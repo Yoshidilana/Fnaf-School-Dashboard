@@ -703,60 +703,67 @@ else if (type === 'compiti') { // <--- Ora l'else è collegato correttamente all
         window.closeModal();
     };
 }              
-            } else if(type === 'note') {
-                body.innerHTML = `
-                    <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-                        <option value="nota">Nota Disciplinare</option>
-                        ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.PROF) ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
-                    </select>
-                    <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24"></textarea>
-                `;
-                confirm.onclick = async () => {
-                    const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
-                    const inputCal = document.getElementById('global-calendar');
-                    const dParts = inputCal.value.split('-');
-                    const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-                    const month = parseInt(dParts[1]);
-                    const year = parseInt(dParts[0]);
-                    const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-                    const note = {
-                        id: crypto.randomUUID(),
-                        testo: document.getElementById('m-txt').value, 
-                        tipo: document.getElementById('m-type').value, 
-                        autore: window.currentUserData.name, 
-                        prof: window.currentUserData.name,
-                        profId: window.currentUserId,
-                        data: dataScelta,
-                        anno: annoScolastico,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
-                    
-                    const agendaId = `${window.selectedClass}_${inputCal.value}`;
-                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
-                    await setDoc(agendaRef, { 
-            note: arrayUnion({
-                ...note, 
-                studente: stud.name, 
-                studenteId: stud.id
-            }) 
-        }, { merge: true });
-                        if(note.tipo === 'mandato') {
-                        // Notifica al Preside (se emesso da altri, ma qui è solo preside)
-                        // Invia record notifica a tutti i prof
-                        const inputCal = document.getElementById('global-calendar');
-                        const dParts = inputCal.value.split('-');
-                        const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-                        const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
-                        const inputElement = document.getElementById('m-txt');
-                        const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
-                        await setDoc(notifRef, { alerts: arrayUnion({ msg: `MANDATO: ${stud.name} convocato dal Preside`, motivo: notaTesto, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), data: dataScelta, autore: window.currentUserData.name }) }, { merge: true });
-                    }
-                    window.closeModal();
-                };
+        } else if(type === 'note') {
+        body.innerHTML = `
+            <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                <option value="nota">Nota Disciplinare</option>
+                ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.PROF) ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
+            </select>
+            <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
+        `;
+        confirm.onclick = async () => {
+            const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
+            const inputCal = document.getElementById('global-calendar');
+            const dParts = inputCal.value.split('-');
+            const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+            const month = parseInt(dParts[1]);
+            const year = parseInt(dParts[0]);
+            const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+            
+            const note = {
+                id: crypto.randomUUID(),
+                testo: document.getElementById('m-txt').value, 
+                tipo: document.getElementById('m-type').value, 
+                autore: window.currentUserData.name, 
+                prof: window.currentUserData.name,
+                profId: window.currentUserId,
+                data: dataScelta,
+                anno: annoScolastico,
+                timestamp: new Date().toISOString()
+            };
+            
+            // 1. Salva nel record dello studente
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
+            
+            // 2. Salva nell'agenda della classe
+            const agendaId = `${window.selectedClass}_${inputCal.value}`;
+            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+            await setDoc(agendaRef, { 
+                note: arrayUnion({
+                    ...note, 
+                    studente: stud.name, 
+                    studenteId: stud.id
+                }) 
+            }, { merge: true }); // <--- Sistemata la chiusura qui
+    
+            // 3. Gestione Mandato
+            if(note.tipo === 'mandato') {
+                const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
+                const inputElement = document.getElementById('m-txt');
+                const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
+                await setDoc(notifRef, { 
+                    alerts: arrayUnion({ 
+                        msg: `MANDATO: ${stud.name} convocato dal Preside`, 
+                        motivo: notaTesto, 
+                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+                        data: dataScelta, 
+                        autore: window.currentUserData.name 
+                    }) 
+                }, { merge: true });
             }
+            window.closeModal();
         };
+    }
          // --- NOTIFICHE ---
         window.toggleNotifPanel = () => {
         const panel = document.getElementById('notif-panel');
