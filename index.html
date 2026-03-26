@@ -417,10 +417,20 @@ async function loadClassAgenda(cls) {
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [] };
         
-        // --- FIRME ---
-        document.getElementById('agenda-firme-list').innerHTML = (data.firme || []).map(f => 
-            `<div><b>Ore ${f.ora}</b> - ${cap(f.prof)}: ${cap(f.argomento)}</div>`
-        ).join('') || 'Nessuna firma.';
+// --- FIRME (Versione Leggibile: Testo Scuro su Sfondo Chiaro) ---
+document.getElementById('agenda-firme-list').innerHTML = (data.firme || []).map(f => {
+    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+    const oraFormattata = `${f.ora}° Ora`;
+    
+    return `
+        <div class="py-1 border-b border-zinc-200 last:border-0 text-zinc-900">
+            <b class="text-blue-700">${oraFormattata}</b> - 
+            <span class="font-bold text-zinc-800">${cap(f.materia)}</span>: 
+            <span class="text-zinc-700">${cap(f.argomento)}</span> 
+            <span class="text-[10px] text-zinc-500 italic">- ${cap(f.prof)}</span>
+        </div>
+    `;
+}).join('') || '<div class="text-zinc-500 italic p-2">Nessuna firma presente.</div>';
         
         // --- COMPITI ---
         document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => 
