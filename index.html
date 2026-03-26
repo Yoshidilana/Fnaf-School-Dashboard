@@ -412,14 +412,14 @@
 async function loadClassAgenda(cls) {
     const dateKey = inputCal.value;
     // Funzione rapida per la maiuscola (Capitalize)
-    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [] };
         
 // --- FIRME (Versione Leggibile: Testo Scuro su Sfondo Chiaro) ---
 document.getElementById('agenda-firme-list').innerHTML = (data.firme || []).map(f => {
-    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
     const oraFormattata = `${f.ora}° Ora`;
     
     return `
