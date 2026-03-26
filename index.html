@@ -420,41 +420,21 @@
                 // Compiti (Tutti vedono tutto)
                 document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => `<div class="p-2 bg-zinc-50 rounded border text-[10px] font-bold"><b>${c.materia}</b>: ${c.testo}</div>`).join('') || 'Nessun compito.';
                 
-                // Funzione per gestire le maiuscole (assicurati che sia definita nel tuo script)
-const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+                // Note e Voti odierni (Filtro Privacy)
+                let infoHtml = "";
+                const note = (data.note || []);
+                const voti = (data.daily_voti || []);
 
-// Note e Voti odierni (Filtro Privacy)
-let infoHtml = "";
-const note = (data.note || []);
-const voti = (data.daily_voti || []);
-
-if(window.userRole === ROLES.STUDENTE) {
-    const myNote = note.filter(n => n.studenteId === window.currentUserId);
-    const myVoti = voti.filter(v => v.studenteId === window.currentUserId);
-    
-    // Vista Studente: Formattiamo testo della nota e materia
-    infoHtml += myNote.map(n => `<div class="text-red-600 font-bold">NOTA: ${cap(n.testo)}</div>`).join('');
-    infoHtml += myVoti.map(v => `<div class="text-zinc-800 font-medium">VOTO: <span class="text-blue-700">${v.voto}</span> in ${cap(v.materia)}</div>`).join('');
-
-} else {
-    // Vista Professore: Formattiamo Nomi, Note e Materie
-    infoHtml += note.map(n => `
-        <div class="border-l-2 border-red-500 pl-2 mb-1">
-            <b class="text-zinc-700">${cap(n.studente)}</b>: ${cap(n.testo)} 
-            <span class="text-[10px] text-zinc-400">(${cap(n.prof)})</span>
-        </div>
-    `).join('');
-
-    infoHtml += voti.map(v => `
-        <div class="border-l-2 border-blue-500 pl-2 mb-1">
-            <b class="text-zinc-700">${cap(v.studente)}</b>: 
-            <span class="font-bold text-blue-600">${v.voto}</span> 
-            <span class="text-zinc-500">(${cap(v.materia)})</span>
-        </div>
-    `).join('');
-}
-
-document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<div class="text-zinc-400 italic text-xs">Nessun aggiornamento odierno.</div>';
+                if(window.userRole === ROLES.STUDENTE) {
+                    const myNote = note.filter(n => n.studenteId === window.currentUserId);
+                    const myVoti = voti.filter(v => v.studenteId === window.currentUserId);
+                    infoHtml += myNote.map(n => `<div class="text-red-600 font-bold">NOTA: ${n.testo}</div>`).join('');
+                    infoHtml += myVoti.map(v => `<div class="text-zinc-800">VOTO: ${v.voto} in ${v.materia}</div>`).join('');
+                } else {
+                    infoHtml += note.map(n => `<div><b>${n.studente}</b>: ${n.testo} (${n.prof})</div>`).join('');
+                    infoHtml += voti.map(v => `<div><b>${v.studente}</b>: ${v.voto} (${v.materia})</div>`).join('');
+                }
+                document.getElementById('agenda-daily-info').innerHTML = infoHtml || 'Nessun aggiornamento odierno.';
             });
         }
 
@@ -648,122 +628,101 @@ document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<div class
             const confirm = document.getElementById('modal-confirm');
             document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
             
-            if (type === 'firme') {
-    body.innerHTML = `
-        <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
-        <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-        <select id="m-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-            ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
-        </select>
-        <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-    `;
-    confirm.onclick = async () => {
-        const mat = document.getElementById('m-mat').value;
-        const arg = document.getElementById('m-arg').value;
-        const ora = document.getElementById('m-ora').value;
-        const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
-        
-        await setDoc(ref, { 
-            firme: arrayUnion({ 
-                ora: ora, 
-                materia: cap(mat), 
-                argomento: cap(arg), 
-                prof: cap(window.currentUserData.name), 
-                profId: window.currentUserId 
-            }) 
-        }, { merge: true });
-        window.closeModal();
-    };
-} 
-else if (type === 'compiti') { // <--- Ora l'else è collegato correttamente all'if sopra
-    body.innerHTML = `
-        <p class="text-[10px] uppercase font-bold text-zinc-400">Assegna Compiti per Casa</p>
-        <select id="m-compiti-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-            ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
-        </select>
-        <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
-    `;
-    confirm.onclick = async () => {
-        const mat = document.getElementById('m-compiti-mat').value;
-        const txt = document.getElementById('m-compiti-txt').value;
-        if(!txt) return;
+            if(type === 'firme') {
+                body.innerHTML = `
+                    <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
+                    <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                    <select id="m-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                        ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+                    </select>
+                    <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                `;
+                confirm.onclick = async () => {
+                    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
+                    await setDoc(ref, { firme: arrayUnion({ ora: document.getElementById('m-ora').value, materia: document.getElementById('m-mat').value, argomento: document.getElementById('m-arg').value, prof: window.currentUserData.name, profId: window.currentUserId }) }, { merge: true });
+                    window.closeModal();
+                };
+          } else if(type === 'compiti') {
+              body.innerHTML = `
+                <p class="text-[10px] uppercase font-bold text-zinc-400">Assegna Compiti per Casa</p>
+                <select id="m-compiti-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                    ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+                </select>
+                <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
+            `;
+            confirm.onclick = async () => {
+                const mat = document.getElementById('m-compiti-mat').value;
+                const txt = document.getElementById('m-compiti-txt').value;
+                if(!txt) return;
 
-        const agendaId = `${window.selectedClass}_${inputCal.value}`;
-        const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
-        
-        await setDoc(ref, { 
-            compiti: arrayUnion({ 
-                materia: cap(mat), 
-                testo: cap(txt),   
-                prof: cap(window.currentUserData.name), 
-                profId: window.currentUserId 
-            }) 
-        }, { merge: true });
-
-        window.closeModal();
-    };
-}              
-        } else if(type === 'note') {
-        body.innerHTML = `
-            <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-                <option value="nota">Nota Disciplinare</option>
-                ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.PROF) ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
-            </select>
-            <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
-        `;
-        confirm.onclick = async () => {
-            const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
-            const inputCal = document.getElementById('global-calendar');
-            const dParts = inputCal.value.split('-');
-            const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-            const month = parseInt(dParts[1]);
-            const year = parseInt(dParts[0]);
-            const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-            
-            const note = {
-                id: crypto.randomUUID(),
-                testo: document.getElementById('m-txt').value, 
-                tipo: document.getElementById('m-type').value, 
-                autore: window.currentUserData.name, 
-                prof: window.currentUserData.name,
-                profId: window.currentUserId,
-                data: dataScelta,
-                anno: annoScolastico,
-                timestamp: new Date().toISOString()
-            };
-            
-            // 1. Salva nel record dello studente
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
-            
-            // 2. Salva nell'agenda della classe
-            const agendaId = `${window.selectedClass}_${inputCal.value}`;
-            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
-            await setDoc(agendaRef, { 
-                note: arrayUnion({
-                    ...note, 
-                    studente: stud.name, 
-                    studenteId: stud.id
-                }) 
-            }, { merge: true }); // <--- Sistemata la chiusura qui
-    
-            // 3. Gestione Mandato
-            if(note.tipo === 'mandato') {
-                const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
-                const inputElement = document.getElementById('m-txt');
-                const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
-                await setDoc(notifRef, { 
-                    alerts: arrayUnion({ 
-                        msg: `MANDATO: ${stud.name} convocato dal Preside`, 
-                        motivo: notaTesto, 
-                        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
-                        data: dataScelta, 
-                        autore: window.currentUserData.name 
+                const agendaId = `${window.selectedClass}_${inputCal.value}`;
+                const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+                
+                await setDoc(ref, { 
+                    compiti: arrayUnion({ 
+                        materia: mat, 
+                        testo: txt, 
+                        prof: window.currentUserData.name, 
+                        profId: window.currentUserId 
                     }) 
                 }, { merge: true });
+
+                window.closeModal();
+            };                
+            } else if(type === 'note') {
+                body.innerHTML = `
+                    <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                        <option value="nota">Nota Disciplinare</option>
+                        ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.PROF) ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
+                    </select>
+                    <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24"></textarea>
+                `;
+                confirm.onclick = async () => {
+                    const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
+                    const inputCal = document.getElementById('global-calendar');
+                    const dParts = inputCal.value.split('-');
+                    const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+                    const month = parseInt(dParts[1]);
+                    const year = parseInt(dParts[0]);
+                    const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+                    const note = {
+                        id: crypto.randomUUID(),
+                        testo: document.getElementById('m-txt').value, 
+                        tipo: document.getElementById('m-type').value, 
+                        autore: window.currentUserData.name, 
+                        prof: window.currentUserData.name,
+                        profId: window.currentUserId,
+                        data: dataScelta,
+                        anno: annoScolastico,
+                        timestamp: new Date().toISOString()
+                    };
+                    
+                    await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
+                    
+                    const agendaId = `${window.selectedClass}_${inputCal.value}`;
+                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+                    await setDoc(agendaRef, { 
+            note: arrayUnion({
+                ...note, 
+                studente: stud.name, 
+                studenteId: stud.id
+            }) 
+        }, { merge: true });
+                        if(note.tipo === 'mandato') {
+                        // Notifica al Preside (se emesso da altri, ma qui è solo preside)
+                        // Invia record notifica a tutti i prof
+                        const inputCal = document.getElementById('global-calendar');
+                        const dParts = inputCal.value.split('-');
+                        const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+                        const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
+                        const inputElement = document.getElementById('m-txt');
+                        const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
+                        await setDoc(notifRef, { alerts: arrayUnion({ msg: `MANDATO: ${stud.name} convocato dal Preside`, motivo: notaTesto, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), data: dataScelta, autore: window.currentUserData.name }) }, { merge: true });
+                    }
+                    window.closeModal();
+                };
             }
-            window.closeModal();
         };
-    }
          // --- NOTIFICHE ---
         window.toggleNotifPanel = () => {
         const panel = document.getElementById('notif-panel');
