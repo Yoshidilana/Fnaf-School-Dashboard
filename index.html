@@ -420,21 +420,44 @@
                 // Compiti (Tutti vedono tutto)
                 document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => `<div class="p-2 bg-zinc-50 rounded border text-[10px] font-bold"><b>${c.materia}</b>: ${c.testo}</div>`).join('') || 'Nessun compito.';
                 
-                // Note e Voti odierni (Filtro Privacy)
-                let infoHtml = "";
-                const note = (data.note || []);
-                const voti = (data.daily_voti || []);
+                // Funzione per gestire le maiuscole (assicurati che sia definita nel tuo script)
+const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
 
-                if(window.userRole === ROLES.STUDENTE) {
-                    const myNote = note.filter(n => n.studenteId === window.currentUserId);
-                    const myVoti = voti.filter(v => v.studenteId === window.currentUserId);
-                    infoHtml += myNote.map(n => `<div class="text-red-600 font-bold">NOTA: ${n.testo}</div>`).join('');
-                    infoHtml += myVoti.map(v => `<div class="text-zinc-800">VOTO: ${v.voto} in ${v.materia}</div>`).join('');
-                } else {
-                    infoHtml += note.map(n => `<div><b>${n.studente}</b>: ${n.testo} (${n.prof})</div>`).join('');
-                    infoHtml += voti.map(v => `<div><b>${v.studente}</b>: ${v.voto} (${v.materia})</div>`).join('');
-                }
-                document.getElementById('agenda-daily-info').innerHTML = infoHtml || 'Nessun aggiornamento odierno.';
+            // Funzione per gestire le maiuscole (assicurati che sia definita nel tuo script)
+const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+
+// Note e Voti odierni (Filtro Privacy)
+let infoHtml = "";
+const note = (data.note || []);
+const voti = (data.daily_voti || []);
+
+if(window.userRole === ROLES.STUDENTE) {
+    const myNote = note.filter(n => n.studenteId === window.currentUserId);
+    const myVoti = voti.filter(v => v.studenteId === window.currentUserId);
+    
+    // Vista Studente: Formattiamo testo della nota e materia
+    infoHtml += myNote.map(n => `<div class="text-red-600 font-bold">NOTA: ${cap(n.testo)}</div>`).join('');
+    infoHtml += myVoti.map(v => `<div class="text-zinc-800 font-medium">VOTO: <span class="text-blue-700">${v.voto}</span> in ${cap(v.materia)}</div>`).join('');
+
+} else {
+    // Vista Professore: Formattiamo Nomi, Note e Materie
+    infoHtml += note.map(n => `
+        <div class="border-l-2 border-red-500 pl-2 mb-1">
+            <b class="text-zinc-700">${cap(n.studente)}</b>: ${cap(n.testo)} 
+            <span class="text-[10px] text-zinc-400">(${cap(n.prof)})</span>
+        </div>
+    `).join('');
+
+    infoHtml += voti.map(v => `
+        <div class="border-l-2 border-blue-500 pl-2 mb-1">
+            <b class="text-zinc-700">${cap(v.studente)}</b>: 
+            <span class="font-bold text-blue-600">${v.voto}</span> 
+            <span class="text-zinc-500">(${cap(v.materia)})</span>
+        </div>
+    `).join('');
+}
+
+document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<div class="text-zinc-400 italic text-xs">Nessun aggiornamento odierno.</div>';
             });
         }
 
@@ -628,47 +651,62 @@
             const confirm = document.getElementById('modal-confirm');
             document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
             
-            if(type === 'firme') {
-                body.innerHTML = `
-                    <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
-                    <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-                    <select id="m-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-                        ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
-                    </select>
-                    <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-                `;
-                confirm.onclick = async () => {
-                    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
-                    await setDoc(ref, { firme: arrayUnion({ ora: document.getElementById('m-ora').value, materia: document.getElementById('m-mat').value, argomento: document.getElementById('m-arg').value, prof: window.currentUserData.name, profId: window.currentUserId }) }, { merge: true });
-                    window.closeModal();
-                };
-          } else if(type === 'compiti') {
-              body.innerHTML = `
-                <p class="text-[10px] uppercase font-bold text-zinc-400">Assegna Compiti per Casa</p>
-                <select id="m-compiti-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-                    ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
-                </select>
-                <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
-            `;
-            confirm.onclick = async () => {
-                const mat = document.getElementById('m-compiti-mat').value;
-                const txt = document.getElementById('m-compiti-txt').value;
-                if(!txt) return;
+ if(type === 'firme') {
+    body.innerHTML = `
+        <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
+        <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+        <select id="m-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+            ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+        </select>
+        <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+    `;
+    confirm.onclick = async () => {
+        const mat = document.getElementById('m-mat').value;
+        const arg = document.getElementById('m-arg').value;
+        const ora = document.getElementById('m-ora').value;
+        
+        const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
+        
+        // Salviamo l'argomento con la prima lettera maiuscola e la materia formattata
+        await setDoc(ref, { 
+            firme: arrayUnion({ 
+                ora: ora, 
+                materia: cap(mat), // Salva la materia con l'iniziale maiuscola
+                argomento: cap(arg), // Salva l'argomento con l'iniziale maiuscola
+                prof: cap(window.currentUserData.name), // Anche il nome del prof
+                profId: window.currentUserId 
+            }) 
+        }, { merge: true });
+        window.closeModal();
+    };
+           } else if(type === 'compiti') {
+    body.innerHTML = `
+        <p class="text-[10px] uppercase font-bold text-zinc-400">Assegna Compiti per Casa</p>
+        <select id="m-compiti-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+            ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+        </select>
+        <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
+    `;
+    confirm.onclick = async () => {
+        const mat = document.getElementById('m-compiti-mat').value;
+        const txt = document.getElementById('m-compiti-txt').value;
+        if(!txt) return;
 
-                const agendaId = `${window.selectedClass}_${inputCal.value}`;
-                const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
-                
-                await setDoc(ref, { 
-                    compiti: arrayUnion({ 
-                        materia: mat, 
-                        testo: txt, 
-                        prof: window.currentUserData.name, 
-                        profId: window.currentUserId 
-                    }) 
-                }, { merge: true });
+        const agendaId = `${window.selectedClass}_${inputCal.value}`;
+        const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+        
+        await setDoc(ref, { 
+            compiti: arrayUnion({ 
+                materia: cap(mat), // Materia maiuscola
+                testo: cap(txt),   // Testo del compito maiuscolo
+                prof: cap(window.currentUserData.name), 
+                profId: window.currentUserId 
+            }) 
+        }, { merge: true });
 
-                window.closeModal();
-            };                
+        window.closeModal();
+    };
+}               
             } else if(type === 'note') {
                 body.innerHTML = `
                     <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
