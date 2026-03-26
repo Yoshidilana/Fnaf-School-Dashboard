@@ -648,7 +648,7 @@ document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<div class
             const confirm = document.getElementById('modal-confirm');
             document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
             
- if(type === 'firme') {
+            if (type === 'firme') {
     body.innerHTML = `
         <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
         <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
@@ -661,22 +661,21 @@ document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<div class
         const mat = document.getElementById('m-mat').value;
         const arg = document.getElementById('m-arg').value;
         const ora = document.getElementById('m-ora').value;
-        
         const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
         
-        // Salviamo l'argomento con la prima lettera maiuscola e la materia formattata
         await setDoc(ref, { 
             firme: arrayUnion({ 
                 ora: ora, 
-                materia: cap(mat), // Salva la materia con l'iniziale maiuscola
-                argomento: cap(arg), // Salva l'argomento con l'iniziale maiuscola
-                prof: cap(window.currentUserData.name), // Anche il nome del prof
+                materia: cap(mat), 
+                argomento: cap(arg), 
+                prof: cap(window.currentUserData.name), 
                 profId: window.currentUserId 
             }) 
         }, { merge: true });
         window.closeModal();
     };
-           } else if(type === 'compiti') {
+} 
+else if (type === 'compiti') { // <--- Ora l'else è collegato correttamente all'if sopra
     body.innerHTML = `
         <p class="text-[10px] uppercase font-bold text-zinc-400">Assegna Compiti per Casa</p>
         <select id="m-compiti-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
@@ -694,8 +693,8 @@ document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<div class
         
         await setDoc(ref, { 
             compiti: arrayUnion({ 
-                materia: cap(mat), // Materia maiuscola
-                testo: cap(txt),   // Testo del compito maiuscolo
+                materia: cap(mat), 
+                testo: cap(txt),   
                 prof: cap(window.currentUserData.name), 
                 profId: window.currentUserId 
             }) 
@@ -703,7 +702,7 @@ document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<div class
 
         window.closeModal();
     };
-}               
+}              
             } else if(type === 'note') {
                 body.innerHTML = `
                     <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
