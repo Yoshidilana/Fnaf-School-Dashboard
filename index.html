@@ -411,48 +411,63 @@
         // --- CARICAMENTO DATI ---
 async function loadClassAgenda(cls) {
     const dateKey = inputCal.value;
-    // Funzione rapida per la maiuscola (Capitalize)
     const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
-        const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [] };
+        const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
         
-// --- FIRME (Versione Leggibile: Testo Scuro su Sfondo Chiaro) ---
-document.getElementById('agenda-firme-list').innerHTML = (data.firme || []).map(f => {
-    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-    const oraFormattata = `${f.ora}° Ora`;
-    
-    return `
-        <div class="py-1 border-b border-zinc-200 last:border-0 text-zinc-900">
-            <b class="text-blue-700">${oraFormattata}</b> - 
-            <span class="font-bold text-zinc-800">${cap(f.materia)}</span>: 
-            <span class="text-zinc-700">${cap(f.argomento)}</span> 
-            <span class="text-[10px] text-zinc-500 italic">- ${cap(f.prof)}</span>
-        </div>
-    `;
-}).join('') || '<div class="text-zinc-500 italic p-2">Nessuna firma presente.</div>';
+        // 1. --- SEZIONE COMUNICAZIONI (AMBRA) ---
+        const avvisi = data.comunicazioni || [];
+        const avvisiHtml = avvisi.map((com, idx) => `
+            <div class="relative group p-3 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3">
+                <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
+                <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
+                <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
+                ${(window.userRole === 'Preside' || window.userRole === 'Bidello') ? `
+                    <button onclick="window.deleteAvviso('${idx}', '${cls}')" class="absolute top-2 right-2 bg-red-100 text-red-600 p-1 rounded hover:bg-red-200 transition-all text-[10px]">🗑️</button>
+                ` : ''}
+            </div>
+        `).join('');
+
+        // 2. --- FIRME (TESTO SCURO) ---
+        const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
+            <div class="py-2 border-b border-zinc-100 last:border-0 text-zinc-900">
+                <b class="text-blue-700 text-xs">${f.ora}° Ora</b> - 
+                <span class="font-bold text-zinc-800 text-xs">${cap(f.materia)}</span>: 
+                <span class="text-zinc-700 text-xs">${cap(f.argomento)}</span> 
+                <span class="text-[10px] text-zinc-400 italic font-medium">- ${cap(f.prof)}</span>
+            </div>
+        `).join('') || '<div class="text-zinc-400 italic p-2 text-xs text-center">Nessuna firma presente.</div>';
+
+        // Inseriamo Avvisi + Firme nello stesso contenitore
+        document.getElementById('agenda-firme-list').innerHTML = avvisiHtml + firmeHtml;
         
-        // --- COMPITI ---
+        // 3. --- COMPITI ---
         document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => 
-            `<div class="p-2 bg-zinc-50 rounded border text-[10px] font-bold"><b>${cap(c.materia)}</b>: ${cap(c.testo)}</div>`
-        ).join('') || 'Nessun compito.';
+            `<div class="p-2 bg-zinc-50 rounded border border-zinc-200 text-[10px] font-bold mb-1">
+                <b class="text-red-700">${cap(c.materia)}</b>: ${cap(c.testo)}
+            </div>`
+        ).join('') || '<p class="text-zinc-400 text-[10px] italic">Nessun compito.</p>';
         
-        // --- NOTE E VOTI (Filtro Privacy) ---
+        // 4. --- NOTE E VOTI (FILTRO PRIVACY) ---
         let infoHtml = "";
         const note = (data.note || []);
         const voti = (data.daily_voti || []);
 
-        if(window.userRole === ROLES.STUDENTE) {
+        if(window.userRole === 'Studente') {
+            // Filtro per lo studente loggato
             const myNote = note.filter(n => n.studenteId === window.currentUserId);
             const myVoti = voti.filter(v => v.studenteId === window.currentUserId);
-            infoHtml += myNote.map(n => `<div class="text-red-600 font-bold">NOTA: ${cap(n.testo)}</div>`).join('');
-            infoHtml += myVoti.map(v => `<div class="text-zinc-800">VOTO: ${v.voto} in ${cap(v.materia)}</div>`).join('');
+            
+            infoHtml += myNote.map(n => `<div class="p-2 bg-red-50 text-red-700 font-bold rounded mb-1 text-[10px] border border-red-100 uppercase">⚠️ NOTA: ${cap(n.testo)}</div>`).join('');
+            infoHtml += myVoti.map(v => `<div class="p-2 bg-blue-50 text-zinc-800 rounded mb-1 text-[10px] border border-blue-100 font-bold">⭐ VOTO: ${v.voto} in ${cap(v.materia)}</div>`).join('');
         } else {
-            // Qui cap() viene usato anche per i nomi degli studenti
-            infoHtml += note.map(n => `<div><b>${cap(n.studente)}</b>: ${cap(n.testo)} (${cap(n.prof)})</div>`).join('');
-            infoHtml += voti.map(v => `<div><b>${cap(v.studente)}</b>: ${v.voto} (${cap(v.materia)})</div>`).join('');
+            // Staff vede tutto
+            infoHtml += note.map(n => `<div class="text-[10px] mb-1"><b>${cap(n.studente)}</b>: <span class="text-red-600">${cap(n.testo)}</span> <small class="text-zinc-400">(${cap(n.prof)})</small></div>`).join('');
+            infoHtml += voti.map(v => `<div class="text-[10px] mb-1"><b>${cap(v.studente)}</b>: <span class="font-black text-blue-700">${v.voto}</span> <small class="text-zinc-400">(${cap(v.materia)})</small></div>`).join('');
         }
-        document.getElementById('agenda-daily-info').innerHTML = infoHtml || 'Nessun aggiornamento odierno.';
+        
+        document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<p class="text-zinc-400 text-[10px] italic text-center">Nessun aggiornamento odierno.</p>';
     });
 }
 
