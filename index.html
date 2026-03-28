@@ -1047,6 +1047,24 @@ window.editNote = async (idx, studentId) => {
     q1Body.innerHTML = q1Html || '<tr><td colspan="3" class="p-8 text-center italic text-zinc-400">Nessun voto nel 1° Quadrimestre</td></tr>';
     q2Body.innerHTML = q2Html || '<tr><td colspan="3" class="p-8 text-center italic text-zinc-400">Nessun voto nel 2° Quadrimestre</td></tr>';
 };
+        window.deleteAvviso = async (idx, cls) => {
+    if(!confirm("Sei sicuro di voler eliminare questa comunicazione?")) return;
+    const dateKey = inputCal.value;
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`);
+    
+    try {
+        const snap = await getDoc(ref);
+        if(snap.exists()) {
+            const data = snap.data();
+            const coms = data.comunicazioni || [];
+            coms.splice(idx, 1); // Rimuove l'avviso all'indice indicato
+            await updateDoc(ref, { comunicazioni: coms });
+        }
+    } catch (e) {
+        console.error("Errore eliminazione:", e);
+        alert("Errore durante l'eliminazione.");
+    }
+};
     </script>
 </body>
 </html>
