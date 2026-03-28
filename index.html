@@ -411,26 +411,11 @@
         // --- CARICAMENTO DATI ---
 async function loadClassAgenda(cls) {
     const dateKey = inputCal.value;
+    // Funzione rapida per la maiuscola (Capitalize)
     const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
-        const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
-        
-        // --- NUOVO: SEZIONE COMUNICAZIONI ---
-        const avvisi = data.comunicazioni || [];
-        const avvisiHtml = avvisi.map((com, idx) => `
-            <div class="relative group p-3 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-2">
-                <p class="text-[11px] font-black text-amber-900 uppercase mb-1">📢 Comunicazione</p>
-                <p class="text-xs text-amber-950 font-medium">${com.testo}</p>
-                <p class="text-[9px] text-amber-700 mt-1 italic">- Inserito da: ${com.autore}</p>
-                ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.BIDELLO) ? `
-                    <button onclick="window.deleteAvviso('${idx}', '${cls}')" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 bg-red-100 text-red-600 p-1 rounded text-[8px]">🗑️</button>
-                ` : ''}
-            </div>
-        `).join('');
-
-        // Inseriamo gli avvisi sopra le firme
-        document.getElementById('agenda-firme-list').innerHTML = avvisiHtml + (data.firme || []).map(f => {
+        const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [] };
         
 // --- FIRME (Versione Leggibile: Testo Scuro su Sfondo Chiaro) ---
 document.getElementById('agenda-firme-list').innerHTML = (data.firme || []).map(f => {
