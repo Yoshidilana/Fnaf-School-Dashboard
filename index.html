@@ -464,10 +464,6 @@ async function loadClassAgenda(cls) {
             `;
         }).join('');
 
-        // --- UNIONE E STAMPA ---
-        // Iniettiamo sia il box di scrittura che la lista avvisi nel contenitore delle Firme (sopra le lezioni)
-        const containerFirme = document.getElementById('agenda-firme-list');
-
         // 2. --- FIRME (ESTETICA TIMELINE + SCROLL) ---
         const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
             <div class="p-4 border border-zinc-100 rounded-[20px] bg-white flex gap-4 items-center mb-3 shadow-sm hover:border-red-200 transition-all">
