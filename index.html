@@ -1016,7 +1016,6 @@ window.editNote = async (idx, studentId) => {
     const q2Body = document.getElementById('pagella-q2-body');
     if (!q1Body || !q2Body) return;
 
-    // Filtriamo i voti dell'anno selezionato (logica identica al registro)
     const votiAnno = voti.filter(v => {
         let vAy = v.anno;
         if(!vAy && v.data) {
@@ -1026,7 +1025,6 @@ window.editNote = async (idx, studentId) => {
         return vAy === aySelezionato;
     });
 
-    // Prendiamo le materie uniche
     const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
     
     let q1Html = "";
@@ -1035,33 +1033,32 @@ window.editNote = async (idx, studentId) => {
     materie.forEach(m => {
         const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m);
         
-        // Calcolo Medie per Quadrimestre
         const vQ1 = m_voti.filter(v => isDateInQ(v.data, 1));
         const vQ2 = m_voti.filter(v => isDateInQ(v.data, 2));
 
         const avgQ1 = vQ1.length ? (vQ1.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ1.length).toFixed(1) : "-";
         const avgQ2 = vQ2.length ? (vQ2.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ2.length).toFixed(1) : "-";
 
-        // Funzione rapida per l'icona esito
         const getEsito = (avg) => avg === "-" ? "" : Math.round(parseFloat(avg)) >= 6 ? "✅" : "❌";
 
-        q1Html += `
-            <tr class="hover:bg-zinc-50 transition-colors">
-                <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
-                <td class="p-4 text-center font-black text-lg ${Math.round(parseFloat(avgQ1)) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ1))}</td>
-                <td class="p-4 text-right">${getEsito(avgQ1)}</td>
+        // Layout riga migliorato (stile Fazbear)
+        const row = (materia, avg) => `
+            <tr class="hover:bg-zinc-50 transition-colors border-b border-zinc-50 last:border-0">
+                <td class="p-4 font-black uppercase text-zinc-800 text-[10px] tracking-tighter">${materia}</td>
+                <td class="p-4 text-center">
+                    <span class="inline-block px-3 py-1 rounded-lg font-black text-sm ${avg !== "-" && Math.round(parseFloat(avg)) < 6 ? 'bg-red-50 text-red-600' : 'bg-zinc-900 text-white'}">
+                        ${avg !== "-" ? Math.round(parseFloat(avg)) : "-"}
+                    </span>
+                </td>
+                <td class="p-4 text-right">${getEsito(avg)}</td>
             </tr>`;
 
-        q2Html += `
-            <tr class="hover:bg-zinc-50 transition-colors">
-                <td class="p-4 font-bold uppercase text-zinc-800">${m}</td>
-                <td class="p-4 text-center font-black text-lg ${Math.round(parseFloat(avgQ2)) < 6 ? 'text-red-600' : 'text-zinc-900'}">${Math.round(parseFloat(avgQ2))}</td>
-                <td class="p-4 text-right">${getEsito(avgQ2)}</td>
-            </tr>`;
+        q1Html += row(m, avgQ1);
+        q2Html += row(m, avgQ2);
     });
 
-    q1Body.innerHTML = q1Html || '<tr><td colspan="3" class="p-8 text-center italic text-zinc-400">Nessun voto nel 1° Quadrimestre</td></tr>';
-    q2Body.innerHTML = q2Html || '<tr><td colspan="3" class="p-8 text-center italic text-zinc-400">Nessun voto nel 2° Quadrimestre</td></tr>';
+    q1Body.innerHTML = q1Html || '<tr><td colspan="3" class="p-10 text-center italic text-zinc-300 text-[9px] uppercase font-bold tracking-widest">Nessun dato</td></tr>';
+    q2Body.innerHTML = q2Html || '<tr><td colspan="3" class="p-10 text-center italic text-zinc-300 text-[9px] uppercase font-bold tracking-widest">Nessun dato</td></tr>';
 };
         window.deleteAvviso = async (idx, cls) => {
     if(!confirm("Sei sicuro di voler eliminare questa comunicazione?")) return;
