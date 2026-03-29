@@ -419,16 +419,17 @@ async function loadClassAgenda(cls) {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
         
        // 1. --- SEZIONE COMUNICAZIONI (AMBRA) ---
-// Controlliamo chi può scrivere (Boss e Prof)
 const role = (window.userRole || "").toLowerCase();
-const canWrite = ['preside', 'vicepreside', 'bidello', 'prof'].includes(role);
+const currentUser = (window.currentUserData?.name || "").trim();
 
+// BOX DI SCRITTURA (appare solo a chi ha i permessi)
 let writeBoxHtml = "";
+const canWrite = ['preside', 'vicepreside', 'bidello', 'prof'].includes(role);
 
 if (canWrite) {
     writeBoxHtml = `
         <div class="bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm mb-6">
-            <p class="text-[10px] font-black uppercase text-zinc-400 mb-2 tracking-widest">Nuova Comunicazione</p>
+            <p class="text-[10px] font-black uppercase text-zinc-400 mb-2 tracking-widest italic text-center">Nuova Comunicazione</p>
             <textarea id="input-testo-avviso" 
                 class="w-full p-3 bg-zinc-50 border border-zinc-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none" 
                 placeholder="Scrivi qui il messaggio per la classe..." rows="2"></textarea>
@@ -442,17 +443,11 @@ if (canWrite) {
     `;
 }
 
-// Poi procedi con la tua mappatura degli avvisi...
+// MAPPATURA AVVISI ESISTENTI
 const avvisi = data.comunicazioni || [];
 const avvisiHtml = avvisi.map((com, idx) => {
-
-// Infine, quando monti l'HTML nel contenitore dell'agenda:
-// container.innerHTML = writeBoxHtml + avvisiHtml;3
-    const currentUser = window.currentUserData.name; // Assicurati che questo sia il nome del prof loggato
-    
     // Permessi speciali: Preside, Vicepreside, Bidello cancellano TUTTO
     const isSpecialRole = ['preside', 'vicepreside', 'bidello'].includes(role);
-    
     // Il Prof cancella solo se l'autore coincide
     const isOwner = (role === 'prof' && com.autore === currentUser);
 
@@ -469,7 +464,7 @@ const avvisiHtml = avvisi.map((com, idx) => {
             ` : ''}
         </div>
     `;
-}).join('');        
+}).join('');    
 
         // 2. --- FIRME (ESTETICA TIMELINE + SCROLL) ---
         const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
