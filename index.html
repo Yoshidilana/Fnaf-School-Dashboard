@@ -420,26 +420,34 @@ async function loadClassAgenda(cls) {
         
        // 1. --- SEZIONE COMUNICAZIONI (AMBRA) ---
 const avvisi = data.comunicazioni || [];
-// Dentro loadClassAgenda, dove generi avvisiHtml:
 const avvisiHtml = avvisi.map((com, idx) => {
-    const role = window.userRole ? window.userRole.toLowerCase() : '';
-    const currentUser = window.currentUserData.name; // Assicurati che questo sia il nome del prof loggato
+    // Normalizziamo il ruolo (tutto minuscolo)
+    const role = (window.userRole || "").toLowerCase();
     
-    // Permessi speciali: Preside, Vicepreside, Bidello cancellano TUTTO
-    const isSpecialRole = ['preside', 'vicepreside', 'bidello'].includes(role);
+    // Usiamo .name come hai chiesto, ma aggiungiamo un fallback vuoto per sicurezza
+    const currentUser = (window.currentUserData?.name || "").trim(); 
+    const autoreAvviso = (com.autore || "").trim();
     
-    // Il Prof cancella solo se l'autore coincide
-    const isOwner = (role === 'prof' && com.autore === currentUser);
+    // Controllo poteri forti: includiamo il vicepreside
+    const isBoss = ['preside', 'vicepreside', 'bidello'].includes(role);
+    
+    // Controllo proprietario: Prof che ha scritto l'avviso
+    const isOwner = (role === 'prof' && currentUser === autoreAvviso);
+
+    // DEBUG: Togli questo commento se non appare ancora per vedere i valori in console
+    // console.log(`Ruolo: ${role}, User: ${currentUser}, Autore: ${autoreAvviso}, isOwner: ${isOwner}`);
 
     return `
         <div class="relative group p-3 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3">
             <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
             <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
             <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
-            ${(isSpecialRole || isOwner) ? `
+            ${(isBoss || isOwner) ? `
                 <button onclick="window.deleteAvviso(${idx}, '${cls}')" 
-                        class="absolute top-2 right-2 bg-red-100 text-red-600 p-1 rounded hover:bg-red-200 transition-all text-[10px] border border-red-200">
-                    🗑️
+                        class="absolute top-2 right-2 bg-white/80 hover:bg-red-50 text-red-600 p-1.5 rounded-lg transition-all shadow-sm border border-red-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                 </button>
             ` : ''}
         </div>
