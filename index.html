@@ -420,18 +420,25 @@ async function loadClassAgenda(cls) {
         
         // 1. --- SEZIONE COMUNICAZIONI (AMBRA) ---
 const avvisi = data.comunicazioni || [];
-const avvisiHtml = avvisi.map((com, idx) => `
-    <div class="relative group p-4 bg-amber-50 border-l-4 border-amber-500 rounded-2xl shadow-sm mb-4">
-        <p class="text-[9px] font-black text-amber-900 uppercase mb-1 tracking-widest">📢 Comunicazione Agenda</p>
-        <p class="text-xs text-amber-950 font-bold leading-tight">${com.testo}</p>
-        <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
-        ${(window.userRole === 'Preside' || window.userRole === 'Bidello') ? `
-    <button onclick="window.deleteAvviso(${idx}, '${cls}')" class="absolute top-2 right-2 text-red-400 hover:text-red-600 p-1">
-        🗑️
-    </button>
-` : ''}
-    </div>
-`).join('');
+const avvisiHtml = avvisi.map((com, idx) => {
+    // Portiamo tutto a minuscolo per non sbagliare il controllo
+    const role = window.userRole ? window.userRole.toLowerCase() : '';
+    const canDelete = (role === 'preside' || role === 'bidello');
+
+    return `
+        <div class="relative group p-3 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3">
+            <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
+            <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
+            <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
+            ${canDelete ? `
+                <button onclick="window.deleteAvviso(${idx}, '${cls}')" 
+                        class="absolute top-2 right-2 bg-red-100 text-red-600 p-1 rounded hover:bg-red-200 transition-all text-[10px] border border-red-200">
+                    🗑️
+                </button>
+            ` : ''}
+        </div>
+    `;
+}).join('');
         
 
         // 2. --- FIRME (ESTETICA TIMELINE + SCROLL) ---
