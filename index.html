@@ -419,11 +419,31 @@ async function loadClassAgenda(cls) {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
         
        // 1. --- SEZIONE COMUNICAZIONI (AMBRA) ---
+const role = (window.userRole || "").toLowerCase();
+const canWrite = ['preside', 'vicepreside', 'bidello', 'prof'].includes(role);
+
+let writeBoxHtml = "";
+
+if (canWrite) {
+    writeBoxHtml = `
+        <div class="bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm mb-6">
+            <p class="text-[10px] font-black uppercase text-zinc-400 mb-2 tracking-widest">Nuova Comunicazione</p>
+            <textarea id="input-testo-avviso" 
+                class="w-full p-3 bg-zinc-50 border border-zinc-100 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/20 resize-none" 
+                placeholder="Scrivi qui il messaggio per la classe..." rows="2"></textarea>
+            <div class="flex justify-end mt-2">
+                <button onclick="window.addAvviso(document.getElementById('input-testo-avviso').value, '${cls}')" 
+                    class="bg-zinc-900 text-white text-[9px] font-black px-4 py-2 rounded-lg uppercase hover:bg-zinc-800 transition-all shadow-md">
+                    Invia in Agenda
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// Poi procedi con la tua mappatura degli avvisi...
 const avvisi = data.comunicazioni || [];
-const avvisiHtml = avvisi.map((com, idx) => {
-    // Normalizziamo il ruolo (tutto minuscolo)
-    const role = (window.userRole || "").toLowerCase();
-    
+const avvisiHtml = avvisi.map((com, idx) => { ... }).join('');    
     // Usiamo .name come hai chiesto, ma aggiungiamo un fallback vuoto per sicurezza
     const currentUser = (window.currentUserData?.name || "").trim(); 
     const autoreAvviso = (com.autore || "").trim();
