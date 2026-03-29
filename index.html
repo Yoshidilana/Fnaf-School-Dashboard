@@ -423,7 +423,7 @@ const avvisi = data.comunicazioni || [];
 // Dentro loadClassAgenda, dove generi avvisiHtml:
 const avvisiHtml = avvisi.map((com, idx) => {
     const role = window.userRole ? window.userRole.toLowerCase() : '';
-    const currentUser = window.currentUserData.nome; // Assicurati che questo sia il nome del prof loggato
+    const currentUser = window.currentUserData.name; // Assicurati che questo sia il nome del prof loggato
     
     // Permessi speciali: Preside, Vicepreside, Bidello cancellano TUTTO
     const isSpecialRole = ['preside', 'vicepreside', 'bidello'].includes(role);
@@ -1111,7 +1111,7 @@ window.renderPagella = (voti, aySelezionato) => {
     }
 
     const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`);
-    const autore = window.currentUserData.nome; // Il nome che apparirà nella firma
+    const autore = window.currentUserData.name; // Il nome che apparirà nella firma
 
     try {
         const snap = await getDoc(ref);
@@ -1143,7 +1143,7 @@ window.renderPagella = (voti, aySelezionato) => {
 
      window.deleteAvviso = async (idx, cls) => {
     const role = window.userRole ? window.userRole.toLowerCase() : '';
-    const currentUser = window.currentUserData.nome;
+    const currentUser = window.currentUserData.name;
 
     if(!confirm("Vuoi eliminare questa comunicazione?")) return;
     
