@@ -449,18 +449,18 @@ async function loadClassAgenda(cls) {
             const isOwner = (role === 'prof' && currentUser !== "" && currentUser === (com.autore || "").trim());
 
             return `
-                <div class="relative group p-3 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3 text-left">
-                    <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
-                    <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
-                    <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore || 'Sistema'}</p>
-                    ${(isBoss || isOwner) ? `
-                        <button onclick="window.deleteAvviso(${idx}, '${cls}')" 
-                                class="absolute top-2 right-2 bg-white/80 hover:bg-red-50 text-red-600 p-1.5 rounded-lg transition-all shadow-sm border border-red-100">
-                            🗑️
-                        </button>
-                    ` : ''}
-                </div>
-            `;
+    <div class="relative group p-3 pr-10 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3 text-left">
+        <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
+        <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
+        <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
+        ${(isBoss || isOwner) ? `
+            <button onclick="window.deleteAvviso(${idx}, '${cls}')" 
+                    class="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-1.5 rounded-lg transition-all shadow-sm border border-red-100">
+                🗑️
+            </button>
+        ` : ''}
+    </div>
+`;
         }).join('');
 
         // 2. --- FIRME (ESTETICA TIMELINE + SCROLL) ---
