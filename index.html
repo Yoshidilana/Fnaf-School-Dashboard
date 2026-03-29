@@ -485,7 +485,7 @@ async function loadClassAgenda(cls) {
 
         // Applichiamo lo scroll al contenitore firme
         const containerFirme = document.getElementById('agenda-firme-list');
-        containerFirme.className = "space-y-1 overflow-y-auto pr-2";
+        containerFirme.className = "space-y-1 overflow-y-auto p-4 bg-zinc-200 rounded-[24px] shadow-inner border border-zinc-300/50";
         containerFirme.style.maxHeight = "500px"; // Altezza fissa per scorrere
         containerFirme.innerHTML = writeBoxHtml + avvisiHtml + firmeHtml;
         
