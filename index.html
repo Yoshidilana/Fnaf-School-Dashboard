@@ -478,7 +478,7 @@ async function loadClassAgenda(cls) {
                         <span class="text-[10px] font-black text-red-600 uppercase italic tracking-tighter truncate">${safeCap(f.materia)}</span>
                         <span class="text-[8px] font-bold text-zinc-300 uppercase shrink-0 ml-2">${safeCap(f.prof)}</span>
                     </div>
-                    <p class="text-xs font-bold text-zinc-800 leading-tight truncate">${safeCap(f.argomento)}</p>
+                    <p class="text-xs font-bold text-zinc-800 leading-tight truncate">${f.argomento || ""}</p>
                 </div>
             </div>
         `).join('') || '<div class="text-zinc-300 italic p-10 text-center text-[10px] font-black uppercase tracking-widest">Nessuna firma presente</div>';
