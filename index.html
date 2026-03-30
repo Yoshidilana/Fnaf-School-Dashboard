@@ -18,7 +18,22 @@
     overflow-y: auto; /* Cambiato da hidden a auto */
     zoom: 0.85; /* Zoom automatico per vedere tutto meglio */
 }
-        .glass { background: rgba(45, 27, 20, 0.95); border: 1px solid #d4af37; backdrop-filter: blur(10px); border-radius: 12px; color: white; }
+        .glass-light {
+    background: white !important;
+    border: 1px solid #e4e4e7 !important; /* Grigio chiaro invece di oro */
+    backdrop-filter: none !important;
+    color: #18181b !important; /* Testo quasi nero */
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+
+/* Forza i testi interni a essere scuri quando usiamo la variante light */
+.glass-light h2, .glass-light p, .glass-light span:not(.bg-red-600) {
+    color: #18181b !important;
+}
+
+.glass-light #res-student-media {
+    color: #b91c1c !important; /* Mantieni la media rossa */
+}
         .sidebar-item { transition: all 0.2s; border-radius: 8px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; cursor: pointer; }
         .sidebar-item.active { background: #b91c1c; color: white; }
         .tab-content { display: none; height: 100%; }
@@ -29,6 +44,34 @@
     </style>
 </head>
 <body>
+
+<button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden" style="display: none;">
+    🛠️
+</button>
+
+	<div id="test-bypass-panel" class="glass p-4 text-[10px] border-2 border-red-500 fixed bottom-20 right-4 z-[10000] shadow-2xl w-64 hidden" style="background: rgba(0,0,0,0.95); position: fixed; display: none;">
+    <div class="flex justify-between items-center mb-4 border-b border-red-500 pb-2">
+        <h3 class="font-black uppercase text-red-500">🛠️ Debug Access</h3>
+        <button onclick="toggleDebug()" class="text-white hover:text-red-500 font-bold">CHIUDI X</button>
+    </div>
+
+    <div class="flex flex-col gap-2">
+        <label class="text-[8px] uppercase font-bold text-zinc-400">Inserisci ID Discord:</label>
+        <input type="text" id="debug-input-id" placeholder="Es: bonnieilconiglio2026" class="text-black p-2 rounded border-none outline-none text-xs">
+        
+        <button onclick="window.startBypass()" class="bg-red-700 hover:bg-red-600 text-white p-3 rounded font-black uppercase transition-colors mt-2">
+            🚀 Simula Login
+        </button>
+
+        <button onclick="location.reload()" class="bg-zinc-800 text-[8px] text-zinc-400 p-1 rounded uppercase mt-1">
+            🔄 Reset Totale (Logout)
+        </button>
+
+        <div id="debug-log" class="mt-4 font-monospace text-[9px] color-[#44ff44] bg-black p-2 max-h-32 overflow-auto rounded border border-zinc-800">
+            Log: Sistema pronto...
+        </div>
+    </div>
+</div>
 
     <!-- Top Bar -->
     <header class="h-14 border-b border-zinc-300 bg-white flex items-center justify-between px-6 z-50 shrink-0 shadow-sm">
@@ -138,7 +181,7 @@
 
             <!-- VIEW: REGISTRO -->
             <div id="view-registro" class="tab-content space-y-6">
-                <div id="student-header" class="hidden glass p-6 rounded-2xl">
+                <div id="student-header" class="hidden glass-light p-6 rounded-2xl flex justify-between items-center">
                     <div class="flex justify-between items-center">
                         <div>
                             <span id="res-student-role" class="bg-red-600 text-[8px] px-2 py-0.5 rounded font-black uppercase">Studente</span>
@@ -193,46 +236,50 @@
 
             <!-- VIEW: Pagella -->
             <div id="view-pagella" class="tab-content space-y-6">
-    <div class="glass p-6 rounded-2xl flex justify-between items-center border-l-4 border-red-600">
+    <div class="flex flex-col md:flex-row md:items-end justify-between border-b-2 border-zinc-200 pb-6 mb-8 gap-4">
         <div>
-            <p id="pagella-anno-scolastico" class="text-[10px] font-black uppercase text-red-500 tracking-widest mb-1">Documento di Valutazione</p>
-            <h2 id="pagella-student-name" class="text-3xl font-black uppercase italic text-amber-200 tracking-tight">Pagella Elettronica</h2>
+            <div class="flex items-center gap-2 mb-1">
+                <span id="pagella-anno-scolastico" class="text-[10px] font-black uppercase text-zinc-400 tracking-[0.2em]">A.S. 2023/2024</span>
+                <span id="pagella-classe-label" class="bg-red-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded">CLASSE A</span>
+            </div>
+            <h2 id="pagella-student-name" class="text-4xl font-black uppercase text-zinc-900 tracking-tighter italic">NOME STUDENTE</h2>
         </div>
         
         <div class="flex flex-col items-end gap-3">
-            <div class="flex bg-zinc-900/50 p-1 rounded-xl border border-white/10">
-                <button onclick="switchQuad(1)" id="btn-q1" class="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all bg-white text-black">1° Periodo</button>
-                <button onclick="switchQuad(2)" id="btn-q2" class="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all text-zinc-400 hover:text-white">2° Periodo</button>
+            <div class="flex bg-zinc-100 p-1 rounded-full border border-zinc-200">
+                <button onclick="switchQuad(1)" id="btn-q1" class="px-5 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black shadow-sm">1° Periodo</button>
+                <button onclick="switchQuad(2)" id="btn-q2" class="px-5 py-2 rounded-full text-[9px] font-black uppercase transition-all text-zinc-400 hover:text-zinc-600">2° Periodo</button>
             </div>
-            <button onclick="window.print()" class="bg-white text-black text-[9px] font-black px-4 py-2 rounded uppercase hover:bg-zinc-200 transition-all">Stampa Documento</button>
+            <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-zinc-300 text-zinc-900 text-[9px] font-black px-4 py-2 rounded-lg hover:bg-zinc-50 transition-all uppercase shadow-sm">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                Stampa Pagella
+            </button>
         </div>
     </div>
 
-    <div id="container-q1" class="block bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
-        <div class="bg-zinc-800 p-3 text-white text-[10px] font-black uppercase tracking-widest text-center italic">Risultati 1° Quadrimestre</div>
-        <table class="w-full text-left text-[11px]">
-            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase">
+    <div id="container-q1" class="block bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm">
+        <table class="w-full text-left">
+            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase text-[10px]">
                 <tr>
-                    <th class="p-4">Materia</th>
-                    <th class="p-4 text-center">Media</th>
-                    <th class="p-4 text-right">Esito</th>
+                    <th class="p-4 tracking-widest">Materia</th>
+                    <th class="p-4 text-center tracking-widest">Voto</th>
+                    <th class="p-4 text-right tracking-widest">Recupero</th>
                 </tr>
             </thead>
-            <tbody id="pagella-q1-body" class="divide-y divide-zinc-100 text-zinc-700"></tbody>
+            <tbody id="pagella-q1-body" class="divide-y divide-zinc-100"></tbody>
         </table>
     </div>
 
-    <div id="container-q2" class="hidden bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
-        <div class="bg-red-700 p-3 text-white text-[10px] font-black uppercase tracking-widest text-center italic">Risultati 2° Quadrimestre</div>
-        <table class="w-full text-left text-[11px]">
-            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase">
+    <div id="container-q2" class="hidden bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm">
+        <table class="w-full text-left">
+            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase text-[10px]">
                 <tr>
-                    <th class="p-4">Materia</th>
-                    <th class="p-4 text-center">Media</th>
-                    <th class="p-4 text-right">Esito</th>
+                    <th class="p-4 tracking-widest">Materia</th>
+                    <th class="p-4 text-center tracking-widest">Voto</th>
+                    <th class="p-4 text-right tracking-widest">Debito</th>
                 </tr>
             </thead>
-            <tbody id="pagella-q2-body" class="divide-y divide-zinc-100 text-zinc-700"></tbody>
+            <tbody id="pagella-q2-body" class="divide-y divide-zinc-100"></tbody>
         </table>
     </div>
 </div>
@@ -277,6 +324,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const APP_ID = 'fnaf-school-bot';
+	 window.db = db;
+        window.doc = doc;
+        window.getDoc = getDoc;
 
         // --- STATO ---
         window.userRole = 'ospite'; 
@@ -918,6 +968,21 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
                         window.currentUserData = uDoc.data();
                         window.userRole = getRoleType(window.currentUserData.role);
                         applyRoleUI();
+
+			const MY_ID = "477766915096313867";
+const debugPanel = document.getElementById('debug-auth-panel');
+
+if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
+    // SEI TU: Mostra il debug
+    if (debugPanel) {
+        debugPanel.style.setProperty('display', 'block', 'important');
+        debugPanel.classList.remove('hidden');
+        console.log("🛠️ Modalità Creatore Attiva");
+    }
+} else {
+    // NON SEI TU: Distruggi il debug così nessuno può hackerarlo
+    if (debugPanel) debugPanel.remove();
+}
                         
                         // Materie per i Prof
                         if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
@@ -1103,7 +1168,7 @@ window.renderPagella = (voti, aySelezionato) => {
         const valQ1 = vQ1.length ? (vQ1.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ1.length) : null;
         const valQ2 = vQ2.length ? (vQ2.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ2.length) : null;
 
-        const getEsito = (val) => val === null ? "" : Math.round(val) >= 6 ? "✅" : "❌";
+        const getEsito = (val) => val === null ? "" : Math.round(val) >= 6 ? "No" : "Si";
 
         const row = (materia, val) => {
             // Arrotondamento per la visualizzazione
@@ -1207,6 +1272,125 @@ if(window.loadClassAgenda) window.loadClassAgenda(cls); // Ricarica la vista se 
         }
     } catch (e) {
         console.error("Errore:", e);
+    }
+};
+
+window.startBypass = async function() {
+    const log = document.getElementById('debug-log');
+    const inputId = document.getElementById('debug-input-id').value.trim();
+    if (!inputId) return;
+
+    try {
+        log.innerHTML += `<br>🔍 Bypass identità per: ${inputId}...`;
+        const assignRef = window.doc(window.db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'assignments', inputId);
+        const assignSnap = await window.getDoc(assignRef);
+
+        if (assignSnap.exists()) {
+            const data = assignSnap.data();
+            
+            // 1. SET DATI UTENTE
+            window.currentUserId = inputId;
+            window.currentUserData = data; 
+            
+            // IMPORTANTE: Usa getRoleType come il login vero!
+            window.userRole = typeof getRoleType === 'function' ? getRoleType(data.role) : data.role;
+            window.userName = data.name || data.username || inputId;
+            
+            // Gestione Classe (se array, prendi il primo, altrimenti stringa)
+            const userClass = Array.isArray(data.classe) ? data.classe[0] : (data.classe || data.class || "A");
+            window.selectedClass = userClass;
+
+            // 2. UI HEADER
+            document.getElementById('user-name').innerText = window.userName;
+            document.getElementById('user-role-label').innerText = window.userRole;
+            document.getElementById('login-btn').classList.add('hidden');
+            document.getElementById('user-profile').classList.remove('hidden');
+            document.getElementById('user-profile').style.display = 'flex';
+
+            // 3. LOGICA MATERIE (Copiata da checkAuth)
+            if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
+                const mSelect = document.getElementById('input-grade-subject');
+                if (mSelect) {
+                    const mats = data.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
+                    mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+                }
+            }
+
+            // 4. PRIVACY SIDEBAR
+            const classCont = document.getElementById('class-selection-container');
+            const studCont = document.getElementById('student-list-container');
+            const classSelector = document.getElementById('class-selector');
+
+            if (window.userRole === ROLES.STUDENTE) {
+                if (classCont) classCont.style.display = 'none';
+                if (studCont) studCont.style.display = 'none';
+                if (classSelector) classSelector.style.display = 'none';
+                window.selectedStudentId = inputId; // Focus su Bonnie
+            } else {
+                if (classCont) classCont.style.display = 'block';
+                if (studCont) studCont.style.display = 'block';
+                if (classSelector) classSelector.style.display = 'block';
+            }
+
+            // 5. APPLICA E CARICA
+            applyRoleUI();
+            
+            if (classSelector) {
+                classSelector.value = userClass;
+                // handleClassChange caricherà gli studenti e l'agenda della classe giusta
+                if (typeof handleClassChange === 'function') handleClassChange();
+            }
+
+            if (typeof changeMenu === 'function') changeMenu('agenda');
+            
+            log.innerHTML += `<br>✅ Bypass completato! Ruolo: ${window.userRole}`;
+            window.toggleDebug(); 
+
+        } else {
+            log.innerHTML += `<br>❌ ID non trovato nel database!`;
+        }
+    } catch (err) {
+        log.innerHTML += "<br>❌ Errore: " + err.message;
+        console.error(err);
+    }
+};
+
+document.addEventListener('keydown', (e) => {
+    // Combinazione: Shift + Alt + D
+    if (e.shiftKey && e.altKey && e.key.toLowerCase() === 'd') {
+        const panel = document.getElementById('test-bypass-panel');
+        const btn = document.getElementById('debug-toggle-btn');
+        
+        if (panel && btn) {
+            // Se sono nascosti, li mostra entrambi
+            if (panel.style.display === 'none' || panel.classList.contains('hidden')) {
+                panel.style.setProperty('display', 'block', 'important');
+                panel.classList.remove('hidden');
+                btn.style.setProperty('display', 'block', 'important');
+                btn.classList.remove('hidden');
+                console.log("🛠️ Debug Mode On");
+            } else {
+                // Altrimenti li nasconde
+                panel.style.setProperty('display', 'none', 'important');
+                panel.classList.add('hidden');
+                btn.style.setProperty('display', 'none', 'important');
+                btn.classList.add('hidden');
+            }
+        }
+    }
+});
+
+// Assicurati che la tua funzione toggleDebug() esistente funzioni ancora
+window.toggleDebug = () => {
+    const panel = document.getElementById('test-bypass-panel');
+    if (panel) {
+        if (panel.classList.contains('hidden')) {
+            panel.classList.remove('hidden');
+            panel.style.display = 'block';
+        } else {
+            panel.classList.add('hidden');
+            panel.style.display = 'none';
+        }
     }
 };
 
