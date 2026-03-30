@@ -505,7 +505,7 @@ async function loadClassAgenda(cls) {
         const note = (data.note || []);
         const voti = (data.daily_voti || []);
 
-        if(window.userRole === 'Studente') {
+        if(window.userRole === 'studente') {
             const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
             const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
             
