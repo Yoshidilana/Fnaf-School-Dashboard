@@ -505,16 +505,19 @@ async function loadClassAgenda(cls) {
         const note = (data.note || []);
         const voti = (data.daily_voti || []);
 
-        if(window.userRole === 'studente') {
-            const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
-            const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
-            
-            infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-red-700 font-bold rounded-xl mb-2 text-[10px] border border-red-100 shadow-sm uppercase tracking-tighter">⚠️ NOTA: ${cap(n.testo)}</div>`).join('');
-            infoHtml += myVoti.map(v => `<div class="p-3 bg-zinc-900 text-white rounded-xl mb-2 text-[10px] border border-zinc-800 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${cap(v.materia)}</span><span class="text-lg font-black text-red-600">${v.voto}</span></div>`).join('');
-        } else {
-            infoHtml += note.map(n => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm italic text-zinc-700"><b>${cap(n.studente)}</b>: ${cap(n.testo)}</div>`).join('');
-            infoHtml += voti.map(v => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm flex justify-between items-center"><b>${cap(v.studente)}</b> <span class="font-black text-red-600 text-xs">${v.voto} (${cap(v.materia)})</span></div>`).join('');
-        }
+        // Usa .toLowerCase() per essere sicuro al 100% che il confronto funzioni
+if(window.userRole && window.userRole.toLowerCase() === 'studente') {
+    // Filtro per lo studente: vede SOLO i suoi
+    const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
+    const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
+    
+    infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-red-700 font-bold rounded-xl mb-2 text-[10px] border border-red-100 shadow-sm uppercase tracking-tighter">⚠️ NOTA: ${cap(n.testo)}</div>`).join('');
+    infoHtml += myVoti.map(v => `<div class="p-3 bg-zinc-900 text-white rounded-xl mb-2 text-[10px] border border-zinc-800 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${cap(v.materia)}</span><span class="text-lg font-black text-red-600">${v.voto}</span></div>`).join('');
+} else {
+    // Qui entrano Prof, Preside e chiunque altro: vedono TUTTI i voti della classe
+    infoHtml += note.map(n => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm italic text-zinc-700"><b>${cap(n.studente)}</b>: ${cap(n.testo)}</div>`).join('');
+    infoHtml += voti.map(v => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm flex justify-between items-center"><b>${cap(v.studente)}</b> <span class="font-black text-red-600 text-xs">${v.voto} (${cap(v.materia)})</span></div>`).join('');
+}
         
         const containerInfo = document.getElementById('agenda-daily-info');
         containerInfo.className = "overflow-y-auto";
