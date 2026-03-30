@@ -506,8 +506,8 @@ async function loadClassAgenda(cls) {
         const voti = (data.daily_voti || []);
 
         if(window.userRole === 'Studente') {
-            const myNote = note.filter(n => n.studenteId === window.currentUserId);
-            const myVoti = voti.filter(v => v.studenteId === window.currentUserId);
+            const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
+            const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
             
             infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-red-700 font-bold rounded-xl mb-2 text-[10px] border border-red-100 shadow-sm uppercase tracking-tighter">⚠️ NOTA: ${cap(n.testo)}</div>`).join('');
             infoHtml += myVoti.map(v => `<div class="p-3 bg-zinc-900 text-white rounded-xl mb-2 text-[10px] border border-zinc-800 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${cap(v.materia)}</span><span class="text-lg font-black text-red-600">${v.voto}</span></div>`).join('');
