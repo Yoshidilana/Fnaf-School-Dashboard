@@ -110,6 +110,10 @@
         <aside id="main-sidebar" class="w-64 border-r border-zinc-200 bg-zinc-50 flex flex-col shrink-0 p-4">
             <nav class="space-y-1 mb-8">
                 <p class="text-[9px] font-black text-zinc-400 uppercase mb-2 ml-2">Menu Principale</p>
+
+<button onclick="window.apriProfiloPersonale()" id="menu-profilo" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
+    <span>👤</span> Il Mio Profilo
+</button>
                 <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200 active">
                     <span>📅</span> Agenda
                 </button>
@@ -178,6 +182,38 @@
                     </div>
                 </div>
             </div>
+
+<div id="view-profilo" class="tab-content space-y-6">
+    <div class="glass-light p-8 rounded-2xl border-l-8 border-red-700 shadow-xl">
+        <div class="flex flex-col md:flex-row justify-between items-start gap-6">
+            <div class="flex items-center gap-6">
+                <img id="profilo-avatar" src="" class="w-24 h-24 rounded-2xl border-4 border-zinc-100 shadow-sm object-cover bg-zinc-200">
+                <div>
+                    <span id="profilo-classe-badge" class="bg-red-700 text-white text-[9px] font-black px-2 py-1 rounded uppercase tracking-tighter mb-2 inline-block">Classe -</span>
+                    <h1 id="profilo-nome" class="text-4xl font-black uppercase italic text-zinc-900 leading-none">Caricamento...</h1>
+                    <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Studente della Fazbear School</p>
+                </div>
+            </div>
+            <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-100 text-center min-w-[120px]">
+                <p class="text-[9px] font-black text-zinc-400 uppercase mb-1">Media Personale</p>
+                <p id="profilo-media" class="text-4xl font-black text-red-600">0.0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-light p-6 rounded-2xl">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
+            <div id="profilo-voti-list" class="space-y-3">
+                </div>
+        </div>
+        <div class="glass-light p-6 rounded-2xl">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
+            <div id="profilo-note-list" class="space-y-3">
+                </div>
+        </div>
+    </div>
+</div>
 
             <!-- VIEW: REGISTRO -->
             <div id="view-registro" class="tab-content space-y-6">
@@ -1394,6 +1430,98 @@ window.toggleDebug = () => {
     }
 };
 
+window.apriProfiloPersonale = async () => {
+    const uid = window.currentUserId;
+    if (!uid) return alert("Esegui il login!");
+
+    // 1. RECUPERO ANNO DAL CALENDARIO DEL SITO
+    const inputCal = document.getElementById('global-calendar');
+    const dataCal = inputCal ? inputCal.value : ""; 
+    const dataScelta = dataCal ? new Date(dataCal) : new Date(); // Se vuoto, usa oggi
+    
+    const annoScelto = dataScelta.getFullYear();
+    const meseScelto = dataScelta.getMonth() + 1;
+    
+    // Calcola l'A.S. in base alla data del calendario (Settembre è il mese 9)
+    let as = (meseScelto >= 9) ? `${annoScelto}/${annoScelto + 1}` : `${annoScelto - 1}/${annoScelto}`;
+
+    // 2. NAVIGAZIONE (Attiva la vista profilo con animazione fadeIn [1])
+    if (typeof window.changeMenu === 'function') {
+        window.changeMenu('profilo');
+    }
+
+    // 3. RECUPERO DATI DA FIRESTORE
+    const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', uid);
+    const snap = await getDoc(docRef);
+
+    if (snap.exists()) {
+        const data = snap.data();
+        
+        // --- FILTRO CRUCIALE ---
+        // Filtriamo usando '.anno' (coerente con il comando /pagella del bot [2])
+        const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
+        const noteFiltrate = (data.note || []).filter(n => n.anno === as);
+        
+        // 4. POPOLAMENTO HEADER
+        const nomeEl = document.getElementById('profilo-nome');
+        const avatarEl = document.getElementById('profilo-avatar');
+        const badgeEl = document.getElementById('profilo-classe-badge');
+
+        if (nomeEl) nomeEl.innerText = (data.name || window.userName || "Studente").toUpperCase();
+        if (avatarEl) avatarEl.src = document.getElementById('user-avatar')?.src || "";
+        if (badgeEl) badgeEl.innerText = `CLASSE ${window.selectedClass || 'N/A'} - A.S. ${as}`;
+        
+        // 5. CALCOLO E RENDERING MEDIA
+        const media = votiFiltrati.length > 0 
+            ? (votiFiltrati.reduce((a, b) => a + parseFloat(b.voto), 0) / votiFiltrati.length).toFixed(1) 
+            : "0.0";
+        
+        const mediaEl = document.getElementById('profilo-media');
+        if (mediaEl) {
+            mediaEl.innerText = media;
+            // Colore rosso per insufficienze, altrimenti scuro [1]
+            mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+        }
+        
+        // 6. RENDERING LISTA VOTI (Con Argomento e Materia)
+        const vList = document.getElementById('profilo-voti-list');
+        if (vList) {
+            vList.innerHTML = votiFiltrati.slice().reverse().map(v => `
+                <div class="flex justify-between items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100 mb-2">
+                    <div class="flex flex-col">
+                        <p class="font-black text-[10px] uppercase text-zinc-800">${v.materia}</p>
+                        <p class="text-[9px] text-zinc-500 font-medium">${v.argomento || 'Nessun argomento'}</p>
+                        <p class="text-[8px] text-zinc-400 font-bold mt-1">${v.data || 'Data N/A'}</p>
+                    </div>
+                    <span class="text-lg font-black ${parseFloat(v.voto) < 6 ? 'text-red-600' : 'text-zinc-900'}">${v.voto}</span>
+                </div>
+            `).join('') || `<p class="text-[9px] text-zinc-300 italic text-center py-4">Nessun voto registrato per l'anno ${as}</p>`;
+        }
+
+        // 7. RENDERING LISTA NOTE
+        const nList = document.getElementById('profilo-note-list');
+        if (nList) {
+            nList.innerHTML = noteFiltrate.map(n => `
+                <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500 mb-2">
+                    <p class="text-[10px] text-red-800 italic font-medium">"${n.testo}"</p>
+                    <div class="flex justify-between mt-1">
+                        <p class="text-[8px] text-red-400 font-bold uppercase">${n.data}</p>
+                        <p class="text-[8px] text-red-300 font-bold uppercase italic">A.S. ${as}</p>
+                    </div>
+                </div>
+            `).join('') || '<p class="text-[9px] text-zinc-300 italic text-center py-4">Nessun provvedimento disciplinare.</p>';
+        }
+    }
+};
+    
+   // Questo pezzetto serve a "reagire" quando sposti la data nel calendario
+document.getElementById('global-calendar')?.addEventListener('input', () => {
+    // Se l'utente sta guardando il profilo, aggiorna i voti in tempo reale!
+    if (document.getElementById('view-profilo')?.classList.contains('active-view')) {
+        console.log("📅 Calendario modificato, aggiorno il profilo...");
+        window.apriProfiloPersonale();
+    }
+});
     </script>
 </body>
 </html>
