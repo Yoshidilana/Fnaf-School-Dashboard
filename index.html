@@ -491,10 +491,15 @@
             }
             
             // Notifiche (solo Prof e Preside)
-            if(isStaff) {
-                document.getElementById('notif-bell').classList.remove('hidden');
-                listenNotifications();
-            }
+            // --- In applyRoleUI ---
+const isAdmin = type === ROLES.PRESIDE || type === ROLES.VICE_PRESIDE;
+
+if (isAdmin) {
+    document.getElementById('notif-bell')?.classList.remove('hidden');
+} else {
+    // Se non è admin, la nascondiamo del tutto per non confondere
+    document.getElementById('notif-bell')?.classList.add('hidden');
+}
         }
 
         // --- GESTIONE CLASSI E STUDENTI ---
@@ -951,11 +956,31 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
         };
          // --- NOTIFICHE ---
         window.toggleNotifPanel = () => {
-        const panel = document.getElementById('notif-panel');
-        if (!panel) return;
-        if (window.userRole !== ROLES.PRESIDE && window.userRole !== ROLES.VICE_PRESIDE) return;
-        panel.classList.toggle('hidden');
-    };
+    const panel = document.getElementById('notif-panel');
+    const badge = document.getElementById('notif-count');
+    const bell = document.getElementById('notif-bell');
+
+    if (!panel) return;
+
+    // 1. Controllo Permessi: solo Preside e Vice Preside possono aprire
+    const haPermesso = window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE;
+
+    if (!haPermesso) {
+        console.log("Accesso notifiche negato: Ruolo non autorizzato.");
+        return; 
+    }
+
+    // 2. Se ha i permessi, procediamo a mostrare/nascondere il pannello
+    const isOpening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+
+    // 3. Reset del Pallino: se stiamo aprendo il pannello, azzeriamo il conteggio e nascondiamo il rosso
+    if (isOpening && badge) {
+        badge.innerText = "0";
+        badge.classList.add('hidden'); // Nascondiamo il pallino rosso
+        // Opzionale: se vuoi resettare anche nel DB dovresti fare una chiamata qui
+    }
+};
        
        function listenNotifications() {
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global'), d => {
@@ -1620,8 +1645,6 @@ window.vaiADataRapida = () => {
         console.log(`🚀 Teletrasporto: 1° ${meseInput}/${anno}`);
     }
 };
-
-
     </script>
 </body>
 </html>
