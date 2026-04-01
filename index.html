@@ -1430,100 +1430,130 @@ window.toggleDebug = () => {
     }
 };
 
-window.apriProfiloPersonale = async () => {
-    const uid = window.currentUserId;
-    if (!uid) return alert("Esegui il login!");
+    window.apriProfiloPersonale = async (userId) => {
+    const targetId = userId || window.currentUserId;
+    if (!targetId) return alert("ID Utente non trovato!");
 
-    // 1. RECUPERO ANNO DAL CALENDARIO
+    // 1. RECUPERO ANNO DAL CALENDARIO (Tua logica originale)
     const inputCal = document.getElementById('global-calendar');
     const dataCal = inputCal ? inputCal.value : ""; 
     const dataScelta = dataCal ? new Date(dataCal) : new Date();
-    
     const annoScelto = dataScelta.getFullYear();
     const meseScelto = dataScelta.getMonth() + 1;
     let as = (meseScelto >= 9) ? `${annoScelto}/${annoScelto + 1}` : `${annoScelto - 1}/${annoScelto}`;
 
-    // 2. NAVIGAZIONE
-    if (typeof window.changeMenu === 'function') {
-        window.changeMenu('profilo');
-    }
-
     try {
-        // 3. RECUPERO DATI DA FIRESTORE
-        const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', uid);
-        const snap = await getDoc(docRef);
+        // 2. RECUPERO DATI (Assignments + Records come il Bot)
+        const assignRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', targetId);
+        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', targetId);
+        const [assignSnap, recordSnap] = await Promise.all([getDoc(assignRef), getDoc(recordRef)]);
 
-        if (snap.exists()) {
-            const data = snap.data();
-            // ORA PUOI FARE IL LOG PERCHÉ 'data' ESISTE
-            console.log("DATI RICEVUTI PER IL PROFILO:", data);
-            
-            const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
-            const noteFiltrate = (data.note || []).filter(n => n.anno === as);
-            
-            // 4. POPOLAMENTO HEADER
-            const nomeEl = document.getElementById('profilo-nome');
-            const avatarEl = document.getElementById('profilo-avatar');
-            const badgeEl = document.getElementById('profilo-classe-badge');
+        if (!assignSnap.exists() && !recordSnap.exists()) return;
 
-            if (nomeEl) nomeEl.innerText = (data.name || window.userName || "Studente").toUpperCase();
-            if (avatarEl) avatarEl.src = data.avatar || document.getElementById('user-avatar')?.src || "";
-            if (badgeEl) badgeEl.innerText = `CLASSE ${data.classe || window.selectedClass || 'N/A'} - A.S. ${as}`;
-            
-            // 5. CALCOLO E RENDERING MEDIA
-            const listaVoti = votiFiltrati || [];
-            const media = listaVoti.length > 0  
-                ? (listaVoti.reduce((a, b) => a + parseFloat(b.voto), 0) / listaVoti.length).toFixed(1)  
-                : "0.0";
+        const d = assignSnap.exists() ? assignSnap.data() : {};
+        const data = recordSnap.exists() ? recordSnap.data() : {};
 
-            const mediaEl = document.getElementById('profilo-media');
+        // 3. NAVIGAZIONE
+        if (typeof window.changeMenu === 'function') window.changeMenu('profilo');
+
+        // --- LOGICA RUOLO ---
+        const roleStr = (d.role || 'Studente').toLowerCase();
+        const isStaff = ['prof', 'docente', 'preside', 'vice', 'direttore', 'bidello', 'admin'].some(x => roleStr.includes(x));
+        const ruoloEffettivo = (d.role || 'Studente').toUpperCase();
+
+        // 4. POPOLAMENTO HEADER
+        const nomeEl = document.getElementById('profilo-nome');
+        const ruoloEl = document.getElementById('profilo-ruolo-testo');
+        const badgeEl = document.getElementById('profilo-classe-badge');
+        const avatarEl = document.getElementById('profilo-avatar');
+
+        if (nomeEl) nomeEl.innerText = (d.name || data.name || "UTENTE").toUpperCase();
+        if (avatarEl) avatarEl.src = d.avatar_npc || data.avatar || "";
+        if (badgeEl) badgeEl.innerText = `CLASSE: ${d.classe || 'N/A'} - A.S. ${as}`;
+
+        if (ruoloEl) {
+            ruoloEl.innerText = ruoloEffettivo;
+            ruoloEl.style.backgroundColor = isStaff ? "#f59e0b" : "#b91c1c";
+            ruoloEl.style.color = "white";
+        }
+
+        // --- FILTRO PER ANNO SCOLASTICO ---
+        // Filtriamo i voti e le note in base all'A.S. calcolato dal calendario
+        const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
+        const noteFiltrate = (data.note || []).filter(n => n.anno === as);
+
+        // 5. MEDIA O RUOLO (Sostituisce "STAFF" con il ruolo reale)
+        const mediaEl = document.getElementById('profilo-media');
+        if (isStaff) {
             if (mediaEl) {
-                mediaEl.innerText = media;
-                if (media === "0.0") {
-                    mediaEl.className = "text-4xl font-black text-zinc-300";
-                } else {
-                    mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
-                }
-            }        
-            
-            // 6. RENDERING LISTA VOTI
-            const vList = document.getElementById('profilo-voti-list');
-            if (vList) {
-                vList.innerHTML = votiFiltrati.slice().reverse().map(v => `
-                    <div class="flex justify-between items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100 mb-2">
-                        <div class="flex flex-col">
-                            <p class="font-black text-[10px] uppercase text-zinc-800">${v.materia}</p>
-                            <p class="text-[9px] text-zinc-500 font-medium">${v.argomento || 'Nessun argomento'}</p>
-                            <p class="text-[8px] text-zinc-400 font-bold mt-1">${v.data || 'Data N/A'}</p>
-                        </div>
-                        <span class="text-lg font-black ${parseFloat(v.voto) < 6 ? 'text-red-600' : 'text-zinc-900'}">${v.voto}</span>
-                    </div>
-                `).join('') || `<p class="text-[9px] text-zinc-300 italic text-center py-4">Nessun voto registrato per l'anno ${as}</p>`;
-            }
-
-            // 7. RENDERING LISTA NOTE
-            const nList = document.getElementById('profilo-note-list');
-            if (nList) {
-                nList.innerHTML = noteFiltrate.map(n => `
-                    <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500 mb-2">
-                        <p class="text-[10px] text-red-800 italic font-medium">"${n.testo}"</p>
-                        <div class="flex justify-between mt-1">
-                            <p class="text-[8px] text-red-400 font-bold uppercase">${n.data}</p>
-                            <p class="text-[8px] text-red-300 font-bold uppercase italic">A.S. ${as}</p>
-                        </div>
-                    </div>
-                `).join('') || '<p class="text-[9px] text-zinc-300 italic text-center py-4">Nessun provvedimento disciplinare.</p>';
+                // Invece di "STAFF", scriviamo "PRESIDE", "BIDELLO", ecc.
+                mediaEl.innerText = ruoloEffettivo; 
+                // Rimpiccioliamo un po' il font se il nome è lungo (es. VICE PRESIDE)
+                mediaEl.className = "text-xl font-black text-zinc-400 leading-tight uppercase";
+                
+                // Opzionale: Cambiamo l'etichetta sopra da "Media Personale" a "Inquadramento"
+                const labelMedia = mediaEl.parentElement.querySelector('p');
+                if (labelMedia) labelMedia.innerText = "RUOLO ISTITUZIONALE";
             }
         } else {
-            console.log("Nessun dato trovato per l'utente:", uid);
-            // Almeno scriviamo il nome della sessione se il DB è vuoto
-            const nomeEl = document.getElementById('profilo-nome');
-            if (nomeEl) nomeEl.innerText = (window.userName || "UTENTE").toUpperCase();
+            const media = votiFiltrati.length > 0 
+                ? (votiFiltrati.reduce((a, b) => a + parseFloat(b.voto), 0) / votiFiltrati.length).toFixed(2) 
+                : "0.00";
+            if (mediaEl) {
+                mediaEl.innerText = media;
+                mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+                
+                // Ripristiniamo l'etichetta per gli studenti
+                const labelMedia = mediaEl.parentElement.querySelector('p');
+                if (labelMedia) labelMedia.innerText = "MEDIA PERSONALE";
+            }
         }
-    } catch (e) {
-        console.error("ERRORE CRITICO:", e);
+
+        // 6. LISTE (Passiamo l'anno per il messaggio "Nessun voto")
+        renderListaProfilo('profilo-voti-list', votiFiltrati, isStaff, "voti", as);
+        renderListaProfilo('profilo-note-list', noteFiltrate, isStaff, "note", as);
+
+    } catch (error) {
+        console.error("Errore profilo:", error);
     }
 };
+
+function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+
+    if (isStaff && tipo === "voti") {
+        el.innerHTML = `<div class="py-6 opacity-40 text-center"><p class="text-[10px] font-black uppercase text-zinc-400">Registro Docente</p></div>`;
+        return;
+    }
+
+    if (!lista || lista.length === 0) {
+        el.innerHTML = `<p class="text-[9px] text-zinc-300 italic text-center py-4">Nessun dato per l'A.S. ${anno}</p>`;
+        return;
+    }
+
+    el.innerHTML = lista.slice().reverse().map(item => {
+        if (tipo === "voti") {
+            return `
+                <div class="flex justify-between items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100 mb-2">
+                    <div class="flex flex-col">
+                        <p class="font-black text-[10px] uppercase text-zinc-800">${item.materia}</p>
+                        <p class="text-[9px] text-zinc-500 font-medium">${item.argomento || 'Nessun argomento'}</p>
+                    </div>
+                    <span class="text-lg font-black ${parseFloat(item.voto) < 6 ? 'text-red-600' : 'text-zinc-900'}">${item.voto}</span>
+                </div>`;
+        } else {
+            return `
+                <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500 mb-2">
+                    <p class="text-[10px] text-red-800 italic font-medium">"${item.testo}"</p>
+                </div>`;
+        }
+    }).join('');
+}
+
+
+
+
     
    // Questo pezzetto serve a "reagire" quando sposti la data nel calendario
 document.getElementById('global-calendar')?.addEventListener('input', () => {
@@ -1533,6 +1563,8 @@ document.getElementById('global-calendar')?.addEventListener('input', () => {
         window.apriProfiloPersonale();
     }
 });
+
+
     </script>
 </body>
 </html>
