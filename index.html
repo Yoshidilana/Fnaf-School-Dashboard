@@ -1049,24 +1049,36 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
         };
 
         async function checkAuth() {
-            const params = new URLSearchParams(window.location.hash.slice(1));
-            const token = params.get('access_token');
-            if (token) {
-                try {
-                    const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token}` } });
-                    const user = await res.json();
-                    window.currentUserId = user.id;
-                    
-                    document.getElementById('login-btn').classList.add('hidden');
-                    document.getElementById('user-profile').classList.remove('hidden');
-                    document.getElementById('user-name').innerText = user.username;
-                    document.getElementById('user-avatar').src = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const token = params.get('access_token');
+    if (token) {
+        try {
+            const res = await fetch('https://discord.com/api/users/@me', { 
+                headers: { Authorization: `Bearer ${token}` } 
+            });
+            const user = await res.json();
+            window.currentUserId = user.id;
+            
+            // Creiamo l'URL dell'avatar e salviamolo globalmente
+            const discordAvatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+            window.currentAvatarUrl = discordAvatarUrl; 
 
-                    const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
-                    if(uDoc.exists()) {
-                        window.currentUserData = uDoc.data();
-                        window.userRole = getRoleType(window.currentUserData.role);
-                        applyRoleUI();
+            // Aggiorniamo la Top Bar
+            const loginBtn = document.getElementById('login-btn');
+            const userProfile = document.getElementById('user-profile');
+            if (loginBtn) loginBtn.classList.add('hidden');
+            if (userProfile) {
+                userProfile.classList.remove('hidden');
+                document.getElementById('user-name').innerText = user.username;
+                document.getElementById('user-avatar').src = discordAvatarUrl;
+            }
+
+            // Carichiamo i dati dal Database
+            const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
+            if(uDoc.exists()) {
+                window.currentUserData = uDoc.data();
+                window.userRole = getRoleType(window.currentUserData.role);
+                applyRoleUI();
 
 			const MY_ID = "477766915096313867";
 const debugPanel = document.getElementById('debug-auth-panel');
@@ -1524,21 +1536,49 @@ window.toggleDebug = () => {
         const isStaff = ['prof', 'docente', 'preside', 'vice', 'direttore', 'bidello', 'admin'].some(x => roleStr.includes(x));
         const ruoloEffettivo = (d.role || 'Studente').toUpperCase();
 
-        // 4. POPOLAMENTO HEADER
-        const nomeEl = document.getElementById('profilo-nome');
-        const ruoloEl = document.getElementById('profilo-ruolo-testo');
-        const badgeEl = document.getElementById('profilo-classe-badge');
-        const avatarEl = document.getElementById('profilo-avatar');
+        // --- 4. POPOLAMENTO HEADER PROFILO (VERSIONE COMPLETA) ---
+const nomeEl = document.getElementById('profilo-nome');
+const ruoloEl = document.getElementById('profilo-ruolo-testo');
+const badgeEl = document.getElementById('profilo-classe-badge');
+const avatarEl = document.getElementById('profilo-avatar');
 
-        if (nomeEl) nomeEl.innerText = (d.name || data.name || "UTENTE").toUpperCase();
-        if (avatarEl) avatarEl.src = d.avatar_npc || data.avatar || "";
-        if (badgeEl) badgeEl.innerText = `CLASSE: ${d.classe || 'N/A'} - A.S. ${as}`;
+// Nome
+if (nomeEl) nomeEl.innerText = (d.name || data.name || "UTENTE").toUpperCase();
 
-        if (ruoloEl) {
-            ruoloEl.innerText = ruoloEffettivo;
-            ruoloEl.style.backgroundColor = isStaff ? "#f59e0b" : "#b91c1c";
-            ruoloEl.style.color = "white";
-        }
+// Avatar (Logica intelligente: Te stesso vs NPC)
+if (avatarEl) {
+    let fotoUrl = "";
+    if (targetId === window.currentUserId) {
+        // Se sei tu, usa la foto salvata da checkAuth
+        fotoUrl = window.currentAvatarUrl;
+    } else {
+        // Se è un altro (NPC o Studente con foto nel DB)
+        fotoUrl = d.avatar_npc || d.avatar || data.avatar || "";
+    }
+    
+    avatarEl.src = fotoUrl || "https://ui-avatars.com/api/?name=User&background=333&color=fff";
+    avatarEl.onerror = () => { avatarEl.src = "https://ui-avatars.com/api/?name=NPC&background=7f1d1d&color=fff"; };
+}
+
+// Classe e Anno Scolastico
+if (badgeEl) {
+    const classeDoc = d.classe || data.classe || 'N/A';
+    badgeEl.innerText = `CLASSE: ${classeDoc} - A.S. ${as}`;
+}
+
+// Ruolo e Colori (Staff = Arancione, Studenti = Rosso)
+if (ruoloEl) {
+    const ruoloEffettivo = d.role || data.role || "Ospite";
+    const isStaff = ruoloEffettivo.toUpperCase().includes("PRESIDE") || 
+                    ruoloEffettivo.toUpperCase().includes("PROF") || 
+                    ruoloEffettivo.toUpperCase().includes("VICE");
+    
+    ruoloEl.innerText = ruoloEffettivo.toUpperCase();
+    ruoloEl.style.backgroundColor = isStaff ? "#f59e0b" : "#b91c1c"; // Arancio Staff, Rosso Studenti
+    ruoloEl.style.color = "white";
+    ruoloEl.style.padding = "2px 8px";
+    ruoloEl.style.borderRadius = "4px";
+}
 
         // --- FILTRO PER ANNO SCOLASTICO ---
         // Filtriamo i voti e le note in base all'A.S. calcolato dal calendario
