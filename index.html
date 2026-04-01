@@ -81,6 +81,7 @@
             <h1 class="font-black text-xs uppercase italic tracking-tighter">Fazbear <span class="text-red-600">Classroom</span></h1>
             <p id="current-academic-year" class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">A.S. --/--</p>
         </div>
+  		
         
         <div class="ml-4 flex items-center gap-1 bg-zinc-50 px-2 py-1 rounded border border-zinc-200 shadow-sm">
     <span class="text-[8px] font-black text-zinc-400 uppercase mr-1">Vai a:</span>
@@ -120,6 +121,11 @@
     </button>
 </div>
     </div>
+                      <div class="flex items-center gap-6">
+            <div id="notif-bell" class="relative cursor-pointer hidden" onclick="window.toggleNotifPanel()">
+                <span class="text-xl">🔔</span>
+                <span id="notif-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] px-1 rounded-full font-black">0</span>
+            </div>
     
     <div class="flex items-center gap-4"> <div class="flex flex-col items-end">
             <input type="date" id="global-calendar" onchange="window.updateDateContext()" class="bg-zinc-100 border border-zinc-300 rounded px-2 py-0.5 text-[10px] font-bold outline-none focus:border-red-600">
