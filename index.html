@@ -75,35 +75,67 @@
 
     <!-- Top Bar -->
     <header class="h-14 border-b border-zinc-300 bg-white flex items-center justify-between px-6 z-50 shrink-0 shadow-sm">
-        <div class="flex items-center gap-4">
-            <div class="w-8 h-8 bg-red-700 rounded flex items-center justify-center text-lg">🐻</div>
-            <div>
-                <h1 class="font-black text-xs uppercase italic tracking-tighter">Fazbear <span class="text-red-600">Classroom</span></h1>
-                <p id="current-academic-year" class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">A.S. --/--</p>
-            </div>
+    <div class="flex items-center gap-4">
+        <div class="w-8 h-8 bg-red-700 rounded flex items-center justify-center text-lg">🐻</div>
+        <div>
+            <h1 class="font-black text-xs uppercase italic tracking-tighter">Fazbear <span class="text-red-600">Classroom</span></h1>
+            <p id="current-academic-year" class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">A.S. --/--</p>
         </div>
         
-        <div class="flex items-center gap-6">
-            <div id="notif-bell" class="relative cursor-pointer hidden" onclick="window.toggleNotifPanel()">
-                <span class="text-xl">🔔</span>
-                <span id="notif-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] px-1 rounded-full font-black">0</span>
-            </div>
+        <div class="ml-4 flex items-center gap-1 bg-zinc-50 px-2 py-1 rounded border border-zinc-200 shadow-sm">
+    <span class="text-[8px] font-black text-zinc-400 uppercase mr-1">Vai a:</span>
+    
+    <input 
+        type="text" 
+        id="quick-year-filter" 
+        placeholder="2025" 
+        class="text-[10px] p-1 border rounded w-14 text-center outline-none focus:ring-1 focus:ring-red-500 font-bold"
+        onkeypress="if(event.key === 'Enter') window.vaiADataRapida()"
+    >
 
-            <div class="flex flex-col items-end">
-                <input type="date" id="global-calendar" onchange="window.updateDateContext()" class="bg-zinc-100 border border-zinc-300 rounded px-2 py-0.5 text-[10px] font-bold outline-none focus:border-red-600">
-                <span id="period-indicator" class="text-[8px] font-black uppercase text-red-600">1° Quadrimestre</span>
-            </div>
+    <select 
+        id="quick-month-filter" 
+        class="text-[10px] p-1 border rounded bg-white outline-none font-bold text-zinc-700"
+        onchange="window.vaiADataRapida()"
+    >
+        <option value="09">Set</option>
+        <option value="10">Ott</option>
+        <option value="11">Nov</option>
+        <option value="12">Dic</option>
+        <option value="01">Gen</option>
+        <option value="02">Feb</option>
+        <option value="03">Mar</option>
+        <option value="04">Apr</option>
+        <option value="05">Mag</option>
+        <option value="06">Giu</option>
+        <option value="07">Lug</option>
+        <option value="08">Ago</option>
+    </select>
 
-            <div id="user-profile" class="hidden flex items-center gap-3 bg-zinc-100 p-1 rounded-full border border-zinc-200">
-                <img id="user-avatar" src="" class="w-6 h-6 rounded-full border border-red-600">
-                <div class="flex flex-col pr-2">
-                    <span id="user-name" class="text-[9px] font-black text-zinc-800 uppercase leading-none">---</span>
-                    <span id="user-role-label" class="text-[7px] font-bold text-red-600 uppercase tracking-tighter">Ospite</span>
-                </div>
-            </div>
-            <button id="login-btn" onclick="window.loginDiscord()" class="bg-zinc-900 text-white text-[9px] font-black px-4 py-2 rounded uppercase hover:bg-red-700 transition-all">Login Discord</button>
+    <button 
+        onclick="window.vaiADataRapida()"
+        class="bg-red-600 text-white text-[9px] px-2 py-1 rounded font-black hover:bg-zinc-900 transition-all"
+    >
+        VAI
+    </button>
+</div>
+    </div>
+    
+    <div class="flex items-center gap-4"> <div class="flex flex-col items-end">
+            <input type="date" id="global-calendar" onchange="window.updateDateContext()" class="bg-zinc-100 border border-zinc-300 rounded px-2 py-0.5 text-[10px] font-bold outline-none focus:border-red-600">
+            <span id="period-indicator" class="text-[8px] font-black uppercase text-red-600">1° Quadrimestre</span>
         </div>
-    </header>
+
+        <div id="user-profile" class="hidden flex items-center gap-2 bg-zinc-100 p-1 rounded-full border border-zinc-200">
+            <img id="user-avatar" src="" class="w-6 h-6 rounded-full border border-red-600">
+            <div class="flex flex-col pr-2">
+                <span id="user-name" class="text-[9px] font-black text-zinc-800 uppercase leading-none">---</span>
+                <span id="user-role-label" class="text-[7px] font-bold text-red-600 uppercase tracking-tighter">Ospite</span>
+            </div>
+        </div>
+        <button id="login-btn" onclick="window.loginDiscord()" class="bg-zinc-900 text-white text-[9px] font-black px-4 py-2 rounded uppercase hover:bg-red-700 transition-all">Login</button>
+    </div>
+</header>
 
     <div class="flex flex-1 overflow-hidden">
         <!-- Sidebar -->
@@ -1551,10 +1583,6 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
     }).join('');
 }
 
-
-
-
-    
    // Questo pezzetto serve a "reagire" quando sposti la data nel calendario
 document.getElementById('global-calendar')?.addEventListener('input', () => {
     // Se l'utente sta guardando il profilo, aggiorna i voti in tempo reale!
@@ -1563,6 +1591,29 @@ document.getElementById('global-calendar')?.addEventListener('input', () => {
         window.apriProfiloPersonale();
     }
 });
+
+window.vaiADataRapida = () => {
+    const annoInput = document.getElementById('quick-year-filter').value;
+    const meseInput = document.getElementById('quick-month-filter').value;
+    
+    // Estraiamo l'anno (i primi 4 numeri)
+    const annoMatch = annoInput.match(/\d{4}/);
+    if (!annoMatch) {
+        alert("Inserisci un anno valido (es: 2025)");
+        return;
+    }
+
+    const anno = annoMatch[0];
+    // Il mese nel calendario HTML vuole il formato MM (es: 01, 09, 12)
+    const dataTarget = `${anno}-${meseInput}-01`;
+
+    const cal = document.getElementById('global-calendar');
+    if (cal) {
+        cal.value = dataTarget;
+        cal.dispatchEvent(new Event('change'));
+        console.log(`🚀 Teletrasporto: 1° ${meseInput}/${anno}`);
+    }
+};
 
 
     </script>
