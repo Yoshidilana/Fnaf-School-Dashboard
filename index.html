@@ -1536,48 +1536,46 @@ window.toggleDebug = () => {
         const isStaff = ['prof', 'docente', 'preside', 'vice', 'direttore', 'bidello', 'admin'].some(x => roleStr.includes(x));
         const ruoloEffettivo = (d.role || 'Studente').toUpperCase();
 
-        // --- 4. POPOLAMENTO HEADER PROFILO (VERSIONE COMPLETA) ---
+        // --- 4. POPOLAMENTO HEADER PROFILO (VERSIONE UNIFICATA NPC + DISCORD) ---
 const nomeEl = document.getElementById('profilo-nome');
 const ruoloEl = document.getElementById('profilo-ruolo-testo');
 const badgeEl = document.getElementById('profilo-classe-badge');
 const avatarEl = document.getElementById('profilo-avatar');
 
-// Nome
+// Nome (come prima)
 if (nomeEl) nomeEl.innerText = (d.name || data.name || "UTENTE").toUpperCase();
 
-// Avatar (Logica intelligente: Te stesso vs NPC)
+// Avatar - LOGICA RIPRISTINATA + FIX DISCORD
 if (avatarEl) {
     let fotoUrl = "";
-    if (targetId === window.currentUserId) {
-        // Se sei tu, usa la foto salvata da checkAuth
+
+    if (targetId === window.currentUserId && window.currentAvatarUrl) {
+        // Se sei tu, usa la foto del login Discord (che non è nel DB)
         fotoUrl = window.currentAvatarUrl;
     } else {
-        // Se è un altro (NPC o Studente con foto nel DB)
-        fotoUrl = d.avatar_npc || d.avatar || data.avatar || "";
+        // PER TUTTI GLI ALTRI (NPC e Studenti): Torna alla logica che funzionava prima
+        fotoUrl = d.avatar_npc || data.avatar || d.avatar || "";
     }
-    
+
     avatarEl.src = fotoUrl || "https://ui-avatars.com/api/?name=User&background=333&color=fff";
-    avatarEl.onerror = () => { avatarEl.src = "https://ui-avatars.com/api/?name=NPC&background=7f1d1d&color=fff"; };
-}
-
-// Classe e Anno Scolastico
-if (badgeEl) {
-    const classeDoc = d.classe || data.classe || 'N/A';
-    badgeEl.innerText = `CLASSE: ${classeDoc} - A.S. ${as}`;
-}
-
-// Ruolo e Colori (Staff = Arancione, Studenti = Rosso)
-if (ruoloEl) {
-    const ruoloEffettivo = d.role || data.role || "Ospite";
-    const isStaff = ruoloEffettivo.toUpperCase().includes("PRESIDE") || 
-                    ruoloEffettivo.toUpperCase().includes("PROF") || 
-                    ruoloEffettivo.toUpperCase().includes("VICE");
     
+    // Se l'URL nel database è rotto o vuoto, mettiamo un'immagine di emergenza
+    avatarEl.onerror = () => { 
+        avatarEl.src = "https://ui-avatars.com/api/?name=NPC&background=7f1d1d&color=fff"; 
+    };
+}
+
+// Classe (come prima)
+if (badgeEl) {
+    badgeEl.innerText = `CLASSE: ${d.classe || data.classe || 'N/A'} - A.S. ${as}`;
+}
+
+// Ruolo e Colori (Ripristinato esattamente come lo avevi tu)
+if (ruoloEl) {
+    // Usiamo le variabili isStaff e ruoloEffettivo che hai già nel tuo codice
     ruoloEl.innerText = ruoloEffettivo.toUpperCase();
-    ruoloEl.style.backgroundColor = isStaff ? "#f59e0b" : "#b91c1c"; // Arancio Staff, Rosso Studenti
+    ruoloEl.style.backgroundColor = isStaff ? "#f59e0b" : "#b91c1c";
     ruoloEl.style.color = "white";
-    ruoloEl.style.padding = "2px 8px";
-    ruoloEl.style.borderRadius = "4px";
 }
 
         // --- FILTRO PER ANNO SCOLASTICO ---
