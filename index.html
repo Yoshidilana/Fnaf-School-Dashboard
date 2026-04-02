@@ -512,17 +512,17 @@
         });
 
         // --- GESTIONE INTERFACCIA RUOLI ---
-       function applyRoleUI() {
+function applyRoleUI() {
     const type = window.userRole;
     const roleLabel = document.getElementById('user-role-label');
     if (roleLabel) roleLabel.innerText = window.currentUserData?.role || 'Ospite';
     
-    const isStaff = type === ROLES.PRESIDE || type === ROLES.PROF;
-    const isPreside = type === ROLES.PRESIDE;
+    const isStaff = type === ROLES.PRESIDE || type === ROLES.PROF || type === ROLES.VICE_PRESIDE;
+    const isPreside = type === ROLES.PRESIDE || type === ROLES.VICE_PRESIDE;
     const isBidello = type === ROLES.BIDELLO;
     const isStudente = type === ROLES.STUDENTE;
 
-    // Funzione interna veloce per nascondere/mostrare solo se l'elemento esiste
+    // Funzione interna veloce per nascondere/mostrare
     const toggle = (id, show) => {
         const el = document.getElementById(id);
         if (el) {
@@ -531,46 +531,55 @@
         }
     };
 
+    // 1. Visibilità pannelli Staff
     if(isStaff) {
         toggle('prof-actions-agenda', true);
         toggle('prof-grade-panel', true);
         toggle('btn-add-note', true);
     }
+    
+    // 2. Pannello Bacheca (Preside/Bidello)
     if(isPreside || isBidello) {
         toggle('bacheca-admin-panel', true);
     }
-    
-    // Questa era la riga che probabilmente rompeva tutto perché lo abbiamo tolto
-    toggle('class-selection-container', isStaff || isBidello || type === ROLES.OSPITE);
 
-    if(isStudente) {
-        window.selectedClass = window.currentUserData?.classe;
-        window.selectedStudentId = window.currentUserId;
+    // 3. Notifiche (Solo Admin/Preside/Vice)
+    toggle('notif-bell', isPreside);
+
+    // 4. LOGICA PULSANTI CLASSI (NASCONDINO)
+    const miaClasse = window.currentUserData?.classe;
+    const classButtons = document.querySelectorAll('.class-filter-btn');
+
+    classButtons.forEach(btn => {
+        const classePulsante = btn.getAttribute('data-class');
         
-        const selector = document.getElementById('class-selector');
-        if (selector) {
-            selector.value = window.selectedClass || "";
-            selector.disabled = true;
+        if (isStudente) {
+            // Se è studente, vede solo il pulsante della SUA classe
+            if (classePulsante !== miaClasse) {
+                btn.classList.add('hidden');
+            } else {
+                btn.classList.remove('hidden');
+                btn.classList.replace('cursor-pointer', 'cursor-default');
+            }
+        } else {
+            // Se è staff o admin, vede tutto
+            btn.classList.remove('hidden');
         }
+    });
 
-        // RIGA PROBLEMATICA FIXATA
+    // 5. Configurazione specifica per lo Studente
+    if(isStudente) {
+        window.selectedClass = miaClasse;
+        window.selectedStudentId = window.currentUserId;
+
+        // Nascondiamo i contenitori che non servono allo studente
         toggle('student-list-container', false);
         
-        if (typeof window.handleClassChange === 'function') window.handleClassChange();
+        // Forziamo il caricamento della sua classe all'avvio
+        if (typeof window.handleClassChange === 'function') window.handleClassChange(miaClasse);
         if (typeof window.selectStudent === 'function') window.selectStudent(window.currentUserId);
     }
-            
-            // Notifiche (solo Prof e Preside)
-            // --- In applyRoleUI ---
-const isAdmin = type === ROLES.PRESIDE || type === ROLES.VICE_PRESIDE;
-
-if (isAdmin) {
-    document.getElementById('notif-bell')?.classList.remove('hidden');
-} else {
-    // Se non è admin, la nascondiamo del tutto per non confondere
-    document.getElementById('notif-bell')?.classList.add('hidden');
 }
-        }
 
         // --- GESTIONE CLASSI E STUDENTI ---
         window.handleClassChange = (classeDalPulsante) => {
@@ -1949,19 +1958,33 @@ if (avatarEl) {
         console.error("Errore salvataggio avatar:", e);
     }
 }
- 	window.filterByClass = (classe) => {
-    window.selectedClass = classe;
+ 	window.filterByClass = (classeCliccata) => {
+    // 1. CONTROLLO PRIVACY PER STUDENTI
+    const isStudente = window.userRole === ROLES.STUDENTE;
+    const miaClasse = window.currentUserData?.classe; // Es: "A"
+
+    if (isStudente && classeCliccata !== miaClasse && classeCliccata !== 'ALL') {
+        alert(`🚫 Accesso negato: puoi visualizzare solo l'agenda e gli studenti della tua classe (${miaClasse}).`);
+        return; // Blocca l'esecuzione
+    }
     
-    // Gestione estetica pulsanti (il codice rosso/bianco che avevi già)
+    // Se lo studente clicca "TUTTI", potresti decidere di lasciarlo fare 
+    // per vedere i compagni, o bloccare anche quello. 
+    // Se vuoi bloccare anche "TUTTI": change in: (classeCliccata !== miaClasse)
+
+    // 2. SE IL CONTROLLO PASSA, CONTINUA CON LA LOGICA DI PRIMA...
+    window.selectedClass = classeCliccata;
+
+    // Aggiorna estetica pulsanti
     document.querySelectorAll('.class-filter-btn').forEach(btn => {
-        const isActive = btn.getAttribute('data-class') === classe;
+        const isActive = btn.getAttribute('data-class') === classeCliccata;
         btn.className = isActive 
             ? "class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md shadow-red-200"
             : "class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600";
     });
 
-    // Chiamiamo la funzione di aggiornamento centrale
-    window.handleClassChange(classe);
+    // Aggiorna Elenco e Agenda
+    window.handleClassChange(classeCliccata);
 };
     </script>
 </body>
