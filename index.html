@@ -581,15 +581,23 @@ window.renderStudentList = function() {
         return;
     }
 
-    grid.innerHTML = filtered.map(s => `
-        <div onclick="window.selectAndGoToProfile('${s.id}')" 
-             class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center">👤</div>
-                <p class="font-black uppercase">${s.name}</p>
-            </div>
+    grid.innerHTML = filtered.map(s => {
+    // ANCHE QUI: s.avatar (Discord) ha la priorità su s.avatar_npc
+    const foto = s.avatar || s.avatar_npc || '';
+    
+    const avatarHTML = foto 
+        ? `<img src="${foto}" class="w-10 h-10 rounded-full object-cover border border-zinc-200">`
+        : `<div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-lg">👤</div>`;
+
+    return `
+    <div onclick="window.selectAndGoToProfile('${s.id}')" 
+         class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm">
+        <div class="flex items-center gap-3">
+            ${avatarHTML}
+            <p class="font-black uppercase text-xs">${s.name}</p>
         </div>
-    `).join('');
+    </div>`;
+}).join('');
 };
 
         window.selectStudent = (id) => {
@@ -1139,6 +1147,18 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
                 document.getElementById('user-name').innerText = user.username;
                 document.getElementById('user-avatar').src = discordAvatarUrl;
             }
+
+		async function syncDiscordAvatar(userId, photoURL) {
+    if (!userId || !photoURL || photoURL.includes('null')) return; // Evita di salvare se l'URL è rotto
+    try {
+        const userRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', userId);
+        // Usiamo merge: true così non cancelliamo il ruolo o la classe dell'utente!
+        await setDoc(userRef, { avatar: photoURL }, { merge: true });
+        console.log("📸 Avatar Discord sincronizzato!");
+    } catch (e) {
+        console.error("Errore salvataggio avatar:", e);
+    }
+}
 
             // Carichiamo i dati dal Database
             const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
@@ -1821,10 +1841,16 @@ window.vaiADataRapida = () => {
         document.getElementById('target-profile-name').innerText = student.name.toUpperCase();
         document.getElementById('target-profile-class-badge').innerText = `CLASSE: ${student.classe || 'N/A'} - A.S. ${as}`;
         
-        const avatarEl = document.getElementById('target-profile-avatar');
-        if (avatarEl) {
-            avatarEl.src = student.avatar_npc || student.avatar || `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
-        }
+       const avatarEl = document.getElementById('target-profile-avatar');
+if (avatarEl) {
+    // ABBIAMO SPOSTATO student.avatar AL PRIMO POSTO
+    avatarEl.src = student.avatar || student.avatar_npc || `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
+    
+    // Piccolo trucco: se l'immagine salvata è rotta, mette l'avatar con l'iniziale
+    avatarEl.onerror = () => {
+        avatarEl.src = `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
+    };
+}
 
         // 5. FILTRO E MEDIA
         const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
