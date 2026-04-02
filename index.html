@@ -152,6 +152,11 @@
 <button onclick="window.apriProfiloPersonale()" id="menu-profilo" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
     <span>👤</span> Il Mio Profilo
 </button>
+
+			<button onclick="window.changeMenu('studenti'); setTimeout(() => { renderStudentList(); }, 100);" id="menu-studenti" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200">
+    <span>👥</span> Elenco Studenti
+</button>
+
                 <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-600 hover:bg-zinc-200 active">
                     <span>📅</span> Agenda
                 </button>
@@ -191,6 +196,49 @@
 
         <!-- Contenuto -->
         <main class="flex-1 overflow-hidden bg-zinc-100 p-6 relative">
+
+		<div id="view-studenti" class="tab-content hidden p-4 md:p-6">
+    <h2 class="text-2xl font-black italic mb-4 uppercase">ELENCO STUDENTI</h2>
+    <div id="grid-studenti" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+</div>
+
+		<div id="view-profilo-target" class="tab-content hidden space-y-6 p-4 md:p-6">
+    <div class="glass-light p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white">
+        <div class="flex flex-col md:flex-row justify-between items-start gap-6">
+            <div class="flex items-center gap-6">
+                <img id="target-profile-avatar" src="" class="w-24 h-24 rounded-2xl border-4 border-zinc-100 shadow-sm object-cover bg-zinc-200">
+                <div>
+                    <span id="target-profile-class-badge" class="px-2 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black rounded-lg uppercase tracking-wider">Classe -</span>
+                    <h1 id="target-profile-name" class="text-3xl font-black italic uppercase text-zinc-800 leading-none mt-2">Caricamento...</h1>
+                    <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Studente della Fazbear School</p>
+                </div>
+            </div>
+            <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-100 text-center min-w-[120px]">
+                <p class="text-[9px] font-black text-zinc-400 uppercase mb-1">Media Personale</p>
+                <p id="target-profile-media" class="text-4xl font-black text-red-600">0.0</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
+            <div id="target-voti-list" class="space-y-3">
+                </div>
+        </div>
+        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
+            <div id="target-note-list" class="space-y-3">
+                </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-3">
+        <button onclick="window.changeMenu('registro')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">📊 REGISTRO</button>
+        <button onclick="window.changeMenu('note')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">⚠️ NOTE</button>
+        <button onclick="window.changeMenu('pagella')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">🎓 PAGELLA</button>
+    </div>
+</div>
             
             <!-- VIEW: AGENDA -->
             <div id="view-agenda" class="tab-content active-view space-y-4">
@@ -515,15 +563,34 @@ if (isAdmin) {
             }
         };
 
-        function renderStudentList() {
-            const list = document.getElementById('student-list');
-            const filtered = window.allStudents.filter(s => s.classe === window.selectedClass);
-            list.innerHTML = filtered.map(s => `
-                <button onclick="window.selectStudent('${s.id}')" class="w-full text-left p-2 rounded hover:bg-zinc-200 text-[10px] font-bold uppercase flex justify-between items-center ${window.selectedStudentId === s.id ? 'bg-zinc-200 border-l-4 border-red-700' : ''}">
-                    ${s.name}
-                </button>
-            `).join('') || '<p class="text-[9px] opacity-40 p-2">Vuoto</p>';
-        }
+        // Aggiungendo window. all'inizio, la rendi globale e indistruttibile
+window.renderStudentList = function() {
+    const grid = document.getElementById('grid-studenti');
+    if (!grid) return;
+
+    // Se non ci sono studenti caricati, messaggio di errore
+    if (!window.allStudents || window.allStudents.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-zinc-400">Nessuno studente trovato nel database.</p>`;
+        return;
+    }
+
+    const filtered = window.allStudents.filter(s => s.classe === window.selectedClass);
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `<p class="col-span-full text-zinc-400">Nessuno studente nella classe ${window.selectedClass}</p>`;
+        return;
+    }
+
+    grid.innerHTML = filtered.map(s => `
+        <div onclick="window.selectAndGoToProfile('${s.id}')" 
+             class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center">👤</div>
+                <p class="font-black uppercase">${s.name}</p>
+            </div>
+        </div>
+    `).join('');
+};
 
         window.selectStudent = (id) => {
             if(window.userRole === ROLES.STUDENTE && id !== window.currentUserId) return;
@@ -1110,11 +1177,31 @@ if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
         }
 
         window.changeMenu = (menu) => {
-            document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
-            document.getElementById(`menu-${menu}`).classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(v => v.classList.remove('active-view'));
-            document.getElementById(`view-${menu}`).classList.add('active-view');
-        };
+    // 1. Gestione Sidebar: Rimuove 'active' da tutti
+    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+    
+    // Prova ad aggiungere 'active' al bottone solo se esiste
+    const activeBtn = document.getElementById(`menu-${menu}`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
+
+    // 2. Gestione Viste: Nasconde tutte le schede
+    // Nota: uso 'hidden' o 'active-view' a seconda di come hai impostato il CSS
+    document.querySelectorAll('.tab-content').forEach(v => {
+        v.classList.remove('active-view');
+        v.classList.add('hidden'); // Assicuriamoci che siano nascoste
+    });
+
+    // 3. Mostra la vista richiesta
+    const targetView = document.getElementById(`view-${menu}`);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('active-view');
+    } else {
+        console.error(`Errore: La vista view-${menu} non esiste nell'HTML!`);
+    }
+};
 
         window.closeModal = () => document.getElementById('modal-overlay').classList.replace('flex', 'hidden');
 
@@ -1683,6 +1770,66 @@ window.vaiADataRapida = () => {
         console.log(`🚀 Teletrasporto: 1° ${meseInput}/${anno}`);
     }
 };
+
+	window.selectAndGoToProfile = async (id) => {
+    window.selectedStudentId = id;
+    const student = window.allStudents.find(s => s.id === id);
+    if (!student) return;
+
+    // 1. CALCOLO ANNO SCOLASTICO (Logica del tuo calendario)
+    const inputCal = document.getElementById('global-calendar');
+    const dataCal = inputCal ? inputCal.value : ""; 
+    const dataScelta = dataCal ? new Date(dataCal) : new Date();
+    const as = (dataScelta.getMonth() + 1 >= 9) 
+        ? `${dataScelta.getFullYear()}/${dataScelta.getFullYear() + 1}` 
+        : `${dataScelta.getFullYear() - 1}/${dataScelta.getFullYear()}`;
+
+    try {
+        // 2. MOSTRA SUBITO LA SCHEDA (per feedback immediato)
+        window.changeMenu('profilo-target');
+
+        // 3. RECUPERO DATI DAL DATABASE (Voti e Note reali dello studente scelto)
+        // Nota: Assicurati che 'db' e 'doc' siano accessibili (importati da Firebase)
+        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', id);
+        const recordSnap = await getDoc(recordRef);
+        const data = recordSnap.exists() ? recordSnap.data() : { voti: [], note: [] };
+
+        // 4. POPOLAMENTO HEADER
+        document.getElementById('target-profile-name').innerText = student.name.toUpperCase();
+        document.getElementById('target-profile-class-badge').innerText = `CLASSE: ${student.classe || 'N/A'} - A.S. ${as}`;
+        
+        const avatarEl = document.getElementById('target-profile-avatar');
+        if (avatarEl) {
+            avatarEl.src = student.avatar_npc || student.avatar || `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
+        }
+
+        // 5. FILTRO E MEDIA
+        const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
+        const noteFiltrate = (data.note || []).filter(n => n.anno === as);
+
+        const mediaEl = document.getElementById('target-profile-media');
+        const media = votiFiltrati.length > 0 
+            ? (votiFiltrati.reduce((a, b) => a + parseFloat(b.voto), 0) / votiFiltrati.length).toFixed(2) 
+            : "0.0";
+        
+        if (mediaEl) {
+            mediaEl.innerText = media;
+            mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+        }
+
+        // 6. RENDER DELLE LISTE (Usiamo la tua funzione renderListaProfilo se è globale)
+        // Se non è globale, incolla la logica di mapping qui per voti e note
+        renderListaProfilo('target-voti-list', votiFiltrati, false, "voti", as);
+        renderListaProfilo('target-note-list', noteFiltrate, false, "note", as);
+
+        // 7. CARICAMENTO PER SIDEBAR (Registro/Note/Pagella)
+        if (typeof loadStudentRecords === 'function') loadStudentRecords(id);
+
+    } catch (error) {
+        console.error("Errore nel caricamento profilo studente:", error);
+    }
+};
+
     </script>
 </body>
 </html>
