@@ -1137,6 +1137,7 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
             // Creiamo l'URL dell'avatar e salviamolo globalmente
             const discordAvatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
             window.currentAvatarUrl = discordAvatarUrl; 
+	     syncDiscordAvatar(user.id, discordAvatarUrl);
 
             // Aggiorniamo la Top Bar
             const loginBtn = document.getElementById('login-btn');
@@ -1147,18 +1148,6 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
                 document.getElementById('user-name').innerText = user.username;
                 document.getElementById('user-avatar').src = discordAvatarUrl;
             }
-
-		async function syncDiscordAvatar(userId, photoURL) {
-    if (!userId || !photoURL || photoURL.includes('null')) return; // Evita di salvare se l'URL è rotto
-    try {
-        const userRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', userId);
-        // Usiamo merge: true così non cancelliamo il ruolo o la classe dell'utente!
-        await setDoc(userRef, { avatar: photoURL }, { merge: true });
-        console.log("📸 Avatar Discord sincronizzato!");
-    } catch (e) {
-        console.error("Errore salvataggio avatar:", e);
-    }
-}
 
             // Carichiamo i dati dal Database
             const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
@@ -1878,6 +1867,18 @@ if (avatarEl) {
         console.error("Errore nel caricamento profilo studente:", error);
     }
 };
+
+	async function syncDiscordAvatar(userId, photoURL) {
+    if (!userId || !photoURL || photoURL.includes('null')) return; // Evita di salvare se l'URL è rotto
+    try {
+        const userRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', userId);
+        // Usiamo merge: true così non cancelliamo il ruolo o la classe dell'utente!
+        await setDoc(userRef, { avatar: photoURL }, { merge: true });
+        console.log("📸 Avatar Discord sincronizzato!");
+    } catch (e) {
+        console.error("Errore salvataggio avatar:", e);
+    }
+}
 
     </script>
 </body>
