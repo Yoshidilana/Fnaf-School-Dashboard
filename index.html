@@ -1785,6 +1785,20 @@ window.vaiADataRapida = () => {
     const student = window.allStudents.find(s => s.id === id);
     if (!student) return;
 
+// --- AGGIUNGI/CONTROLLA QUESTE RIGHE ---
+    const header = document.getElementById('student-header');
+    const nameDisplay = document.getElementById('res-student-name');
+    const gradePanel = document.getElementById('prof-grade-panel');
+
+    if (header) {
+        header.classList.remove('hidden'); // TOGLIE IL NASCONDINO
+        header.classList.add('flex');      // Assicura che sia visibile come flexbox
+    }
+    
+    if (nameDisplay) {
+        nameDisplay.innerText = student.name.toUpperCase();
+    }
+
     // 1. CALCOLO ANNO SCOLASTICO (Logica del tuo calendario)
     const inputCal = document.getElementById('global-calendar');
     const dataCal = inputCal ? inputCal.value : ""; 
