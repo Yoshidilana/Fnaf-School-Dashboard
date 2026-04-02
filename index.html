@@ -1790,6 +1790,15 @@ window.vaiADataRapida = () => {
 };
 
 	window.selectAndGoToProfile = async (id) => {
+
+	const isAdmin = window.userRole === 'admin' || window.userRole === 'teacher';
+    const isSelf = window.currentUserId === id;
+
+    if (!isAdmin && !isSelf) {
+        alert("⛔ Accesso negato: puoi visualizzare solo il tuo profilo personale.");
+        return; // Blocca tutto qui
+    }
+
     window.selectedStudentId = id;
     const student = window.allStudents.find(s => s.id === id);
     if (!student) return;
