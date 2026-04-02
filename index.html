@@ -1790,13 +1790,22 @@ window.vaiADataRapida = () => {
 };
 
 	window.selectAndGoToProfile = async (id) => {
-
-	const isAdmin = window.userRole === 'admin' || window.userRole === 'teacher';
+    // 1. DEFINIZIONE PERMESSI
+    // Sei un pezzo grosso (Admin, Preside, Vice o Prof)?
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
+    
+    // Sei tu lo studente in questione?
     const isSelf = window.currentUserId === id;
+    
+    // Sei l'Admin supremo (Yoshi) o non c'è login (se vuoi che sia pubblico)?
+    // Se vuoi che chiunque non loggato veda tutto, aggiungi: || !window.currentUserId
+    const isSuperAdmin = (window.currentUserId === "IL_TUO_ID_DISCORD_QUI"); 
 
-    if (!isAdmin && !isSelf) {
-        alert("⛔ Accesso negato: puoi visualizzare solo il tuo profilo personale.");
-        return; // Blocca tutto qui
+    // 2. IL CANCELLO DI CONTROLLO
+    // Se NON sei Staff, NON sei lo studente stesso e NON sei l'Admin... BLOCCA.
+    if (!isStaff && !isSelf && !isSuperAdmin) {
+        alert("⛔ Accesso riservato: non puoi visualizzare i dati sensibili di altri studenti.");
+        return; 
     }
 
     window.selectedStudentId = id;
