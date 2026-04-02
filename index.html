@@ -1741,10 +1741,19 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
 
    // Questo pezzetto serve a "reagire" quando sposti la data nel calendario
 document.getElementById('global-calendar')?.addEventListener('input', () => {
-    // Se l'utente sta guardando il profilo, aggiorna i voti in tempo reale!
+    
+    // 1. Se sei nel TUO profilo, aggiorna il tuo
     if (document.getElementById('view-profilo')?.classList.contains('active-view')) {
-        console.log("📅 Calendario modificato, aggiorno il profilo...");
+        console.log("📅 Aggiorno il mio profilo...");
         window.apriProfiloPersonale();
+    }
+    
+    // 2. Se stai guardando il profilo di uno STUDENTE, aggiorna il suo!
+    if (document.getElementById('view-profilo-target')?.classList.contains('active-view')) {
+        console.log("📅 Aggiorno il profilo dello studente selezionato...");
+        if (window.selectedStudentId) {
+            window.selectAndGoToProfile(window.selectedStudentId);
+        }
     }
 });
 
