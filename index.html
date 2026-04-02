@@ -175,27 +175,34 @@
                     <span>📢</span> Bacheca
                 </button>
             </nav>
-
-            <div id="selection-area" class="flex-1 overflow-y-auto custom-scroll">
-                <div id="class-selection-container">
-                    <p class="text-[9px] font-black text-zinc-400 uppercase mb-2 ml-2">Selezione Classe</p>
-                    <select id="class-selector" onchange="window.handleClassChange()" class="w-full bg-white border border-zinc-300 rounded-lg p-2 text-xs font-bold mb-4 outline-none focus:border-red-600">
-                        <option value="">Seleziona Classe...</option>
-                        <option value="A">Classe A</option>
-                        <option value="B">Classe B</option>
-                        <option value="C">Classe C</option>
-                    </select>
-                </div>
-
-                <div id="student-list-container" class="hidden">
-                    <p class="text-[9px] font-black text-zinc-400 uppercase mb-2 ml-2">Studenti</p>
-                    <div id="student-list" class="space-y-1"></div>
-                </div>
-            </div>
         </aside>
 
         <!-- Contenuto -->
         <main class="flex-1 overflow-hidden bg-zinc-100 p-6 relative">
+
+	<div class="flex items-center gap-2 mb-8 bg-zinc-50 p-3 rounded-2xl border border-zinc-200 shadow-sm">
+    <p class="text-[10px] font-black text-zinc-400 uppercase mr-2 ml-1">Filtra Classe:</p>
+    
+    <button onclick="window.filterByClass('ALL')" data-class="ALL" 
+        class="class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md shadow-red-200">
+        Tutti
+    </button>
+    
+    <button onclick="window.filterByClass('A')" data-class="A" 
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
+        Classe A
+    </button>
+    
+    <button onclick="window.filterByClass('B')" data-class="B" 
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
+        Classe B
+    </button>
+    
+    <button onclick="window.filterByClass('C')" data-class="C" 
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
+        Classe C
+    </button>
+</div>
 
 		<div id="view-studenti" class="tab-content hidden p-4 md:p-6">
     <h2 class="text-2xl font-black italic mb-4 uppercase">ELENCO STUDENTI</h2>
@@ -505,38 +512,53 @@
         });
 
         // --- GESTIONE INTERFACCIA RUOLI ---
-        function applyRoleUI() {
-            const type = window.userRole;
-            document.getElementById('user-role-label').innerText = window.currentUserData?.role || 'Ospite';
-            
-            // Logica visibilità per ruolo
-            const isStaff = type === ROLES.PRESIDE || type === ROLES.PROF;
-            const isPreside = type === ROLES.PRESIDE;
-            const isBidello = type === ROLES.BIDELLO;
-            const isStudente = type === ROLES.STUDENTE;
+       function applyRoleUI() {
+    const type = window.userRole;
+    const roleLabel = document.getElementById('user-role-label');
+    if (roleLabel) roleLabel.innerText = window.currentUserData?.role || 'Ospite';
+    
+    const isStaff = type === ROLES.PRESIDE || type === ROLES.PROF;
+    const isPreside = type === ROLES.PRESIDE;
+    const isBidello = type === ROLES.BIDELLO;
+    const isStudente = type === ROLES.STUDENTE;
 
-            if(isStaff) {
-                document.getElementById('prof-actions-agenda').classList.remove('hidden');
-                document.getElementById('prof-grade-panel').classList.remove('hidden');
-                document.getElementById('btn-add-note').classList.remove('hidden');
-            }
-            if(isPreside || isBidello) {
-                document.getElementById('bacheca-admin-panel').classList.remove('hidden');
-            }
-            if(isStaff || isBidello || type === ROLES.OSPITE) {
-                document.getElementById('class-selection-container').classList.remove('hidden');
-            }
+    // Funzione interna veloce per nascondere/mostrare solo se l'elemento esiste
+    const toggle = (id, show) => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (show) el.classList.remove('hidden');
+            else el.classList.add('hidden');
+        }
+    };
 
-            // Se è studente, forza la sua classe e il suo profilo
-            if(isStudente) {
-                window.selectedClass = window.currentUserData.classe;
-                window.selectedStudentId = window.currentUserId;
-                document.getElementById('class-selector').value = window.selectedClass;
-                document.getElementById('class-selector').disabled = true;
-                document.getElementById('student-list-container').classList.add('hidden');
-                window.handleClassChange();
-                window.selectStudent(window.currentUserId);
-            }
+    if(isStaff) {
+        toggle('prof-actions-agenda', true);
+        toggle('prof-grade-panel', true);
+        toggle('btn-add-note', true);
+    }
+    if(isPreside || isBidello) {
+        toggle('bacheca-admin-panel', true);
+    }
+    
+    // Questa era la riga che probabilmente rompeva tutto perché lo abbiamo tolto
+    toggle('class-selection-container', isStaff || isBidello || type === ROLES.OSPITE);
+
+    if(isStudente) {
+        window.selectedClass = window.currentUserData?.classe;
+        window.selectedStudentId = window.currentUserId;
+        
+        const selector = document.getElementById('class-selector');
+        if (selector) {
+            selector.value = window.selectedClass || "";
+            selector.disabled = true;
+        }
+
+        // RIGA PROBLEMATICA FIXATA
+        toggle('student-list-container', false);
+        
+        if (typeof window.handleClassChange === 'function') window.handleClassChange();
+        if (typeof window.selectStudent === 'function') window.selectStudent(window.currentUserId);
+    }
             
             // Notifiche (solo Prof e Preside)
             // --- In applyRoleUI ---
@@ -551,53 +573,74 @@ if (isAdmin) {
         }
 
         // --- GESTIONE CLASSI E STUDENTI ---
-        window.handleClassChange = () => {
-            const cls = document.getElementById('class-selector').value;
-            window.selectedClass = cls;
-            document.getElementById('agenda-class-title').innerText = cls || '---';
-            if(cls) {
-                if(window.userRole !== ROLES.STUDENTE) document.getElementById('student-list-container').classList.remove('hidden');
-                renderStudentList();
-                loadClassAgenda(cls);
-                loadBacheca();
-            }
-        };
+        window.handleClassChange = (classeDalPulsante) => {
+    // Se passiamo una classe dal pulsante, usiamo quella. Altrimenti cerchiamo di leggere il vecchio selettore (se esiste)
+    const cls = classeDalPulsante || window.selectedClass || "";
+    window.selectedClass = cls;
+
+    // Aggiorniamo il titolo dell'agenda (se l'elemento esiste)
+    const titleEl = document.getElementById('agenda-class-title');
+    if (titleEl) titleEl.innerText = cls || '---';
+
+    // Ricarichiamo tutto
+    window.renderStudentList();
+    if (typeof loadClassAgenda === 'function' && cls) {
+        loadClassAgenda(cls);
+    }
+    if (typeof loadBacheca === 'function') {
+        loadBacheca();
+    }
+};
 
         // Aggiungendo window. all'inizio, la rendi globale e indistruttibile
 window.renderStudentList = function() {
     const grid = document.getElementById('grid-studenti');
     if (!grid) return;
 
-    // Se non ci sono studenti caricati, messaggio di errore
     if (!window.allStudents || window.allStudents.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-zinc-400">Nessuno studente trovato nel database.</p>`;
+        grid.innerHTML = `<p class="col-span-full text-zinc-400">Caricamento studenti...</p>`;
         return;
     }
 
-    const filtered = window.allStudents.filter(s => s.classe === window.selectedClass);
+    // NUOVA LOGICA DI FILTRO BLINDATA:
+    const filtered = window.allStudents.filter(s => {
+        // Trasformiamo il ruolo in minuscolo per non sbagliare (es: "Prof" diventa "prof")
+        const role = (s.role || "").toLowerCase();
+        
+        // Definiamo chi NON deve apparire nell'elenco studenti
+        // Aggiungi qui altri ruoli se necessario (es. 'bidello', 'vicepreside')
+        const isStaff = ['prof', 'preside', 'vice preside', 'bidello', 'admin'].includes(role);
+        const isNotStaff = !isStaff;
+
+        // 1. Se la classe è "ALL" o vuota, mostriamo tutti i NON-STAFF
+        if (!window.selectedClass || window.selectedClass === 'ALL') {
+            return isNotStaff;
+        }
+        
+        // 2. Altrimenti, mostriamo solo quelli della classe scelta che NON sono STAFF
+        return s.classe === window.selectedClass && isNotStaff;
+    });
 
     if (filtered.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-zinc-400">Nessuno studente nella classe ${window.selectedClass}</p>`;
+        grid.innerHTML = `<p class="col-span-full text-zinc-400">Nessuno studente trovato per questa selezione.</p>`;
         return;
     }
 
     grid.innerHTML = filtered.map(s => {
-    // ANCHE QUI: s.avatar (Discord) ha la priorità su s.avatar_npc
-    const foto = s.avatar || s.avatar_npc || '';
-    
-    const avatarHTML = foto 
-        ? `<img src="${foto}" class="w-10 h-10 rounded-full object-cover border border-zinc-200">`
-        : `<div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-lg">👤</div>`;
+        const foto = s.avatar || s.avatar_npc || '';
+        const avatarHTML = foto 
+            ? `<img src="${foto}" class="w-10 h-10 rounded-full object-cover border border-zinc-200">`
+            : `<div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-lg">👤</div>`;
 
-    return `
-    <div onclick="window.selectAndGoToProfile('${s.id}')" 
-         class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm">
-        <div class="flex items-center gap-3">
-            ${avatarHTML}
-            <p class="font-black uppercase text-xs">${s.name}</p>
-        </div>
-    </div>`;
-}).join('');
+        return `
+        <div onclick="window.selectAndGoToProfile('${s.id}')" 
+             class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm">
+            <div class="flex items-center gap-3">
+                ${avatarHTML}
+                <p class="font-black uppercase text-xs">${s.name}</p>
+            </div>
+        </div>`;
+    }).join('');
 };
 
         window.selectStudent = (id) => {
@@ -623,12 +666,16 @@ window.renderStudentList = function() {
         };
 
         // --- CARICAMENTO DATI ---
-async function loadClassAgenda(cls) {
-    // Manteniamo i tuoi riferimenti originali
-    const dateKey = inputCal.value;
-    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+let agendaListener = null; // Variabile globale per l'ascoltatore
 
-    onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
+window.loadClassAgenda = async (cls) => {
+    // Se c'è già un ascoltatore attivo, lo spegniamo per risparmiare memoria
+    if (agendaListener) agendaListener(); 
+
+    const dateKey = document.getElementById('global-calendar')?.value || ""; 
+
+    // Salviamo il nuovo ascoltatore
+    agendaListener = onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
         
       // 1. --- SEZIONE COMUNICAZIONI (AMBRA) ---
@@ -1897,7 +1944,20 @@ if (avatarEl) {
         console.error("Errore salvataggio avatar:", e);
     }
 }
+ 	window.filterByClass = (classe) => {
+    window.selectedClass = classe;
+    
+    // Gestione estetica pulsanti (il codice rosso/bianco che avevi già)
+    document.querySelectorAll('.class-filter-btn').forEach(btn => {
+        const isActive = btn.getAttribute('data-class') === classe;
+        btn.className = isActive 
+            ? "class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md shadow-red-200"
+            : "class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600";
+    });
 
+    // Chiamiamo la funzione di aggiornamento centrale
+    window.handleClassChange(classe);
+};
     </script>
 </body>
 </html>
