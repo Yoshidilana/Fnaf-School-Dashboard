@@ -1837,21 +1837,20 @@ window.vaiADataRapida = () => {
 };
 
 	window.selectAndGoToProfile = async (id) => {
-    // 1. DEFINIZIONE PERMESSI
-    // Sei un pezzo grosso (Admin, Preside, Vice o Prof)?
-    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
-    
-    // Sei tu lo studente in questione?
-    const isSelf = window.currentUserId === id;
-    
-    // Sei l'Admin supremo (Yoshi) o non c'è login (se vuoi che sia pubblico)?
-    // Se vuoi che chiunque non loggato veda tutto, aggiungi: || !window.currentUserId
-    const isSuperAdmin = (window.currentUserId === "IL_TUO_ID_DISCORD_QUI"); 
+    // 1. CONTROLLO "AUTOCLICK" PER STUDENTI
+    if (window.userRole === ROLES.STUDENTE && window.currentUserId === id) {
+        // Invece di aprire il profilo, diamo un feedback visivo
+        alert("✨ Ehi, questo sei tu! Per vedere i tuoi voti usa il tasto 'Il mio profilo' nella barra laterale.");
+        return; // Blocca l'esecuzione qui
+    }
 
-    // 2. IL CANCELLO DI CONTROLLO
-    // Se NON sei Staff, NON sei lo studente stesso e NON sei l'Admin... BLOCCA.
-    if (!isStaff && !isSelf && !isSuperAdmin) {
-        alert("⛔ Accesso riservato: non puoi visualizzare i dati sensibili di altri studenti.");
+    // 2. DEFINIZIONE PERMESSI (Il codice che abbiamo già)
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
+    const isSuperAdmin = (window.userRole === 'admin'); 
+
+    // Se non sei staff e non sei l'admin, non puoi vedere gli ALTRI
+    if (!isStaff && !isSuperAdmin && window.currentUserId !== id) {
+        alert("⛔ Accesso riservato: non puoi visualizzare i dati degli altri studenti.");
         return; 
     }
 
