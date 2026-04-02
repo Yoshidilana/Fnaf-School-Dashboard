@@ -627,20 +627,26 @@ window.renderStudentList = function() {
     }
 
     grid.innerHTML = filtered.map(s => {
-        const foto = s.avatar || s.avatar_npc || '';
-        const avatarHTML = foto 
-            ? `<img src="${foto}" class="w-10 h-10 rounded-full object-cover border border-zinc-200">`
-            : `<div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-lg">👤</div>`;
+    const foto = s.avatar || s.avatar_npc || '';
+    const avatarHTML = foto 
+        ? `<img src="${foto}" class="w-10 h-10 rounded-full object-cover border border-zinc-200">`
+        : `<div class="w-10 h-10 bg-zinc-100 rounded-full flex items-center justify-center text-lg">👤</div>`;
 
-        return `
-        <div onclick="window.selectAndGoToProfile('${s.id}')" 
-             class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm">
+    // Identifichiamo se la card è dello studente loggato
+    const isMe = (window.userRole === ROLES.STUDENTE && window.currentUserId === s.id);
+
+    return `
+    <div onclick="window.selectAndGoToProfile('${s.id}')" 
+         class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm ${isMe ? 'ring-2 ring-red-500/20' : ''}">
+        <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
                 ${avatarHTML}
                 <p class="font-black uppercase text-xs">${s.name}</p>
             </div>
-        </div>`;
-    }).join('');
+            ${isMe ? '<span class="text-[8px] font-black bg-red-600 text-white px-2 py-1 rounded-md tracking-tighter">TU</span>' : ''}
+        </div>
+    </div>`;
+}).join('');
 };
 
         window.selectStudent = (id) => {
