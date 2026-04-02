@@ -1561,22 +1561,33 @@ window.startBypass = async function() {
             window.currentUserId = inputId;
             window.currentUserData = data; 
             
-            // IMPORTANTE: Usa getRoleType come il login vero!
             window.userRole = typeof getRoleType === 'function' ? getRoleType(data.role) : data.role;
             window.userName = data.name || data.username || inputId;
             
-            // Gestione Classe (se array, prendi il primo, altrimenti stringa)
             const userClass = Array.isArray(data.classe) ? data.classe[0] : (data.classe || data.class || "A");
             window.selectedClass = userClass;
 
-            // 2. UI HEADER
+            // 2. UI HEADER & AVATAR (Aggiornato con i tuoi ID)
             document.getElementById('user-name').innerText = window.userName;
             document.getElementById('user-role-label').innerText = window.userRole;
             document.getElementById('login-btn').classList.add('hidden');
-            document.getElementById('user-profile').classList.remove('hidden');
-            document.getElementById('user-profile').style.display = 'flex';
+            
+            const userProfileEl = document.getElementById('user-profile');
+            if (userProfileEl) {
+                userProfileEl.classList.remove('hidden');
+                userProfileEl.style.display = 'flex';
+                
+                // Cerchiamo la foto salvata dal bot (avatar) o quella NPC (avatar_npc)
+                const fotoHeader = data.avatar || data.avatar_npc || '';
+                const imgHeader = document.getElementById('user-avatar'); // Il tuo ID HTML
+                
+                if (imgHeader) {
+                    // Se non c'è foto, mettiamo un'icona di default
+                    imgHeader.src = fotoHeader || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+                }
+            }
 
-            // 3. LOGICA MATERIE (Copiata da checkAuth)
+            // 3. LOGICA MATERIE (Per Prof/Preside)
             if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
                 const mSelect = document.getElementById('input-grade-subject');
                 if (mSelect) {
@@ -1585,31 +1596,11 @@ window.startBypass = async function() {
                 }
             }
 
-            // 4. PRIVACY SIDEBAR
-            const classCont = document.getElementById('class-selection-container');
-            const studCont = document.getElementById('student-list-container');
-            const classSelector = document.getElementById('class-selector');
-
-            if (window.userRole === ROLES.STUDENTE) {
-                if (classCont) classCont.style.display = 'none';
-                if (studCont) studCont.style.display = 'none';
-                if (classSelector) classSelector.style.display = 'none';
-                window.selectedStudentId = inputId; // Focus su Bonnie
-            } else {
-                if (classCont) classCont.style.display = 'block';
-                if (studCont) studCont.style.display = 'block';
-                if (classSelector) classSelector.style.display = 'block';
-            }
-
-            // 5. APPLICA E CARICA
+            // 4. PRIVACY & VISIBILITÀ (Utilizza la funzione centralizzata)
             applyRoleUI();
-            
-            if (classSelector) {
-                classSelector.value = userClass;
-                // handleClassChange caricherà gli studenti e l'agenda della classe giusta
-                if (typeof handleClassChange === 'function') handleClassChange();
-            }
 
+            // 5. NAVIGAZIONE AUTOMATICA
+            if (typeof handleClassChange === 'function') handleClassChange(userClass);
             if (typeof changeMenu === 'function') changeMenu('agenda');
             
             log.innerHTML += `<br>✅ Bypass completato! Ruolo: ${window.userRole}`;
