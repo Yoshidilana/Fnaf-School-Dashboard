@@ -82,29 +82,7 @@
             <p id="current-academic-year" class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">A.S. --/--</p>
         </div>
 
-		<div class="flex items-center gap-2 mb-8 bg-zinc-50 p-3 rounded-2xl border border-zinc-200 shadow-sm">
-    <p class="text-[10px] font-black text-zinc-400 uppercase mr-2 ml-1">Filtra Classe:</p>
-    
-    <button onclick="window.filterByClass('ALL')" data-class="ALL" 
-        class="class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md shadow-red-200">
-        Tutti
-    </button>
-    
-    <button onclick="window.filterByClass('A')" data-class="A" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
-        Classe A
-    </button>
-    
-    <button onclick="window.filterByClass('B')" data-class="B" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
-        Classe B
-    </button>
-    
-    <button onclick="window.filterByClass('C')" data-class="C" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
-        Classe C
-    </button>
-</div>
+		
   		
         
         <div class="ml-4 flex items-center gap-1 bg-zinc-50 px-2 py-1 rounded border border-zinc-200 shadow-sm">
@@ -144,7 +122,32 @@
         VAI
     </button>
 </div>
-    </div>
+    </div> 
+
+		<div class="flex items-center gap-2 mb-8 bg-zinc-50 p-3 rounded-2xl border border-zinc-200 shadow-sm">
+    <p class="text-[10px] font-black text-zinc-400 uppercase mr-2 ml-1">Filtra Classe:</p>
+    
+    <button onclick="window.filterByClass('ALL')" data-class="ALL" 
+        class="class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md shadow-red-200">
+        Tutti
+    </button>
+    
+    <button onclick="window.filterByClass('A')" data-class="A" 
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
+        Classe A
+    </button>
+    
+    <button onclick="window.filterByClass('B')" data-class="B" 
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
+        Classe B
+    </button>
+    
+    <button onclick="window.filterByClass('C')" data-class="C" 
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
+        Classe C
+    </button>
+</div>
+		
                       <div class="flex items-center gap-6">
             <div id="notif-bell" class="relative cursor-pointer hidden" onclick="window.toggleNotifPanel()">
                 <span class="text-xl">🔔</span>
@@ -1854,75 +1857,73 @@ window.vaiADataRapida = () => {
 };
 
 	window.selectAndGoToProfile = async (id) => {
-    // 1. CONTROLLO "AUTOCLICK" PER STUDENTI
-    if (window.userRole === ROLES.STUDENTE && window.currentUserId === id) {
-        // Invece di aprire il profilo, diamo un feedback visivo
-        alert("✨ Ehi, questo sei tu! Per vedere i tuoi voti usa il tasto 'Il mio profilo' nella barra laterale.");
-        return; // Blocca l'esecuzione qui
-    }
-
-    // 2. DEFINIZIONE PERMESSI (Il codice che abbiamo già)
-    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
+    // 1. DEFINIZIONE RUOLI E PERMESSI
     const isSuperAdmin = (window.userRole === 'admin'); 
+    const isStaff = ['Preside', 'Vice Preside', 'Prof'].includes(window.userRole);
+    const isStudente = (window.userRole === 'Studente');
 
-    // Se non sei staff e non sei l'admin, non puoi vedere gli ALTRI
-    if (!isStaff && !isSuperAdmin && window.currentUserId !== id) {
-        alert("⛔ Accesso riservato: non puoi visualizzare i dati degli altri studenti.");
-        return; 
+    // 2. CONTROLLO ACCESSO (CHI PUÒ VEDERE COSA)
+    const role = String(window.userRole).toLowerCase();
+
+if (role === 'studente') { 
+    if (String(window.currentUserId) === String(id)) {
+        alert("✨ Ehi, questo sei tu!...");
+        return;
+    } else {
+        alert("⛔ Accesso riservato...");
+        return;
+    }
+}
+
+    // 3. SE SIAMO QUI, L'UTENTE È STAFF O ADMIN -> PROCEDIAMO AL CARICAMENTO
+    console.log(`🔓 Caricamento profilo per l'ID: ${id}`);
+
+    // Cerchiamo lo studente nella lista locale
+    const student = window.allStudents.find(s => s.id === id);
+    if (!student) {
+        console.error("Studente non trovato nella lista locale.");
+        return;
     }
 
     window.selectedStudentId = id;
-    const student = window.allStudents.find(s => s.id === id);
-    if (!student) return;
-
-// --- AGGIUNGI/CONTROLLA QUESTE RIGHE ---
-    const header = document.getElementById('student-header');
-    const nameDisplay = document.getElementById('res-student-name');
-    const gradePanel = document.getElementById('prof-grade-panel');
-
-    if (header) {
-        header.classList.remove('hidden'); // TOGLIE IL NASCONDINO
-        header.classList.add('flex');      // Assicura che sia visibile come flexbox
-    }
-    
-    if (nameDisplay) {
-        nameDisplay.innerText = student.name.toUpperCase();
-    }
-
-    // 1. CALCOLO ANNO SCOLASTICO (Logica del tuo calendario)
-    const inputCal = document.getElementById('global-calendar');
-    const dataCal = inputCal ? inputCal.value : ""; 
-    const dataScelta = dataCal ? new Date(dataCal) : new Date();
-    const as = (dataScelta.getMonth() + 1 >= 9) 
-        ? `${dataScelta.getFullYear()}/${dataScelta.getFullYear() + 1}` 
-        : `${dataScelta.getFullYear() - 1}/${dataScelta.getFullYear()}`;
 
     try {
-        // 2. MOSTRA SUBITO LA SCHEDA (per feedback immediato)
-        window.changeMenu('profilo-target');
+        // A. MOSTRA LA SCHEDA (Feedback immediato)
+        if (typeof window.changeMenu === 'function') {
+            window.changeMenu('profilo-target');
+        }
 
-        // 3. RECUPERO DATI DAL DATABASE (Voti e Note reali dello studente scelto)
-        // Nota: Assicurati che 'db' e 'doc' siano accessibili (importati da Firebase)
+        // B. CALCOLO ANNO SCOLASTICO
+        const inputCal = document.getElementById('global-calendar');
+        const dataCal = inputCal ? inputCal.value : ""; 
+        const dataScelta = dataCal ? new Date(dataCal) : new Date();
+        const as = (dataScelta.getMonth() + 1 >= 9) 
+            ? `${dataScelta.getFullYear()}/${dataScelta.getFullYear() + 1}` 
+            : `${dataScelta.getFullYear() - 1}/${dataScelta.getFullYear()}`;
+
+        // C. RECUPERO DATI DA FIREBASE (Records)
+        // Uso la tua logica: doc(db, 'artifacts', ...)
         const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', id);
         const recordSnap = await getDoc(recordRef);
         const data = recordSnap.exists() ? recordSnap.data() : { voti: [], note: [] };
 
-        // 4. POPOLAMENTO HEADER
-        document.getElementById('target-profile-name').innerText = student.name.toUpperCase();
-        document.getElementById('target-profile-class-badge').innerText = `CLASSE: ${student.classe || 'N/A'} - A.S. ${as}`;
+        // D. AGGIORNAMENTO INTERFACCIA (Header e Nomi)
+        const nameDisplay = document.getElementById('target-profile-name');
+        const badgeDisplay = document.getElementById('target-profile-class-badge');
         
-       const avatarEl = document.getElementById('target-profile-avatar');
-if (avatarEl) {
-    // ABBIAMO SPOSTATO student.avatar AL PRIMO POSTO
-    avatarEl.src = student.avatar || student.avatar_npc || `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
-    
-    // Piccolo trucco: se l'immagine salvata è rotta, mette l'avatar con l'iniziale
-    avatarEl.onerror = () => {
-        avatarEl.src = `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
-    };
-}
+        if (nameDisplay) nameDisplay.innerText = student.name.toUpperCase();
+        if (badgeDisplay) badgeDisplay.innerText = `CLASSE: ${student.classe || 'N/A'} - A.S. ${as}`;
 
-        // 5. FILTRO E MEDIA
+        // E. GESTIONE AVATAR
+        const avatarEl = document.getElementById('target-profile-avatar');
+        if (avatarEl) {
+            avatarEl.src = student.avatar || student.avatar_npc || `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
+            avatarEl.onerror = () => {
+                avatarEl.src = `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
+            };
+        }
+
+        // F. FILTRO DATI E MEDIA
         const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
         const noteFiltrate = (data.note || []).filter(n => n.anno === as);
 
@@ -1936,13 +1937,16 @@ if (avatarEl) {
             mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
         }
 
-        // 6. RENDER DELLE LISTE (Usiamo la tua funzione renderListaProfilo se è globale)
-        // Se non è globale, incolla la logica di mapping qui per voti e note
-        renderListaProfilo('target-voti-list', votiFiltrati, false, "voti", as);
-        renderListaProfilo('target-note-list', noteFiltrate, false, "note", as);
+        // G. RENDER LISTE (Voti e Note)
+        if (typeof renderListaProfilo === 'function') {
+            renderListaProfilo('target-voti-list', votiFiltrati, false, "voti", as);
+            renderListaProfilo('target-note-list', noteFiltrate, false, "note", as);
+        }
 
-        // 7. CARICAMENTO PER SIDEBAR (Registro/Note/Pagella)
-        if (typeof loadStudentRecords === 'function') loadStudentRecords(id);
+        // H. CARICAMENTO LOGICA SIDEBAR (Carica i dati nei tab Registro/Note del prof)
+        if (typeof loadStudentRecords === 'function') {
+            loadStudentRecords(id);
+        }
 
     } catch (error) {
         console.error("Errore nel caricamento profilo studente:", error);
