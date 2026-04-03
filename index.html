@@ -1845,33 +1845,22 @@ window.vaiADataRapida = () => {
 };
 
 	window.selectAndGoToProfile = async (id) => {
-    // 1. DEFINIZIONE CHI SEI
-    const isSuperAdmin = (window.userRole === 'admin'); 
-    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
-
-    // 2. SE SEI ADMIN O STAFF: ACCESSO TOTALE IMMEDIATO
-    // Non controlliamo nemmeno se clicchi su te stesso, ti facciamo passare e basta.
-    if (isSuperAdmin || isStaff) {
-        console.log(`🔓 Accesso Admin/Staff autorizzato per l'ID: ${id}`);
-        // Qui metti la tua funzione che carica la scheda, es:
-        // openStudentProfile(id); 
-        return; 
+    // 1. CONTROLLO "AUTOCLICK" PER STUDENTI
+    if (window.userRole === ROLES.STUDENTE && window.currentUserId === id) {
+        // Invece di aprire il profilo, diamo un feedback visivo
+        alert("✨ Ehi, questo sei tu! Per vedere i tuoi voti usa il tasto 'Il mio profilo' nella barra laterale.");
+        return; // Blocca l'esecuzione qui
     }
 
-    // 3. SE SEI UNO STUDENTE: APPLICHIAMO LE RESTRIZIONI
-    if (window.userRole === ROLES.STUDENTE) {
-        // Se lo studente clicca sul SUO nome nell'elenco
-        if (window.currentUserId === id) {
-            alert("✨ Ehi, questo sei tu! Per vedere i tuoi voti usa il tasto 'Il mio profilo' nella barra laterale.");
-            return;
-        } 
-        
-        // Se lo studente prova a cliccare su un ALTRO nome
-        else {
-            alert("⛔ Accesso riservato: non puoi visualizzare i dati degli altri studenti.");
-            return;
-		}
-};
+    // 2. DEFINIZIONE PERMESSI (Il codice che abbiamo già)
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
+    const isSuperAdmin = (window.userRole === 'admin'); 
+
+    // Se non sei staff e non sei l'admin, non puoi vedere gli ALTRI
+    if (!isStaff && !isSuperAdmin && window.currentUserId !== id) {
+        alert("⛔ Accesso riservato: non puoi visualizzare i dati degli altri studenti.");
+        return; 
+    }
 
 
     window.selectedStudentId = id;
