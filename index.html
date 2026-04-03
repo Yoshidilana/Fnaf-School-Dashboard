@@ -1845,18 +1845,20 @@ window.vaiADataRapida = () => {
 };
 
 	window.selectAndGoToProfile = async (id) => {
-    // 1. CONTROLLO "AUTOCLICK" PER STUDENTI
-    if (window.userRole === ROLES.STUDENTE && window.currentUserId === id) {
-        // Invece di aprire il profilo, diamo un feedback visivo
+    // 0. DEFINIZIONE RUOLI (Presa dal tuo sistema)
+    const isSuperAdmin = (window.userRole === 'admin'); 
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
+
+    // 1. CONTROLLO "AUTOCLICK" (Modificato per l'Admin)
+    // Se sei uno studente E clicchi su te stesso, ti avvisa. 
+    // Se sei ADMIN, questo blocco viene ignorato grazie a !isSuperAdmin
+    if (!isSuperAdmin && window.userRole === ROLES.STUDENTE && window.currentUserId === id) {
         alert("✨ Ehi, questo sei tu! Per vedere i tuoi voti usa il tasto 'Il mio profilo' nella barra laterale.");
-        return; // Blocca l'esecuzione qui
+        return; 
     }
 
-    // 2. DEFINIZIONE PERMESSI (Il codice che abbiamo già)
-    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.PROF].includes(window.userRole);
-    const isSuperAdmin = (window.userRole === 'admin'); 
-
-    // Se non sei staff e non sei l'admin, non puoi vedere gli ALTRI
+    // 2. CONTROLLO ACCESSO AGLI ALTRI
+    // Se non sei Staff, non sei Admin e l'ID che vuoi vedere non è il tuo... BLOCCA.
     if (!isStaff && !isSuperAdmin && window.currentUserId !== id) {
         alert("⛔ Accesso riservato: non puoi visualizzare i dati degli altri studenti.");
         return; 
