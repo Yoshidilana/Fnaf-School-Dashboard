@@ -919,20 +919,29 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
         }
 
         function renderVotoTag(v, studentId) {
-            const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
-            const isPreside = window.userRole === ROLES.PRESIDE;
-            const canEdit = isProf || isPreside;
-            const colorClass = v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800';
-            const hoverClass = canEdit ? 'hover:bg-zinc-200' : '';
-            let tooltipText = `Data: ${v.data}${v.commento ? ' - Nota: ' + v.commento : ''}`;
-            if (v.argomento) {tooltipText += `\nArgomento: ${v.argomento}`;
-            }
-            let onclickHandler = "";
-            if (canEdit) {
-            onclickHandler = `window.editVoto('${v.id}', '${studentId}')`;
-            }
-            return `<span title="${tooltipText}" class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" onclick="${onclickHandler}">${v.voto}</span>`;
-        }
+    const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
+    const isPreside = window.userRole === ROLES.PRESIDE;
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, 'admin'].includes(window.userRole);
+    
+    // Possono modificare/eliminare i prof (se è il loro voto) o lo Staff/Admin
+    const canManage = isProf || isStaff;
+
+    const colorClass = v.voto < 6 ? 'text-red-500 font-bold' : 'text-zinc-800';
+    const hoverClass = canManage ? 'hover:bg-zinc-200' : '';
+    
+    let tooltipText = `Data: ${v.data}${v.commento ? ' - Nota: ' + v.commento : ''}`;
+    if (v.argomento) tooltipText += `\nArgomento: ${v.argomento}`;
+
+    let handlers = "";
+    if (canManage) {
+        // Click Sinistro: Modifica
+        handlers += ` onclick="window.editVoto('${v.id}', '${studentId}')"`;
+        // Click Destro: Elimina (e blocca menu browser)
+        handlers += ` oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"`;
+    }
+
+    return `<span title="${tooltipText}" class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" ${handlers}>${v.voto}</span>`;
+}
 
         function renderNoteActions(n, idx, studentId) {
             const isMyNote = n.profId === window.currentUserId;
@@ -1862,7 +1871,6 @@ window.vaiADataRapida = () => {
         return; 
     }
 
-
     window.selectedStudentId = id;
     const student = window.allStudents.find(s => s.id === id);
     if (!student) return;
@@ -1980,6 +1988,46 @@ if (avatarEl) {
     // Aggiorna Elenco e Agenda
     window.handleClassChange(classeCliccata);
 };
+
+	window.deleteVoto = async (idRicevuto, studentId) => {
+    // Conferma di sicurezza per evitare click accidentali
+    if (!confirm("⚠️ Sei sicuro di voler eliminare definitivamente questo voto?")) return;
+
+    console.log("Eliminazione voto ID:", idRicevuto);
+    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+    const d = await getDoc(recordRef);
+
+    if (d.exists()) {
+        const listaVoti = d.data().voti || [];
+        const votoDaEliminare = listaVoti.find(v => v.id === idRicevuto);
+
+        if (!votoDaEliminare) {
+            alert("Errore: Voto non trovato.");
+            return;
+        }
+
+        // 1. FILTRIAMO LA LISTA: Teniamo tutti tranne quello con l'ID ricevuto
+        const nuovaListaVoti = listaVoti.filter(v => v.id !== idRicevuto);
+        await updateDoc(recordRef, { voti: nuovaListaVoti });
+
+        // 2. AGGIORNAMENTO AGENDA (Rimuoviamo anche da lì)
+        const dataParts = votoDaEliminare.data.split('/');
+        const agendaId = `${window.selectedClass}_${dataParts[2]}-${dataParts[1]}-${dataParts[0]}`;
+        const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+
+        const aSnap = await getDoc(agendaRef);
+        if (aSnap.exists()) {
+            let daily = aSnap.data().daily_voti || [];
+            // Rimuoviamo il voto dall'agenda usando l'ID
+            const nuovoDaily = daily.filter(v => v.id !== idRicevuto);
+            await updateDoc(agendaRef, { daily_voti: nuovoDaily });
+        }
+
+        alert("Voto eliminato correttamente.");
+        loadStudentRecords(studentId); // Ricarica la tabella
+    }
+};
+
     </script>
 </body>
 </html>
