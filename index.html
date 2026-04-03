@@ -82,8 +82,6 @@
             <p id="current-academic-year" class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">A.S. --/--</p>
         </div>
 
-		
-  		
         
         <div class="ml-4 flex items-center gap-1 bg-zinc-50 px-2 py-1 rounded border border-zinc-200 shadow-sm">
     <span class="text-[8px] font-black text-zinc-400 uppercase mr-1">Vai a:</span>
@@ -146,6 +144,14 @@
         class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
         Classe C
     </button>
+
+    <div class="ml-auto flex items-center gap-2">
+        <p class="text-[10px] font-black text-zinc-400 uppercase">Salto Rapido:</p>
+        <select id="fast-student-filter" onchange="window.selectAndGoToProfile(this.value)" 
+            class="bg-white border border-zinc-300 text-zinc-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-red-600 transition-all cursor-pointer">
+            <option value="">Seleziona Studente</option>
+        </select>
+    </div>
 </div>
 		
                       <div class="flex items-center gap-6">
@@ -2030,6 +2036,42 @@ if (role === 'studente') {
         alert("Voto eliminato correttamente.");
         loadStudentRecords(studentId); // Ricarica la tabella
     }
+};
+
+	// Funzione per aggiornare la tendina degli studenti in base alla classe
+window.updateFastFilter = (selectedClass) => {
+    const select = document.getElementById('fast-student-filter');
+    if (!select) return;
+
+    // Pulizia tendina (mantiene solo la prima opzione)
+    select.innerHTML = '<option value="">Seleziona Studente</option>';
+
+    // Filtriamo gli studenti dalla lista globale che hai già (window.allStudents)
+    const filtered = (selectedClass === 'ALL' || !selectedClass) 
+        ? window.allStudents 
+        : window.allStudents.filter(s => s.classe === selectedClass);
+
+    // Ordiniamo per nome
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Aggiungiamo le opzioni
+    filtered.forEach(student => {
+        const opt = document.createElement('option');
+        opt.value = student.id;
+        opt.textContent = student.name.toUpperCase();
+        select.appendChild(opt);
+    });
+};
+
+// Modifichiamo leggermente la tua funzione filterByClass esistente 
+// per chiamare anche l'aggiornamento della tendina
+const originalFilterByClass = window.filterByClass;
+window.filterByClass = (className) => {
+    // Chiama la vecchia funzione (quella che filtra i pulsanti e la vista)
+    if (typeof originalFilterByClass === 'function') originalFilterByClass(className);
+    
+    // Aggiorna il filtro rapido
+    window.updateFastFilter(className);
 };
 
     </script>
