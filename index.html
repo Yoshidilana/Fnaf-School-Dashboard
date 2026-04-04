@@ -1012,7 +1012,17 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
             // Log Agenda
             const agendaId = `${window.selectedClass}_${inputCal.value}`;
             const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
-            await setDoc(agendaRef, { daily_voti: arrayUnion({ studente: window.allStudents.find(s=>s.id===window.selectedStudentId).name, studenteId: window.selectedStudentId, voto: v, materia: m }) }, { merge: true });
+            const studentName = window.allStudents.find(s => s.id === window.selectedStudentId)?.name || "Studente Ignoto";
+
+await setDoc(agendaRef, { 
+    daily_voti: arrayUnion({ 
+        studente: studentName, 
+        studenteId: window.selectedStudentId, 
+        voto: v, 
+        materia: m,
+        argomento: arg 
+    }) 
+}, { merge: true });
             
             document.getElementById('input-grade-val').value = "";
             alert("Voto registrato nel profilo e in agenda!");
