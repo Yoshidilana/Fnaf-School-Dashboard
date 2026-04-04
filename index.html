@@ -280,7 +280,7 @@
                     </div>
                     <div class="space-y-4">
                         <div class="bg-red-50 rounded-xl p-4 border border-red-100">
-                            <h3 class="text-[10px] font-black uppercase text-red-800 mb-3 tracking-widest">Note e Voti Odierni</h3>
+                            <h3 class="text-[10px] font-black uppercase text-yellow-800 mb-3 tracking-widest">Note e Voti Odierni</h3>
                             <div id="agenda-daily-info" class="space-y-2 text-[11px]"></div>
                         </div>
                     </div>
@@ -321,39 +321,39 @@
 
             <!-- VIEW: REGISTRO -->
             <div id="view-registro" class="tab-content space-y-6">
-                <div id="student-header" class="hidden glass-light p-6 rounded-2xl flex justify-between items-center">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <span id="res-student-role" class="bg-red-600 text-[8px] px-2 py-0.5 rounded font-black uppercase">Studente</span>
-                            <h2 id="res-student-name" class="text-3xl font-black uppercase italic text-amber-200">Dati Studente</h2>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[9px] uppercase font-bold text-zinc-400">Media Globale</p>
-                            <p id="res-student-media" class="text-3xl font-black text-red-500">0.0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="prof-grade-panel" class="hidden glass p-4 flex gap-3 items-center">
-                    <input id="input-grade-val" type="number" step="0.5" placeholder="Voto" class="w-16 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
-                    <select id="input-grade-subject" class="bg-zinc-900 border border-zinc-700 rounded p-2 text-xs flex-1 text-white"></select>
-                    <button onclick="window.submitGrade()" class="bg-red-700 px-4 py-2 rounded text-[10px] font-black uppercase">Vota</button>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-zinc-200 overflow-hidden">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase">
-                            <tr>
-                                <th class="p-4">Materia</th>
-                                <th class="p-4">1° Quadrimestre</th>
-                                <th class="p-4">2° Quadrimestre</th>
-                                <th class="p-4 text-right">Media</th>
-                            </tr>
-                        </thead>
-                        <tbody id="registro-voti-body" class="divide-y divide-zinc-100"></tbody>
-                    </table>
-                </div>
+    <div id="student-header" class="hidden glass-light p-6 rounded-2xl flex justify-between items-center">
+        <div class="flex justify-between w-full items-center">
+            <div>
+                <span id="res-student-role" class="bg-red-400 text-white text-[8px] px-2 py-0.5 rounded font-black uppercase">Studente</span>
+                <h2 id="res-student-name" class="text-3xl font-black uppercase text-blue-600">Dati Studente</h2>
             </div>
+            <div class="text-right">
+                <p class="text-[9px] uppercase font-bold text-yellow-500">Media Globale</p>
+                <p id="res-student-media" class="text-3xl font-black text-green-600">0.0</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="prof-grade-panel" class="hidden glass p-4 flex gap-3 items-center">
+        <input id="input-grade-val" type="number" step="0.5" placeholder="Voto" class="w-16 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
+        <select id="input-grade-subject" class="bg-zinc-900 border border-zinc-900 rounded p-2 text-xs flex-1 text-white"></select>
+        <button onclick="window.submitGrade()" class="bg-red-700 px-4 py-2 rounded text-white text-[10px] font-black uppercase">Vota</button>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-zinc-900 overflow-hidden">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-zinc-200 text-zinc-900 font-black uppercase">
+                <tr>
+                    <th class="p-4">Materia</th>
+                    <th class="p-4 border-x border-zinc-900">1° Quadrimestre</th>
+                    <th class="p-4 border-r border-zinc-900">2° Quadrimestre</th>
+                    <th class="p-4 text-right">Media</th>
+                </tr>
+            </thead>
+            <tbody id="registro-voti-body" class="divide-y divide-zinc-900"></tbody>
+        </table>
+    </div>
+</div>
 
             <!-- VIEW: NOTE -->
             <div id="view-note" class="tab-content space-y-4">
@@ -380,9 +380,9 @@
         <div>
             <div class="flex items-center gap-2 mb-1">
                 <span id="pagella-anno-scolastico" class="text-[10px] font-black uppercase text-zinc-400 tracking-[0.2em]">A.S. 2023/2024</span>
-                <span id="pagella-classe-label" class="bg-red-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded">CLASSE A</span>
+                <span id="pagella-classe-label" class="bg-red-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded">CLASSE -</span>
             </div>
-            <h2 id="pagella-student-name" class="text-4xl font-black uppercase text-zinc-900 tracking-tighter italic">NOME STUDENTE</h2>
+            <h2 id="pagella-student-name" class="text-4xl font-black uppercase text-zinc-900 tracking-tighter italic">-</h2>
         </div>
         
         <div class="flex flex-col items-end gap-3">
@@ -397,28 +397,32 @@
         </div>
     </div>
 
-    <div id="container-q1" class="block bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm">
+    <div id="container-q1" class="block bg-white rounded-xl border border-zinc-500 overflow-hidden shadow-sm">
         <table class="w-full text-left">
-            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase text-[10px]">
-                <tr>
-                    <th class="p-4 tracking-widest">Materia</th>
-                    <th class="p-4 text-center tracking-widest">Voto</th>
-                    <th class="p-4 text-right tracking-widest">Recupero</th>
-                </tr>
-            </thead>
+            <thead class="bg-zinc-50 border-b border-zinc-900 text-zinc-900 font-black uppercase text-[10px]">
+    <tr>
+        <th class="p-4 tracking-widest">Materia</th>
+        <th class="p-4 text-center tracking-widest border-x border-zinc-900 bg-zinc-100/50">Voto</th>
+        <th class="p-4 text-right tracking-widest">Recupero</th>
+    </tr>
+</thead>
             <tbody id="pagella-q1-body" class="divide-y divide-zinc-100"></tbody>
         </table>
     </div>
 
-    <div id="container-q2" class="hidden bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm">
-        <table class="w-full text-left">
-            <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 font-black uppercase text-[10px]">
-                <tr>
-                    <th class="p-4 tracking-widest">Materia</th>
-                    <th class="p-4 text-center tracking-widest">Voto</th>
-                    <th class="p-4 text-right tracking-widest">Debito</th>
-                </tr>
-            </thead>
+    <div id="container-q2" class="hidden bg-white rounded-xl border border-zinc-500 overflow-hidden shadow-sm">
+    <table class="w-full text-left">
+        <thead class="bg-zinc-50 border-b border-zinc-900 text-zinc-900 font-black uppercase text-[10px]">
+            <tr>
+                <th class="p-4 tracking-widest">Materia</th>
+                
+                <th class="p-4 text-center tracking-widest border-x border-zinc-900 bg-zinc-100/50">
+                    Voto
+                </th>
+                
+                <th class="p-4 text-right tracking-widest">Debito</th>
+            </tr>
+        </thead>
             <tbody id="pagella-q2-body" class="divide-y divide-zinc-100"></tbody>
         </table>
     </div>
@@ -811,7 +815,7 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
                 </span>
                 <span class="font-black text-blue-600 text-sm">${v.voto}</span>
             </div>
-            <p class="text-[9px] text-zinc-400 italic">
+            <p class="text-[9px] text-brown-400">
                 - ${safeOriginal(v.argomento || "Nessun argomento")}
             </p>
         </div>
@@ -864,12 +868,15 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
                     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
                     const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
                     
-                    vHtml += `<tr>
-                        <td class="p-4 font-bold text-red-800 uppercase">${m}</td>
-                        <td class="p-4">${q1.map(v => renderVotoTag(v, studentId)).join('')}</td>
-                        <td class="p-4">${q2.map(v => renderVotoTag(v, studentId)).join('')}</td>
-                        <td class="p-4 text-right font-black text-lg">${avg}</td>
-                    </tr>`;
+                    vHtml += `<tr class="border-b border-zinc-700 last:border-3 hover:bg-zinc-50">
+    <td class="p-4 font-bold text-zinc-800 uppercase">${m}</td>
+    
+    <td class="p-4 border-x border-zinc-800 bg-zinc-50/30">${q1.map(v => renderVotoTag(v, studentId)).join('')}</td>
+    
+    <td class="p-4 border-r border-zinc-800">${q2.map(v => renderVotoTag(v, studentId)).join('')}</td>
+    
+    <td class="p-4 text-right font-black text-lg text-blue-600">${avg}</td>
+</tr>`;
                     });
                     document.getElementById('registro-voti-body').innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
 
@@ -892,7 +899,7 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
             .filter(m => !materieNormalizzate.includes(m));
 
     if(altreMaterie.length > 0) {
-        vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[8px] font-black uppercase text-center">Voti Globali A.S. ${aySelezionato} (Sola Lettura)</td></tr>`;
+        vHtml += `<tr class="bg-white-100"><td colspan="4" class="p-2 text-[8px] font-black uppercase text-center">Alte Materie per l' A.S. ${aySelezionato}</td></tr>`;
         
         altreMaterie.forEach(m => {
             // Calcoliamo la media solo sui voti dell'anno corrente per questa materia
@@ -901,11 +908,11 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
             const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
             const mediaMateria = (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1);
 
-            vHtml += `<tr class="opacity-60 bg-zinc-50/50">
-                <td class="p-2 pl-4 font-bold uppercase text-black-500">${m}</td>
+            vHtml += `<tr class="opacity-100 bg-zinc-50/50">
+                <td class="p-2 pl-4 font-bold uppercase text-blue-800">${m}</td>
                 <td class="p-2">${q1.map(v => `<span class="mr-1 font-medium">${v.voto}</span>`).join('')}</td>
                 <td class="p-2">${q2.map(v => `<span class="mr-1 font-medium">${v.voto}</span>`).join('')}</td>
-                <td class="p-2 text-right font-black text-blue-400">${mediaMateria}</td>
+                <td class="p-2 text-right font-black text-blue-800">${mediaMateria}</td>
             </tr>`;
         });
     }
@@ -1483,22 +1490,28 @@ window.renderPagella = (voti, aySelezionato) => {
         const getEsito = (val) => val === null ? "" : Math.round(val) >= 6 ? "No" : "Si";
 
         const row = (materia, val) => {
-            // Arrotondamento per la visualizzazione
-            const displayVoto = val !== null ? Math.round(val) : "-";
-            // Colore basato sul valore reale
-            const badgeColor = val !== null && Math.round(val) < 6 ? 'bg-red-50 text-red-600' : 'bg-green-600 text-white';
-            
-            return `
-            <tr class="hover:bg-zinc-50 transition-colors">
-                <td class="p-4 font-black uppercase text-blue-800 text-[10px] tracking-tighter">${materia}</td>
-                <td class="p-4 text-center">
-                    <span class="inline-block px-3 py-1 rounded-lg font-black text-[11px] ${badgeColor}">
-                        ${displayVoto}
-                    </span>
-                </td>
-                <td class="p-4 text-right text-[11px]">${getEsito(val)}</td>
-            </tr>`;
-        };
+    // Arrotondamento per la visualizzazione
+    const displayVoto = val !== null ? Math.round(val) : "-";
+    // Colore basato sul valore reale
+    const badgeColor = val !== null && Math.round(val) < 6 ? 'bg-red-50 text-red-600' : 'bg-green-600 text-white';
+    
+    return `
+    <tr class="hover:bg-zinc-50 transition-colors border-b border-zinc-900 last:border-0">
+        <td class="p-4 font-black uppercase text-blue-800 text-[10px] tracking-tighter">
+            ${materia}
+        </td>
+
+        <td class="p-4 text-center border-x border-zinc-900 bg-zinc-50/20">
+            <span class="inline-block px-3 py-1 rounded-lg font-black text-[11px] ${badgeColor}">
+                ${displayVoto}
+            </span>
+        </td>
+
+        <td class="p-4 text-right text-[11px] font-bold text-zinc-900">
+            ${getEsito(val)}
+        </td>
+    </tr>`;
+};
 
         h1 += row(m, valQ1);
         h2 += row(m, valQ2);
