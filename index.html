@@ -170,7 +170,7 @@
     <div class="flex flex-1 overflow-hidden">
 
         <!-- Sidebar -->
-        <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-zing 500 flex flex-col shrink-0 p-4 custom-scroll">
+        <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-zing 700 flex flex-col shrink-0 p-4 custom-scroll">
     <nav class="space-y-1 mb-8">
                 <p class="text-[10px] font-black text-black uppercase mb-4 ml-2 tracking-wider">
             Menu Principale
@@ -258,7 +258,7 @@
             <!-- VIEW: AGENDA -->
             <div id="view-agenda" class="tab-content active-view space-y-4">
                 <div class="flex justify-between items-end">
-                    <h2 class="text-2xl font-black uppercase text-red-500">Agenda <span id="agenda-class-title">---</span></h2>
+                    <h2 class="text-2xl font-black uppercase text-red-500">Agenda <span id="agenda-class-title"></span></h2>
                     <div id="prof-actions-agenda" class="hidden flex gap-2">
                         <button onclick="window.openModal('firme')" class="bg-red-700 text-white text-[9px] font-bold px-3 py-2 rounded uppercase">Firma</button>
                         <button onclick="window.openModal('compiti')" class="bg-blue-600 text-white text-[9px] font-bold px-3 py-2 rounded uppercase">Assegna Compiti</button>
@@ -1290,6 +1290,9 @@ await setDoc(agendaRef, {
                 window.currentUserData = uDoc.data();
                 window.userRole = getRoleType(window.currentUserData.role);
 		if (typeof loadBacheca === 'function') loadBacheca();
+		if (typeof window.handleClassChange === 'function') {
+        window.handleClassChange('ALL'); // O la stringa che usi per "TUTTI"
+    }
                 applyRoleUI();
 
 			const MY_ID = "477766915096313867";
@@ -1541,7 +1544,7 @@ window.renderPagella = (voti, aySelezionato) => {
         h2 += row(m, valQ2);
     });
 
-    const empty = '<tr><td colspan="3" class="p-12 text-center italic text-zinc-300 text-[9px] uppercase font-bold tracking-widest">Nessun dato</td></tr>';
+    const empty = '<tr><td colspan="3" class="p-12 text-center italic text-zinc-900 text-[9px] uppercase font-bold tracking-widest">Nessun dato</td></tr>';
     q1Body.innerHTML = h1 || empty;
     q2Body.innerHTML = h2 || empty;
 };
