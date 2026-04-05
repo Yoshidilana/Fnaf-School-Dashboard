@@ -1289,6 +1289,7 @@ await setDoc(agendaRef, {
             if(uDoc.exists()) {
                 window.currentUserData = uDoc.data();
                 window.userRole = getRoleType(window.currentUserData.role);
+		if (typeof loadBacheca === 'function') loadBacheca();
                 applyRoleUI();
 
 			const MY_ID = "477766915096313867";
