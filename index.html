@@ -276,8 +276,8 @@
                         </div>
                     </div>
                     <div class="space-y-4">
-                        <div class="bg-green-500 rounded-xl p-4 border border-red-600">
-                            <h3 class="text-[10px] font-black uppercase text-yellow-800 mb-3 tracking-widest">Note e Voti Odierni</h3>
+                        <div class="bg-green-500 rounded-xl p-4 border border-zing-300">
+                            <h3 class="text-[10px] font-black uppercase text-yellow-300 mb-3 tracking-widest">Note e Voti Odierni</h3>
                             <div id="agenda-daily-info" class="space-y-2 text-[11px]"></div>
                         </div>
                     </div>
@@ -426,16 +426,22 @@
 </div>
 
             <!-- MODAL -->
-            <div id="modal-overlay" class="fixed inset-0 bg-black/80 z-[100] hidden items-center justify-center p-4">
-                <div class="glass max-w-md w-full p-8 space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h3 id="modal-title" class="text-xl font-black uppercase italic text-red-500">Azione</h3>
-                        <button onclick="window.closeModal()" class="text-zinc-500 hover:text-white">✕</button>
-                    </div>
-                    <div id="modal-body" class="space-y-4 text-white"></div>
-                    <button id="modal-confirm" class="w-full bg-red-700 py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg">Conferma</button>
-                </div>
-            </div>
+            <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center p-4">
+    <!-- Cambiato da 'glass' a 'glass-light' e rimosso text-white -->
+    <div class="glass-light max-w-md w-full p-8 space-y-6 rounded-3xl"> 
+        <div class="flex justify-between items-center">
+            <h3 id="modal-title" class="text-xl font-black uppercase italic text-red-600">Azione</h3>
+            <button onclick="window.closeModal()" class="text-zinc-500 hover:text-white">✕</button>
+        </div>
+        
+        <!-- Il testo qui dentro sarà scuro grazie a .glass-light -->
+        <div id="modal-body" class="space-y-4 text-sm font-medium"></div>
+        
+        <button id="modal-confirm" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg transition-colors"> 
+            Conferma
+        </button>
+    </div>
+</div>
 
             <div id="notif-panel" class="hidden absolute top-16 right-6 w-72 bg-white border border-zinc-300 rounded-xl shadow-2xl z-[100] p-4 animate-in fade-in zoom-in duration-200">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -463,7 +469,6 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-	
         const db = getFirestore(app);
         const APP_ID = 'fnaf-school-bot';
 	 window.db = db;
@@ -773,7 +778,7 @@ window.loadClassAgenda = async (cls) => {
 
         // Applichiamo lo scroll al contenitore firme
         const containerFirme = document.getElementById('agenda-firme-list');
-        containerFirme.className = "space-y-1 overflow-y-auto p-4 bg-zinc-200 rounded-[24px] shadow-inner border border-zinc-300/50";
+        containerFirme.className = "space-y-1 overflow-y-auto p-4 bg-red-600 rounded-[24px] shadow-inner border border-zinc-200/50";
         containerFirme.style.maxHeight = "500px"; // Altezza fissa per scorrere
         containerFirme.innerHTML = writeBoxHtml + avvisiHtml + firmeHtml;
         
@@ -850,7 +855,27 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
                  const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
                  if(document.getElementById('res-student-media')) { 
                 document.getElementById('res-student-media').innerText = mediaG;
-                 }                                                  
+                 }  
+
+		const resMediaElem = document.getElementById('res-student-media');
+if (resMediaElem) { 
+    resMediaElem.innerText = mediaG;
+    
+    // Converte la stringa in numero per il confronto
+    const valoreMedia = parseFloat(mediaG);
+    
+    // Rimuove eventuali classi colore di Tailwind precedenti per evitare conflitti
+    resMediaElem.classList.remove('text-red-600', 'text-green-600', 'text-zinc-400');
+
+    if (valoreMedia === 0) {
+        resMediaElem.classList.add('text-zinc-400'); // Grigio se 0.0
+    } else if (valoreMedia < 6) {
+        resMediaElem.style.color = "#dc2626"; // Rosso (o aggiungi classList.add('text-red-600'))
+    } else {
+        resMediaElem.style.color = "#16a34a"; // Verde (o aggiungi classList.add('text-green-600'))
+    }
+}
+                                                
                  if(document.getElementById('pagella-student-name')) {
                  const student = window.allStudents.find(s => s.id === studentId);
                  document.getElementById('pagella-student-name').innerText = student ? student.name : "Studente";
@@ -1042,11 +1067,11 @@ await setDoc(agendaRef, {
             if(type === 'firme') {
                 body.innerHTML = `
                     <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
-                    <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
-                    <select id="m-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                    <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
+                    <select id="m-mat" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
                         ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
                     </select>
-                    <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                    <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
                 `;
                 confirm.onclick = async () => {
                     const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
@@ -1054,15 +1079,15 @@ await setDoc(agendaRef, {
                     window.closeModal();
                 };
          } else if(type === 'compiti') {
-    // Funzione interna per mettere la prima maiuscola e il resto minuscolo
+    
     const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
 
     body.innerHTML = `
-        <p class="text-[10px] uppercase font-bold text-zinc-400">Assegna Compiti per Casa</p>
-        <select id="m-compiti-mat" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+        <p class="text-[10px] uppercase font-bold text-zinc-500">Assegna Compiti per Casa</p>
+        <select id="m-compiti-mat" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
             ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
         </select>
-        <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
+        <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
     `;
 
     confirm.onclick = async () => {
@@ -1087,11 +1112,11 @@ await setDoc(agendaRef, {
     };                
             } else if(type === 'note') {
                 body.innerHTML = `
-                    <select id="m-type" class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700">
+                    <select id="m-type" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
                         <option value="nota">Nota Disciplinare</option>
                         ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.PROF) ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
                     </select>
-                    <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-800 p-2 rounded text-xs border border-zinc-700 h-24"></textarea>
+                    <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700 h-24"></textarea>
                 `;
                 confirm.onclick = async () => {
                     const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
