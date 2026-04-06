@@ -12,11 +12,10 @@
     font-family: 'Plus Jakarta Sans', sans-serif; 
     background: #f4f4f2; 
     color: #1a1a1a; 
-    min-height: 100vh; /* Cambiato da height a min-height */
+    min-height: 100vh;
     display: flex; 
-    flex-direction: column; 
-    overflow-y: auto; /* Cambiato da hidden a auto */
-    zoom: 0.75; /* Zoom automatico per vedere tutto meglio */
+    flex-direction: column;
+    overflow-y: auto; /* Torna lo scroll normale di sistema */
 }
         .glass-light {
     background: white !important;
@@ -65,12 +64,12 @@
 </div>
 
     <!-- Top Bar -->
-    <header class="h-14 border-b border-zinc-500 bg-white flex items-center justify-between px-6 z-50 shrink-0 shadow-sm">
+    <header class="w-full h-14 min-h-[56px] flex shrink-0 items-center justify-between px-6 bg-white border-b border-zinc-500 z-50">
     <div class="flex items-center gap-4">
-        <div class="w-8 h-8 bg-red-700 rounded flex items-center justify-center text-lg">🐻</div>
+        <div class="w-8 h-8 bg-yellow-400 rounded flex items-center justify-center text-lg">🐻</div>
         <div>
-            <h1 class="font-black text-xs uppercase italic tracking-tighter">Fazbear <span class="text-red-600">Classroom</span></h1>
-            <p id="current-academic-year" class="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">A.S. --/--</p>
+            <h1 class="font-black text-xs uppercase italic tracking-tighter">Fazbear <span class="text-yellow-400">Portal</span></h1>
+            <p id="current-academic-year" class="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">A.S. --/--</p>
         </div>
 
         
@@ -114,12 +113,9 @@
     </div> 
 
 		<div id="class-filter-container" class="flex items-center gap-1 mb-4 bg-zinc-50 p-1 rounded-lg border border-zinc-200 shadow-sm">
-    <p class="text-[9px] font-black text-zinc-400 uppercase ml-1 mr-1">Filtra:</p>
+    <p class="text-[9px] font-black text-zinc-400 uppercase ml-1 mr-1"></p>
     
-    <button onclick="window.filterByClass('ALL')" data-class="ALL" 
-        class="class-filter-btn bg-red-600 text-white px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase transition-all shadow-sm">
-        Tutti
-    </button>
+
     
     <button onclick="window.filterByClass('A')" data-class="A" 
         class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
@@ -137,7 +133,7 @@
     </button>
 
     <div class="ml-auto flex items-center gap-1.5 pr-1">
-        <p class="text-[9px] font-black text-zinc-400 uppercase">Vai:</p>
+        <p class="text-[9px] font-black text-zinc-400 uppercase"></p>
         <select id="fast-student-filter" onchange="window.selectAndGoToProfile(this.value)" 
             class="w-[120px] bg-white border border-zinc-300 text-zinc-900 px-1 py-0.5 rounded-md text-[9px] font-black uppercase outline-none focus:border-red-600 transition-all cursor-pointer">
             <option value="">Studente...</option>
@@ -191,11 +187,11 @@
     </div>
 </header>
 
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 bg-zinc-700">
 
         <!-- Sidebar -->
-        <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-zinc-700 flex flex-col shrink-0 p-4 custom-scroll">
-    <nav class="space-y-1 mb-8">
+        <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-blue-700 flex flex-col shrink-0 p-4 min-h-screen">
+        <nav class="space-y-1 mb-8">
                 <p class="text-[10px] font-black text-black uppercase mb-4 ml-2 tracking-wider">
             Menu Principale
         </p>
@@ -207,6 +203,10 @@
 
 			<button onclick="window.changeMenu('studenti'); setTimeout(() => { renderStudentList(); }, 100);" id="menu-studenti" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
     <span>👥</span> Elenco Studenti
+</button>
+
+		<button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
+    <span>📋</span> Registro Presenze
 </button>
 
                 <button onclick="window.changeMenu('agenda')" id="menu-agenda" 
@@ -232,9 +232,7 @@
         </aside>
 
         <!-- Contenuto -->
-        <main class="flex-1 overflow-hidden bg-zinc-100 p-6 relative">
-
-	
+        <main class="flex-1 bg-zinc-100 p-6 relative">
 
 		<div id="view-studenti" class="tab-content hidden p-4 md:p-6">
     <h2 class="text-2xl font-black italic mb-4 uppercase">ELENCO STUDENTI</h2>
@@ -242,13 +240,14 @@
 </div>
 
 		<div id="view-profilo-target" class="tab-content hidden space-y-6 p-4 md:p-6">
+    
     <div class="glass-light p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white">
         <div class="flex flex-col md:flex-row justify-between items-start gap-6">
             <div class="flex items-center gap-6">
                 <img id="target-profile-avatar" src="" class="w-24 h-24 rounded-2xl border-4 border-zinc-100 shadow-sm object-cover bg-zinc-200">
                 <div>
-                    <span id="target-profile-class-badge" class="px-2 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black rounded-lg uppercase tracking-wider">Classe -</span>
-                    <h1 id="target-profile-name" class="text-3xl font-black italic uppercase text-zinc-800 leading-none mt-2">Caricamento...</h1>
+                    <span id="target-profile-class-badge" class="px-2 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black rounded-lg uppercase tracking-wider">Caricamento...</span>
+                    <h1 id="target-profile-name" class="text-3xl font-black italic uppercase text-zinc-800 leading-none mt-2">NOME</h1>
                     <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Studente della Fazbear School</p>
                 </div>
             </div>
@@ -259,29 +258,25 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
-            <div id="target-voti-list" class="space-y-3">
-                </div>
-        </div>
-        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
-            <div id="target-note-list" class="space-y-3">
-                </div>
-        </div>
-    </div>
-
     <div class="grid grid-cols-3 gap-3">
         <button onclick="window.changeMenu('registro')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">📊 REGISTRO</button>
         <button onclick="window.changeMenu('note')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">⚠️ NOTE</button>
         <button onclick="window.changeMenu('pagella')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">🎓 PAGELLA</button>
     </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
+            <div id="target-voti-list" class="space-y-3"></div> </div>
+        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
+            <div id="target-note-list" class="space-y-3"></div> </div>
+    </div>
 </div>
             
             <!-- VIEW: AGENDA -->
-            <div id="view-agenda" class="tab-content active-view space-y-4">
-                <div class="flex justify-between items-end">
+            <div id="view-agenda" class="tab-content active-view space-y-4 max-w-full overflow-x-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <h2 class="text-2xl font-black uppercase text-red-500">Agenda <span id="agenda-class-title"></span></h2>
                     <div id="prof-actions-agenda" class="hidden flex gap-2">
                         <button onclick="window.openModal('firme')" class="bg-red-700 text-white text-[9px] font-bold px-3 py-2 rounded uppercase">Firma</button>
@@ -305,8 +300,14 @@
                             <div id="agenda-daily-info" class="space-y-2 text-[11px]"></div>
                         </div>
                     </div>
+                <div class="bg-white rounded-xl p-4 border border-zinc-300 shadow-sm">
+                <h3 class="text-[10px] font-black uppercase text-zinc-500 mb-3 tracking-widest">Presenze e Orari</h3>
+                <div id="agenda-attendance-info" class="space-y-1 max-h-48 overflow-y-auto custom-scroll">
+                    <p class="text-zinc-300 text-[10px] italic text-center py-4 uppercase font-bold">Caricamento...</p>
                 </div>
             </div>
+        </div>
+    </div> 
 
 <div id="view-profilo" class="tab-content space-y-6">
     <div class="glass-light p-8 rounded-2xl border-l-8 border-red-700 shadow-xl">
@@ -449,6 +450,33 @@
     </div>
 </div>
 
+		<!-- VIEW: APPELLO (Corretto con classe tab-content) -->
+<div id="view-appello" class="tab-content hidden mb-6 bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
+    <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-2">
+            <div class="w-2 h-6 bg-red-600 rounded-full"></div>
+            <h3 class="font-black uppercase text-xs tracking-tighter text-zinc-900">Registro Appello - <span id="att-class-display">--</span></h3>
+        </div>
+        <button onclick="window.saveAttendance()" class="bg-zinc-900 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase hover:bg-red-600 transition-all shadow-lg">
+            Salva Appello del <span id="att-date-display">--</span>
+        </button>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="text-[9px] font-black text-zinc-400 uppercase border-b border-zinc-100">
+                    <th class="pb-2">Studente</th>
+                    <th class="pb-2 text-center">Stato</th>
+                    <th class="pb-2 text-center">Entrata</th>
+                    <th class="pb-2 text-center">Uscita</th>
+                </tr>
+            </thead>
+            <tbody id="attendance-body"></tbody>
+        </table>
+    </div>
+</div>
+
             <!-- MODAL -->
             <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center p-4">
     <!-- Cambiato da 'glass' a 'glass-light' e rimosso text-white -->
@@ -511,18 +539,37 @@
         inputCal.value = new Date().toISOString().split('T')[0];
 
         window.updateDateContext = () => {
-            const date = new Date(inputCal.value);
-            const month = date.getMonth() + 1;
-            const year = date.getFullYear();
-            const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-            document.getElementById('current-academic-year').innerText = `A.S. ${ay}`;
-            document.getElementById('period-indicator').innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
-            if(window.selectedClass) window.handleClassChange();
-            if(window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
-            if(document.getElementById('pagella-anno-scolastico')) {
-            document.getElementById('pagella-anno-scolastico').innerText = `Pagelle ${document.getElementById('current-academic-year').innerText}`;}
-        };
-        window.updateDateContext();
+    const inputCal = document.getElementById('global-calendar');
+    const date = new Date(inputCal.value);
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+
+    // 1. Aggiorna le etichette dell'anno e del periodo
+    document.getElementById('current-academic-year').innerText = `A.S. ${ay}`;
+    document.getElementById('period-indicator').innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
+    
+    if(document.getElementById('pagella-anno-scolastico')) {
+        document.getElementById('pagella-anno-scolastico').innerText = `Pagelle ${document.getElementById('current-academic-year').innerText}`;
+    }
+
+    // 2. Gestione dei cambiamenti (Classe e Studente)
+    if(window.selectedClass) {
+        window.handleClassChange();
+        
+        // --- QUI AGGIUNGI L'APPELLO ---
+        if (window.loadAttendance) {
+            window.loadAttendance(window.selectedClass, inputCal.value);
+        }
+    }
+
+    if(window.selectedStudentId) {
+        loadStudentRecords(window.selectedStudentId);
+    }
+};
+
+// Esecuzione iniziale
+window.updateDateContext();
 
         // --- PERMESSI ---
         const ROLES = {
@@ -564,22 +611,21 @@ function applyRoleUI() {
     const isBidello = type === ROLES.BIDELLO;
     const isStudente = type === ROLES.STUDENTE;
 
-    // Funzione interna veloce per nascondere/mostrare
+    // Funzione helper corretta (senza auto-chiamata interna)
     const toggle = (id, show) => {
         const el = document.getElementById(id);
-        if (el) {
-            if (show) el.classList.remove('hidden');
-            else el.classList.add('hidden');
-        }
+        if (el) el.classList.toggle('hidden', !show);
+
     };
 
-    // Nasconde l'intera barra dei filtri se è uno studente, la mostra se è Staff/Ospite
+    // Esecuzione dei toggle
     toggle('class-filter-container', !isStudente); 
+    toggle('menu-appello', isStaff); // Spostato fuori dalla definizione di toggle
 
     if(isStaff) {
-        toggle('prof-actions-agenda', true);
-        toggle('prof-grade-panel', true);
-        toggle('btn-add-note', true);
+    toggle('prof-actions-agenda', isStaff);
+    toggle('prof-grade-panel', isStaff);
+    toggle('btn-add-note', isStaff);
     }
     
     if(isPreside || isBidello) {
@@ -588,7 +634,7 @@ function applyRoleUI() {
 
     toggle('notif-bell', isPreside);
 
-    // 4. LOGICA PULSANTI CLASSI (NASCONDINO)
+    // Logica pulsanti classi
     const miaClasse = window.currentUserData?.classe;
     const classButtons = document.querySelectorAll('.class-filter-btn');
 
@@ -596,7 +642,6 @@ function applyRoleUI() {
         const classePulsante = btn.getAttribute('data-class');
         
         if (isStudente) {
-            // Se è studente, vede solo il pulsante della SUA classe
             if (classePulsante !== miaClasse) {
                 btn.classList.add('hidden');
             } else {
@@ -604,20 +649,15 @@ function applyRoleUI() {
                 btn.classList.replace('cursor-pointer', 'cursor-default');
             }
         } else {
-            // Se è staff o admin, vede tutto
             btn.classList.remove('hidden');
         }
     });
 
-    // 5. Configurazione specifica per lo Studente
     if(isStudente) {
         window.selectedClass = miaClasse;
         window.selectedStudentId = window.currentUserId;
-
-        // Nascondiamo i contenitori che non servono allo studente
         toggle('student-list-container', false);
         
-        // Forziamo il caricamento della sua classe all'avvio
         if (typeof window.handleClassChange === 'function') window.handleClassChange(miaClasse);
         if (typeof window.selectStudent === 'function') window.selectStudent(window.currentUserId);
     }
@@ -637,10 +677,12 @@ function applyRoleUI() {
     window.renderStudentList();
     if (typeof loadClassAgenda === 'function' && cls) {
         loadClassAgenda(cls);
+	const isStaff = ['preside', 'vicepreside', 'admin', 'prof'].includes(window.userRole?.toLowerCase());
+        if (isStaff && typeof window.loadAttendance === 'function') {
+            window.loadAttendance(cls, document.getElementById('global-calendar').value);
+        }
     }
-    if (typeof loadBacheca === 'function') {
-        loadBacheca();
-    }
+    if (typeof loadBacheca === 'function') loadBacheca();
 };
 
         // Aggiungendo window. all'inizio, la rendi globale e indistruttibile
@@ -701,47 +743,68 @@ window.renderStudentList = function() {
 };
 
         window.selectStudent = (id) => {
-            if(window.userRole === ROLES.STUDENTE && id !== window.currentUserId) return;
-            window.selectedStudentId = id;
-            renderStudentList();
-            const student = window.allStudents.find(s => s.id === id);
-            if(!student) return;
+    // 1. Sicurezza: uno studente può vedere solo se stesso
+    if(window.userRole === ROLES.STUDENTE && id !== window.currentUserId) return;
+    
+    window.selectedStudentId = id;
+    renderStudentList(); // Aggiorna la selezione visiva nella lista
 
-            document.getElementById('student-header').classList.remove('hidden');
-            document.getElementById('res-student-name').innerText = student.name;
-            document.getElementById('res-student-role').innerText = student.role;
-            if(document.getElementById('pagella-student-name')) {
-            document.getElementById('pagella-student-name').innerText = student.name;
-            const date = new Date(window.currentDate);
-            const month = date.getMonth() + 1;
-            const year = date.getFullYear();
-            const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-            const annoAttuale = document.getElementById('current-academic-year').innerText;
-            document.getElementById('pagella-anno-scolastico').innerText = `Pagelle ${annoAttuale}`;
-            }
-            loadStudentRecords(id);
-        };
+    const student = window.allStudents.find(s => s.id === id);
+    if(!student) return;
+
+    // 2. Mostra l'header e popola i dati base
+    const header = document.getElementById('student-header');
+    if (header) {
+        header.classList.remove('hidden');
+        header.classList.add('flex'); // Assicura che il layout sia corretto
+    }
+    
+    document.getElementById('res-student-name').innerText = student.name;
+    document.getElementById('res-student-role').innerText = student.role || 'Studente';
+
+    // 3. Gestione Pagella (se presente nel DOM)
+    const pagellaName = document.getElementById('pagella-student-name');
+    if(pagellaName) {
+        pagellaName.innerText = student.name;
+        
+        // Recuperiamo l'anno accademico dall'elemento globale
+        const annoAttuale = document.getElementById('current-academic-year').innerText;
+        const pagellaAnnoElem = document.getElementById('pagella-anno-scolastico');
+        if (pagellaAnnoElem) {
+            pagellaAnnoElem.innerText = `Pagelle ${annoAttuale}`;
+        }
+    }
+
+    // 4. Carica i dati dal DB (Voti, Note, Media)
+    loadStudentRecords(id);
+};
 
         // --- CARICAMENTO DATI ---
 let agendaListener = null; // Variabile globale per l'ascoltatore
+let attendanceAgendaListener = null; 
 
 window.loadClassAgenda = async (cls, dataFiltro) => {
-    // Se c'è già un ascoltatore attivo, lo spegniamo per risparmiare memoria
-    if (agendaListener) agendaListener(); 
+    // 1. Pulizia listener precedenti
+    if (agendaListener) agendaListener();
+    if (attendanceAgendaListener) attendanceAgendaListener();
 
     const dateKey = document.getElementById('global-calendar')?.value || ""; 
+    const role = (window.userRole || "").toLowerCase();
+    const isStaff = ['preside', 'vicepreside', 'admin', 'prof'].includes(role);
     
+    // Caricamento interfaccia Appello per Staff
+    if (isStaff && typeof window.loadAttendance === 'function' && cls !== 'ALL') {
+        window.loadAttendance(cls, dateKey);
+    }
 
-    // Salviamo il nuovo ascoltatore
+    // 2. Listener Real-time Agenda (Firme, Compiti, Comunicazioni)
     agendaListener = onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
         
-      // 1. --- SEZIONE COMUNICAZIONI (AMBRA) ---
-        const role = (window.userRole || "").toLowerCase();
         const currentUser = (window.currentUserData?.name || "").trim();
         const canWrite = ['preside', 'vicepreside', 'bidello', 'prof'].includes(role);
 
-        // Prepariamo il box per scrivere
+        // Rendering Comunicazioni
         let writeBoxHtml = "";
         if (canWrite) {
             writeBoxHtml = `
@@ -756,35 +819,22 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
                             Invia in Agenda
                         </button>
                     </div>
-                </div>
-            `;
+                </div>`;
         }
 
-        // Generiamo la lista degli avvisi
-        const avvisi = data.comunicazioni || [];
-        const avvisiHtml = avvisi.map((com, idx) => {
+        const avvisiHtml = (data.comunicazioni || []).map((com, idx) => {
             const isBoss = ['preside', 'vicepreside', 'bidello'].includes(role);
-            const isOwner = (role === 'prof' && currentUser !== "" && currentUser === (com.autore || "").trim());
-
+            const isOwner = (role === 'prof' && currentUser === (com.autore || "").trim());
             return `
-    <div class="relative group p-3 pr-10 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3 text-left">
-        <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
-        <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
-        <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
-        ${(isBoss || isOwner) ? `
-            <button onclick="window.deleteAvviso(${idx}, '${cls}')" 
-                    class="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-1.5 rounded-lg transition-all shadow-sm border border-red-100">
-                🗑️
-            </button>
-        ` : ''}
-    </div>
-`;
+                <div class="relative group p-3 pr-10 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3 text-left">
+                    <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
+                    <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
+                    <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
+                    ${(isBoss || isOwner) ? `<button onclick="window.deleteAvviso(${idx}, '${cls}')" class="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-1.5 rounded-lg transition-all shadow-sm border border-red-100">🗑️</button>` : ''}
+                </div>`;
         }).join('');
 
-         // 2. --- FIRME (ESTETICA TIMELINE + SCROLL) ---
-        // Funzione di sicurezza interna per evitare errori se cap non esiste o i dati sono null
         const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
-
         const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
             <div class="p-4 border border-zinc-100 rounded-[20px] bg-white flex gap-4 items-start mb-3 shadow-sm hover:border-red-200 transition-all">
                 <div class="w-10 h-10 bg-zinc-50 rounded-xl flex flex-col items-center justify-center border border-zinc-100 shrink-0">
@@ -798,184 +848,223 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
                     </div>
                     <p class="text-xs font-sans text-zinc-800 leading-tight">${f.argomento || ""}</p>
                 </div>
-            </div>
-        `).join('') || '<div class="text-zinc-300 italic p-10 text-center text-[10px] font-black uppercase tracking-widest">Nessuna firma presente</div>';
+            </div>`).join('') || '<div class="text-zinc-300 italic p-10 text-center text-[10px] font-black uppercase tracking-widest">Nessuna firma</div>';
 
-        // Applichiamo lo scroll al contenitore firme
-        const containerFirme = document.getElementById('agenda-firme-list');
-        containerFirme.className = "space-y-1 overflow-y-auto p-4 bg-red-600 rounded-[24px] shadow-inner border border-zinc-200/50";
-        containerFirme.style.maxHeight = "60vh"; // Altezza fissa per scorrere
-        containerFirme.innerHTML = writeBoxHtml + avvisiHtml + firmeHtml;
+        document.getElementById('agenda-firme-list').innerHTML = writeBoxHtml + avvisiHtml + firmeHtml;
         
-        // 3. --- COMPITI (SCROLL) ---
-        const safeOriginal = (str) => str || ""; 
-        const containerCompiti = document.getElementById('agenda-compiti-list');
-        containerCompiti.className = "space-y-2 overflow-y-auto";
-        containerCompiti.style.maxHeight = "250px";
-        containerCompiti.innerHTML = (data.compiti || []).map(c => 
-            `<div class="p-3 bg-white rounded-xl border border-red-100 text-[11px] font-bold text-red-900 shadow-sm hover:translate-x-1 transition-transform">
-                <b class="text-blue-500 uppercase text-[9px] block mb-1">${safeOriginal(c.materia)}</b>
-                ${safeOriginal(c.testo)}
-            </div>`
-        ).join('') || '<p class="text-zinc-400 text-[10px] italic text-center py-4 uppercase font-bold tracking-tighter">Nessun compito</p>';
+        document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => 
+            `<div class="p-3 bg-white rounded-xl border border-red-400 text-[11px] font-bold text-red-900 shadow-sm hover:translate-x-1 transition-transform">
+                <b class="text-blue-500 uppercase text-[9px] block mb-1">${c.materia || ""}</b>
+                ${c.testo || ""}
+            </div>`).join('') || '<p class="text-zinc-400 text-[10px] italic text-center py-4 uppercase font-bold">Nessun compito</p>';
         
-        // 4. --- NOTE E VOTI (SCROLL + FILTRO) ---
         let infoHtml = "";
         const note = (data.note || []);
         const voti = (data.daily_voti || []);
 
-        // Usa .toLowerCase() per essere sicuro al 100% che il confronto funzioni
-if(window.userRole && window.userRole.toLowerCase() === 'studente') {
-    // Filtro per lo studente: vede SOLO i suoi
-    const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
-    const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
-    
-    infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-blue-700 font-bold rounded-xl mb-2 text-[10px] border border-yellow-100 shadow-sm uppercase tracking-tighter">⚠️ NOTA: ${safeOriginal(n.testo)}</div>`).join('');
-    infoHtml += myVoti.map(v => `<div class="p-3 bg-zinc-900 text-white rounded-xl mb-2 text-[10px] border border-red-900 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${safeCap(v.materia)}</span><span class="text-lg font-black text-blue-600">${v.voto}</span></div>`).join('');
-} else {
-    // Qui entrano Prof, Preside e chiunque altro: vedono TUTTI i voti della classe
-    infoHtml += note.map(n => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm text-zinc-700"><b>${safeOriginal(n.studente)}</b>: ${safeOriginal(n.testo)}</div>`).join('');
-    infoHtml += voti.map(v => `
-        <div class="p-3 bg-white border border-blue-100 rounded-xl text-[10px] mb-2 shadow-sm flex flex-col gap-1">
-            <div class="flex justify-between items-center">
-                <span class="font-bold text-zinc-800">
-                    ${safeOriginal(v.studente)} - <span class="text-blue-600 uppercase italic">${safeCap(v.materia)}</span>:
-                </span>
-                <span class="font-black text-blue-600 text-sm">${v.voto}</span>
-            </div>
-            <p class="text-[9px] text-brown-400">
-                - ${safeOriginal(v.argomento || "Nessun argomento")}
-            </p>
-        </div>
-    `).join('');
-}
-        
-        const containerInfo = document.getElementById('agenda-daily-info');
-        containerInfo.className = "overflow-y-auto";
-        containerInfo.style.maxHeight = "250px";
-        containerInfo.innerHTML = infoHtml || '<p class="text-zinc-300 text-[10px] italic text-center py-4 uppercase font-bold">Nessun aggiornamento</p>';
+        if(role === 'studente') {
+            const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
+            const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
+            infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-blue-700 font-bold rounded-xl mb-2 text-[10px] border border-yellow-100 shadow-sm uppercase">⚠️ NOTA: ${n.testo}</div>`).join('');
+            infoHtml += myVoti.map(v => `<div class="p-3 bg-zinc-900 text-white rounded-xl mb-2 text-[10px] border border-red-900 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${safeCap(v.materia)}</span><span class="text-lg font-black text-blue-600">${v.voto}</span></div>`).join('');
+        } else {
+            infoHtml += note.map(n => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm text-zinc-700"><b>${n.studente}</b>: ${n.testo}</div>`).join('');
+            infoHtml += voti.map(v => `
+                <div class="p-3 bg-white border border-blue-100 rounded-xl text-[10px] mb-2 shadow-sm flex flex-col gap-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-zinc-800">${v.studente} - <span class="text-blue-600 uppercase italic">${safeCap(v.materia)}</span>:</span>
+                        <span class="font-black text-blue-600 text-sm">${v.voto}</span>
+                    </div>
+                    <p class="text-[9px] text-zinc-400">- ${v.argomento || "Nessun argomento"}</p>
+                </div>`).join('');
+        }
+        document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<p class="text-zinc-300 text-[10px] italic text-center py-4 uppercase font-bold">Nessun aggiornamento</p>';
     });
-}
 
-        async function loadStudentRecords(studentId) {
-            const calElement = document.getElementById('global-calendar');
-            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId), d => {
-                document.getElementById('registro-voti-body').innerHTML = "";
-                const data = d.exists() ? d.data() : { voti: [], note: [] };
-                
-                // Voti (Filtro Materia Prof)
-                const voti = data.voti || [];
-                const dateVal = new Date(inputCal.value);
-                const yearVal = dateVal.getFullYear();
-                const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
-                const votiTuttoAnno = voti.filter(v => {
-                let vAy = v.anno;
-                if(!vAy && v.data) {
-               const p = v.data.split('/');
-               vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-             }
-               return vAy === aySelezionato;
-              });
+    // 3. Listener Real-time Presenze per l'Agenda
+    if (cls !== 'ALL') {
+        attendanceAgendaListener = onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', `${cls}_${dateKey}`), d => {
+            const attData = d.exists() ? d.data() : {};
+            const container = document.getElementById('agenda-attendance-info');
+            if (!container) return;
 
-		// --- AGGIUNGI QUESTO PEZZO QUI SOTTO ---
-votiTuttoAnno.sort((a, b) => {
-    const [dayA, monthA, yearA] = a.data.split('/').map(Number);
-    const [dayB, monthB, yearB] = b.data.split('/').map(Number);
-    // Creiamo oggetti Date per il confronto (Mese è 0-indexed, quindi facciamo -1)
-    return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
-});
 
-                 const sommaG = votiTuttoAnno.reduce((a, b) => a + parseFloat(b.voto), 0);
-                 const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
-                 if(document.getElementById('res-student-media')) { 
-                document.getElementById('res-student-media').innerText = mediaG;
-                 }  
+            let attHtml = "";
 
-		const resMediaElem = document.getElementById('res-student-media');
-if (resMediaElem) { 
-    resMediaElem.innerText = mediaG;
-    
-    // Converte la stringa in numero per il confronto
-    const valoreMedia = parseFloat(mediaG);
-    
-    // Rimuove eventuali classi colore di Tailwind precedenti per evitare conflitti
-    resMediaElem.classList.remove('text-red-600', 'text-green-600', 'text-zinc-400');
+            if (role === 'studente') {
+                // Vista Studente: Vede solo il proprio stato
+                const myAtt = attData[window.currentUserId];
+                if (myAtt) {
+                    const statusColors = {
+                        presente: 'text-green-600',
+                        assente: 'text-red-600',
+                        ritardo: 'text-amber-600'
+                    };
+                    const color = statusColors[myAtt.status] || 'text-zinc-500';
+                    attHtml = `
+                        <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[8px] font-black text-zinc-400 uppercase">Il tuo stato</span>
+                                <span class="font-black uppercase text-[10px] ${color}">${myAtt.status}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="bg-white p-2 rounded border border-zinc-100 text-center">
+                                    <p class="text-[7px] text-zinc-400 uppercase font-bold">Entrata</p>
+                                    <p class="text-[10px] font-black text-zinc-700">${myAtt.entry}</p>
+                                </div>
+                                <div class="bg-white p-2 rounded border border-zinc-100 text-center">
+                                    <p class="text-[7px] text-zinc-400 uppercase font-bold">Uscita</p>
+                                    <p class="text-[10px] font-black text-zinc-700">${myAtt.exit}</p>
+                                </div>
+                            </div>
+                        </div>`;
+                } else {
+                    attHtml = '<p class="text-zinc-300 text-[9px] italic text-center py-4 uppercase font-bold">Appello non registrato</p>';
+                }
+            } else if (isStaff) {
+                // Vista Staff: Vede tutti gli studenti della classe
+                const classStudents = window.allStudents.filter(s => s.classe === cls);
+                if (classStudents.length > 0) {
+                    attHtml = classStudents.map(s => {
+                        const info = attData[s.id] || { status: 'N.P.', entry: '--:--', exit: '--:--' };
+                        const dotColors = {
+                            presente: 'bg-green-500',
+                            assente: 'bg-red-500',
+                            ritardo: 'bg-amber-500',
+                            'N.P.': 'bg-zinc-300'
+                        };
+                        const dot = dotColors[info.status] || 'bg-zinc-300';
+                        
+                        return `
+                            <div class="flex items-center justify-between p-2 hover:bg-zinc-50 rounded-lg transition-colors border-b border-zinc-50 last:border-0">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-1.5 rounded-full ${dot}"></div>
+                                    <span class="font-bold text-zinc-700 uppercase text-[9px] truncate w-24">${s.name}</span>
+                                </div>
+                                <div class="flex gap-3 items-center">
+                                    <span class="text-[8px] font-black text-zinc-400">${info.entry} > ${info.exit}</span>
+                                    <span class="text-[7px] font-black uppercase text-zinc-500 w-10 text-right">${info.status === 'presente' ? 'P' : info.status === 'assente' ? 'A' : info.status === 'ritardo' ? 'R' : '-'}</span>
+                                </div>
+                            </div>`;
+                    }).join('');
+                } else {
+                    attHtml = '<p class="text-zinc-300 text-[9px] italic text-center py-4 uppercase font-bold">Nessuno studente in classe</p>';
+                }
+            }
 
-    if (valoreMedia === 0) {
-        resMediaElem.classList.add('text-zinc-400'); // Grigio se 0.0
-    } else if (valoreMedia < 6) {
-        resMediaElem.style.color = "#dc2626"; // Rosso (o aggiungi classList.add('text-red-600'))
+            container.innerHTML = attHtml;
+        });
     } else {
-        resMediaElem.style.color = "#16a34a"; // Verde (o aggiungi classList.add('text-green-600'))
+        document.getElementById('agenda-attendance-info').innerHTML = '<p class="text-zinc-300 text-[9px] italic text-center py-4 uppercase font-bold">Seleziona una classe</p>';
     }
 }
-                                                
-                 if(document.getElementById('pagella-student-name')) {
-                 const student = window.allStudents.find(s => s.id === studentId);
-                 document.getElementById('pagella-student-name').innerText = student ? student.name : "Studente";
-                 }
-                  window.renderPagella(voti, aySelezionato);                                                 
-                 const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) ? (window.currentUserData.materie || [])  : [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))];
+		
+        async function loadStudentRecords(studentId) {
+    const calElement = document.getElementById('global-calendar');
+    if (!calElement || !studentId) return;
 
-                let vHtml = "";
-                
-                materie.forEach(m => {
-                    const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
-                    const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
-                    const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-                    const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
-                    
-                    vHtml += `<tr class="border-b border-zinc-700 last:border-3 hover:bg-zinc-50">
-    <td class="p-4 font-bold text-zinc-800 uppercase">${m}</td>
-    
-    <td class="p-4 border-x border-zinc-800 bg-zinc-50/30">${q1.map(v => renderVotoTag(v, studentId)).join('')}</td>
-    
-    <td class="p-4 border-r border-zinc-800">${q2.map(v => renderVotoTag(v, studentId)).join('')}</td>
-    
-    <td class="p-4 text-right font-black text-lg text-blue-600">${avg}</td>
-</tr>`;
-                    });
-                    document.getElementById('registro-voti-body').innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
-
-                // Sezione Voti Globali per Prof/Preside
-         if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
-       const materieNormalizzate = materie.map(m => m.toLowerCase().trim());
-    
-    // FILTRO: Prendiamo solo i voti che appartengono all'Anno Scolastico selezionato
-       const votiAnnoCorrente = voti.filter(v => {
-        let vAy = v.anno;
-        if(!vAy && v.data) {
-            const p = v.data.split('/');
-            vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-        }
-        return vAy === aySelezionato;
-    });
-
-    // Cerchiamo le "altre materie" solo tra i voti di quest'anno
-    const altreMaterie = [...new Set(votiAnnoCorrente.map(v => v.materia.toLowerCase().trim()))]
-            .filter(m => !materieNormalizzate.includes(m));
-
-    if(altreMaterie.length > 0) {
-        vHtml += `<tr class="bg-white-100"><td colspan="4" class="p-2 text-[8px] font-black uppercase text-center">Alte Materie per l' A.S. ${aySelezionato}</td></tr>`;
+    onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId), d => {
+        const tbody = document.getElementById('registro-voti-body');
+        if (!tbody) return;
         
-        altreMaterie.forEach(m => {
-            // Calcoliamo la media solo sui voti dell'anno corrente per questa materia
-            const m_voti = votiAnnoCorrente.filter(v => v.materia.toLowerCase().trim() === m);
+        tbody.innerHTML = "";
+        const data = d.exists() ? d.data() : { voti: [], note: [] };
+        
+        // 1. Filtro Anno Scolastico
+        const voti = data.voti || [];
+        const dateVal = new Date(calElement.value); // <--- CORRETTO: calElement invece di inputCal
+        const yearVal = dateVal.getFullYear();
+        const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
+        
+        const votiTuttoAnno = voti.filter(v => {
+            let vAy = v.anno;
+            if(!vAy && v.data) {
+                const p = v.data.split('/');
+                vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
+            }
+            return vAy === aySelezionato;
+        });
+
+        // 2. Ordinamento per data
+        votiTuttoAnno.sort((a, b) => {
+            const [dayA, monthA, yearA] = a.data.split('/').map(Number);
+            const [dayB, monthB, yearB] = b.data.split('/').map(Number);
+            return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+        });
+
+        // 3. Calcolo Media Globale
+        const sommaG = votiTuttoAnno.reduce((a, b) => a + parseFloat(b.voto), 0);
+        const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
+        
+        const resMediaElem = document.getElementById('res-student-media');
+        if (resMediaElem) { 
+            resMediaElem.innerText = mediaG;
+            const valoreMedia = parseFloat(mediaG);
+            resMediaElem.style.color = valoreMedia === 0 ? "#71717a" : (valoreMedia < 6 ? "#dc2626" : "#16a34a");
+        }
+		
+		
+
+        // 4. Identificazione Materie
+        const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) 
+            ? (window.currentUserData?.materie || []) 
+            : [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))];
+
+	
+
+        let vHtml = "";
+        
+        // 5. Render Materie Principali
+        materie.forEach(m => {
+            const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
             const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
             const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-            const mediaMateria = (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1);
-
-            vHtml += `<tr class="opacity-100 bg-zinc-50/50">
-                <td class="p-2 pl-4 font-bold uppercase text-blue-800">${m}</td>
-                <td class="p-2">${q1.map(v => `<span class="mr-1 font-medium">${v.voto}</span>`).join('')}</td>
-                <td class="p-2">${q2.map(v => `<span class="mr-1 font-medium">${v.voto}</span>`).join('')}</td>
-                <td class="p-2 text-right font-black text-blue-800">${mediaMateria}</td>
+            const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
+            
+            vHtml += `<tr class="border-b border-zinc-700 hover:bg-zinc-50">
+                <td class="p-4 font-bold text-zinc-800 uppercase">${m}</td>
+                <td class="p-4 border-x border-zinc-800 bg-zinc-50/30">${q1.map(v => renderVotoTag(v, studentId)).join('')}</td>
+                <td class="p-4 border-r border-zinc-800">${q2.map(v => renderVotoTag(v, studentId)).join('')}</td>
+                <td class="p-4 text-right font-black text-lg text-blue-600">${avg}</td>
             </tr>`;
         });
-    }
-}
 
-                document.getElementById('registro-voti-body').innerHTML = vHtml;
+        // 6. Sezione "Altre Materie" (per Prof/Preside)
+        if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
+            const materieNormalizzate = materie.map(m => m.toLowerCase().trim());
+            const altreMaterie = [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))]
+                .filter(m => !materieNormalizzate.includes(m));
+
+            if(altreMaterie.length > 0) {
+                vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[10px] font-black uppercase text-center text-zinc-500">Altre Materie Registrate</td></tr>`;
+                altreMaterie.forEach(m => {
+                    const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m);
+                    const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
+                    const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
+                    const avg = (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1);
+
+                    vHtml += `<tr class="bg-zinc-50/50">
+                        <td class="p-2 pl-4 font-bold uppercase text-blue-800">${m}</td>
+                        <td class="p-2">${q1.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
+                        <td class="p-2">${q2.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
+                        <td class="p-2 text-right font-black text-blue-800">${avg}</td>
+                    </tr>`;
+                });
+            }
+        }
+
+                document.getElementById('registro-voti-body').innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
+
+        // --- REINSERISCI QUESTO PEZZO QUI SOTTO ---
+        if(document.getElementById('pagella-student-name')) {
+            const student = window.allStudents.find(s => s.id === studentId);
+            document.getElementById('pagella-student-name').innerText = student ? student.name : "Studente";
+        }
+        
+        // Questa è quella che ti serve per far apparire la pagella!
+        if (typeof window.renderPagella === 'function') {
+            window.renderPagella(voti, aySelezionato); 
+        }
 
                 // Note (Gestione Modifica/Elimina)
                 const originalNotes = data.note || [];
@@ -1347,18 +1436,24 @@ if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
 }
                         
                         // Materie per i Prof
-                        if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
-                            const mSelect = document.getElementById('input-grade-subject');
-                            const mats = window.currentUserData.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
-                            mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
-                        }
+                        if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
+                    const mSelect = document.getElementById('input-grade-subject');
+                    if (mSelect) {
+                        const mats = window.currentUserData.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
+                        mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
                     }
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                } catch (e) { console.error("Discord Error:", e); }
-            } else {
-                applyRoleUI(); // Ospite
-            }
+                }
+            } // Chiusura if(uDoc.exists())
+
+            window.history.replaceState({}, document.title, window.location.pathname);
+
+        } catch (e) {
+            console.error("Errore durante il checkAuth:", e);
         }
+    } else {
+        applyRoleUI(); // Ospite
+    }
+}
 
         window.changeMenu = (menu) => {
     // 1. Gestione Sidebar: Rimuove 'active' da tutti
@@ -1530,6 +1625,7 @@ window.renderPagella = (voti, aySelezionato) => {
     if (!q1Body || !q2Body) return;
 
     const votiAnno = voti.filter(v => {
+        // Fallback: se manca il campo 'anno', lo calcola dalla data
         let vAy = v.anno;
         if(!vAy && v.data) {
             const p = v.data.split('/');
@@ -1541,48 +1637,42 @@ window.renderPagella = (voti, aySelezionato) => {
     const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
     let h1 = ""; let h2 = "";
 
+    if (materie.length === 0) {
+        const empty = '<tr><td colspan="3" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold tracking-widest">Nessun voto registrato per l\'A.S. ' + aySelezionato + '</td></tr>';
+        q1Body.innerHTML = empty;
+        q2Body.innerHTML = empty;
+        return;
+    }
+
     materie.forEach(m => {
         const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m);
         const vQ1 = m_voti.filter(v => isDateInQ(v.data, 1));
         const vQ2 = m_voti.filter(v => isDateInQ(v.data, 2));
 
-        // Calcolo matematico per la logica dei colori
         const valQ1 = vQ1.length ? (vQ1.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ1.length) : null;
         const valQ2 = vQ2.length ? (vQ2.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ2.length) : null;
 
-        const getEsito = (val) => val === null ? "" : Math.round(val) >= 6 ? "No" : "Si";
-
         const row = (materia, val) => {
-    // Arrotondamento per la visualizzazione
-    const displayVoto = val !== null ? Math.round(val) : "-";
-    // Colore basato sul valore reale
-    const badgeColor = val !== null && Math.round(val) < 6 ? 'bg-red-50 text-red-600' : 'bg-green-600 text-white';
-    
-    return `
-    <tr class="hover:bg-zinc-50 transition-colors border-b border-zinc-900 last:border-0">
-        <td class="p-4 font-black uppercase text-blue-800 text-[10px] tracking-tighter">
-            ${materia}
-        </td>
-
-        <td class="p-4 text-center border-x border-zinc-900 bg-zinc-50/20">
-            <span class="inline-block px-3 py-1 rounded-lg font-black text-[11px] ${badgeColor}">
-                ${displayVoto}
-            </span>
-        </td>
-
-        <td class="p-4 text-right text-[11px] font-bold text-zinc-900">
-            ${getEsito(val)}
-        </td>
-    </tr>`;
-};
+            const displayVoto = val !== null ? Math.round(val) : "-";
+            const badgeColor = val !== null && Math.round(val) < 6 ? 'bg-red-50 text-red-600' : 'bg-green-600 text-white';
+            const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Sì");
+            
+            return `
+            <tr class="hover:bg-zinc-50 border-b border-zinc-900">
+                <td class="p-4 font-black uppercase text-blue-800 text-[10px]">${materia}</td>
+                <td class="p-4 text-center border-x border-zinc-900">
+                    <span class="inline-block px-3 py-1 rounded-lg font-black text-[11px] ${badgeColor}">${displayVoto}</span>
+                </td>
+                <td class="p-4 text-right text-[11px] font-bold">${esito}</td>
+            </tr>`;
+        };
 
         h1 += row(m, valQ1);
         h2 += row(m, valQ2);
     });
 
-    const empty = '<tr><td colspan="3" class="p-12 text-center italic text-zinc-900 text-[9px] uppercase font-bold tracking-widest">Nessun dato</td></tr>';
-    q1Body.innerHTML = h1 || empty;
-    q2Body.innerHTML = h2 || empty;
+    q1Body.innerHTML = h1;
+    q2Body.innerHTML = h2;
 };
         
      window.addAvviso = async (testo, cls) => {
@@ -1613,11 +1703,12 @@ window.renderPagella = (voti, aySelezionato) => {
         });
 
         await setDoc(ref, { comunicazioni: coms }, { merge: true });
-        // --- LOGICA DI SUCCESSO (SPOSTATA QUI DENTRO) ---
         console.log("Avviso aggiunto con successo!");
+        
         if(document.getElementById('input-testo-avviso')) {
             document.getElementById('input-testo-avviso').value = "";
         }
+        // Ricarica immediata locale
         if(window.loadClassAgenda) window.loadClassAgenda(cls); 
     } catch (e) {
         console.error("Errore salvataggio avviso:", e);
@@ -1705,7 +1796,7 @@ window.startBypass = async function() {
             if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
                 const mSelect = document.getElementById('input-grade-subject');
                 if (mSelect) {
-                    const mats = data.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
+                    const mats = window.currentUserData?.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
                     mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
                 }
             }
@@ -1896,12 +1987,11 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
         return;
     }
 
-    // --- NUOVA LOGICA DI ORDINAMENTO PER DATA ---
-    // Ordiniamo la lista: trasformiamo DD/MM/YYYY in YYYYMMDD per un confronto preciso
+    // Ordinamento per data (DD/MM/YYYY -> YYYYMMDD)
     const listaOrdinata = [...lista].sort((a, b) => {
         const dataA = a.data.split('/').reverse().join('');
         const dataB = b.data.split('/').reverse().join('');
-        return dataB.localeCompare(dataA); // Dal più recente al più vecchio
+        return dataB.localeCompare(dataA);
     });
 
     el.innerHTML = listaOrdinata.map(item => {
@@ -1911,17 +2001,13 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
                     <div class="flex flex-col">
                         <div class="flex items-center gap-2 mb-1">
                             <p class="font-black text-[10px] uppercase text-zinc-800">${item.materia}</p>
-                            <!-- DATA VISIBILE -->
-                            <span class="text-[8px] px-1.5 py-0.5 bg-zinc-200 text-zinc-600 rounded font-bold tracking-tighter">
-                                ${item.data}
-                            </span>
+                            <span class="text-[8px] px-1.5 py-0.5 bg-zinc-200 text-zinc-600 rounded font-bold">${item.data}</span>
                         </div>
-                        <p class="text-[9px] text-zinc-500 font-medium leading-tight">${item.argomento || 'Nessun argomento'}</p>
+                        <p class="text-[9px] text-zinc-500 font-medium">${item.argomento || 'Nessun argomento'}</p>
                     </div>
                     <span class="text-lg font-black ${parseFloat(item.voto) < 6 ? 'text-red-600' : 'text-zinc-900'}">${item.voto}</span>
                 </div>`;
         } else {
-            // Per le note aggiungiamo anche qui la data per coerenza
             return `
                 <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500 mb-2">
                     <p class="text-[8px] font-black text-red-800 uppercase mb-1">${item.data}</p>
@@ -2029,6 +2115,14 @@ if (role === 'studente') {
         
         if (nameDisplay) nameDisplay.innerText = student.name.toUpperCase();
         if (badgeDisplay) badgeDisplay.innerText = `CLASSE: ${student.classe || 'N/A'} - A.S. ${as}`;
+
+	// --- SINCRONIZZAZIONE PAGELLA ---
+        const pagellaName = document.getElementById('pagella-student-name');
+        const pagellaClassLabel = document.getElementById('pagella-classe-label');
+        if(pagellaName) pagellaName.innerText = student.name;
+        if(pagellaClassLabel) {
+            pagellaClassLabel.innerText = `CLASSE ${student.classe || '-'}`;
+        }
 
 
         // E. GESTIONE AVATAR
@@ -2264,6 +2358,78 @@ window.navDate = (unit, value) => {
         }
     } catch (e) {
         console.error("Errore eliminazione bacheca:", e);
+    }
+};
+
+	window.loadAttendance = async (cls, date) => {
+    const isStaff = ['preside', 'vicepreside', 'admin', 'prof'].includes(window.userRole?.toLowerCase());
+    const panel = document.getElementById('view-appello'); // ID Corretto
+    
+    if (!isStaff || !cls || cls === 'ALL') {
+        if(panel) panel.classList.add('hidden');
+        return;
+    }
+
+    panel.classList.remove('hidden');
+    document.getElementById('att-class-display').innerText = cls;
+    document.getElementById('att-date-display').innerText = date;
+
+    if (window.allStudents.length === 0) {
+        setTimeout(() => window.loadAttendance(cls, date), 500);
+        return;
+    }
+
+    const attRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', `${cls}_${date}`);
+    const attSnap = await getDoc(attRef);
+    const attData = attSnap.exists() ? attSnap.data() : {};
+
+    const classStudents = window.allStudents.filter(s => s.classe === cls);
+    const tbody = document.getElementById('attendance-body');
+    tbody.innerHTML = '';
+    
+    classStudents.forEach(s => {
+        const info = attData[s.id] || { status: 'presente', entry: '08:00', exit: '13:00' };
+        tbody.innerHTML += `
+            <tr class="border-b border-zinc-50">
+                <td class="py-2 text-[10px] font-black uppercase text-zinc-700">${s.name}</td>
+                <td class="py-2 text-center">
+                    <select data-sid="${s.id}" class="att-status p-1 bg-zinc-100 rounded font-black text-[9px] outline-none">
+                        <option value="presente" ${info.status === 'presente' ? 'selected' : ''}>P</option>
+                        <option value="assente" ${info.status === 'assente' ? 'selected' : ''}>A</option>
+                        <option value="ritardo" ${info.status === 'ritardo' ? 'selected' : ''}>R</option>
+                    </select>
+                </td>
+                <td class="py-2 text-center"><input type="time" value="${info.entry}" class="att-entry text-[9px] border rounded p-0.5"></td>
+                <td class="py-2 text-center"><input type="time" value="${info.exit}" class="att-exit text-[9px] border rounded p-0.5"></td>
+            </tr>`;
+    });
+};
+
+window.saveAttendance = async () => {
+    const cls = window.selectedClass;
+    const date = document.getElementById('global-calendar').value;
+    if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica.");
+
+    const rows = document.querySelectorAll('#attendance-body tr');
+    let dataToSave = {};
+
+    rows.forEach(row => {
+        const statusEl = row.querySelector('.att-status');
+        if(!statusEl) return;
+        const sid = statusEl.dataset.sid;
+        dataToSave[sid] = {
+            status: statusEl.value,
+            entry: row.querySelector('.att-entry').value,
+            exit: row.querySelector('.att-exit').value
+        };
+    });
+
+    try {
+        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', `${cls}_${date}`), dataToSave);
+        alert("✅ Registro presenze salvato con successo!");
+    } catch (e) { 
+        console.error(e); 
+        alert("❌ Errore durante il salvataggio.");
     }
 };
 
