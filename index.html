@@ -113,38 +113,62 @@
 </div>
     </div> 
 
-		<div class="flex items-center gap-2 mb-8 bg-zinc-50 p-3 rounded-2xl border border-zinc-200 shadow-sm">
-    <p class="text-[10px] font-black text-zinc-400 uppercase mr-2 ml-1">Filtra Classe:</p>
+		<div id="class-filter-container" class="flex items-center gap-1 mb-4 bg-zinc-50 p-1 rounded-lg border border-zinc-200 shadow-sm">
+    <p class="text-[9px] font-black text-zinc-400 uppercase ml-1 mr-1">Filtra:</p>
     
     <button onclick="window.filterByClass('ALL')" data-class="ALL" 
-        class="class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase transition-all shadow-md shadow-red-200">
+        class="class-filter-btn bg-red-600 text-white px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase transition-all shadow-sm">
         Tutti
     </button>
     
     <button onclick="window.filterByClass('A')" data-class="A" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
-        Classe A
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
+        A
     </button>
     
     <button onclick="window.filterByClass('B')" data-class="B" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
-        Classe B
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
+        B
     </button>
     
     <button onclick="window.filterByClass('C')" data-class="C" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all">
-        Classe C
+        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
+        C
     </button>
 
-    <div class="ml-auto flex items-center gap-2">
-        <p class="text-[10px] font-black text-zinc-400 uppercase">Salto Rapido:</p>
+    <div class="ml-auto flex items-center gap-1.5 pr-1">
+        <p class="text-[9px] font-black text-zinc-400 uppercase">Vai:</p>
         <select id="fast-student-filter" onchange="window.selectAndGoToProfile(this.value)" 
-            class="bg-white border border-zinc-300 text-zinc-900 px-4 py-2 rounded-xl text-[10px] font-black uppercase outline-none focus:border-red-600 transition-all cursor-pointer">
-            <option value="">Seleziona Studente</option>
+            class="w-[120px] bg-white border border-zinc-300 text-zinc-900 px-1 py-0.5 rounded-md text-[9px] font-black uppercase outline-none focus:border-red-600 transition-all cursor-pointer">
+            <option value="">Studente...</option>
         </select>
     </div>
 </div>
-		
+		<div class="flex items-center gap-2 p-1.5 bg-white rounded-xl border border-zinc-200 shadow-sm">
+    <div class="flex gap-0.5 border-r border-zinc-200 pr-2">
+        <button onclick="navDate('month', -1)" class="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[9px] font-black uppercase rounded-md border border-zinc-200 transition-all">
+            -1M
+        </button>
+        <button onclick="navDate('week', -1)" class="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[9px] font-black uppercase rounded-md border border-zinc-200 transition-all">
+            -1S
+        </button>
+        <button onclick="navDate('day', -1)" class="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[9px] font-black uppercase rounded-md border border-zinc-200 transition-all">
+            -1G
+        </button>
+    </div>
+
+    <div class="flex gap-0.5 border-l border-zinc-200 pl-2">
+        <button onclick="navDate('day', 1)" class="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[9px] font-black uppercase rounded-md border border-zinc-200 transition-all">
+            +1G
+        </button>
+        <button onclick="navDate('week', 1)" class="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[9px] font-black uppercase rounded-md border border-zinc-200 transition-all">
+            +1S
+        </button>
+        <button onclick="navDate('month', 1)" class="px-2 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 text-[9px] font-black uppercase rounded-md border border-zinc-200 transition-all">
+            +1M
+        </button>
+    </div>
+</div>
                       <div class="flex items-center gap-6">
             <div id="notif-bell" class="relative cursor-pointer hidden" onclick="window.toggleNotifPanel()">
                 <span class="text-xl">🔔</span>
@@ -170,7 +194,7 @@
     <div class="flex flex-1 overflow-hidden">
 
         <!-- Sidebar -->
-        <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-zing 700 flex flex-col shrink-0 p-4 custom-scroll">
+        <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-zinc-700 flex flex-col shrink-0 p-4 custom-scroll">
     <nav class="space-y-1 mb-8">
                 <p class="text-[10px] font-black text-black uppercase mb-4 ml-2 tracking-wider">
             Menu Principale
@@ -549,19 +573,19 @@ function applyRoleUI() {
         }
     };
 
-    // 1. Visibilità pannelli Staff
+    // Nasconde l'intera barra dei filtri se è uno studente, la mostra se è Staff/Ospite
+    toggle('class-filter-container', !isStudente); 
+
     if(isStaff) {
         toggle('prof-actions-agenda', true);
         toggle('prof-grade-panel', true);
         toggle('btn-add-note', true);
     }
     
-    // 2. Pannello Bacheca (Preside/Bidello)
     if(isPreside || isBidello) {
         toggle('bacheca-admin-panel', true);
     }
 
-    // 3. Notifiche (Solo Admin/Preside/Vice)
     toggle('notif-bell', isPreside);
 
     // 4. LOGICA PULSANTI CLASSI (NASCONDINO)
@@ -701,11 +725,12 @@ window.renderStudentList = function() {
         // --- CARICAMENTO DATI ---
 let agendaListener = null; // Variabile globale per l'ascoltatore
 
-window.loadClassAgenda = async (cls) => {
+window.loadClassAgenda = async (cls, dataFiltro) => {
     // Se c'è già un ascoltatore attivo, lo spegniamo per risparmiare memoria
     if (agendaListener) agendaListener(); 
 
     const dateKey = document.getElementById('global-calendar')?.value || ""; 
+    
 
     // Salviamo il nuovo ascoltatore
     agendaListener = onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
@@ -779,7 +804,7 @@ window.loadClassAgenda = async (cls) => {
         // Applichiamo lo scroll al contenitore firme
         const containerFirme = document.getElementById('agenda-firme-list');
         containerFirme.className = "space-y-1 overflow-y-auto p-4 bg-red-600 rounded-[24px] shadow-inner border border-zinc-200/50";
-        containerFirme.style.maxHeight = "500px"; // Altezza fissa per scorrere
+        containerFirme.style.maxHeight = "60vh"; // Altezza fissa per scorrere
         containerFirme.innerHTML = writeBoxHtml + avvisiHtml + firmeHtml;
         
         // 3. --- COMPITI (SCROLL) ---
@@ -851,6 +876,15 @@ if(window.userRole && window.userRole.toLowerCase() === 'studente') {
              }
                return vAy === aySelezionato;
               });
+
+		// --- AGGIUNGI QUESTO PEZZO QUI SOTTO ---
+votiTuttoAnno.sort((a, b) => {
+    const [dayA, monthA, yearA] = a.data.split('/').map(Number);
+    const [dayB, monthB, yearB] = b.data.split('/').map(Number);
+    // Creiamo oggetti Date per il confronto (Mese è 0-indexed, quindi facciamo -1)
+    return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+});
+
                  const sommaG = votiTuttoAnno.reduce((a, b) => a + parseFloat(b.voto), 0);
                  const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
                  if(document.getElementById('res-student-media')) { 
@@ -1087,7 +1121,7 @@ await setDoc(agendaRef, {
         <select id="m-compiti-mat" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
             ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
         </select>
-        <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
+        <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-900 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
     `;
 
     confirm.onclick = async () => {
@@ -1231,12 +1265,14 @@ await setDoc(agendaRef, {
         async function loadBacheca() {
             onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general'), d => {
                 const data = d.exists() ? d.data() : { posts: [] };
-                document.getElementById('bacheca-container').innerHTML = data.posts.slice().reverse().map(p => `
-                    <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm">
-                        <p class="text-sm text-zinc-800">${p.text}</p>
-                        <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
-                    </div>
-                `).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso</p>';
+                document.getElementById('bacheca-container').innerHTML = data.posts.slice().reverse().map((p, idx) => `
+    <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
+        <p class="text-sm text-zinc-800">${p.text}</p>
+        <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
+        ${(['preside', 'admin', 'bidello'].includes(window.userRole.toLowerCase())) ? 
+            `<button onclick="window.deleteBacheca(${idx})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:scale-110 transition-all">✕</button>` : ''}
+    </div>
+`).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso</p>';
             });
         }
 
@@ -1560,7 +1596,7 @@ window.renderPagella = (voti, aySelezionato) => {
     }
 
     const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`);
-    const autore = window.currentUserData.name; // Il nome che apparirà nella firma
+    const autore = window.currentUserData.name;
 
     try {
         const snap = await getDoc(ref);
@@ -1569,7 +1605,6 @@ window.renderPagella = (voti, aySelezionato) => {
             coms = snap.data().comunicazioni || [];
         }
 
-        // Aggiungiamo il nuovo avviso in cima
         coms.unshift({
             testo: testo,
             autore: autore,
@@ -1578,19 +1613,15 @@ window.renderPagella = (voti, aySelezionato) => {
         });
 
         await setDoc(ref, { comunicazioni: coms }, { merge: true });
+        // --- LOGICA DI SUCCESSO (SPOSTATA QUI DENTRO) ---
         console.log("Avviso aggiunto con successo!");
-        
-        // Pulizia eventuale campo input
         if(document.getElementById('input-testo-avviso')) {
             document.getElementById('input-testo-avviso').value = "";
         }
+        if(window.loadClassAgenda) window.loadClassAgenda(cls); 
     } catch (e) {
         console.error("Errore salvataggio avviso:", e);
         alert("Errore durante l'invio.");
-
-// ... dentro il try di addAvviso, dopo await setDoc ...
-console.log("Avviso aggiunto con successo!");
-if(window.loadClassAgenda) window.loadClassAgenda(cls); // Ricarica la vista se hai questa funzione
     }
 };
 
@@ -1865,19 +1896,35 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
         return;
     }
 
-    el.innerHTML = lista.slice().reverse().map(item => {
+    // --- NUOVA LOGICA DI ORDINAMENTO PER DATA ---
+    // Ordiniamo la lista: trasformiamo DD/MM/YYYY in YYYYMMDD per un confronto preciso
+    const listaOrdinata = [...lista].sort((a, b) => {
+        const dataA = a.data.split('/').reverse().join('');
+        const dataB = b.data.split('/').reverse().join('');
+        return dataB.localeCompare(dataA); // Dal più recente al più vecchio
+    });
+
+    el.innerHTML = listaOrdinata.map(item => {
         if (tipo === "voti") {
             return `
                 <div class="flex justify-between items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100 mb-2">
                     <div class="flex flex-col">
-                        <p class="font-black text-[10px] uppercase text-zinc-800">${item.materia}</p>
-                        <p class="text-[9px] text-zinc-500 font-medium">${item.argomento || 'Nessun argomento'}</p>
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="font-black text-[10px] uppercase text-zinc-800">${item.materia}</p>
+                            <!-- DATA VISIBILE -->
+                            <span class="text-[8px] px-1.5 py-0.5 bg-zinc-200 text-zinc-600 rounded font-bold tracking-tighter">
+                                ${item.data}
+                            </span>
+                        </div>
+                        <p class="text-[9px] text-zinc-500 font-medium leading-tight">${item.argomento || 'Nessun argomento'}</p>
                     </div>
                     <span class="text-lg font-black ${parseFloat(item.voto) < 6 ? 'text-red-600' : 'text-zinc-900'}">${item.voto}</span>
                 </div>`;
         } else {
+            // Per le note aggiungiamo anche qui la data per coerenza
             return `
                 <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500 mb-2">
+                    <p class="text-[8px] font-black text-red-800 uppercase mb-1">${item.data}</p>
                     <p class="text-[10px] text-red-800 italic font-medium">"${item.testo}"</p>
                 </div>`;
         }
@@ -2055,32 +2102,47 @@ if (mediaRegistro) {
     }
 }
  	window.filterByClass = (classeCliccata) => {
-    // 1. CONTROLLO PRIVACY PER STUDENTI
     const isStudente = window.userRole === ROLES.STUDENTE;
-    const miaClasse = window.currentUserData?.classe; // Es: "A"
+    const miaClasse = window.currentUserData?.classe;
 
-    if (isStudente && classeCliccata !== miaClasse && classeCliccata !== 'ALL') {
-        alert(`🚫 Accesso negato: puoi visualizzare solo l'agenda e gli studenti della tua classe (${miaClasse}).`);
-        return; // Blocca l'esecuzione
+    // 1. CONTROLLO PRIVACY (Blindato)
+    if (isStudente) {
+        // Se lo studente prova a cliccare su una classe non sua o su "TUTTI"
+        if (classeCliccata !== miaClasse) {
+            alert(`🚫 Accesso negato: puoi visualizzare solo la tua classe (${miaClasse}).`);
+            return; // Blocca tutto
+        }
     }
-    
-    // Se lo studente clicca "TUTTI", potresti decidere di lasciarlo fare 
-    // per vedere i compagni, o bloccare anche quello. 
-    // Se vuoi bloccare anche "TUTTI": change in: (classeCliccata !== miaClasse)
 
-    // 2. SE IL CONTROLLO PASSA, CONTINUA CON LA LOGICA DI PRIMA...
+    // 2. AGGIORNAMENTO STATO GLOBALE
     window.selectedClass = classeCliccata;
 
-    // Aggiorna estetica pulsanti
-    document.querySelectorAll('.class-filter-btn').forEach(btn => {
-        const isActive = btn.getAttribute('data-class') === classeCliccata;
-        btn.className = isActive 
-            ? "class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md shadow-red-200"
-            : "class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600";
+    // 3. AGGIORNAMENTO ESTETICA PULSANTI (Logica centralizzata)
+    const buttons = document.querySelectorAll('.class-filter-btn');
+    buttons.forEach(btn => {
+        const btnClass = btn.getAttribute('data-class');
+        const isActive = btnClass === classeCliccata;
+
+        if (isActive) {
+            // Classi per il pulsante ATTIVO
+            btn.className = "class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md shadow-red-200 transition-all scale-105 z-10";
+        } else {
+            // Classi per il pulsante INATTIVO
+            btn.className = "class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all hover:bg-zinc-50";
+        }
     });
 
-    // Aggiorna Elenco e Agenda
-    window.handleClassChange(classeCliccata);
+    // 4. SINCRONIZZAZIONE TENDINA (Filtro rapido)
+    if (typeof window.updateFastFilter === 'function') {
+        window.updateFastFilter(classeCliccata);
+    }
+
+    // 5. CARICAMENTO DATI (Agenda ed Elenco)
+    if (typeof window.handleClassChange === 'function') {
+        window.handleClassChange(classeCliccata);
+    }
+    
+    console.log(`📂 Vista filtrata per: ${classeCliccata}`);
 };
 
 	window.deleteVoto = async (idRicevuto, studentId) => {
@@ -2127,18 +2189,39 @@ window.updateFastFilter = (selectedClass) => {
     const select = document.getElementById('fast-student-filter');
     if (!select) return;
 
-    // Pulizia tendina (mantiene solo la prima opzione)
-    select.innerHTML = '<option value="">Seleziona Studente</option>';
+    // Pulizia tendina
+    select.innerHTML = '<option value="">Studente...</option>';
 
-    // Filtriamo gli studenti dalla lista globale che hai già (window.allStudents)
-    const filtered = (selectedClass === 'ALL' || !selectedClass) 
-        ? window.allStudents 
-        : window.allStudents.filter(s => s.classe === selectedClass);
+    // Definiamo i ruoli da escludere (Staff)
+    const staffRoles = ['prof', 'preside', 'vice preside', 'bidello', 'admin', 'docente'];
+    // Definiamo le classi valide
+    const validClasses = ['A', 'B', 'C'];
 
-    // Ordiniamo per nome
+    const filtered = window.allStudents.filter(s => {
+        const role = (s.role || "").toLowerCase();
+        const studentClass = (s.classe || "").toUpperCase();
+        
+        // 1. Verifichiamo che NON sia staff
+        const isNotStaff = !staffRoles.some(r => role.includes(r));
+        
+        // 2. Verifichiamo che appartenga a una classe valida (A, B o C)
+        const hasValidClass = validClasses.includes(studentClass);
+
+        // Se non è uno studente valido per le classi A, B, C, lo scartiamo a prescindere
+        if (!isNotStaff || !hasValidClass) return false;
+
+        // 3. Se il filtro classe è attivo (diverso da ALL), filtriamo ulteriormente
+        if (selectedClass && selectedClass !== 'ALL') {
+            return studentClass === selectedClass;
+        }
+
+        return true;
+    });
+
+    // Ordinamento alfabetico
     filtered.sort((a, b) => a.name.localeCompare(b.name));
 
-    // Aggiungiamo le opzioni
+    // Aggiunta opzioni alla tendina
     filtered.forEach(student => {
         const opt = document.createElement('option');
         opt.value = student.id;
@@ -2147,15 +2230,41 @@ window.updateFastFilter = (selectedClass) => {
     });
 };
 
-// Modifichiamo leggermente la tua funzione filterByClass esistente 
-// per chiamare anche l'aggiornamento della tendina
-const originalFilterByClass = window.filterByClass;
-window.filterByClass = (className) => {
-    // Chiama la vecchia funzione (quella che filtra i pulsanti e la vista)
-    if (typeof originalFilterByClass === 'function') originalFilterByClass(className);
+window.navDate = (unit, value) => {
+    const cal = document.getElementById('global-calendar');
+    if (!cal || !cal.value) return;
+
+    let d = new Date(cal.value);
+    if (unit === 'day') d.setDate(d.getDate() + value);
+    if (unit === 'week') d.setDate(d.getDate() + (value * 7));
+    if (unit === 'month') d.setMonth(d.getMonth() + value);
+
+    const isoDate = d.toISOString().split('T')[0];
+    cal.value = isoDate;
     
-    // Aggiorna il filtro rapido
-    window.updateFastFilter(className);
+    // Invece di dispatchEvent, chiamiamo direttamente la funzione di aggiornamento
+    window.updateDateContext(); 
+};
+
+	window.deleteBacheca = async (idx) => {
+    const isStaff = ['preside', 'vicepreside', 'admin', 'bidello'].includes(window.userRole.toLowerCase());
+    if (!isStaff) return;
+
+    if (!confirm("Vuoi eliminare questa comunicazione dalla bacheca?")) return;
+
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general');
+    try {
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+            let posts = [...snap.data().posts];
+            // Poiché la bacheca è renderizzata con .reverse(), l'indice va calcolato
+            const realIdx = posts.length - 1 - idx; 
+            posts.splice(realIdx, 1);
+            await updateDoc(ref, { posts: posts });
+        }
+    } catch (e) {
+        console.error("Errore eliminazione bacheca:", e);
+    }
 };
 
     </script>
