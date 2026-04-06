@@ -1952,7 +1952,11 @@ if (avatarEl) {
 
 // Classe (come prima)
 if (badgeEl) {
-    badgeEl.innerText = `CLASSE: ${d.classe || data.classe || 'N/A'} - A.S. ${as}`;
+    if (isStaff || d.classe === 'None' || !d.classe) {
+        badgeEl.innerText = `DOCENTE ATTIVO - A.S. ${as}`;
+    } else {
+        badgeEl.innerText = `CLASSE: ${d.classe || data.classe || 'N/A'} - A.S. ${as}`;
+    }
 }
 
 // Ruolo e Colori (Ripristinato esattamente come lo avevi tu)
@@ -1995,9 +1999,63 @@ if (ruoloEl) {
             }
         }
 
-        // 6. LISTE (Passiamo l'anno per il messaggio "Nessun voto")
-        renderListaProfilo('profilo-voti-list', votiFiltrati, isStaff, "voti", as);
-        renderListaProfilo('profilo-note-list', noteFiltrate, isStaff, "note", as);
+        // 6. GESTIONE CONTENUTI DINAMICI (DASHBOARD STAFF vs LISTE STUDENTE)
+const containerListe = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-2.gap-6'); // Seleziona la griglia sotto l'header
+
+if (isStaff) {
+    // SE È STAFF: Creiamo una grafica con scorciatoie e info utili
+    if (containerListe) {
+        containerListe.innerHTML = `
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
+                <h3 class="font-black uppercase text-amber-600 text-xs mb-4 border-b pb-2">👨‍🏫 Pannello Gestione</h3>
+                <div class="space-y-4">
+                    <p class="text-[11px] font-bold text-zinc-500 uppercase leading-tight">Benvenuto nel tuo profilo istituzionale. Da qui puoi accedere rapidamente alle funzioni di registro.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
+                            <p class="text-[8px] font-black text-zinc-400 uppercase">Status</p>
+                            <p class="text-xs font-black text-green-600 uppercase">Attivo</p>
+                        </div>
+                        <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
+                            <p class="text-[8px] font-black text-zinc-400 uppercase">Lezioni</p>
+                            <p class="text-xs font-black text-zinc-800 uppercase">Oggi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🛠️ Azioni Rapide</h3>
+                <div class="flex flex-col gap-3">
+                    <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center">
+                        <span>Vai in Agenda Classi</span>
+                        <span>➡️</span>
+                    </button>
+                    <button onclick="window.changeMenu('bacheca')" class="w-full p-4 bg-white border-2 border-zinc-200 text-zinc-800 rounded-2xl font-black text-[10px] uppercase hover:border-zinc-800 transition-all flex justify-between items-center">
+                        <span>Leggi Comunicazioni</span>
+                        <span>📢</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+} else {
+    // SE È STUDENTE: Ripristiniamo la grafica classica con Voti e Note
+    if (containerListe) {
+        containerListe.innerHTML = `
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
+                <div id="profilo-voti-list" class="space-y-3"></div>
+            </div>
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
+                <div id="profilo-note-list" class="space-y-3"></div>
+            </div>
+        `;
+    }
+    // Ora popoliamo le liste come al solito
+    renderListaProfilo('profilo-voti-list', votiFiltrati, false, "voti", as);
+    renderListaProfilo('profilo-note-list', noteFiltrate, false, "note", as);
+}
 
     } catch (error) {
         console.error("Errore profilo:", error);
