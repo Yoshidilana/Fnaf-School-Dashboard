@@ -1953,7 +1953,7 @@ if (avatarEl) {
 // Classe (come prima)
 if (badgeEl) {
     if (isStaff || d.classe === 'None' || !d.classe) {
-        badgeEl.innerText = `DOCENTE ATTIVO - A.S. ${as}`;
+        badgeEl.innerText = `Staff scolastico - A.S. ${as}`;
     } else {
         badgeEl.innerText = `CLASSE: ${d.classe || data.classe || 'N/A'} - A.S. ${as}`;
     }
@@ -2004,7 +2004,7 @@ const gridContenuti = document.getElementById('profilo-content-grid');
 
 if (isStaff) {
     // 1. Pulizia Header per Staff
-    if (badgeEl) badgeEl.innerText = `DOCENTE ATTIVO - A.S. ${as}`;
+    if (badgeEl) badgeEl.innerText = `Staff scolastico - A.S. ${as}`;
     
     // Recuperiamo le materie (assumendo che siano nel documento 'assignments' o 'records')
     // Se è un array lo uniamo con una virgola, se è stringa la usiamo così com'è
@@ -2015,7 +2015,7 @@ if (isStaff) {
     if (gridContenuti) {
         gridContenuti.innerHTML = `
             <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-red-700 text-xs mb-4 border-b pb-2">👨‍🏫 Area Personale Docente</h3>
+                <h3 class="font-black uppercase text-red-700 text-xs mb-4 border-b pb-2">👨‍🏫 Area Personale Scolastico</h3>
                 <div class="space-y-4">
                     <p class="text-[11px] font-bold text-zinc-500 uppercase leading-tight">Benvenuto. Da qui puoi gestire le tue attività quotidiane della Fazbear School.</p>
                     <div class="grid grid-cols-2 gap-3">
