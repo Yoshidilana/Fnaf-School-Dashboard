@@ -536,7 +536,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyCDlju6uXmXj3fRLYge-ya65J8ditM6rnM", 
@@ -2332,41 +2332,69 @@ if (mediaRegistro) {
 };
 
 	window.deleteVoto = async (idRicevuto, studentId) => {
-    // Conferma di sicurezza per evitare click accidentali
     if (!confirm("⚠️ Sei sicuro di voler eliminare definitivamente questo voto?")) return;
 
-    console.log("Eliminazione voto ID:", idRicevuto);
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-    const d = await getDoc(recordRef);
+    try {
+        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+        const d = await getDoc(recordRef);
 
-    if (d.exists()) {
+        if (!d.exists()) {
+            alert("Errore: Registro non trovato.");
+            return;
+        }
+
         const listaVoti = d.data().voti || [];
         const votoDaEliminare = listaVoti.find(v => v.id === idRicevuto);
 
         if (!votoDaEliminare) {
-            alert("Errore: Voto non trovato.");
+            alert("Errore: Voto non trovato nel registro.");
             return;
         }
 
-        // 1. FILTRIAMO LA LISTA: Teniamo tutti tranne quello con l'ID ricevuto
-        const nuovaListaVoti = listaVoti.filter(v => v.id !== idRicevuto);
-        await updateDoc(recordRef, { voti: nuovaListaVoti });
+        // 1. ELIMINAZIONE DAL REGISTRO PRINCIPALE
+        await updateDoc(recordRef, {
+            voti: arrayRemove(votoDaEliminare)
+        });
 
-        // 2. AGGIORNAMENTO AGENDA (Rimuoviamo anche da lì)
-        const dataParts = votoDaEliminare.data.split('/');
-        const agendaId = `${window.selectedClass}_${dataParts[2]}-${dataParts[1]}-${dataParts[0]}`;
-        const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+        // 2. AGGIORNAMENTO AGENDA (Sostituito con logica filter)
+        try {
+            const [gg, mm, aaaa] = votoDaEliminare.data.split('/');
+            const agendaId = `${window.selectedClass}_${aaaa}-${mm}-${gg}`;
+            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
 
-        const aSnap = await getDoc(agendaRef);
-        if (aSnap.exists()) {
-            let daily = aSnap.data().daily_voti || [];
-            // Rimuoviamo il voto dall'agenda usando l'ID
-            const nuovoDaily = daily.filter(v => v.id !== idRicevuto);
-            await updateDoc(agendaRef, { daily_voti: nuovoDaily });
+            const aSnap = await getDoc(agendaRef);
+            if (aSnap.exists()) {
+                const daily = aSnap.data().daily_voti || [];
+                
+                // FILTRO: Teniamo tutti i voti TRANNE quello che corrisponde ai criteri
+                const nuovoDaily = daily.filter(v => {
+                    const match = 
+                        v.studenteId === studentId && 
+                        v.materia === votoDaEliminare.materia && 
+                        String(v.voto) === String(votoDaEliminare.voto) &&
+                        v.argomento === votoDaEliminare.argomento;
+                    
+                    return !match; // Se è un match, ritorna false e lo elimina
+                });
+
+                // Se la lista è cambiata, salviamo
+                if (nuovoDaily.length !== daily.length) {
+                    await updateDoc(agendaRef, { daily_voti: nuovoDaily });
+                }
+            }
+        } catch (agendaError) {
+            console.error("Errore durante la pulizia dell'agenda:", agendaError);
         }
 
-        alert("Voto eliminato correttamente.");
-        loadStudentRecords(studentId); // Ricarica la tabella
+        alert("✅ Voto eliminato correttamente.");
+        
+        if (typeof loadStudentRecords === "function") {
+            loadStudentRecords(studentId);
+        }
+
+    } catch (error) {
+        console.error("Errore durante l'eliminazione:", error);
+        alert("❌ Errore critico durante l'eliminazione.");
     }
 };
 
