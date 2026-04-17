@@ -2591,6 +2591,34 @@ window.saveAttendance = async () => {
 // Chiama la funzione dopo il caricamento
 inizializzaGradiVoti();
 
+window.deleteBacheca = async (idx) => {
+    if (!confirm("Vuoi eliminare definitivamente questo avviso dalla bacheca?")) return;
+
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general');
+    
+    try {
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+            const data = snap.data();
+            let posts = [...(data.posts || [])];
+            
+            // Rimuove l'elemento all'indice specificato (l'indice è invertito nel render, 
+            // ma loadBacheca usa .slice().reverse(), quindi l'indice passato deve 
+            // corrispondere all'array originale invertito)
+            const originalIdx = posts.length - 1 - idx;
+            
+            if (originalIdx > -1) {
+                posts.splice(originalIdx, 1);
+                await updateDoc(ref, { posts: posts });
+                console.log(`[SUCCESS] Post bacheca rimosso all'indice originale: ${originalIdx}`);
+            }
+        }
+    } catch (e) {
+        console.error("[ERROR] Fallimento durante l'eliminazione del post:", e);
+        alert("Errore durante l'eliminazione.");
+    }
+};
+
     </script>
 </body>
 </html>
