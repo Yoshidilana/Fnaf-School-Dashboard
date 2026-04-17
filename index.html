@@ -710,13 +710,21 @@ function applyRoleUI() {
 
         // --- GESTIONE CLASSI E STUDENTI ---
         window.handleClassChange = (classeDalPulsante) => {
-    // Se passiamo una classe dal pulsante, usiamo quella. Altrimenti cerchiamo di leggere il vecchio selettore (se esiste)
     const cls = classeDalPulsante || window.selectedClass || "";
     window.selectedClass = cls;
 
-    // Aggiorniamo il titolo dell'agenda (se l'elemento esiste)
     const titleEl = document.getElementById('agenda-class-title');
     if (titleEl) titleEl.innerText = cls || '---';
+
+    // --- AGGIUNTA: Nascondi pulsanti se la classe non è valida ---
+    const profActions = document.getElementById('prof-actions-agenda');
+    const profCommPanel = document.getElementById('prof-comm-panel');
+    const isClassValid = ['A', 'B', 'C'].includes(cls);
+
+    if (profActions) profActions.classList.toggle('hidden', !isClassValid);
+    if (profCommPanel) profCommPanel.classList.toggle('hidden', !isClassValid);
+
+    window.renderStudentList();
 
     // Ricarichiamo tutto
     window.renderStudentList();
@@ -1211,11 +1219,18 @@ await setDoc(agendaRef, {
         };
 
         window.openModal = (type) => {
-            const body = document.getElementById('modal-body');
-            const confirm = document.getElementById('modal-confirm');
-            document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
-            
-            if(type === 'firme') {
+    // --- AGGIUNTA: Controllo validità classe per Firme e Compiti ---
+    const classiValide = ['A', 'B', 'C'];
+    if ((type === 'firme' || type === 'compiti') && !classiValide.includes(window.selectedClass)) {
+        alert("⚠️ Azione negata: Seleziona prima una classe valida (A, B o C) dal menu in alto.");
+        return;
+    }
+
+    const body = document.getElementById('modal-body');
+    const confirm = document.getElementById('modal-confirm');
+    document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+    
+    if(type === 'firme') {
                 body.innerHTML = `
                     <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
                     <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
@@ -1706,6 +1721,13 @@ window.renderPagella = (voti, aySelezionato) => {
      window.addAvviso = async (testo, cls) => {
     if(!testo || testo.trim() === "") return;
     
+    // --- AGGIUNTA: Blocco per classi non valide ---
+    const classiValide = ['A', 'B', 'C'];
+    if (!classiValide.includes(cls)) {
+        alert("⚠️ Impossibile inviare l'avviso: Seleziona una classe specifica.");
+        return;
+    }
+
     const cal = document.getElementById('global-calendar');
     const dateKey = cal ? cal.value : null;
     if(!dateKey) {
