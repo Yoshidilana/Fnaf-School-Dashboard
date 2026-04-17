@@ -1133,13 +1133,17 @@ if (resMediaElem) {
     const colorClass = valoreNumerico < 6 ? 'text-red-500 font-bold' : 'text-green-600 font-bold';
     const hoverClass = canManage ? 'hover:bg-zinc-200' : '';
     
+    // Costruiamo il testo del tooltip
+    const infoTooltip = `${v.data} - ${v.argomento || 'Nessun argomento'}`;
+
     let handlers = "";
     if (canManage) {
         handlers += ` onclick="window.editVoto('${v.id}', '${studentId}')"`;
         handlers += ` oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"`;
     }
 
-    return `<span class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" ${handlers}>${v.voto}</span>`;
+    // Aggiunto l'attributo title="${infoTooltip}"
+    return `<span title="${infoTooltip}" class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" ${handlers}>${v.voto}</span>`;
 }
 
         function renderNoteActions(n, idx, studentId) {
