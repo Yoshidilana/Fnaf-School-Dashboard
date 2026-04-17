@@ -383,10 +383,12 @@
     </div>
 
     <div id="prof-grade-panel" class="hidden glass p-4 flex gap-3 items-center">
-        <input id="input-grade-val" type="number" step="0.5" placeholder="Voto" class="w-16 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
-        <select id="input-grade-subject" class="bg-zinc-900 border border-zinc-900 rounded p-2 text-xs flex-1 text-white"></select>
-        <button onclick="window.submitGrade()" class="bg-red-700 px-4 py-2 rounded text-white text-[10px] font-black uppercase">Vota</button>
-    </div>
+    <select id="input-grade-val" class="w-28 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white outline-none focus:border-red-500">
+        <!-- Opzioni popolate via JS -->
+    </select>
+    <select id="input-grade-subject" class="bg-zinc-900 border border-zinc-900 rounded p-2 text-xs flex-1 text-white"></select>
+    <button onclick="window.submitGrade()" class="bg-red-700 px-4 py-2 rounded text-white text-[10px] font-black uppercase">Vota</button>
+</div>
 
     <div class="bg-white rounded-xl shadow-sm border border-zinc-900 overflow-hidden">
         <table class="w-full text-left text-xs">
@@ -1024,33 +1026,31 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
         });
 
         // 3. Calcolo Media Globale
-        const sommaG = votiTuttoAnno.reduce((a, b) => a + parseFloat(b.voto), 0);
-        const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
-        
-        const resMediaElem = document.getElementById('res-student-media');
-        if (resMediaElem) { 
-            resMediaElem.innerText = mediaG;
-            const valoreMedia = parseFloat(mediaG);
-            resMediaElem.style.color = valoreMedia === 0 ? "#71717a" : (valoreMedia < 6 ? "#dc2626" : "#16a34a");
-        }
-		
-		
+        const sommaG = votiTuttoAnno.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0);
+const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
+
+const resMediaElem = document.getElementById('res-student-media');
+if (resMediaElem) { 
+    resMediaElem.innerText = mediaG;
+    const valoreMedia = parseFloat(mediaG);
+    resMediaElem.style.color = valoreMedia === 0 ? "#71717a" : (valoreMedia < 6 ? "#dc2626" : "#16a34a");
+}
 
         // 4. Identificazione Materie
         const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) 
             ? (window.currentUserData?.materie || []) 
             : [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))];
 
-	
-
         let vHtml = "";
         
         // 5. Render Materie Principali
         materie.forEach(m => {
-            const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
-            const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
-            const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-            const avg = m_voti.length ? (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1) : "0.0";
+    const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
+    const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
+    const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
+    
+    // Sostituisci il calcolo della media di materia (avg) con questo:
+    const avg = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
             
             vHtml += `<tr class="border-b border-zinc-700 hover:bg-zinc-50">
                 <td class="p-4 font-bold text-zinc-800 uppercase">${m}</td>
@@ -1126,27 +1126,20 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
 
         function renderVotoTag(v, studentId) {
     const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
-    const isPreside = window.userRole === ROLES.PRESIDE;
     const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, 'admin'].includes(window.userRole);
-    
-    // Possono modificare/eliminare i prof (se è il loro voto) o lo Staff/Admin
     const canManage = isProf || isStaff;
 
-    const colorClass = v.voto < 6 ? 'text-red-500 font-bold' : 'text-green-600 font-bold';
+    const valoreNumerico = window.parseVotoScolastico(v.voto);
+    const colorClass = valoreNumerico < 6 ? 'text-red-500 font-bold' : 'text-green-600 font-bold';
     const hoverClass = canManage ? 'hover:bg-zinc-200' : '';
     
-    let tooltipText = `Data: ${v.data}${v.commento ? ' - Nota: ' + v.commento : ''}`;
-    if (v.argomento) tooltipText += `\nArgomento: ${v.argomento}`;
-
     let handlers = "";
     if (canManage) {
-        // Click Sinistro: Modifica
         handlers += ` onclick="window.editVoto('${v.id}', '${studentId}')"`;
-        // Click Destro: Elimina (e blocca menu browser)
         handlers += ` oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"`;
     }
 
-    return `<span title="${tooltipText}" class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" ${handlers}>${v.voto}</span>`;
+    return `<span class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" ${handlers}>${v.voto}</span>`;
 }
 
         function renderNoteActions(n, idx, studentId) {
@@ -1680,8 +1673,8 @@ window.renderPagella = (voti, aySelezionato) => {
         const vQ1 = m_voti.filter(v => isDateInQ(v.data, 1));
         const vQ2 = m_voti.filter(v => isDateInQ(v.data, 2));
 
-        const valQ1 = vQ1.length ? (vQ1.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ1.length) : null;
-        const valQ2 = vQ2.length ? (vQ2.reduce((a,b)=>a+parseFloat(b.voto),0)/vQ2.length) : null;
+        const valQ1 = vQ1.length ? (vQ1.reduce((a,b) => a + window.parseVotoScolastico(b.voto), 0) / vQ1.length) : null;
+        const valQ2 = vQ2.length ? (vQ2.reduce((a,b) => a + window.parseVotoScolastico(b.voto), 0) / vQ2.length) : null;
 
         const row = (materia, val) => {
             const displayVoto = val !== null ? Math.round(val) : "-";
@@ -1987,10 +1980,11 @@ if (ruoloEl) {
             }
         } else {
             const media = votiFiltrati.length > 0 
-                ? (votiFiltrati.reduce((a, b) => a + parseFloat(b.voto), 0) / votiFiltrati.length).toFixed(2) 
-                : "0.00";
-            if (mediaEl) {
-                mediaEl.innerText = media;
+    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(2) 
+    : "0.00";
+
+if (mediaEl) {
+    mediaEl.innerText = media;
                 mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
                 
                 // Ripristiniamo l'etichetta per gli studenti
@@ -2232,8 +2226,8 @@ if (role === 'studente') {
 
         const mediaEl = document.getElementById('target-profile-media');
         const media = votiFiltrati.length > 0 
-            ? (votiFiltrati.reduce((a, b) => a + parseFloat(b.voto), 0) / votiFiltrati.length).toFixed(2) 
-            : "0.0";
+    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(2) 
+    : "0.0";
         
         if (mediaEl) {
             mediaEl.innerText = media;
@@ -2531,6 +2525,45 @@ window.saveAttendance = async () => {
         alert("❌ Errore durante il salvataggio.");
     }
 };
+
+	window.parseVotoScolastico = (votoStr) => {
+    if (!votoStr) return 0;
+    let v = votoStr.toString().trim();
+    if (v === "10L") return 10.5;
+    
+    // Estrae la parte numerica iniziale
+    let base = parseFloat(v);
+    if (isNaN(base)) return 0;
+
+    if (v.includes('+')) return base + 0.25;
+    if (v.includes('-')) return base - 0.25;
+    if (v.includes('½')) return base + 0.5;
+    return base;
+};
+
+	function inizializzaGradiVoti() {
+    const select = document.getElementById('input-grade-val');
+    if (!select) return;
+    
+    const voti = [];
+    for (let i = 1; i <= 10; i++) {
+        if (i < 10) {
+            voti.push(`${i}`);
+            voti.push(`${i}+`);
+            voti.push(`${i}½`);
+            voti.push(`${i+1}-`);
+        } else {
+            voti.push("10");
+            voti.push("10L");
+        }
+    }
+    
+    select.innerHTML = voti.map(v => `<option value="${v}">${v}</option>`).join('');
+    select.value = "6"; // Default
+}
+
+// Chiama la funzione dopo il caricamento
+inizializzaGradiVoti();
 
     </script>
 </body>
