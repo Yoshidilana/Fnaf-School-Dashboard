@@ -115,8 +115,6 @@
 		<div id="class-filter-container" class="flex items-center gap-1 mb-4 bg-zinc-50 p-1 rounded-lg border border-zinc-200 shadow-sm">
     <p class="text-[9px] font-black text-zinc-400 uppercase ml-1 mr-1"></p>
     
-
-    
     <button onclick="window.filterByClass('A')" data-class="A" 
         class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
         A
@@ -207,8 +205,8 @@
             <span>👤</span> Il Mio Profilo
         </button>
 
-			<button onclick="window.changeMenu('studenti'); setTimeout(() => { renderStudentList(); }, 100);" id="menu-studenti" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-    <span>👥</span> Elenco Studenti
+			<button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
+    <span>🏫</span> Classi
 </button>
 
 		<button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
@@ -240,6 +238,74 @@
         <!-- Contenuto -->
         <main class="flex-1 bg-zinc-100 p-6 relative">
 
+	<!-- VIEW: HUB CLASSE -->
+<div id="view-classi" class="tab-content hidden p-6">
+    <!-- Stato 1: Selezione Classe (visibile se selectedClass è null) -->
+    <div id="class-selection-screen" class="flex flex-col items-center justify-center min-h-[50vh]">
+        <h2 class="text-2xl font-black italic mb-8 uppercase text-zinc-800">Seleziona una Classe</h2>
+        <div class="flex gap-6">
+            <button onclick="window.filterByClass('A')" class="w-32 h-32 bg-white border-4 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black shadow-sm">A</button>
+            <button onclick="window.filterByClass('B')" class="w-32 h-32 bg-white border-4 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black shadow-sm">B</button>
+            <button onclick="window.filterByClass('C')" class="w-32 h-32 bg-white border-4 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black shadow-sm">C</button>
+        </div>
+    </div>
+
+    <!-- Stato 2: Hub Operativo (visibile dopo la selezione) -->
+    <div id="class-hub-screen" class="hidden">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-black italic uppercase text-zinc-800">Gestione Classe <span id="hub-class-name" class="text-red-600">--</span></h2>
+            <button onclick="window.resetClassSelection()" class="text-[10px] font-black uppercase text-zinc-400 hover:text-red-600">🔄 Cambia Classe</button>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <button onclick="window.changeMenu('studenti')" class="p-8 bg-white border-2 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-sm group">
+                <span class="text-4xl group-hover:scale-110 transition-transform">👥</span>
+                <span class="font-black uppercase text-xs tracking-widest">Elenco Studenti</span>
+            </button>
+            <button onclick="window.changeMenu('agenda')" class="p-8 bg-white border-2 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-sm group">
+                <span class="text-4xl group-hover:scale-110 transition-transform">📅</span>
+                <span class="font-black uppercase text-xs tracking-widest">Agenda Classe</span>
+            </button>
+            <button onclick="window.renderGlobalClassRegistry()" class="p-8 bg-white border-2 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-sm group">
+                <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
+                <span class="font-black uppercase text-xs tracking-widest">Registro Voti</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW: REGISTRO VOTI GLOBALE -->
+<div id="view-registro-classe" class="tab-content hidden p-6">
+    <div class="flex justify-between items-center mb-6">
+        <div class="flex items-center gap-4">
+            <div>
+                <h2 class="text-2xl font-black italic uppercase text-zinc-800">Registro Voti Classe</h2>
+                <p id="reg-global-info" class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Caricamento...</p>
+            </div>
+            <!-- FILTRO MATERIE AGGIUNTO QUI -->
+            <div id="reg-subject-filter-container" class="hidden">
+                <select id="reg-global-subject-select" onchange="window.renderGlobalClassRegistry(this.value)" 
+                    class="bg-white border-2 border-zinc-200 rounded-xl px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-red-600 shadow-sm">
+                </select>
+            </div>
+        </div>
+        <button onclick="window.changeMenu('classi')" class="bg-zinc-200 px-4 py-2 rounded-xl font-black text-[9px] uppercase">Indietro</button>
+    </div>
+    <div class="bg-white rounded-2xl shadow-xl border border-zinc-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-[11px]">
+                <thead class="bg-zinc-900 text-white font-black uppercase">
+                    <tr id="reg-global-head">
+                        <th class="p-4 border-r border-zinc-700">Studente</th>
+                        <!-- I voti verranno inseriti qui -->
+                        <th class="p-4 text-right">Media</th>
+                    </tr>
+                </thead>
+                <tbody id="reg-global-body" class="divide-y divide-zinc-200"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 		<div id="view-studenti" class="tab-content hidden p-4 md:p-6">
     <h2 class="text-2xl font-black italic mb-4 uppercase">ELENCO STUDENTI</h2>
     <div id="grid-studenti" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
@@ -253,8 +319,8 @@
                 <img id="target-profile-avatar" src="" class="w-24 h-24 rounded-2xl border-4 border-zinc-100 shadow-sm object-cover bg-zinc-200">
                 <div>
                     <span id="target-profile-class-badge" class="px-2 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black rounded-lg uppercase tracking-wider">Caricamento...</span>
-                    <h1 id="target-profile-name" class="text-3xl font-black italic uppercase text-zinc-800 leading-none mt-2">NOME</h1>
-                    <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Studente della Fazbear School</p>
+                    <h1 id="target-profile-name" class="text-3xl font-black uppercase text-zinc-800 leading-none mt-2">NOME</h1>
+                    <p class="text-green-500 text-[10px] font-bold uppercase mt-2 tracking-widest">Studente della Fazbear School</p>
                 </div>
             </div>
             <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-100 text-center min-w-[120px]">
@@ -665,15 +731,17 @@ function applyRoleUI() {
         const el = document.getElementById(id);
         if (el) el.classList.toggle('hidden', !show);
     };
-
+	
+     toggle('menu-classi', !isStudente); // Nasconde il tasto "Classi" dalla sidebar se è uno studente
     toggle('class-filter-container', !isStudente); 
     toggle('menu-appello', isStaff);
 
     if(isStaff) {
-        toggle('prof-actions-agenda', isStaff);
-        toggle('prof-grade-panel', isStaff);
-        toggle('btn-add-note', isStaff);
-        toggle('prof-comm-panel', isStaff);
+toggle('prof-actions-agenda', isStaff);
+toggle('prof-comm-panel', isStaff);
+toggle('menu-appello', isStaff);
+toggle('btn-add-note', isStaff);
+toggle('prof-grade-panel', isStaff);
     }
     
     if(isPreside || isBidello) {
@@ -730,7 +798,12 @@ function applyRoleUI() {
     window.renderStudentList();
     if (typeof loadClassAgenda === 'function' && cls) {
         loadClassAgenda(cls);
-	const isStaff = ['preside', 'vicepreside', 'admin', 'prof'].includes(window.userRole?.toLowerCase());
+	const isStaff = [ROLES.PRESIDE, ROLES.PROF, 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase());
+const isClassValid = ['A', 'B', 'C'].includes(cls);
+
+// I pulsanti appaiono SOLO se l'utente è Staff E la classe è selezionata
+if (profActions) profActions.classList.toggle('hidden', !(isStaff && isClassValid));
+if (profCommPanel) profCommPanel.classList.toggle('hidden', !(isStaff && isClassValid));
         if (isStaff && typeof window.loadAttendance === 'function') {
             window.loadAttendance(cls, document.getElementById('global-calendar').value);
         }
@@ -794,6 +867,23 @@ window.renderStudentList = function() {
     </div>`;
 }).join('');
 };
+
+// --- AGGIUNTA: Pulizia tabelle se non c'è uno studente ---
+    if (!window.selectedStudentId) {
+        const registroBody = document.getElementById('registro-voti-body');
+        const noteList = document.getElementById('notes-list-global');
+        const pagellaQ1 = document.getElementById('pagella-q1-body');
+        const pagellaQ2 = document.getElementById('pagella-q2-body');
+
+        const msg = '<tr><td colspan="4" class="p-8 text-center text-zinc-400 italic uppercase font-bold">Seleziona uno studente della classe</td></tr>';
+
+        
+        if (registroBody) registroBody.innerHTML = msg;
+        if (pagellaQ1) pagellaQ1.innerHTML = msg;
+        if (pagellaQ2) pagellaQ2.innerHTML = msg;
+        if (noteList) noteList.innerHTML = '<p class="p-10 text-center opacity-30 uppercase font-black italic text-xs">Seleziona uno studente per vedere le note</p>';
+    }
+
 
         window.selectStudent = (id) => {
     // 1. Sicurezza: uno studente può vedere solo se stesso
@@ -1498,7 +1588,23 @@ if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
     }
 }
 
-        window.changeMenu = (menu) => {
+window.changeMenu = (menu) => {
+
+    
+    if (menu === 'classi') {
+        const selectionScreen = document.getElementById('class-selection-screen');
+        const hubScreen = document.getElementById('class-hub-screen');
+        
+        if (!window.selectedClass || window.selectedClass === 'ALL') {
+            selectionScreen.classList.remove('hidden');
+            hubScreen.classList.add('hidden');
+        } else {
+            selectionScreen.classList.add('hidden');
+            hubScreen.classList.remove('hidden');
+            document.getElementById('hub-class-name').innerText = window.selectedClass;
+        }
+    }
+
     // 1. Gestione Sidebar: Rimuove 'active' da tutti
     document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
     
@@ -1524,6 +1630,7 @@ if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
         console.error(`Errore: La vista view-${menu} non esiste nell'HTML!`);
     }
 };
+
 
         window.closeModal = () => document.getElementById('modal-overlay').classList.replace('flex', 'hidden');
 
@@ -2006,8 +2113,8 @@ if (ruoloEl) {
             }
         } else {
             const media = votiFiltrati.length > 0 
-    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(2) 
-    : "0.00";
+    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
+    : "0.0";
 
 if (mediaEl) {
     mediaEl.innerText = media;
@@ -2252,7 +2359,7 @@ if (role === 'studente') {
 
         const mediaEl = document.getElementById('target-profile-media');
         const media = votiFiltrati.length > 0 
-    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(2) 
+    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
     : "0.0";
         
         if (mediaEl) {
@@ -2308,6 +2415,14 @@ if (mediaRegistro) {
     }
 }
  	window.filterByClass = (classeCliccata) => {
+    // --- AGGIUNTA: Reset dello studente al cambio classe ---
+    window.selectedStudentId = null;
+    
+    const studentHeader = document.getElementById('student-header');
+    if (studentHeader) studentHeader.classList.add('hidden');
+    
+    const fastFilter = document.getElementById('fast-student-filter');
+    if (fastFilter) fastFilter.value = ""; 
     const isStudente = window.userRole === ROLES.STUDENTE;
     const miaClasse = window.currentUserData?.classe;
 
@@ -2379,7 +2494,9 @@ if (mediaRegistro) {
         // 2. AGGIORNAMENTO AGENDA (Sostituito con logica filter)
         try {
             const [gg, mm, aaaa] = votoDaEliminare.data.split('/');
-            const agendaId = `${window.selectedClass}_${aaaa}-${mm}-${gg}`;
+            const student = window.allStudents.find(s => s.id === studentId);
+	const sClass = student ? student.classe : window.selectedClass;
+	const agendaId = `${sClass}_${aaaa}-${mm}-${gg}`;
             const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
 
             const aSnap = await getDoc(agendaRef);
@@ -2423,9 +2540,8 @@ window.updateFastFilter = (selectedClass) => {
     const select = document.getElementById('fast-student-filter');
     if (!select) return;
 
-    // Pulizia tendina
     select.innerHTML = '<option value="">Studente...</option>';
-
+    select.value = ""; // Forza il reset visivo
     // Definiamo i ruoli da escludere (Staff)
     const staffRoles = ['prof', 'preside', 'vice preside', 'bidello', 'admin', 'docente'];
     // Definiamo le classi valide
@@ -2618,6 +2734,99 @@ window.deleteBacheca = async (idx) => {
         alert("Errore durante l'eliminazione.");
     }
 };
+
+	const originalFilterByClass = window.filterByClass;
+window.filterByClass = (cls) => {
+    // Esegue la logica originale (filtri topbar, caricamento dati)
+    originalFilterByClass(cls);
+    
+    // Gestione specifica per l'Hub
+    const selectionScreen = document.getElementById('class-selection-screen');
+    const hubScreen = document.getElementById('class-hub-screen');
+    const hubTitle = document.getElementById('hub-class-name');
+
+    if (selectionScreen && hubScreen) {
+        selectionScreen.classList.add('hidden');
+        hubScreen.classList.remove('hidden');
+        if (hubTitle) hubTitle.innerText = cls;
+        
+        // Se l'utente ha cliccato dalla topbar mentre era in un'altra vista, 
+        // non forziamo il ritorno all'hub, ma se è in "classi" lo mostriamo
+        const currentView = document.querySelector('.tab-content.active-view');
+        if (currentView && currentView.id === 'view-classi') {
+            window.changeMenu('classi');
+        }
+    }
+};
+
+	window.renderGlobalClassRegistry = async (subjectOverride = null) => {
+    const cls = window.selectedClass;
+    if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica (A, B, C)");
+
+    window.changeMenu('registro-classe');
+    const tbody = document.getElementById('reg-global-body');
+    const info = document.getElementById('reg-global-info');
+    const filterContainer = document.getElementById('reg-subject-filter-container');
+    const subjectSelect = document.getElementById('reg-global-subject-select');
+    
+    const materieDisponibili = window.currentUserData?.materie || [];
+    
+    // Gestione Filtro Materie (se > 1)
+    if (materieDisponibili.length > 1) {
+        filterContainer.classList.remove('hidden');
+        if (subjectSelect.options.length === 0) {
+            subjectSelect.innerHTML = materieDisponibili.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+        }
+    } else {
+        filterContainer.classList.add('hidden');
+    }
+
+    const profSubject = subjectOverride || subjectSelect.value || materieDisponibili[0] || "Materia non definita";
+    info.innerText = `Classe ${cls} - Visualizzazione: ${profSubject}`;
+
+    tbody.innerHTML = '<tr><td colspan="10" class="p-10 text-center animate-pulse uppercase font-black">Sincronizzazione dati classe...</td></tr>';
+
+    const classStudents = window.allStudents.filter(s => s.classe === cls);
+    let rowsHtml = "";
+
+    for (const student of classStudents) {
+        const recRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', student.id);
+        const snap = await getDoc(recRef);
+        const data = snap.exists() ? snap.data() : { voti: [] };
+
+        const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+        const studentGrades = (data.voti || []).filter(v => 
+            v.materia.toLowerCase() === profSubject.toLowerCase() && 
+            v.anno === currentYear
+        );
+
+        const media = studentGrades.length > 0 
+            ? (studentGrades.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / studentGrades.length).toFixed(1) 
+            : "0.0";
+
+        rowsHtml += `
+            <tr class="hover:bg-zinc-50 transition-colors">
+                <td class="p-4 font-black uppercase border-r border-zinc-100 bg-zinc-50/50">${student.name}</td>
+                <td class="p-4 flex flex-wrap gap-1">
+                    ${studentGrades.map(v => `
+                        <span class="px-2 py-1 rounded bg-white border border-zinc-200 font-bold ${window.parseVotoScolastico(v.voto) < 6 ? 'text-red-600' : 'text-green-600'}">
+                            ${v.voto}
+                        </span>
+                    `).join('') || '<span class="text-zinc-300 italic text-[9px]">Nessun voto</span>'}
+                </td>
+                <td class="p-4 text-right font-black text-sm ${parseFloat(media) < 6 ? 'text-red-600' : 'text-blue-600'}">${media}</td>
+            </tr>`;
+    }
+    tbody.innerHTML = rowsHtml || '<tr><td colspan="10" class="p-10 text-center">Nessuno studente trovato.</td></tr>';
+};
+
+	window.resetClassSelection = () => {
+    window.selectedClass = null;
+    document.getElementById('class-selection-screen').classList.remove('hidden');
+    document.getElementById('class-hub-screen').classList.add('hidden');
+    window.changeMenu('classi');
+};
+
 
     </script>
 </body>
