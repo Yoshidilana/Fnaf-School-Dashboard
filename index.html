@@ -254,11 +254,11 @@
                 <span class="text-3xl block mb-2">📢</span>
                 <span class="font-black uppercase text-[10px]">Bacheca</span>
             </button>
-            <button onclick="window.changeMenu('agenda')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
-                <span class="text-3xl block mb-2">📅</span>
-                <span class="font-black uppercase text-[10px]">Agenda</span>
-            </button>
-        </div>
+            <button onclick="window.changeMenu('classi')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">🏫</span>
+        <span class="font-black uppercase text-[10px]">Classi</span>
+    </button>
+</div>
     </div>
 </div>
 
@@ -1621,16 +1621,33 @@ if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
 }
 
 window.changeMenu = (menu) => {
-    // 1. Gestione Sidebar: Nascondi se siamo in Home, mostra altrimenti
+    // Gestione visibilità Sidebar
     if (menu === 'home') {
         document.body.classList.add('sidebar-hidden');
     } else {
         document.body.classList.remove('sidebar-hidden');
-        // Riesegui applyRoleUI per assicurarti che i permessi siano corretti al riapparire
+        // Forza il refresh dei permessi quando la sidebar appare
         if(typeof applyRoleUI === 'function') applyRoleUI();
     }
 
-    // 2. Gestione Classi Hub
+    // Reset stati attivi Sidebar
+    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.getElementById(`menu-${menu}`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Switch delle Viste
+    document.querySelectorAll('.tab-content').forEach(v => {
+        v.classList.remove('active-view');
+        v.classList.add('hidden');
+    });
+
+    const targetView = document.getElementById(`view-${menu}`);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.classList.add('active-view');
+    }
+
+    // Logica specifica per Hub Classi
     if (menu === 'classi') {
         const selectionScreen = document.getElementById('class-selection-screen');
         const hubScreen = document.getElementById('class-hub-screen');
@@ -1643,23 +1660,6 @@ window.changeMenu = (menu) => {
             const hubTitle = document.getElementById('hub-class-name');
             if(hubTitle) hubTitle.innerText = window.selectedClass;
         }
-    }
-
-    // 3. Reset stati attivi Sidebar
-    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.getElementById(`menu-${menu}`);
-    if (activeBtn) activeBtn.classList.add('active');
-
-    // 4. Switch delle Viste
-    document.querySelectorAll('.tab-content').forEach(v => {
-        v.classList.remove('active-view');
-        v.classList.add('hidden');
-    });
-
-    const targetView = document.getElementById(`view-${menu}`);
-    if (targetView) {
-        targetView.classList.remove('hidden');
-        targetView.classList.add('active-view');
     }
 };
 
