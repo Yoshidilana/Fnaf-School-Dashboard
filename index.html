@@ -707,6 +707,7 @@ window.updateDateContext();
 
         // --- PERMESSI ---
         const ROLES = {
+    ADMIN: 'admin',
     PRESIDE: 'preside',
     VICE_PRESIDE: 'vicepreside', // Aggiunto
     PROF: 'prof',
@@ -716,14 +717,15 @@ window.updateDateContext();
 };
 
         function getRoleType(roleStr) {
-            if(!roleStr) return ROLES.OSPITE;
-            const r = roleStr.toLowerCase();
-            if(r.includes('preside')) return ROLES.PRESIDE;
-            if(r.includes('prof') || r.includes('docente')) return ROLES.PROF;
-            if(r.includes('bidello') || r.includes('ata')) return ROLES.BIDELLO;
-            if(r.includes('studente')) return ROLES.STUDENTE;
-            return ROLES.OSPITE;
-        }
+    if(!roleStr) return ROLES.OSPITE;
+    const r = roleStr.toLowerCase();
+    if(r.includes('admin')) return ROLES.ADMIN; // Aggiunto controllo Admin
+    if(r.includes('preside')) return ROLES.PRESIDE;
+    if(r.includes('prof') || r.includes('docente')) return ROLES.PROF;
+    if(r.includes('bidello') || r.includes('ata')) return ROLES.BIDELLO;
+    if(r.includes('studente')) return ROLES.STUDENTE;
+    return ROLES.OSPITE;
+}
 
         // --- FIREBASE SYNC ---
         signInAnonymously(auth).then(() => {
@@ -747,6 +749,7 @@ function applyRoleUI() {
     const isStudente = type === ROLES.STUDENTE;
     const isPersonale = isStaff || isBidello;
     const isOspite = type === ROLES.OSPITE;
+    const isAdmin = type === ROLES.ADMIN;
 
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
     let miaClasse = window.currentUserData?.classe;
@@ -760,7 +763,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     };
 	
 	    // --- SIDEBAR: CHI VEDE COSA ---
-    toggle('menu-classi', isPersonale);      // Ora visibile anche ai bidelli
+    toggle('menu-classi', isPersonale || isAdmin);      // Ora visibile anche ai bidelli
     toggle('menu-appello', isStaff);     // Solo Staff vede Appello rapido
     toggle('menu-agenda', isStudente);   // Solo Studenti vedono Agenda in Sidebar
     toggle('menu-registro', isStudente); // Solo Studenti vedono Registro in Sidebar
@@ -768,7 +771,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-note', isStudente);     // Solo Studenti vedono Note in Sidebar
     toggle('menu-bacheca', true);        // Tutti vedono la bacheca
     toggle('class-filter-container', !isStudente); 
-    toggle('home-btn-classi', isPersonale);  // Ora visibile anche ai bidelli
+    toggle('home-btn-classi', isPersonale || isAdmin);  // Ora visibile anche ai bidelli
 
 if(isStaff) {
     toggle('prof-actions-agenda', isStaff);
