@@ -839,7 +839,7 @@ if (!cls || cls === 'ALL') {
     window.renderStudentList();
     if (typeof loadClassAgenda === 'function' && cls) {
         loadClassAgenda(cls);
-	const isStaff = [ROLES.PRESIDE, ROLES.PROF, 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase());
+	const isStaff = [ROLES.PRESIDE, ROLES.PROF, 'vicepreside'].includes(window.userRole?.toLowerCase());
 const isClassValid = ['A', 'B', 'C'].includes(cls);
 
 // I pulsanti appaiono SOLO se l'utente è Staff E la classe è selezionata
@@ -1300,7 +1300,7 @@ if (resMediaElem) {
 
         function renderVotoTag(v, studentId) {
     const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
-    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, 'admin'].includes(window.userRole);
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
     const canManage = isProf || isStaff;
 
     const valoreNumerico = window.parseVotoScolastico(v.voto);
