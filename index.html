@@ -707,12 +707,13 @@ window.updateDateContext();
 
         // --- PERMESSI ---
         const ROLES = {
-            PRESIDE: 'preside',
-            PROF: 'prof',
-            BIDELLO: 'bidello',
-            STUDENTE: 'studente',
-            OSPITE: 'ospite'
-        };
+    PRESIDE: 'preside',
+    VICE_PRESIDE: 'vicepreside', // Aggiunto
+    PROF: 'prof',
+    BIDELLO: 'bidello',
+    STUDENTE: 'studente',
+    OSPITE: 'ospite'
+};
 
         function getRoleType(roleStr) {
             if(!roleStr) return ROLES.OSPITE;
@@ -747,8 +748,8 @@ function applyRoleUI() {
 
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
     let miaClasse = window.currentUserData?.classe;
-    if (miaClasse === "None" || !miaClasse || miaClasse === "") {
-        miaClasse = null;
+if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaClasse.trim() === "")) {
+    miaClasse = null;
     }
 
     const toggle = (id, show) => {
@@ -804,13 +805,18 @@ toggle('prof-grade-panel', isStaff);
         if (typeof window.selectStudent === 'function') window.selectStudent(window.currentUserId);
     } else {
         // Se è Staff e la classe è None, di default non selezionare nessuna classe specifica
-        if (!window.selectedClass) window.selectedClass = 'ALL';
+        if (!window.selectedClass) window.selectedClass = null;
     }
 }
 
         // --- GESTIONE CLASSI E STUDENTI ---
         window.handleClassChange = (classeDalPulsante) => {
-    const cls = classeDalPulsante || window.selectedClass || "";
+    const cls = classeDalPulsante || window.selectedClass;
+if (!cls || cls === 'ALL') {
+    console.warn("⚠️ Tentativo di caricamento agenda senza classe valida.");
+    return;
+}
+
     window.selectedClass = cls;
 
     const titleEl = document.getElementById('agenda-class-title');
@@ -962,6 +968,10 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
     // 1. Pulizia listener precedenti
     if (agendaListener) agendaListener();
     if (attendanceAgendaListener) attendanceAgendaListener();
+   if (!cls || cls === "None" || !['A', 'B', 'C'].includes(cls)) {
+        console.warn("Tentativo di caricamento agenda su classe non valida:", cls);
+        return; 
+    }
 
     const dateKey = document.getElementById('global-calendar')?.value || ""; 
     const role = (window.userRole || "").toLowerCase();
@@ -1629,6 +1639,11 @@ window.changeMenu = (menu) => {
         // Forza il refresh dei permessi quando la sidebar appare
         if(typeof applyRoleUI === 'function') applyRoleUI();
     }
+	if (menu === 'agenda' && (!window.selectedClass || window.selectedClass === 'ALL')) {
+    alert("⚠️ Seleziona prima una classe dal menu 'Classi' per visualizzare l'agenda.");
+    window.changeMenu('classi');
+    return;
+}
 
     // Reset stati attivi Sidebar
     document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
@@ -1958,7 +1973,9 @@ window.startBypass = async function() {
             window.userRole = typeof getRoleType === 'function' ? getRoleType(data.role) : data.role;
             window.userName = data.name || data.username || inputId;
             
-            const userClass = Array.isArray(data.classe) ? data.classe[0] : (data.classe || data.class || "A");
+            let userClass = Array.isArray(data.classe) ? data.classe[0] : (data.classe || data.class || null);
+// Se è "None", forziamo a null per far apparire la selezione manuale
+if (userClass === "None") userClass = null; 
             window.selectedClass = userClass;
 
             // 2. UI HEADER & AVATAR (Aggiornato con i tuoi ID)
