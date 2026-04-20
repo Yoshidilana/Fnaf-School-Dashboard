@@ -763,7 +763,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     };
 	
 	    // --- SIDEBAR: CHI VEDE COSA ---
-    toggle('menu-classi', isPersonale || isAdmin);      // Ora visibile anche ai bidelli
+    toggle('menu-classi', isPersonale || isAdmin || isOspite);      // Ora visibile anche ai bidelli
     toggle('menu-appello', isStaff);     // Solo Staff vede Appello rapido
     toggle('menu-agenda', isStudente);   // Solo Studenti vedono Agenda in Sidebar
     toggle('menu-registro', isStudente); // Solo Studenti vedono Registro in Sidebar
@@ -771,7 +771,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-note', isStudente);     // Solo Studenti vedono Note in Sidebar
     toggle('menu-bacheca', true);        // Tutti vedono la bacheca
     toggle('class-filter-container', !isStudente); 
-    toggle('home-btn-classi', isPersonale || isAdmin);  // Ora visibile anche ai bidelli
+    toggle('home-btn-classi', isPersonale || isAdmin || isOspite);  // Ora visibile anche ai bidelli
 
 if(isStaff) {
     toggle('prof-actions-agenda', isStaff);
