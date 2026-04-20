@@ -790,7 +790,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-pagella', isStudente);  // Solo Studenti vedono Pagella in Sidebar
     toggle('menu-note', isStudente);     // Solo Studenti vedono Note in Sidebar
     toggle('menu-bacheca', true);        // Tutti vedono la bacheca
-    toggle('class-filter-container', !isStudente); 
+    toggle('class-filter-container', isPersonale || isAdmin); 
     toggle('home-btn-classi', isPersonale || isAdmin || isOspite);  // Ora visibile anche ai bidelli
       toggle('home-btn-agenda', isStudente);   // Mostra Agenda solo a Studenti
     toggle('home-btn-registro', isStudente); // Mostra Registro solo a Studenti
