@@ -1567,7 +1567,7 @@ await setDoc(agendaRef, {
     <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
         <p class="text-sm text-zinc-800">${p.text}</p>
         <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
-        ${(['preside', 'admin', 'bidello', 'vicepreside'].includes(window.userRole.toLowerCase())) ? 
+        ${(['preside', 'bidello', 'vicepreside'].includes(window.userRole.toLowerCase())) ? 
     `<button onclick="window.deleteBacheca(${idx})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:scale-110 transition-all">✕</button>` : ''}
     </div>
 `).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso</p>';
