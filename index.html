@@ -245,19 +245,39 @@
         <h2 class="text-4xl font-black uppercase italic mb-2">Benvenuto nel Portale</h2>
         <p class="text-zinc-500 font-bold mb-8 uppercase tracking-widest text-xs">Seleziona una sezione per iniziare</p>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button onclick="window.changeMenu('profilo')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
-                <span class="text-3xl block mb-2">👤</span>
-                <span class="font-black uppercase text-[10px]">Il Mio Profilo</span>
-            </button>
-            <button onclick="window.changeMenu('bacheca')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
-                <span class="text-3xl block mb-2">📢</span>
-                <span class="font-black uppercase text-[10px]">Bacheca</span>
-            </button>
-            <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
-    <span class="text-3xl block mb-2">🏫</span>
-    <span class="font-black uppercase text-[10px]">Classi</span>
-</button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
+    <button onclick="window.changeMenu('profilo')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">👤</span>
+        <span class="font-black uppercase text-[10px]">Il Mio Profilo</span>
+    </button>
+    <button onclick="window.changeMenu('bacheca')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">📢</span>
+        <span class="font-black uppercase text-[10px]">Bacheca</span>
+    </button>
+    
+    <!-- Visibile solo a Staff/Admin/Ospiti -->
+    <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">🏫</span>
+        <span class="font-black uppercase text-[10px]">Hub Classi</span>
+    </button>
+
+    <!-- Visibili solo agli Studenti -->
+    <button id="home-btn-agenda" onclick="window.changeMenu('agenda')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">📅</span>
+        <span class="font-black uppercase text-[10px]">Agenda</span>
+    </button>
+    <button id="home-btn-registro" onclick="window.changeMenu('registro')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">📝</span>
+        <span class="font-black uppercase text-[10px]">Registro Voti</span>
+    </button>
+    <button id="home-btn-note" onclick="window.changeMenu('note')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">⚠️</span>
+        <span class="font-black uppercase text-[10px]">Note</span>
+    </button>
+    <button id="home-btn-pagella" onclick="window.changeMenu('pagella')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+        <span class="text-3xl block mb-2">🎓</span>
+        <span class="font-black uppercase text-[10px]">Pagella</span>
+    </button>
 </div>
     </div>
 </div>
@@ -772,6 +792,10 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-bacheca', true);        // Tutti vedono la bacheca
     toggle('class-filter-container', !isStudente); 
     toggle('home-btn-classi', isPersonale || isAdmin || isOspite);  // Ora visibile anche ai bidelli
+      toggle('home-btn-agenda', isStudente);   // Mostra Agenda solo a Studenti
+    toggle('home-btn-registro', isStudente); // Mostra Registro solo a Studenti
+    toggle('home-btn-note', isStudente);     // Mostra Note solo a Studenti
+    toggle('home-btn-pagella', isStudente);  // Mostra Pagella solo a Studenti
 
 if(isStaff) {
     toggle('prof-actions-agenda', isStaff);
