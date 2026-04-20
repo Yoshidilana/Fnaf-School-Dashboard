@@ -2010,9 +2010,14 @@ if (userClass === "None") userClass = null;
             // 4. PRIVACY & VISIBILITÀ (Utilizza la funzione centralizzata)
             applyRoleUI();
 
-            // 5. NAVIGAZIONE AUTOMATICA
-            if (typeof handleClassChange === 'function') handleClassChange(userClass);
-            if (typeof changeMenu === 'function') changeMenu('agenda');
+            // 5. NAVIGAZIONE AUTOMATICA AL MENU PRINCIPALE
+            if (userClass && userClass !== "None" && typeof handleClassChange === 'function') {
+                handleClassChange(userClass);
+            }
+            
+            if (typeof changeMenu === 'function') {
+                changeMenu('home'); // Porta al menu principale invece che in agenda
+            }
             
             log.innerHTML += `<br>✅ Bypass completato! Ruolo: ${window.userRole}`;
             window.toggleDebug(); 
