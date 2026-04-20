@@ -1032,20 +1032,23 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
         const note = (data.note || []);
         const voti = (data.daily_voti || []);
 
-        if(role === 'studente') {
+	
+if (role === 'ospite') {
+    infoHtml = '<p class="bold-text-zinc-900 text-[9px] text-center py-4 uppercase font-bold">Area riservata agli utenti loggati</p>';
+} else if (role === 'studente') {
             const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
             const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
-            infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-blue-700 font-bold rounded-xl mb-2 text-[10px] border border-yellow-100 shadow-sm uppercase">⚠️ NOTA: ${n.testo}</div>`).join('');
-            infoHtml += myVoti.map(v => `<div class="p-3 bg-zinc-900 text-white rounded-xl mb-2 text-[10px] border border-red-900 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${safeCap(v.materia)}</span><span class="text-lg font-black text-blue-600">${v.voto}</span></div>`).join('');
+            infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-blue-700 font-bold rounded-xl mb-2 text-[10px] border border-yellow-400 shadow-sm uppercase">⚠️ NOTA: ${n.testo}</div>`).join('');
+            infoHtml += myVoti.map(v => `<div class="p-3 bg-green-900 text-white rounded-xl mb-2 text-[10px] border border-red-900 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${safeCap(v.materia)}</span><span class="text-lg font-black text-blue-600">${v.voto}</span></div>`).join('');
         } else {
             infoHtml += note.map(n => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm text-zinc-700"><b>${n.studente}</b>: ${n.testo}</div>`).join('');
             infoHtml += voti.map(v => `
                 <div class="p-3 bg-white border border-blue-100 rounded-xl text-[10px] mb-2 shadow-sm flex flex-col gap-1">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-zinc-800">${v.studente} - <span class="text-blue-600 uppercase italic">${safeCap(v.materia)}</span>:</span>
+                        <span class="font-bold text-zinc-800">${v.studente} - <span class="text-blue-600 uppercase ">${safeCap(v.materia)}</span>:</span>
                         <span class="font-black text-blue-600 text-sm">${v.voto}</span>
                     </div>
-                    <p class="text-[9px] text-zinc-400">- ${v.argomento || "Nessun argomento"}</p>
+                    <p class="text-[9px] font-bold text-green-500">- ${v.argomento || "Nessun argomento"}</p>
                 </div>`).join('');
         }
         document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<p class="text-zinc-300 text-[10px] italic text-center py-4 uppercase font-bold">Nessun aggiornamento</p>';
@@ -1060,7 +1063,35 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
 
         let attHtml = "";
 
-            if (role === 'studente') {
+            if (role === 'ospite') {
+        attHtml = '<p class="text-red-500 text-[9px] italic text-center py-4 uppercase font-black">⚠️ Effettua il login per vedere le presenze</p>';
+    } else if (role === 'studente') {
+        // Vista Studente: Vede solo il proprio stato
+        const myAtt = attData[window.currentUserId];
+        if (myAtt) {
+            const statusColors = { presente: 'text-green-600', assente: 'text-red-600', ritardo: 'text-amber-600' };
+            const color = statusColors[myAtt.status] || 'text-zinc-500';
+            attHtml = `
+                <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[8px] font-black text-zinc-400 uppercase">Il tuo stato</span>
+                        <span class="font-black uppercase text-[10px] ${color}">${myAtt.status}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-white p-2 rounded border border-zinc-100 text-center">
+                            <p class="text-[7px] text-zinc-400 uppercase font-bold">Entrata</p>
+                            <p class="text-[10px] font-black text-zinc-700">${myAtt.entry}</p>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-zinc-100 text-center">
+                            <p class="text-[7px] text-zinc-400 uppercase font-bold">Uscita</p>
+                            <p class="text-[10px] font-black text-zinc-700">${myAtt.exit}</p>
+                        </div>
+                    </div>
+                </div>`;
+        } else {
+            attHtml = '<p class="text-zinc-300 text-[9px] italic text-center py-4 uppercase font-bold">Appello non registrato</p>';
+        }
+    } else if (role === 'studente') {
                 // Vista Studente: Vede solo il proprio stato
                 const myAtt = attData[window.currentUserId];
                 if (myAtt) {
