@@ -254,10 +254,10 @@
                 <span class="text-3xl block mb-2">📢</span>
                 <span class="font-black uppercase text-[10px]">Bacheca</span>
             </button>
-            <button onclick="window.changeMenu('classi')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
-        <span class="text-3xl block mb-2">🏫</span>
-        <span class="font-black uppercase text-[10px]">Classi</span>
-    </button>
+            <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <span class="text-3xl block mb-2">🏫</span>
+    <span class="font-black uppercase text-[10px]">Classi</span>
+</button>
 </div>
     </div>
 </div>
@@ -745,6 +745,8 @@ function applyRoleUI() {
     const isPreside = type === ROLES.PRESIDE || type === ROLES.VICE_PRESIDE;
     const isBidello = type === ROLES.BIDELLO;
     const isStudente = type === ROLES.STUDENTE;
+    const isPersonale = isStaff || isBidello;
+    const isOspite = type === ROLES.OSPITE;
 
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
     let miaClasse = window.currentUserData?.classe;
@@ -758,24 +760,22 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     };
 	
 	    // --- SIDEBAR: CHI VEDE COSA ---
-    toggle('menu-classi', isStaff);      // Solo Staff vede il nuovo Hub Classi
+    toggle('menu-classi', isPersonale);      // Ora visibile anche ai bidelli
     toggle('menu-appello', isStaff);     // Solo Staff vede Appello rapido
     toggle('menu-agenda', isStudente);   // Solo Studenti vedono Agenda in Sidebar
     toggle('menu-registro', isStudente); // Solo Studenti vedono Registro in Sidebar
     toggle('menu-pagella', isStudente);  // Solo Studenti vedono Pagella in Sidebar
     toggle('menu-note', isStudente);     // Solo Studenti vedono Note in Sidebar
     toggle('menu-bacheca', true);        // Tutti vedono la bacheca
-     toggle('menu-classi', !isStudente); // Nasconde il tasto "Classi" dalla sidebar se è uno studente
     toggle('class-filter-container', !isStudente); 
-    toggle('menu-appello', isStaff);
+    toggle('home-btn-classi', isPersonale);  // Ora visibile anche ai bidelli
 
-    if(isStaff) {
-toggle('prof-actions-agenda', isStaff);
-toggle('prof-comm-panel', isStaff);
-toggle('menu-appello', isStaff);
-toggle('btn-add-note', isStaff);
-toggle('prof-grade-panel', isStaff);
-    }
+if(isStaff) {
+    toggle('prof-actions-agenda', isStaff);
+    toggle('prof-comm-panel', isStaff);
+    toggle('btn-add-note', isStaff);
+    toggle('prof-grade-panel', isStaff);
+}
     
     if(isPreside || isBidello) {
         toggle('bacheca-admin-panel', true);
