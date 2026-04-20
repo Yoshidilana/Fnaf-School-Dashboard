@@ -732,6 +732,17 @@ function applyRoleUI() {
         if (el) el.classList.toggle('hidden', !show);
     };
 	
+	    // --- SIDEBAR: CHI VEDE COSA ---
+    toggle('menu-classi', isStaff);      // Solo Staff vede il nuovo Hub Classi
+    toggle('menu-appello', isStaff);     // Solo Staff vede Appello rapido
+    
+    toggle('menu-agenda', isStudente);   // Solo Studenti vedono Agenda in Sidebar
+    toggle('menu-registro', isStudente); // Solo Studenti vedono Registro in Sidebar
+    toggle('menu-pagella', isStudente);  // Solo Studenti vedono Pagella in Sidebar
+    toggle('menu-note', isStudente);     // Solo Studenti vedono Note in Sidebar
+    
+    toggle('menu-profilo', !isBidello);  // Tutti tranne bidelli vedono il profilo
+    toggle('menu-bacheca', true);        // Tutti vedono la bacheca
      toggle('menu-classi', !isStudente); // Nasconde il tasto "Classi" dalla sidebar se è uno studente
     toggle('class-filter-container', !isStudente); 
     toggle('menu-appello', isStaff);
