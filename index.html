@@ -66,7 +66,7 @@
             🔄 Reset Totale (Logout)
         </button>
 
-        <div id="debug-log" class="mt-4 font-monospace text-[9px] color-[#44ff44] bg-black p-2 max-h-32 overflow-auto rounded border border-zinc-800">
+        <div id="debug-log" class="mt-4 font-monospace text-[9px] color-[#44ff44] bg-red p-2 max-h-32 overflow-auto rounded border border-zinc-800">
             Log: Sistema pronto...
         </div>
     </div>
@@ -176,6 +176,7 @@
 
         <!-- Sidebar -->
         <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-red-600 flex flex-col shrink-0 p-4 min-h-screen">
+       <body class="sidebar-hidden">
         <nav class="space-y-1 mb-8">
                 <p class="text-[10px] font-black text-black uppercase mb-4 ml-2 tracking-wider">
             Menu Principale
@@ -226,7 +227,8 @@
         <p class="text-zinc-500 font-bold mb-8 uppercase tracking-widest text-xs">Seleziona una sezione per iniziare</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
-    <button id="home-profilo-btn" onclick="window.changeMenu('profilo')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <button id="home-profilo-btn" onclick="window.changeMenu('profilo')" 
+    class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
     <span class="text-3xl block mb-2">👤</span>
     <span class="font-black uppercase text-[10px]">Il Mio Profilo</span>
 </button>
@@ -236,7 +238,7 @@
     </button>
     
     <!-- Visibile solo a Staff/Admin/Ospiti -->
-    <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">🏫</span>
         <span class="font-black uppercase text-[10px]">Hub Classi</span>
     </button>
@@ -774,8 +776,10 @@ loadBacheca();
 
         function getRoleType(roleStr) {
     if(!roleStr) return ROLES.OSPITE;
-    const r = roleStr.toLowerCase();
-    if(r.includes('admin')) return ROLES.ADMIN; // Aggiunto controllo Admin
+    const r = roleStr.toLowerCase().replace(/\s+/g, ''); // Rimuove tutti gli spazi (es: "vice preside" -> "vicepreside")
+    
+    if(r.includes('admin')) return ROLES.ADMIN;
+    if(r.includes('vicepreside')) return ROLES.VICE_PRESIDE; // Controllo specifico prima di preside
     if(r.includes('preside')) return ROLES.PRESIDE;
     if(r.includes('prof') || r.includes('docente')) return ROLES.PROF;
     if(r.includes('bidello') || r.includes('ata')) return ROLES.BIDELLO;
@@ -785,13 +789,14 @@ loadBacheca();
 
         // --- FIREBASE SYNC ---
         signInAnonymously(auth).then(() => {
-            onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'), (snap) => {
-                window.allStudents = [];
-                snap.forEach(d => window.allStudents.push({id: d.id, ...d.data()}));
-                if(window.selectedClass) renderStudentList();
-            });
-            checkAuth();
-        });
+    onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'), (snap) => {
+        window.allStudents = [];
+        snap.forEach(d => window.allStudents.push({id: d.id, ...d.data()}));
+        if(window.selectedClass) renderStudentList();
+        applyRoleUI(); // Riapplica dopo aver caricato gli studenti
+    });
+    checkAuth();
+});
 
         // --- GESTIONE INTERFACCIA RUOLI ---
 function applyRoleUI() {
@@ -927,14 +932,10 @@ window.renderStudentList = function() {
     }
 
     // NUOVA LOGICA DI FILTRO BLINDATA:
-    const filtered = window.allStudents.filter(s => {
-        // Trasformiamo il ruolo in minuscolo per non sbagliare (es: "Prof" diventa "prof")
-        const role = (s.role || "").toLowerCase();
-        
-        // Definiamo chi NON deve apparire nell'elenco studenti
-        // Aggiungi qui altri ruoli se necessario (es. 'bidello', 'vicepreside')
-        const isStaff = ['prof', 'preside', 'vice preside', 'bidello', 'admin'].includes(role);
-        const isNotStaff = !isStaff;
+        const filtered = window.allStudents.filter(s => {
+        const role = getRoleType(s.role); // Usa la funzione di mappatura
+        const isStaff = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.ADMIN].includes(role);
+        const isNotStaff = !isStaff
 
         // 1. Se la classe è "ALL" o vuota, mostriamo tutti i NON-STAFF
         if (!window.selectedClass || window.selectedClass === 'ALL') {
@@ -1035,14 +1036,14 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
     // 1. Pulizia listener precedenti
     if (agendaListener) agendaListener();
     if (attendanceAgendaListener) attendanceAgendaListener();
-   if (!cls || cls === "None" || !['A', 'B', 'C'].includes(cls)) {
-        console.warn("Tentativo di caricamento agenda su classe non valida:", cls);
+   if (!cls || cls === "None" || cls === "null" || !['A', 'B', 'C'].includes(cls)) {
+        console.warn("⚠️ Caricamento Agenda annullato: Classe non valida o non definita (", cls, ")");
         return; 
     }
 
     const dateKey = document.getElementById('global-calendar')?.value || ""; 
-    const role = (window.userRole || "").toLowerCase();
-    const isStaff = ['preside', 'vicepreside', 'admin', 'prof'].includes(role);
+    const role = window.userRole; // Già mappato da applyRoleUI
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN, ROLES.PROF].includes(role);
     
     // Caricamento interfaccia Appello per Staff
     if (isStaff && typeof window.loadAttendance === 'function' && cls !== 'ALL') {
@@ -1058,7 +1059,7 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
 
         // Rendering Lista Avvisi (Ambra)
         const avvisiHtml = (data.comunicazioni || []).map((com, idx) => {
-            const isBoss = ['preside', 'vicepreside', 'bidello'].includes(role);
+            const isBoss = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO].includes(role);
             const isOwner = (role === 'prof' && currentUser === (com.autore || "").trim());
             return `
                 <div class="relative group p-3 pr-10 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3 text-left">
@@ -2048,7 +2049,7 @@ window.renderPagella = (voti, aySelezionato) => {
 };
 
      window.deleteAvviso = async (idx, cls) => {
-    const role = window.userRole ? window.userRole.toLowerCase() : '';
+    const role = window.userRole;
     const currentUser = window.currentUserData.name;
 
     if(!confirm("Vuoi eliminare questa comunicazione?")) return;
@@ -2066,7 +2067,7 @@ window.renderPagella = (voti, aySelezionato) => {
 
             // Controllo finale permessi: 
             // Se non sei uno dei ruoli boss E non sei l'autore, blocca.
-            const isBoss = ['preside', 'vicepreside', 'bidello'].includes(role);
+                const isBoss = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.ADMIN].includes(role);
             if(!isBoss && avviso.autore !== currentUser) {
                 alert("Non hai i permessi per eliminare questo avviso.");
                 return;
@@ -2654,65 +2655,56 @@ if (mediaRegistro) {
         const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
         const d = await getDoc(recordRef);
 
-        if (!d.exists()) {
-            alert("Errore: Registro non trovato.");
-            return;
-        }
+        if (!d.exists()) return;
 
         const listaVoti = d.data().voti || [];
         const votoDaEliminare = listaVoti.find(v => v.id === idRicevuto);
 
-        if (!votoDaEliminare) {
-            alert("Errore: Voto non trovato nel registro.");
-            return;
-        }
+        if (!votoDaEliminare) return;
 
-        // 1. ELIMINAZIONE DAL REGISTRO PRINCIPALE
+        // 1. ELIMINAZIONE DAL REGISTRO PERSONALE
         await updateDoc(recordRef, {
             voti: arrayRemove(votoDaEliminare)
         });
 
-        // 2. AGGIORNAMENTO AGENDA (Sostituito con logica filter)
+        // 2. ELIMINAZIONE DALL'AGENDA GIORNALIERA (Logica Rinforzata)
         try {
             const [gg, mm, aaaa] = votoDaEliminare.data.split('/');
             const student = window.allStudents.find(s => s.id === studentId);
-	const sClass = student ? student.classe : window.selectedClass;
-	const agendaId = `${sClass}_${aaaa}-${mm}-${gg}`;
-            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+            // Usa la classe dello studente, con fallback sulla classe selezionata
+            const sClass = student?.classe || window.selectedClass;
+            
+            if (sClass && sClass !== 'ALL') {
+                const agendaId = `${sClass}_${aaaa}-${mm}-${gg}`;
+                const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+                const aSnap = await getDoc(agendaRef);
 
-            const aSnap = await getDoc(agendaRef);
-            if (aSnap.exists()) {
-                const daily = aSnap.data().daily_voti || [];
-                
-                // FILTRO: Teniamo tutti i voti TRANNE quello che corrisponde ai criteri
-                const nuovoDaily = daily.filter(v => {
-                    const match = 
-                        v.studenteId === studentId && 
-                        v.materia === votoDaEliminare.materia && 
-                        String(v.voto) === String(votoDaEliminare.voto) &&
-                        v.argomento === votoDaEliminare.argomento;
+                if (aSnap.exists()) {
+                    const daily = aSnap.data().daily_voti || [];
                     
-                    return !match; // Se è un match, ritorna false e lo elimina
-                });
+                    // Filtro normalizzato: ignora maiuscole/minuscole e spazi bianchi
+                    const nuovoDaily = daily.filter(v => {
+                        const isSameStudent = String(v.studenteId) === String(studentId);
+                        const isSameSubject = v.materia.toLowerCase().trim() === votoDaEliminare.materia.toLowerCase().trim();
+                        const isSameValue = String(v.voto) === String(votoDaEliminare.voto);
+                        
+                        return !(isSameStudent && isSameSubject && isSameValue);
+                    });
 
-                // Se la lista è cambiata, salviamo
-                if (nuovoDaily.length !== daily.length) {
-                    await updateDoc(agendaRef, { daily_voti: nuovoDaily });
+                    if (nuovoDaily.length !== daily.length) {
+                        await updateDoc(agendaRef, { daily_voti: nuovoDaily });
+                    }
                 }
             }
         } catch (agendaError) {
-            console.error("Errore durante la pulizia dell'agenda:", agendaError);
+            console.error("Errore pulizia agenda:", agendaError);
         }
 
         alert("✅ Voto eliminato correttamente.");
-        
-        if (typeof loadStudentRecords === "function") {
-            loadStudentRecords(studentId);
-        }
+        if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
 
     } catch (error) {
-        console.error("Errore durante l'eliminazione:", error);
-        alert("❌ Errore critico durante l'eliminazione.");
+        console.error("Errore eliminazione:", error);
     }
 };
 
@@ -2724,16 +2716,15 @@ window.updateFastFilter = (selectedClass) => {
     select.innerHTML = '<option value="">Studente...</option>';
     select.value = ""; // Forza il reset visivo
     // Definiamo i ruoli da escludere (Staff)
-    const staffRoles = ['prof', 'preside', 'vice preside', 'bidello', 'admin', 'docente'];
+    const staffRoles = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.ADMIN];
     // Definiamo le classi valide
     const validClasses = ['A', 'B', 'C'];
 
     const filtered = window.allStudents.filter(s => {
-        const role = (s.role || "").toLowerCase();
+        const role = getRoleType(s.role);
         const studentClass = (s.classe || "").toUpperCase();
-        
         // 1. Verifichiamo che NON sia staff
-        const isNotStaff = !staffRoles.some(r => role.includes(r));
+        const isNotStaff = !staffRoles.includes(role);
         
         // 2. Verifichiamo che appartenga a una classe valida (A, B o C)
         const hasValidClass = validClasses.includes(studentClass);
@@ -2779,11 +2770,18 @@ window.navDate = (unit, value) => {
 };
 
 	window.loadAttendance = async (cls, date) => {
-    const role = (window.userRole || "").toLowerCase();
-    const isStaff = ['preside', 'vicepreside', 'admin', 'prof'].includes(role);
     const panel = document.getElementById('view-appello');
+
+    // Controllo preventivo: se la classe o la data mancano, o la classe non è A/B/C, esce subito
+    if (!cls || cls === "None" || cls === "null" || !['A', 'B', 'C'].includes(cls) || !date) {
+        if(panel) panel.classList.add('hidden');
+        return;
+    }
+
+    const role = window.userRole;
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN, ROLES.PROF].includes(role);
     
-    if (!isStaff || !['A', 'B', 'C'].includes(cls)) {
+    if (!isStaff) {
         if(panel) panel.classList.add('hidden');
         return;
     }
