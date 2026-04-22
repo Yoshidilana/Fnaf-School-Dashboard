@@ -502,7 +502,11 @@
         </div>
     </div>
 
-    <div id="prof-grade-panel" class="hidden glass p-4 flex gap-3 items-center">
+    <div id="prof-grade-panel" class="hidden glass p-4 flex flex-wrap gap-3 items-center">
+    <div class="flex flex-col border-r border-zinc-700 pr-3">
+        <label class="text-[8px] font-black uppercase text-zinc-400">Data Voto</label>
+        <input type="date" class="shared-calendar bg-zinc-900 text-white text-xs p-1 rounded border border-zinc-700">
+    </div>
     <select id="input-grade-val" class="w-28 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white outline-none focus:border-red-500">
         <!-- Opzioni popolate via JS -->
     </select>
@@ -527,20 +531,24 @@
 
             <!-- VIEW: NOTE -->
             <div id="view-note" class="tab-content space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 class="text-2xl font-black uppercase italic text-zinc-800">Note e Mandati</h2>
-                    <button id="btn-add-note" onclick="window.openModal('note')" class="hidden bg-amber-600 text-white text-[9px] font-bold px-4 py-2 rounded uppercase">Emetti Nota/Mandato</button>
-                </div>
+    <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
+        <h2 class="text-2xl font-black uppercase italic text-zinc-800">Note</h2>
+        <div id="note-date-container" class="hidden flex items-center gap-3">
+            <input type="date" class="shared-calendar bg-zinc-100 border border-zinc-300 rounded-xl px-3 py-2 text-xs font-bold">
+            <button id="btn-add-note" onclick="window.openModal('note')" class="bg-amber-600 text-white text-[9px] font-bold px-4 py-2 rounded uppercase">Emetti Nota</button>
+        </div>
+    </div>
                 <div id="notes-list-global" class="grid gap-3 overflow-y-auto custom-scroll"></div>
             </div>
 
             <!-- VIEW: BACHECA -->
             <div id="view-bacheca" class="tab-content space-y-4">
                 <h2 class="text-2xl font-black uppercase italic text-zinc-800">Bacheca</h2>
-                <div id="bacheca-admin-panel" class="hidden glass p-4 flex gap-2">
-                    <input id="input-bacheca-text" type="text" placeholder="Scrivi comunicazione..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
-                    <button onclick="window.addBacheca()" class="bg-zinc-100 text-black px-4 py-2 rounded text-[10px] font-black uppercase">Pubblica</button>
-                </div>
+                <div id="bacheca-admin-panel" class="hidden glass p-4 flex gap-3 items-center">
+    <input type="date" class="shared-calendar bg-zinc-900 text-white text-xs p-2 rounded border border-zinc-700">
+    <input id="input-bacheca-text" type="text" placeholder="Scrivi comunicazione..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
+    <button onclick="window.addBacheca()" class="bg-zinc-100 text-black px-4 py-2 rounded text-[10px] font-black uppercase">Pubblica</button>
+</div>
                 <div id="bacheca-container" class="space-y-3 overflow-y-auto"></div>
             </div>
 
@@ -686,58 +694,56 @@
         const inputCal = document.getElementById('global-calendar');
         inputCal.value = new Date().toISOString().split('T')[0];
 
-        window.updateDateContext = () => {
-    const inputCal = document.getElementById('global-calendar');
-    if (!inputCal || !inputCal.value) return;
+        window.updateDateContext = (newDate) => {
+    const allCalendars = document.querySelectorAll('.shared-calendar, #global-calendar');
+    // Prende la nuova data, o il valore del primo calendario trovato, o la data di oggi come fallback
+    const dateValue = newDate || (allCalendars[0]?.value) || new Date().toISOString().split('T')[0];
     
+    if (!dateValue) return;
 
-    const date = new Date(inputCal.value);
+    // 1. Sincronizza tutti gli input data nel portale
+    allCalendars.forEach(cal => { if(cal.value !== dateValue) cal.value = dateValue; });
+
+    const date = new Date(dateValue);
+
+    // 2. AGGIORNAMENTO DISPLAY DATA (Quello che volevi recuperare)
     const topDisplay = document.getElementById('current-date-display');
     if (topDisplay) {
         const opzioni = { weekday: 'short', day: '2-digit', month: 'short' };
-        // Risultato es: "LUN 20 APR"
+        // Scrive la data formattata (es. MAR 21 APR)
         topDisplay.innerText = date.toLocaleDateString('it-IT', opzioni).toUpperCase();
     }
+
+    // 3. Logica Anno Scolastico e Quadrimestre
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
 
-    // 1. Aggiorna etichette temporali
     const ayElem = document.getElementById('current-academic-year');
-    const piElem = document.getElementById('period-indicator');
-    const pagellaAyElem = document.getElementById('pagella-anno-scolastico');
-
     if (ayElem) ayElem.innerText = `A.S. ${ay}`;
+    
+    const piElem = document.getElementById('period-indicator');
     if (piElem) piElem.innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
-    if (pagellaAyElem) pagellaAyElem.innerText = `Pagelle ${ay}`;
-    loadBacheca();
-    // 2. Refresh Dati Classe (Agenda e Appello)
-    if (window.selectedClass) {
-        window.handleClassChange();
-        if (window.loadAttendance && window.selectedClass !== 'ALL') {
-            window.loadAttendance(window.selectedClass, inputCal.value);
-        }
-    }
 
-    // 3. Refresh Registro Voti
-    if (window.selectedStudentId) {
-        loadStudentRecords(window.selectedStudentId);
-    }
+    // 4. Refresh dati e viste
+    if (window.selectedClass) window.handleClassChange();
+    if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
+    
+    // Refresh bacheca (onSnapshot dovrebbe già gestirlo, ma così forziamo il filtro)
+    if (typeof loadBacheca === "function") loadBacheca();
 
-    // 4. REFRESH IMMEDIATO PROFILI (Se visibili)
-    const viewProfilo = document.getElementById('view-profilo');
-    const viewProfiloTarget = document.getElementById('view-profilo-target');
-
-    if (viewProfilo && viewProfilo.classList.contains('active-view')) {
+    // Refresh Profili (se l'utente sta guardando un profilo, lo aggiorna con la nuova data)
+    if (document.getElementById('view-profilo')?.classList.contains('active-view')) {
         window.apriProfiloPersonale();
     }
-    
-    if (viewProfiloTarget && viewProfiloTarget.classList.contains('active-view')) {
-        if (window.selectedStudentId) {
-            window.selectAndGoToProfile(window.selectedStudentId);
-        }
-    }
 };
+
+// Listener universale per il cambio data
+document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('shared-calendar') || e.target.id === 'global-calendar') {
+        window.updateDateContext(e.target.value);
+    }
+});
 
 // Esecuzione iniziale
 window.updateDateContext();
@@ -816,6 +822,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('home-btn-note', isStudente);     // Mostra Note solo a Studenti
     toggle('home-btn-pagella', isStudente);  // Mostra Pagella solo a Studenti
    toggle('home-profilo-btn', !isOspite);
+   toggle('note-date-container', isStaff);
 
 
 if(isStaff) {
