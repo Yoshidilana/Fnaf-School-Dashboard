@@ -24,6 +24,14 @@
     color: #18181b !important; /* Testo quasi nero */
     box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
 }
+
+.glass {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(228, 228, 231, 0.5);
+    color: #18181b !important;
+}
+
         .sidebar-item { transition: all 0.2s; border-radius: 8px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; cursor: pointer; } 
 	.sidebar-hidden #main-sidebar { display: none !important; }
         .sidebar-item.active { background: #FF0000; color: white; }
@@ -696,28 +704,24 @@
 
         window.updateDateContext = (newDate) => {
     const allCalendars = document.querySelectorAll('.shared-calendar, #global-calendar');
-    // Prende la nuova data, o il valore del primo calendario trovato, o la data di oggi come fallback
     const dateValue = newDate || (allCalendars[0]?.value) || new Date().toISOString().split('T')[0];
     
     if (!dateValue) return;
 
-    // 1. Sincronizza tutti gli input data nel portale
+    // 1. Sincronizza tutti gli input data
     allCalendars.forEach(cal => { if(cal.value !== dateValue) cal.value = dateValue; });
 
     const date = new Date(dateValue);
-
-    // 2. AGGIORNAMENTO DISPLAY DATA (Quello che volevi recuperare)
-    const topDisplay = document.getElementById('current-date-display');
-    if (topDisplay) {
-        const opzioni = { weekday: 'short', day: '2-digit', month: 'short' };
-        // Scrive la data formattata (es. MAR 21 APR)
-        topDisplay.innerText = date.toLocaleDateString('it-IT', opzioni).toUpperCase();
-    }
-
-    // 3. Logica Anno Scolastico e Quadrimestre
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     const ay = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+
+    // 2. Aggiornamento Display e Etichette (TUTTE)
+    const topDisplay = document.getElementById('current-date-display');
+    if (topDisplay) {
+        const opzioni = { weekday: 'short', day: '2-digit', month: 'short' };
+        topDisplay.innerText = date.toLocaleDateString('it-IT', opzioni).toUpperCase();
+    }
 
     const ayElem = document.getElementById('current-academic-year');
     if (ayElem) ayElem.innerText = `A.S. ${ay}`;
@@ -725,25 +729,33 @@
     const piElem = document.getElementById('period-indicator');
     if (piElem) piElem.innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
 
-    // 4. Refresh dati e viste
-    if (window.selectedClass) window.handleClassChange();
+    // PEZZO MANCANTE 1: Pagelle
+    const pagellaAyElem = document.getElementById('pagella-anno-scolastico');
+    if (pagellaAyElem) pagellaAyElem.innerText = `Pagelle ${ay}`;
+
+    // 3. Refresh Dati Classe e Registro
+    if (window.selectedClass) {
+        window.handleClassChange();
+        if (window.loadAttendance && window.selectedClass !== 'ALL') {
+            window.loadAttendance(window.selectedClass, dateValue);
+        }
+    }
     if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
-    
-    // Refresh bacheca (onSnapshot dovrebbe già gestirlo, ma così forziamo il filtro)
     if (typeof loadBacheca === "function") loadBacheca();
 
-    // Refresh Profili (se l'utente sta guardando un profilo, lo aggiorna con la nuova data)
+    // 4. Refresh Profili (Sia personale che target)
     if (document.getElementById('view-profilo')?.classList.contains('active-view')) {
         window.apriProfiloPersonale();
     }
-};
-
-// Listener universale per il cambio data
-document.addEventListener('change', (e) => {
-    if (e.target.classList.contains('shared-calendar') || e.target.id === 'global-calendar') {
-        window.updateDateContext(e.target.value);
+    
+    // PEZZO MANCANTE 2: Profilo dello studente selezionato (Target)
+    const viewProfiloTarget = document.getElementById('view-profilo-target');
+    if (viewProfiloTarget?.classList.contains('active-view')) {
+        if (window.selectedStudentId) {
+            window.selectAndGoToProfile(window.selectedStudentId);
+        }
     }
-});
+};
 
 // Esecuzione iniziale
 window.updateDateContext();
