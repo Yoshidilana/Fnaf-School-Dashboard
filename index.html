@@ -218,10 +218,10 @@
         <p class="text-zinc-500 font-bold mb-8 uppercase tracking-widest text-xs">Seleziona una sezione per iniziare</p>
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
-    <button onclick="window.changeMenu('profilo')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
-        <span class="text-3xl block mb-2">👤</span>
-        <span class="font-black uppercase text-[10px]">Il Mio Profilo</span>
-    </button>
+    <button id="home-profilo-btn" onclick="window.changeMenu('profilo')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <span class="text-3xl block mb-2">👤</span>
+    <span class="font-black uppercase text-[10px]">Il Mio Profilo</span>
+</button>
     <button onclick="window.changeMenu('bacheca')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">📢</span>
         <span class="font-black uppercase text-[10px]">Bacheca</span>
@@ -488,6 +488,7 @@
 
             <!-- VIEW: REGISTRO -->
             <div id="view-registro" class="tab-content space-y-6">
+
     <div id="student-header" class="hidden glass-light p-6 rounded-2xl flex justify-between items-center">
         <div class="flex justify-between w-full items-center">
             <div>
@@ -709,7 +710,7 @@
     if (ayElem) ayElem.innerText = `A.S. ${ay}`;
     if (piElem) piElem.innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
     if (pagellaAyElem) pagellaAyElem.innerText = `Pagelle ${ay}`;
-
+    loadBacheca();
     // 2. Refresh Dati Classe (Agenda e Appello)
     if (window.selectedClass) {
         window.handleClassChange();
@@ -740,6 +741,7 @@
 
 // Esecuzione iniziale
 window.updateDateContext();
+loadBacheca();
 
         // --- PERMESSI ---
         const ROLES = {
@@ -799,6 +801,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     };
 	
 	    // --- SIDEBAR: CHI VEDE COSA ---
+    toggle('menu-profilo', !isOspite);
     toggle('menu-classi', isPersonale || isAdmin || isOspite);      // Ora visibile anche ai bidelli
     toggle('menu-appello', isStaff);     // Solo Staff vede Appello rapido
     toggle('menu-agenda', isStudente);   // Solo Studenti vedono Agenda in Sidebar
@@ -812,6 +815,8 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('home-btn-registro', isStudente); // Mostra Registro solo a Studenti
     toggle('home-btn-note', isStudente);     // Mostra Note solo a Studenti
     toggle('home-btn-pagella', isStudente);  // Mostra Pagella solo a Studenti
+   toggle('home-profilo-btn', !isOspite);
+
 
 if(isStaff) {
     toggle('prof-actions-agenda', isStaff);
@@ -889,7 +894,7 @@ if (profCommPanel) profCommPanel.classList.toggle('hidden', !(isStaff && isClass
             window.loadAttendance(cls, document.getElementById('global-calendar').value);
         }
     }
-    if (typeof loadBacheca === 'function') loadBacheca();
+
 };
 
         // Aggiungendo window. all'inizio, la rendi globale e indistruttibile
@@ -1600,31 +1605,60 @@ await setDoc(agendaRef, {
 }
 
         // --- BACHECA ---
-        async function loadBacheca() {
-            onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general'), d => {
-                const data = d.exists() ? d.data() : { posts: [] };
-                document.getElementById('bacheca-container').innerHTML = data.posts.slice().reverse().map((p, idx) => `
-    <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
-        <p class="text-sm text-zinc-800">${p.text}</p>
-        <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
-        ${(['preside', 'bidello', 'vicepreside'].includes(window.userRole.toLowerCase())) ? 
-    `<button onclick="window.deleteBacheca(${idx})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:scale-110 transition-all">✕</button>` : ''}
-    </div>
-`).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso</p>';
-            });
-        }
+       async function loadBacheca() {
+    const container = document.getElementById('bacheca-container');
+    if (!container) return;
+
+    onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general'), d => {
+        const data = d.exists() ? d.data() : { posts: [] };
+        
+        // Calcolo robusto dell'Anno Scolastico corrente
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        const calculatedAS = currentMonth >= 9 ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`;
+        
+        // Usa l'anno del DOM se presente, altrimenti quello calcolato
+        const ayElem = document.getElementById('current-academic-year');
+        const currentAS = (ayElem && ayElem.innerText.includes('/')) ? ayElem.innerText.replace('A.S. ', '') : calculatedAS;
+        
+        const filteredPosts = data.posts.filter(p => p.anno === currentAS);
+
+        container.innerHTML = filteredPosts.slice().reverse().map((p, idx) => `
+            <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
+                <p class="text-sm text-zinc-800">${p.text}</p>
+                <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
+                ${(['preside', 'bidello', 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase())) ? 
+                `<button onclick="window.deleteBacheca(${idx})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:scale-110 transition-all">✕</button>` : ''}
+            </div>
+        `).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso per l\'A.S. ' + currentAS + '</p>';
+    });
+}
 
         window.addBacheca = async () => {
-            const txt = document.getElementById('input-bacheca-text').value;
-            if(!txt) return;
-            const inputCal = document.getElementById('global-calendar');
-            const dParts = inputCal.value.split('-');
-            const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-            const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general');
-            await setDoc(ref, { posts: arrayUnion({ text: txt, author: window.currentUserData.name, date: `${dataScelta} — ${oraAttuale}` }) }, { merge: true });
-            document.getElementById('input-bacheca-text').value = "";
-        }
+    const txt = document.getElementById('input-bacheca-text').value;
+    if(!txt) return;
+    const inputCal = document.getElementById('global-calendar');
+    const dParts = inputCal.value.split('-');
+    const year = parseInt(dParts[0]);
+    const month = parseInt(dParts[1]);
+    
+    // Calcolo Anno Scolastico
+    const as = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+    const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+    const oraAttuale = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general');
+    await setDoc(ref, { 
+        posts: arrayUnion({ 
+            text: txt, 
+            author: window.currentUserData.name, 
+            date: `${dataScelta} — ${oraAttuale}`,
+            anno: as // Campo fondamentale per il filtro
+        }) 
+    }, { merge: true });
+    document.getElementById('input-bacheca-text').value = "";
+};
 
         // --- AUTH & LOGIN ---
         window.loginDiscord = () => {
