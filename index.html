@@ -1133,18 +1133,21 @@ if (role === 'ospite') {
 
             if (role === 'ospite') {
         attHtml = '<p class="text-red-500 text-[9px] italic text-center py-4 uppercase font-black">⚠️ Effettua il login per vedere le presenze</p>';
-    } else if (role === 'studente') {
+   } else if (role === 'studente') {
         // Vista Studente: Vede solo il proprio stato
         const myAtt = attData[window.currentUserId];
         if (myAtt) {
+            const isAssente = myAtt.status === 'assente';
             const statusColors = { presente: 'text-green-600', assente: 'text-red-600', ritardo: 'text-amber-600' };
             const color = statusColors[myAtt.status] || 'text-zinc-500';
+            
             attHtml = `
                 <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
-                    <div class="flex justify-between items-center mb-2">
+                    <div class="flex justify-between items-center ${isAssente ? '' : 'mb-2'}">
                         <span class="text-[8px] font-black text-zinc-400 uppercase">Il tuo stato</span>
                         <span class="font-black uppercase text-[10px] ${color}">${myAtt.status}</span>
                     </div>
+                    ${!isAssente ? `
                     <div class="grid grid-cols-2 gap-2">
                         <div class="bg-white p-2 rounded border border-zinc-100 text-center">
                             <p class="text-[7px] text-zinc-400 uppercase font-bold">Entrata</p>
@@ -1154,41 +1157,11 @@ if (role === 'ospite') {
                             <p class="text-[7px] text-zinc-400 uppercase font-bold">Uscita</p>
                             <p class="text-[10px] font-black text-zinc-700">${myAtt.exit}</p>
                         </div>
-                    </div>
+                    </div>` : ''}
                 </div>`;
         } else {
             attHtml = '<p class="text-zinc-300 text-[9px] italic text-center py-4 uppercase font-bold">Appello non registrato</p>';
         }
-    } else if (role === 'studente') {
-                // Vista Studente: Vede solo il proprio stato
-                const myAtt = attData[window.currentUserId];
-                if (myAtt) {
-                    const statusColors = {
-                        presente: 'text-green-600',
-                        assente: 'text-red-600',
-                        ritardo: 'text-amber-600'
-                    };
-                    const color = statusColors[myAtt.status] || 'text-zinc-500';
-                    attHtml = `
-                        <div class="p-3 bg-zinc-50 rounded-xl border border-zinc-100">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-[8px] font-black text-zinc-400 uppercase">Il tuo stato</span>
-                                <span class="font-black uppercase text-[10px] ${color}">${myAtt.status}</span>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div class="bg-white p-2 rounded border border-zinc-100 text-center">
-                                    <p class="text-[7px] text-zinc-400 uppercase font-bold">Entrata</p>
-                                    <p class="text-[10px] font-black text-zinc-700">${myAtt.entry}</p>
-                                </div>
-                                <div class="bg-white p-2 rounded border border-zinc-100 text-center">
-                                    <p class="text-[7px] text-zinc-400 uppercase font-bold">Uscita</p>
-                                    <p class="text-[10px] font-black text-zinc-700">${myAtt.exit}</p>
-                                </div>
-                            </div>
-                        </div>`;
-                } else {
-                    attHtml = '<p class="text-zinc-300 text-[9px] italic text-center py-4 uppercase font-bold">Appello non registrato</p>';
-                }
             } else if (isStaff) {
                 // Vista Staff: Vede tutti gli studenti della classe
                 const classStudents = window.allStudents.filter(s => s.classe === cls);
