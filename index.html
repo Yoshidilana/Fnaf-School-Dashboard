@@ -195,6 +195,10 @@
     <span>📋</span> Registro Presenze
 </button>
 
+	<button onclick="window.changeMenu('presenze-studente')" id="menu-presenze-studente" class="sidebar-item hidden w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
+    <span>🕒</span> Assenze e Ritardi
+</button>
+
                 <button onclick="window.changeMenu('agenda')" id="menu-agenda" 
     class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
             <span>📅</span> Agenda
@@ -256,6 +260,12 @@
         <span class="text-3xl block mb-2">⚠️</span>
         <span class="font-black uppercase text-[10px]">Note</span>
     </button>
+
+	<button id="home-btn-presenze" onclick="window.changeMenu('presenze-studente')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <span class="text-3xl block mb-2">🕒</span>
+    <span class="font-black uppercase text-[10px]">Assenze e Ritardi</span>
+</button>
+
     <button id="home-btn-pagella" onclick="window.changeMenu('pagella')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">🎓</span>
         <span class="font-black uppercase text-[10px]">Pagella</span>
@@ -539,6 +549,18 @@
     </div>
 </div>
 
+		<div id="view-presenze-studente" class="tab-content hidden p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-black italic uppercase text-zinc-800">Il Mio Registro Presenze</h2>
+        <span class="text-[10px] font-black bg-zinc-200 px-3 py-1 rounded-full uppercase text-zinc-500">Solo Assenze e Ritardi</span>
+    </div>
+    
+    <div id="student-attendance-history" class="grid gap-4">
+        <!-- Popolato via JS -->
+        <p class="text-center py-10 text-zinc-400 italic uppercase text-xs font-bold">Caricamento storico...</p>
+    </div>
+</div>
+
             <!-- VIEW: NOTE -->
             <div id="view-note" class="tab-content space-y-4">
     <div class="flex justify-between items-center bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
@@ -676,7 +698,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyCDlju6uXmXj3fRLYge-ya65J8ditM6rnM", 
@@ -742,6 +764,16 @@
             window.loadAttendance(window.selectedClass, dateValue);
         }
     }
+
+	  // AGGIUNTA: Refresh del Registro Voti Globale se la vista è attiva
+    if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) {
+        window.renderGlobalClassRegistry();
+    }
+
+	if (document.getElementById('view-presenze-studente')?.classList.contains('active-view')) {
+    window.loadStudentAttendanceHistory();
+}
+	
     if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
     if (typeof loadBacheca === "function") loadBacheca();
 
@@ -840,6 +872,8 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('home-btn-pagella', isStudente);  // Mostra Pagella solo a Studenti
    toggle('home-profilo-btn', !isOspite);
    toggle('note-date-container', isStaff);
+   toggle('menu-presenze-studente', isStudente);
+toggle('home-btn-presenze', isStudente);
 
 
 if(isStaff) {
@@ -1744,6 +1778,10 @@ window.changeMenu = (menu) => {
     alert("⚠️ Seleziona prima una classe dal menu 'Classi' per visualizzare l'agenda.");
     window.changeMenu('classi');
     return;
+}
+
+if (menu === 'presenze-studente') {
+    window.loadStudentAttendanceHistory();
 }
 
     // Reset stati attivi Sidebar
@@ -2985,6 +3023,93 @@ window.filterByClass = (cls) => {
 	window.addEventListener('load', () => {
     window.changeMenu('home');
 });
+
+	window.loadStudentAttendanceHistory = async () => {
+    const container = document.getElementById('student-attendance-history');
+    if (!container || !window.currentUserId) return;
+
+    const cls = window.currentUserData?.classe;
+    if (!cls || cls === "None") {
+        container.innerHTML = `<p class="text-center py-10 text-red-500 font-black uppercase text-xs">Classe non assegnata</p>`;
+        return;
+    }
+
+    // 1. Recupero l'Anno Scolastico di riferimento dal calendario globale
+    const cal = document.getElementById('global-calendar');
+    const dCal = cal ? new Date(cal.value) : new Date();
+    const curYear = dCal.getFullYear();
+    const curMonth = dCal.getMonth() + 1;
+    const currentAS = (curMonth >= 9) ? `${curYear}/${curYear + 1}` : `${curYear - 1}/${curYear}`;
+
+    container.innerHTML = `<p class="text-center py-10 text-zinc-400 animate-pulse font-black uppercase text-xs">Scansione registro A.S. ${currentAS}...</p>`;
+
+    try {
+        const attendanceColl = collection(db, 'artifacts', APP_ID, 'public', 'data', 'attendance');
+        const snapshot = await getDocs(attendanceColl);
+        
+        let anomalie = [];
+
+        snapshot.forEach(docSnap => {
+            const docId = docSnap.id; // Formato: "A_2025-02-10"
+            
+            if (docId.startsWith(`${cls}_`)) {
+                const dataGiorno = docId.split('_')[1]; // "2025-02-10"
+                const [y, m, d] = dataGiorno.split('-').map(Number);
+                
+                // 2. Calcolo l'Anno Scolastico del documento specifico
+                const docAS = (m >= 9) ? `${y}/${y + 1}` : `${y - 1}/${y}`;
+
+                // 3. Filtro: procedo solo se l'anno scolastico coincide
+                if (docAS === currentAS) {
+                    const presenzeClasse = docSnap.data();
+                    const mioStato = presenzeClasse[window.currentUserId];
+
+                    if (mioStato && mioStato.status !== 'presente') {
+                        anomalie.push({
+                            data: `${d.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${y}`,
+                            rawDate: dataGiorno,
+                            ...mioStato
+                        });
+                    }
+                }
+            }
+        });
+
+        if (anomalie.length === 0) {
+            container.innerHTML = `
+                <div class="bg-green-50 border-2 border-green-200 p-10 rounded-3xl text-center">
+                    <span class="text-4xl block mb-2">✅</span>
+                    <p class="text-green-700 font-black uppercase text-sm">Tutto in regola per l'A.S. ${currentAS}</p>
+                    <p class="text-green-600 text-[10px] font-bold uppercase">Non risultano assenze o ritardi in questo periodo.</p>
+                </div>`;
+            return;
+        }
+
+        anomalie.sort((a, b) => b.rawDate.localeCompare(a.rawDate));
+
+        container.innerHTML = anomalie.map(p => `
+            <div class="bg-white border-2 ${p.status === 'assente' ? 'border-red-100' : 'border-amber-100'} p-4 rounded-2xl flex justify-between items-center shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 ${p.status === 'assente' ? 'bg-red-600' : 'bg-amber-500'} rounded-xl flex items-center justify-center text-white font-black text-xs">
+                        ${p.status === 'assente' ? 'ASS' : 'RIT'}
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-black text-zinc-400 uppercase">${p.data}</p>
+                        <p class="text-sm font-black uppercase text-zinc-800">${p.status}</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-[8px] font-black text-zinc-400 uppercase">Orario Registrato</p>
+                    <p class="text-xs font-bold text-zinc-600">${p.entry || '--:--'} - ${p.exit || '--:--'}</p>
+                </div>
+            </div>
+        `).join('');
+
+    } catch (e) {
+        console.error("Errore scansione presenze:", e);
+        container.innerHTML = `<p class="text-center py-10 text-red-500 font-black uppercase text-xs">Errore durante il recupero dei dati.</p>`;
+    }
+};
 
     </script>
 </body>
