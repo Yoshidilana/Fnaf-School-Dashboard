@@ -920,23 +920,22 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('home-btn-note', isStudente);     // Mostra Note solo a Studenti
     toggle('home-btn-pagella', isStudente);  // Mostra Pagella solo a Studenti
    toggle('home-profilo-btn', !isOspite);
-   toggle('note-date-container', isStaff);
    toggle('menu-presenze-studente', isStudente);
-toggle('home-btn-presenze', isStudente);
 
+// --- AZIONI PROF / PRESIDE / BIDELLO ---
+// Invece di "if(isStaff)", passiamo direttamente la condizione al toggle.
+// Se isStaff è false, il pannello si SPEGNE automaticamente.
+toggle('prof-actions-agenda', isStaff);
+toggle('prof-comm-panel', isStaff);
+toggle('btn-add-note', isStaff);
+toggle('prof-grade-panel', isStaff);
+toggle('note-date-container', isStaff);
 
-if(isStaff) {
-    toggle('prof-actions-agenda', isStaff);
-    toggle('prof-comm-panel', isStaff);
-    toggle('btn-add-note', isStaff);
-    toggle('prof-grade-panel', isStaff);
-}
-    
-    if(isPreside || isBidello) {
-        toggle('bacheca-admin-panel', true);
-    }
+// Pannello bacheca: se non sei preside o bidello, DEVE sparire
+toggle('bacheca-admin-panel', isPreside || isBidello);
 
-    toggle('notif-bell', isPreside);
+// Campanella notifiche
+toggle('notif-bell', isPreside);
 
     const classButtons = document.querySelectorAll('.class-filter-btn');
     classButtons.forEach(btn => {
@@ -1704,8 +1703,8 @@ await setDoc(agendaRef, {
             <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
                 <p class="text-sm text-zinc-800">${p.text}</p>
                 <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
-                ${(['preside', 'bidello', 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase())) ? 
-                `<button onclick="window.deleteBacheca(${idx})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:scale-110 transition-all">✕</button>` : ''}
+                ${(['preside', 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase())) ? 
+`<button onclick="window.deleteBacheca(${idx})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:scale-110 transition-all">✕</button>` : ''}
             </div>
         `).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso per l\'A.S. ' + currentAS + '</p>';
     });
@@ -2153,20 +2152,30 @@ window.startBypass = async function() {
 
         if (assignSnap.exists()) {
             const data = assignSnap.data();
+
+            // --- 0. PULIZIA TOTALE (TABULA RASA) ---
+            // Svuota i contenitori che generano HTML dinamico con permessi (Bacheca e Voti)
+            const bachecaContainer = document.getElementById('bacheca-container');
+            if (bachecaContainer) bachecaContainer.innerHTML = ''; 
+
+            const tableBody = document.querySelector('#voti-table tbody');
+            if (tableBody) tableBody.innerHTML = '';
+
+            const mSelect = document.getElementById('input-grade-subject');
+            if (mSelect) mSelect.innerHTML = ''; 
+            // ---------------------------------------
             
             // 1. SET DATI UTENTE
             window.currentUserId = inputId;
             window.currentUserData = data; 
-            
             window.userRole = typeof getRoleType === 'function' ? getRoleType(data.role) : data.role;
             window.userName = data.name || data.username || inputId;
             
             let userClass = Array.isArray(data.classe) ? data.classe[0] : (data.classe || data.class || null);
-// Se è "None", forziamo a null per far apparire la selezione manuale
-if (userClass === "None") userClass = null; 
+            if (userClass === "None") userClass = null; 
             window.selectedClass = userClass;
 
-            // 2. UI HEADER & AVATAR (Aggiornato con i tuoi ID)
+            // 2. UI HEADER & AVATAR
             document.getElementById('user-name').innerText = window.userName;
             document.getElementById('user-role-label').innerText = window.userRole;
             document.getElementById('login-btn').classList.add('hidden');
@@ -2175,36 +2184,33 @@ if (userClass === "None") userClass = null;
             if (userProfileEl) {
                 userProfileEl.classList.remove('hidden');
                 userProfileEl.style.display = 'flex';
-                
-                // Cerchiamo la foto salvata dal bot (avatar) o quella NPC (avatar_npc)
                 const fotoHeader = data.avatar || data.avatar_npc || '';
-                const imgHeader = document.getElementById('user-avatar'); // Il tuo ID HTML
-                
-                if (imgHeader) {
-                    // Se non c'è foto, mettiamo un'icona di default
-                    imgHeader.src = fotoHeader || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
-                }
+                const imgHeader = document.getElementById('user-avatar');
+                if (imgHeader) imgHeader.src = fotoHeader || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
             }
 
-            // 3. LOGICA MATERIE (Per Prof/Preside)
+            // 3. LOGICA MATERIE (Solo se serve)
             if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
-                const mSelect = document.getElementById('input-grade-subject');
                 if (mSelect) {
                     const mats = window.currentUserData?.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
                     mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
                 }
             }
 
-            // 4. PRIVACY & VISIBILITÀ (Utilizza la funzione centralizzata)
+            // 4. PRIVACY & VISIBILITÀ (Questa nasconde i pannelli, ma non toglie la X dai post già scritti!)
             applyRoleUI();
 
-            // 5. NAVIGAZIONE AUTOMATICA AL MENU PRINCIPALE
+            // 5. RICARICA I DATI FRESCHI (Fondamentale per far sparire la X dalla bacheca)
+            if (typeof loadBacheca === 'function') {
+                await loadBacheca(); // Rigenera l'HTML della bacheca col nuovo ruolo (senza X se sei studente)
+            }
+
             if (userClass && userClass !== "None" && typeof handleClassChange === 'function') {
                 handleClassChange(userClass);
             }
             
             if (typeof changeMenu === 'function') {
-                changeMenu('home'); // Porta al menu principale invece che in agenda
+                changeMenu('home');
             }
             
             log.innerHTML += `<br>✅ Bypass completato! Ruolo: ${window.userRole}`;
