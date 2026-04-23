@@ -551,7 +551,7 @@
     <div id="student-header" class="hidden glass-light p-6 rounded-2xl flex justify-between items-center">
         <div class="flex justify-between w-full items-center">
             <div>
-                <span id="res-student-role" class="bg-red-400 text-white text-[8px] px-2 py-0.5 rounded font-black uppercase">Studente</span>
+<span id="res-student-role" class="bg-red-400 text-white text-[8px] px-2 py-0.5 rounded font-black uppercase">---</span>
                 <h2 id="res-student-name" class="text-3xl font-black uppercase text-blue-600">Dati Studente</h2>
             </div>
             <div class="text-right">
@@ -1087,11 +1087,11 @@ window.renderStudentList = function() {
     const header = document.getElementById('student-header');
     if (header) {
         header.classList.remove('hidden');
-        header.classList.add('flex'); // Assicura che il layout sia corretto
+        header.classList.add('flex');
     }
     
     document.getElementById('res-student-name').innerText = student.name;
-    document.getElementById('res-student-role').innerText = student.role || 'Studente';
+    document.getElementById('res-student-role').innerText = (student.role || 'Studente').toUpperCase();
 
     // 3. Gestione Pagella (se presente nel DOM)
     const pagellaName = document.getElementById('pagella-student-name');
@@ -2564,6 +2564,11 @@ if (role === 'studente') {
     if (!student) {
         console.error("Studente non trovato nella lista locale.");
         return;
+    }
+
+const roleDisplay = document.getElementById('res-student-role');
+    if (roleDisplay) {
+        roleDisplay.innerText = (student.role || 'Studente').toUpperCase();
     }
 
     window.selectedStudentId = id;
