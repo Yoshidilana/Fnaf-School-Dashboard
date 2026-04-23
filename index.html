@@ -3247,40 +3247,59 @@ window.filterByClass = (cls) => {
     }).join('');
 };
 
-	// Carica l'audio (assicurati di avere il file 'fnaf-honk.mp3')
+	// --- SEZIONE EASTER EGG FREDDY ---
+
+// Inizializzazione Audio (Fuori dal DOM per caricarlo subito)
 const honkSound = new Audio('https://www.myinstants.com/media/sounds/freddys-honk-nose.mp3');
 honkSound.preload = 'auto';
+honkSound.crossOrigin = "anonymous"; // Aiuta per i blocchi HTTPS online
 
 let noseClickCount = 0;
 let noseClickTimeout;
 
-// 2. Rendi la funzione cliccabile dall'HTML
-window.handleFreddyClick = function(event) {
-    if (event.target.id === 'freddy-nose') {
-        playHonk();
-        checkEasterEggTrigger();
-    }
-};
+// Usiamo un unico punto di ingresso per le funzioni globali
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Funzione interna per suonare
+    const playHonk = () => {
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') context.resume();
 
-function playHonk() {
-    honkSound.currentTime = 0;
-    honkSound.play().catch(e => console.warn("Interagisci con la pagina per attivare l'audio."));
-}
+        honkSound.currentTime = 0;
+        honkSound.play().catch(e => console.log("Audio in attesa di interazione..."));
+    };
 
-function checkEasterEggTrigger() {
-    noseClickCount++;
-    console.log(`Honk: ${noseClickCount}/5`); // Debug in console
+    // Funzione interna per il conteggio
+    const checkEasterEggTrigger = () => {
+        noseClickCount++;
+        console.log(`Honk: ${noseClickCount}/5`);
 
-    clearTimeout(noseClickTimeout);
-    noseClickTimeout = setTimeout(() => {
-        noseClickCount = 0;
-    }, 2000);
+        clearTimeout(noseClickTimeout);
+        noseClickTimeout = setTimeout(() => {
+            noseClickCount = 0;
+        }, 2000);
 
-    if (noseClickCount === 5) {
-        window.triggerGoldenDebug(); // Chiamiamo l'altra funzione globale
-        noseClickCount = 0;
-    }
-}
+        if (noseClickCount === 5) {
+            if (typeof window.triggerGoldenDebug === 'function') {
+                window.triggerGoldenDebug();
+            }
+            noseClickCount = 0;
+        }
+    };
+
+    // ESPORTAZIONE GLOBALE: Rendiamo il click accessibile all'HTML
+    window.handleFreddyClick = function(event) {
+        // Preveniamo che il click faccia scrollare la pagina o altro
+        if (event) event.stopPropagation(); 
+        
+        if (event.target.id === 'freddy-nose') {
+            playHonk();
+            checkEasterEggTrigger();
+        }
+    };
+
+    console.log("🐻 Freddy Nose System: Online");
+});
 	window.triggerGoldenDebug = async function() {
     if (document.getElementById('golden-debug-panel')) {
         document.getElementById('golden-debug-panel').remove();
