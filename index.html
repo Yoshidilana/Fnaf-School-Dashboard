@@ -1253,8 +1253,9 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
                 </div>`;
         }).join('');
 
-        // Rendering Firme (Lezioni)
-const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
+        // Rendering Firme
+        const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
+        const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
     <div class="group flex gap-5 p-4 rounded-2xl border border-zinc-100 hover:border-red-200 hover:bg-red-50/30 transition-all">
         <div class="flex flex-col items-center justify-center w-14 h-14 bg-white border-2 border-zinc-100 rounded-2xl shadow-sm group-hover:border-red-200 shrink-0">
             <span class="text-lg font-black text-zinc-900 leading-none">${f.ora}°</span>
@@ -1267,13 +1268,12 @@ const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
             </div>
             <p class="text-sm text-zinc-700 font-medium leading-snug">${f.argomento || "Nessun argomento inserito"}</p>
         </div>
-            </div>`).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Nessuna lezione registrata</div>';
+    </div>`).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Nessuna lezione registrata</div>';
 
         // Iniezione nella lista (senza il box di input)
         document.getElementById('agenda-firme-list').innerHTML = avvisiHtml + firmeHtml;
         
-        // Rendering Compiti
-document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => `
+        document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => `
     <div class="p-4 bg-blue-50/50 border-l-4 border-blue-500 rounded-2xl shadow-sm">
         <div class="flex items-center gap-2 mb-2">
             <span class="text-[9px] font-black uppercase text-blue-700 bg-blue-100 px-2 py-0.5 rounded">${c.materia}</span>
