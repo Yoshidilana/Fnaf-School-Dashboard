@@ -32,6 +32,43 @@
     color: #18181b !important;
 }
 
+	.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    cursor: help;
+}
+
+.grade-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.grade-positive {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+}
+
+.grade-negative {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.grade-neutral {
+    background-color: #f4f4f5;
+    color: #71717a;
+    border-color: #e4e4e7;
+}
+
         .sidebar-item { transition: all 0.2s; border-radius: 8px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; cursor: pointer; } 
 	.sidebar-hidden #main-sidebar { display: none !important; }
         .sidebar-item.active { background: #FF0000; color: white; }
@@ -573,18 +610,20 @@
     <button onclick="window.submitGrade()" class="bg-red-700 px-4 py-2 rounded text-white text-[10px] font-black uppercase">Vota</button>
 </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-zinc-900 overflow-hidden">
-        <table class="w-full text-left text-xs">
-            <thead class="bg-zinc-200 text-zinc-900 font-black uppercase">
-                <tr>
-                    <th class="p-4">Materia</th>
-                    <th class="p-4 border-x border-zinc-900">1° Quadrimestre</th>
-                    <th class="p-4 border-r border-zinc-900">2° Quadrimestre</th>
-                    <th class="p-4 text-right">Media</th>
-                </tr>
-            </thead>
-            <tbody id="registro-voti-body" class="divide-y divide-zinc-900"></tbody>
-        </table>
+    <div class="bg-white rounded-2xl shadow-sm border border-zinc-900 overflow-hidden">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-blue-300 border-b border-zinc-600">
+                <th class="p-5 text-[10px] font-black uppercase text-zinc-900 tracking-widest">Materia</th>
+                <th class="p-5 text-[10px] font-black uppercase text-zinc-900 tracking-widest border-x border-zinc-900">1° Quadrimestre</th>
+                <th class="p-5 text-[10px] font-black uppercase text-zinc-900 tracking-widest border-r border-zinc-900">2° Quadrimestre</th>
+                <th class="p-5 text-right text-[10px] font-black uppercase text-zinc-900 tracking-widest bg-blue-300">Media</th>
+            </tr>
+        </thead>
+        <tbody id="registro-voti-body" class="divide-y divide-zinc-900">
+            <!-- Righe popolate via JS -->
+        </tbody>
+    </table>
     </div>
 </div>
 
@@ -1346,12 +1385,30 @@ if (resMediaElem) {
     // Sostituisci il calcolo della media di materia (avg) con questo:
     const avg = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
             
-            vHtml += `<tr class="border-b border-zinc-700 hover:bg-zinc-50">
-                <td class="p-4 font-bold text-zinc-800 uppercase">${m}</td>
-                <td class="p-4 border-x border-zinc-800 bg-zinc-50/30">${q1.map(v => renderVotoTag(v, studentId)).join('')}</td>
-                <td class="p-4 border-r border-zinc-800">${q2.map(v => renderVotoTag(v, studentId)).join('')}</td>
-                <td class="p-4 text-right font-black text-lg text-blue-600">${avg}</td>
-            </tr>`;
+            vHtml += `
+    <tr class="group hover:bg-zinc-50/80 transition-colors">
+        <td class="p-5">
+            <div class="flex flex-col">
+                <span class="font-extrabold text-zinc-800 uppercase text-xs tracking-tight">${m}</span>
+                <span class="text-[9px] text-zinc-400 font-bold uppercase">Docente: ${m_voti[0]?.prof || 'N.D.'}</span>
+            </div>
+        </td>
+        <td class="p-5 border-x border-zinc-900 bg-zinc-50/30">
+            <div class="flex flex-wrap gap-2">
+                ${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[9px] text-zinc-300 italic font-bold">VUOTO</span>'}
+            </div>
+        </td>
+        <td class="p-5 border-r border-zinc-900">
+            <div class="flex flex-wrap gap-2">
+                ${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[9px] text-zinc-300 italic font-bold">VUOTO</span>'}
+            </div>
+        </td>
+        <td class="p-5 text-right bg-zinc-50/30">
+            <span class="text-sm font-black ${parseFloat(avg) < 6 ? 'text-red-600' : 'text-green-600'}">
+                ${avg}
+            </span>
+        </td>
+    </tr>`;
         });
 
         // 6. Sezione "Altre Materie" (per Prof/Preside)
@@ -1420,15 +1477,16 @@ if (resMediaElem) {
 
         function renderVotoTag(v, studentId) {
     const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
-    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
+    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
     const canManage = isProf || isStaff;
 
     const valoreNumerico = window.parseVotoScolastico(v.voto);
-    const colorClass = valoreNumerico < 6 ? 'text-red-500 font-bold' : 'text-green-600 font-bold';
-    const hoverClass = canManage ? 'hover:bg-zinc-200' : '';
+    let statusClass = "grade-neutral";
     
-    // Costruiamo il testo del tooltip
-    const infoTooltip = `${v.data} - ${v.argomento || 'Nessun argomento'}`;
+    if (valoreNumerico >= 6) statusClass = "grade-positive";
+    else if (valoreNumerico > 0) statusClass = "grade-negative";
+
+    const infoTooltip = `${v.data} - ${v.argomento || 'Valutazione'}`;
 
     let handlers = "";
     if (canManage) {
@@ -1436,8 +1494,12 @@ if (resMediaElem) {
         handlers += ` oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"`;
     }
 
-    // Aggiunto l'attributo title="${infoTooltip}"
-    return `<span title="${infoTooltip}" class="mr-1 inline-block px-1 rounded cursor-help ${colorClass} ${hoverClass}" ${handlers}>${v.voto}</span>`;
+    return `
+        <span title="${infoTooltip}" 
+              class="grade-badge ${statusClass} ${canManage ? 'hover:border-zinc-400 cursor-pointer' : ''}" 
+              ${handlers}>
+            ${v.voto}
+        </span>`;
 }
 
         function renderNoteActions(n, idx, studentId) {
