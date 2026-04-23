@@ -2558,7 +2558,6 @@ if (role === 'studente') {
 }
 
     // 3. SE SIAMO QUI, L'UTENTE È STAFF O ADMIN -> PROCEDIAMO AL CARICAMENTO
-    console.log(`🔓 Caricamento profilo per l'ID: ${id}`);
 
     // Cerchiamo lo studente nella lista locale
     const student = window.allStudents.find(s => s.id === id);
@@ -2724,7 +2723,7 @@ if (mediaRegistro) {
         window.handleClassChange(classeCliccata);
     }
     
-    console.log(`📂 Vista filtrata per: ${classeCliccata}`);
+
 };
 
 	window.deleteVoto = async (idRicevuto, studentId) => {
@@ -3303,8 +3302,6 @@ document.addEventListener('DOMContentLoaded', () => {
             checkEasterEggTrigger();
         }
     };
-
-    console.log("🐻 Freddy Nose System: Online");
 });
 	window.triggerGoldenDebug = async function() {
     if (document.getElementById('golden-debug-panel')) {
