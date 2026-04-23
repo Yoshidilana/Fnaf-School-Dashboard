@@ -73,15 +73,27 @@
 </div>
 
     <!-- Top Bar -->
-    <header class="w-full h-14 min-h-[56px] flex shrink-0 items-center justify-between px-6 bg-blue-800 border-b border-zinc-500 z-50">
-    <div class="flex items-center gap-4">
-        <div class="w-8 h-8 bg-yellow-400 rounded flex items-center justify-center text-lg">🐻</div>
-        <div>
-            <h1 class="font-black text-xs uppercase italic tracking-tighter">Faz- <span class="text-yellow-400">Portal</span></h1>
-            <p id="current-academic-year" class="text-[9px] font-bold text-zinc-800 uppercase tracking-widest">A.S. --/--</p>
+    <header class="w-full h-16 min-h-[64px] flex shrink-0 items-center justify-between px-4 bg-indigo-900 border-b border-zinc-200 z-50">
+    <div class="flex items-center gap-2">
+        
+        <div class="relative w-12 h-12 flex shrink-0 items-center justify-center cursor-pointer" onclick="handleFreddyClick(event)">
+            <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" 
+                 alt="Faz-Logo" 
+                 class="h-10 w-auto object-contain active:scale-90 transition-transform">
+            
+            <div id="freddy-nose" class="absolute w-4 h-4 bg-transparent rounded-full top-[58%] left-[51%] -translate-x-1/2 -translate-y-1/2 z-10"></div>
         </div>
 
-        
+        <div class="flex flex-col justify-center -space-y-1">
+            <h1 class="font-black text-sm uppercase italic tracking-tighter">
+                Faz-<span class="text-yellow-500">Portal</span>
+            </h1>
+            <p id="current-academic-year" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                A.S. 2025/2026
+            </p>
+        </div>
+    </div>
+ 
         <div class="ml-4 flex items-center gap-1 bg-zinc-50 px-2 py-1 rounded border border-zinc-200 shadow-sm">
     <span class="text-[8px] font-black text-zinc-400 uppercase mr-1"></span>
     
@@ -2206,26 +2218,39 @@ if (userClass === "None") userClass = null;
 };
 
 document.addEventListener('keydown', (e) => {
-    // Combinazione: Shift + Alt + D
     if (e.shiftKey && e.altKey && e.key.toLowerCase() === 'd') {
-        const panel = document.getElementById('test-bypass-panel');
-        const btn = document.getElementById('debug-toggle-btn');
         
-        if (panel && btn) {
-            // Se sono nascosti, li mostra entrambi
-            if (panel.style.display === 'none' || panel.classList.contains('hidden')) {
-                panel.style.setProperty('display', 'block', 'important');
-                panel.classList.remove('hidden');
-                btn.style.setProperty('display', 'block', 'important');
-                btn.classList.remove('hidden');
-                console.log("🛠️ Debug Mode On");
-            } else {
-                // Altrimenti li nasconde
-                panel.style.setProperty('display', 'none', 'important');
-                panel.classList.add('hidden');
-                btn.style.setProperty('display', 'none', 'important');
-                btn.classList.add('hidden');
+        // 1. RILEVA IL CONTESTO
+        const isLocal = window.location.hostname === "localhost" || 
+                        window.location.hostname === "127.0.0.1" || 
+                        window.location.protocol === "file:";
+        
+        const MY_ID = "477766915096313867";
+        const isAuthorized = (window.currentUserId === MY_ID || window.userRole === 'Admin');
+
+        // 2. LA LOGICA DI ACCESSO: Entra se sei in locale OPPURE se sei autorizzato online
+        if (isLocal || isAuthorized) {
+            const panel = document.getElementById('test-bypass-panel');
+            const btn = document.getElementById('debug-toggle-btn');
+            
+            if (panel && btn) {
+                const isHidden = panel.style.display === 'none' || panel.classList.contains('hidden');
+                
+                if (isHidden) {
+                    panel.style.setProperty('display', 'block', 'important');
+                    panel.classList.remove('hidden');
+                    btn.style.setProperty('display', 'block', 'important');
+                    btn.classList.remove('hidden');
+                    console.log("🛠️ Debug Mode On " + (isLocal ? "(LOCAL)" : "(AUTH)"));
+                } else {
+                    panel.style.setProperty('display', 'none', 'important');
+                    panel.classList.add('hidden');
+                    btn.style.setProperty('display', 'none', 'important');
+                    btn.classList.add('hidden');
+                }
             }
+        } else {
+            console.warn("🔒 Tentativo di accesso debug negato.");
         }
     }
 });
@@ -3218,6 +3243,112 @@ window.filterByClass = (cls) => {
                 <td class="p-4 text-right font-black text-sm bg-zinc-50 ${mediaGenerale < 6 ? 'text-red-600' : 'text-blue-600'}">${mediaGenerale}</td>
             </tr>`;
     }).join('');
+};
+
+	// Carica l'audio (assicurati di avere il file 'fnaf-honk.mp3')
+const honkSound = new Audio('https://www.myinstants.com/media/sounds/freddys-honk-nose.mp3');
+honkSound.preload = 'auto';
+
+let noseClickCount = 0;
+let noseClickTimeout;
+
+// 2. Rendi la funzione cliccabile dall'HTML
+window.handleFreddyClick = function(event) {
+    if (event.target.id === 'freddy-nose') {
+        playHonk();
+        checkEasterEggTrigger();
+    }
+};
+
+function playHonk() {
+    honkSound.currentTime = 0;
+    honkSound.play().catch(e => console.warn("Interagisci con la pagina per attivare l'audio."));
+}
+
+function checkEasterEggTrigger() {
+    noseClickCount++;
+    console.log(`Honk: ${noseClickCount}/5`); // Debug in console
+
+    clearTimeout(noseClickTimeout);
+    noseClickTimeout = setTimeout(() => {
+        noseClickCount = 0;
+    }, 2000);
+
+    if (noseClickCount === 5) {
+        window.triggerGoldenDebug(); // Chiamiamo l'altra funzione globale
+        noseClickCount = 0;
+    }
+}
+	window.triggerGoldenDebug = function() {
+    if (document.getElementById('golden-debug-panel')) {
+        document.getElementById('golden-debug-panel').remove();
+        return;
+    }
+
+    const MY_ID = "477766915096313867";
+    const isLocal = window.location.hostname === "localhost" || window.location.protocol === "file:";
+    const isMeOnline = window.currentUserId === MY_ID;
+
+    const panel = document.createElement('div');
+    panel.id = 'golden-debug-panel';
+    // Classi Tailwind + Stile Custom
+    panel.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[320px] p-6 z-[99999] border-2 border-red-700 shadow-[0_0_50px_rgba(185,28,28,0.4)] rounded-xl text-center';
+    panel.style.cssText = 'background: rgba(5, 5, 5, 0.98); backdrop-filter: blur(15px); color: #fff; font-family: "Courier New", Courier, monospace;';
+
+    let content = '';
+
+    if (isMeOnline || isLocal) {
+        content = `
+            <h2 class="text-xl font-black text-red-600 mb-2 animate-pulse uppercase">Golden Debug</h2>
+            <p class="text-[9px] text-zinc-500 mb-4 uppercase tracking-tighter">Identity Verified: ADMIN_ACCESS</p>
+            <div class="flex flex-col gap-2">
+                <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
+                        class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
+                    🚀 Launch Admin Bypass
+                </button>
+                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Abort x</button>
+            </div>
+        `;
+    } else {
+        content = `
+            <h2 class="text-lg font-black text-yellow-500 mb-2 uppercase">Easter Egg!</h2>
+            <p class="text-[10px] text-zinc-400 mb-4 italic">"It's me." - Inserisci la chiave del proprietario per procedere.</p>
+            <div class="flex flex-col gap-3">
+                <input type="password" id="golden-pass-input" placeholder="********" class="bg-zinc-900 border border-zinc-800 text-white p-2 rounded text-sm text-center outline-none focus:border-red-600 transition-all">
+                <button onclick="window.verifyGoldenPass()" class="bg-white text-black p-2 rounded text-xs font-bold uppercase hover:bg-red-600 hover:text-white transition-all">Verify</button>
+                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-600 hover:text-white uppercase mt-1">Close</button>
+            </div>
+        `;
+    }
+
+    panel.innerHTML = content;
+    document.body.appendChild(panel);
+};
+
+window.verifyGoldenPass = function() {
+    const input = document.getElementById('golden-pass-input');
+    const panel = document.getElementById('golden-debug-panel');
+    const MY_ID = "477766915096313867";
+
+    if (input.value === MY_ID) {
+        // TRASFORMAZIONE IN DEBUG
+        panel.innerHTML = `
+    <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
+    <div class="flex flex-col gap-2">
+        <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
+                class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
+            🚀 Start Master Bypass
+        </button>
+        <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
+    </div>
+`;
+    } else {
+        input.value = '';
+        input.placeholder = 'INVALID KEY';
+        input.classList.add('border-red-600');
+        // Suono di errore se lo hai
+        if(typeof playHonk === 'function') playHonk(); 
+    }
 };
 
     </script>
