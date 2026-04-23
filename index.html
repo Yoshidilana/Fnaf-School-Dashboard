@@ -6,31 +6,33 @@
     <title>Fazbear Classroom - Sistema Gestionale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-    font-family: 'Plus Jakarta Sans', sans-serif; 
-    background: #f4f4f2; 
-    color: #1a1a1a; 
-    min-height: 100vh;
-    display: flex; 
-    flex-direction: column;
-    overflow-y: auto; /* Torna lo scroll normale di sistema */
-}
-        .glass-light {
-    background: white !important;
-    border: 1px solid #e4e4e7 !important; /* Grigio chiaro invece di oro */
-    backdrop-filter: none !important;
-    color: #18181b !important; /* Testo quasi nero */
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-}
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+        font-family: 'Plus Jakarta Sans', sans-serif; 
+        background: #f8fafc; /* Grigio ardesia chiarissimo per un look pulito */
+        color: #0f172a; 
+        min-height: 100vh;
+        display: flex; 
+        flex-direction: column;
+        overflow-y: auto;
+    }
 
-.glass {
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(228, 228, 231, 0.5);
-    color: #18181b !important;
-}
+    /* Glassmorphism migliorato */
+    .glass-light {
+        background: rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    }
+
+    .glass {
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 1);
+    }
 
 	.grade-badge {
     display: inline-flex;
@@ -69,17 +71,65 @@
     border-color: #e4e4e7;
 }
 
-        .sidebar-item { transition: all 0.2s; border-radius: 8px; margin-bottom: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; cursor: pointer; } 
-	.sidebar-hidden #main-sidebar { display: none !important; }
-        .sidebar-item.active { background: #FF0000; color: white; }
-        .tab-content { display: none; height: 100%; }
-        .active-view { display: flex; animation: fadeIn 0.3s ease-out; flex-direction: column; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        .custom-scroll::-webkit-scrollbar { width: 5px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #6e1515; border-radius: 10px; }
-    </style>
-</head>
-<body>
+   /* Miglioramenti Estetici Top & Sidebar */
+.sidebar-item { 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    border-radius: 12px; 
+    margin: 4px 4px; 
+    font-size: 0.7rem; 
+    font-weight: 800; 
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+}
+
+.sidebar-item:hover { 
+    background: rgba(255, 255, 255, 0.15); 
+    transform: translateX(4px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-item.active { 
+    background: #ffffff !important; 
+    color: #b91c1c !important; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+header {
+    background: #ffffff !important;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+}
+
+.filter-container {
+    background: #f4f4f5;
+    border-radius: 14px;
+    padding: 4px;
+    border: 1px solid #e4e4e7;
+}
+
+.top-btn-action {
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.top-btn-action:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+    .sidebar-hidden #main-sidebar { display: none !important; }
+    
+    .tab-content { display: none; height: 100%; }
+    .active-view { display: flex; animation: fadeIn 0.4s ease-out; flex-direction: column; }
+    
+    @keyframes fadeIn { 
+        from { opacity: 0; transform: translateY(10px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
+
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
 
 <button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden" style="display: none;">
     🛠️
@@ -109,166 +159,135 @@
     </div>
 </div>
 
-    <!-- Top Bar -->
-    <header class="w-full h-16 min-h-[64px] flex shrink-0 items-center justify-between px-4 bg-yellow-600 border-b border-zinc-700 z-50">
-    <div class="flex items-center gap-2">
-        
-        <div class="relative w-12 h-12 flex shrink-0 items-center justify-center cursor-pointer" onclick="handleFreddyClick(event)">
+   <!-- Top Bar Ristilizzata -->
+<header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-200 z-50">
+    <div class="flex items-center gap-4">
+        <!-- Logo Section -->
+        <div class="relative w-14 h-14 flex shrink-0 items-center justify-center cursor-pointer group" onclick="handleFreddyClick(event)">
             <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" 
-                 alt="Faz-Logo" 
-                 class="h-10 w-auto object-contain active:scale-90 transition-transform">
-            
+                 class="h-12 w-auto object-contain group-active:scale-90 transition-transform">
             <div id="freddy-nose" class="absolute w-4 h-4 bg-transparent rounded-full top-[58%] left-[51%] -translate-x-1/2 -translate-y-1/2 z-10"></div>
         </div>
 
-        <div class="flex flex-col justify-center -space-y-1">
-            <h1 class="font-bold text-zinc-900 uppercase italic tracking-tighter">
-                Faz-<span class="text-yellow-500">Portal</span>
+        <div class="flex flex-col -space-y-1">
+            <h1 class="font-black text-zinc-900 uppercase italic text-xl tracking-tighter">
+                Faz-<span class="text-red-600">Portal</span>
             </h1>
-            <p id="current-academic-year" class="text-[10px] font-bold text-zinc-900 uppercase tracking-widest">
+            <p id="current-academic-year" class="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">
                 A.S. 2025/2026
             </p>
         </div>
     </div>
- 
-        <div class="ml-4 flex items-center gap-1 bg-zinc-50 px-2 py-1 rounded border border-zinc-200 shadow-sm">
-    <span class="text-[8px] font-black text-zinc-400 uppercase mr-1"></span>
-    
-    <input 
-        type="text" 
-        id="quick-year-filter" 
-        placeholder="2025" 
-        class="text-[10px] p-1 border rounded w-14 text-center outline-none focus:ring-1 focus:ring-red-500 font-bold"
-        onkeypress="if(event.key === 'Enter') window.vaiADataRapida()"
-    >
 
-    <select 
-        id="quick-month-filter" 
-        class="text-[10px] p-1 border rounded bg-white outline-none font-bold text-zinc-700"
-        onchange="window.vaiADataRapida()"
-    >
-        <option value="09">Set</option>
-        <option value="10">Ott</option>
-        <option value="11">Nov</option>
-        <option value="12">Dic</option>
-        <option value="01">Gen</option>
-        <option value="02">Feb</option>
-        <option value="03">Mar</option>
-        <option value="04">Apr</option>
-        <option value="05">Mag</option>
-        <option value="06">Giu</option>
-        <option value="07">Lug</option>
-        <option value="08">Ago</option>
-    </select>
-
-    <button 
-        onclick="window.vaiADataRapida()"
-        class="bg-red-600 text-white text-[9px] px-2 py-1 rounded font-black hover:bg-zinc-900 transition-all"
-    >
-        VAI
-    </button>
-</div>
-    </div> 
-
-		<div id="class-filter-container" class="flex items-center gap-1 mb-4 bg-zinc-50 p-1 rounded-lg border border-zinc-200 shadow-sm">
-    <p class="text-[9px] font-black text-zinc-400 uppercase ml-1 mr-1"></p>
-    
-    <button onclick="window.filterByClass('A')" data-class="A" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
-        A
-    </button>
-    
-    <button onclick="window.filterByClass('B')" data-class="B" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
-        B
-    </button>
-    
-    <button onclick="window.filterByClass('C')" data-class="C" 
-        class="class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase hover:border-red-600 transition-all">
-        C
-    </button>
-
-    <div class="ml-auto flex items-center gap-1.5 pr-1">
-        <p class="text-[9px] font-black text-zinc-400 uppercase"></p>
-        <select id="fast-student-filter" onchange="window.selectAndGoToProfile(this.value)" 
-            class="w-[120px] bg-white border border-zinc-300 text-zinc-900 px-1 py-0.5 rounded-md text-[9px] font-black uppercase outline-none focus:border-red-600 transition-all cursor-pointer">
-            <option value="">Studente...</option>
-        </select>
-    </div>
-</div>
-		<div class="flex items-center gap-2 p-1.5 bg-zinc-50 rounded-xl border border-zinc-200 shadow-sm">
-    <div class="flex items-center gap-2 px-3 py-1">
-        <span class="text-xs">📅</span>
-        <span id="current-date-display" class="text-[10px] font-black uppercase text-zinc-600 tracking-tight">
-            Seleziona Data
-        </span>
-    </div>
-</div>
-                      <div class="flex items-center gap-6">
-            <div id="notif-bell" class="relative cursor-pointer hidden" onclick="window.toggleNotifPanel()">
-                <span class="text-xl">🔔</span>
-                <span id="notif-count" class="absolute -top-1 -right-1 bg-red-600 text-white text-[8px] px-1 rounded-full font-black">0</span>
-            </div>
-
-        <div id="user-profile" class="hidden flex items-center gap-2 bg-zinc-100 p-1 rounded-full border border-zinc-200">
-            <img id="user-avatar" src="" class="w-6 h-6 rounded-full border border-red-600">
-            <div class="flex flex-col pr-2">
-                <span id="user-name" class="text-[9px] font-black text-zinc-800 uppercase leading-none">---</span>
-                <span id="user-role-label" class="text-[7px] font-bold text-red-600 uppercase tracking-tighter">Ospite</span>
-            </div>
+    <!-- Central Filters -->
+    <div class="flex items-center gap-3">
+        <!-- Date Quick Filter -->
+        <div class="filter-container flex items-center gap-1 px-2">
+            <input type="text" id="quick-year-filter" placeholder="2025" class="text-[10px] bg-transparent w-12 text-center outline-none font-bold" onkeypress="if(event.key === 'Enter') window.vaiADataRapida()">
+            <select id="quick-month-filter" class="text-[10px] bg-transparent outline-none font-bold text-zinc-700" onchange="window.vaiADataRapida()">
+                <option value="09">SET</option><option value="10">OTT</option><option value="11">NOV</option><option value="12">DIC</option>
+                <option value="01">GEN</option><option value="02">FEB</option><option value="03">MAR</option><option value="04">APR</option>
+                <option value="05">MAG</option><option value="06">GIU</option>
+            </select>
+            <button onclick="window.vaiADataRapida()" class="bg-zinc-900 text-white text-[8px] px-2 py-1 rounded-lg font-black hover:bg-red-600 transition-colors">GO</button>
         </div>
-        <button id="login-btn" onclick="window.loginDiscord()" class="bg-zinc-900 text-white text-[9px] font-black px-4 py-2 rounded uppercase hover:bg-red-700 transition-all">Login</button>
+
+        <!-- Class Filter -->
+        <div id="class-filter-container" class="filter-container flex items-center gap-1">
+            <button onclick="window.filterByClass('A')" data-class="A" class="class-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">A</button>
+            <button onclick="window.filterByClass('B')" data-class="B" class="class-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">B</button>
+            <button onclick="window.filterByClass('C')" data-class="C" class="class-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">C</button>
+            <div class="w-[1px] h-4 bg-zinc-300 mx-1"></div>
+            <select id="fast-student-filter" onchange="window.selectAndGoToProfile(this.value)" class="bg-transparent text-[10px] font-black uppercase outline-none pr-2">
+                <option value="">Studente...</option>
+            </select>
+        </div>
+
+        <!-- Current Date Display -->
+        <div class="filter-container flex items-center gap-2 px-4 py-2">
+            <span class="text-xs">📅</span>
+            <span id="current-date-display" class="text-[10px] font-black uppercase text-zinc-600">Seleziona Data</span>
+        </div>
     </div>
+
+    <!-- User Actions -->
+<div class="flex items-center gap-4">
+    <div id="notif-bell" class="relative cursor-pointer hidden p-2.5 hover:bg-zinc-100 rounded-xl transition-all active:scale-90" onclick="window.toggleNotifPanel()">
+        <span class="text-xl">🔔</span>
+        <span id="notif-count" class="absolute top-1.5 right-1.5 bg-red-600 text-white text-[7px] w-4 h-4 flex items-center justify-center rounded-full font-black border-2 border-white shadow-sm">0</span>
+    </div>
+
+    <!-- Profilo Utente Ristilizzato -->
+    <div id="user-profile" class="hidden items-center gap-3 bg-white border border-zinc-200 p-1.5 pr-5 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group" onclick="window.apriProfiloPersonale()">
+        <div class="relative">
+            <img id="user-avatar" src="" class="w-9 h-9 rounded-xl border-2 border-zinc-50 object-cover shadow-sm group-hover:border-red-500 transition-colors">
+            <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+        </div>
+        <div class="flex flex-col justify-center">
+            <span id="user-name" class="text-[11px] font-extrabold text-zinc-900 uppercase leading-none tracking-tight">---</span>
+            <span id="user-role-label" class="text-[7px] font-black text-red-600 uppercase tracking-[0.1em] mt-0.5">Ospite</span>
+        </div>
+    </div>
+
+    <!-- Pulsante Login Ristilizzato -->
+    <button id="login-btn" onclick="window.loginDiscord()" 
+        class="group relative px-6 py-2.5 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-xl overflow-hidden transition-all hover:bg-red-700 active:scale-95 shadow-lg shadow-zinc-200">
+        <span class="relative z-10">Accedi</span>
+        <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+    </button>
+</div>
 </header>
 
     <div class="flex flex-1 bg-zinc-700">
 
-        <!-- Sidebar -->
-        <aside id="main-sidebar" class="w-64 border-r border-zinc-400 bg-yellow-600 flex flex-col shrink-0 p-4 min-h-screen">
-       <body class="sidebar-hidden">
-        <nav class="space-y-1 mb-8">
-                <p class="text-[10px] font-black text-black uppercase mb-4 ml-2 tracking-wider">
-            Menu Principale
-        </p>
-
-<button onclick="window.apriProfiloPersonale()" id="menu-profilo" 
-            class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-white/10">
-            <span>👤</span> Il Mio Profilo
+        <!-- Sidebar Ristilizzata -->
+<aside id="main-sidebar" class="w-72 border-r border-zinc-200 bg-yellow-600 flex flex-col shrink-0 py-6 z-40 shadow-xl">
+    <div class="px-6 mb-8">
+<body class="sidebar-hidden">
+    <nav class="flex-1 space-y-1">
+        <p class="text-[10px] font-black text-yellow-900 uppercase tracking-[0.3em]">Menù Principale</p>
+    </div>
+        <button onclick="window.apriProfiloPersonale()" id="menu-profilo" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">👤</span>Profilo
         </button>
 
-			<button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-    <span>🏫</span> Classi
-</button>
-
-		<button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-    <span>📋</span> Registro Presenze
-</button>
-
-	<button onclick="window.changeMenu('presenze-studente')" id="menu-presenze-studente" class="sidebar-item hidden w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-    <span>🕒</span> Assenze e Ritardi
-</button>
-
-                <button onclick="window.changeMenu('agenda')" id="menu-agenda" 
-    class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-            <span>📅</span> Agenda
+        <button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">🏫</span> Hub Classi
         </button>
 
-                <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-                    <span>📝</span> Registro Voti
-                </button>
+        <button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">📋</span> Registro Presenze
+        </button>
 
-                <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-                    <span>🎓</span> Pagella Scolastica
-                </button>
-                
-                <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-                    <span>⚠️</span> Note e Mandati
-                </button>
-                <button onclick="window.changeMenu('bacheca')" id="menu-bacheca" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 text-zinc-900 hover:bg-zinc-200">
-                    <span>📢</span> Bacheca
-                </button>
-            </nav>
-        </aside>
+        <button onclick="window.changeMenu('presenze-studente')" id="menu-presenze-studente" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">🕒</span> Assenze e Ritardi
+        </button>
+
+        <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">📅</span> Agenda
+        </button>
+
+        <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">📝</span>Voti
+        </button>
+
+        <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">🎓</span> Pagella
+        </button>
+        
+        <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">⚠️</span> Note e Mandati
+        </button>
+
+        <button onclick="window.changeMenu('bacheca')" id="menu-bacheca" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+            <span class="text-lg">📢</span> Bacheca Avvisi
+        </button>
+    </nav>
+
+    <div class="px-8 mt-auto pt-6 border-t border-yellow-500/30">
+        <p class="text-[8px] font-bold text-yellow-900/40 uppercase">Fazbear Classroom Management v2.0</p>
+    </div>
+</aside>
 
         <!-- Contenuto -->
         <main class="flex-1 bg-zinc-100 p-6 relative">
@@ -848,6 +867,9 @@
 	  // AGGIUNTA: Refresh del Registro Voti Globale se la vista è attiva
     if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) {
         window.renderGlobalClassRegistry();
+    }
+	        if (document.getElementById('view-tabellone')?.classList.contains('active-view')) {
+        window.renderTabelloneGlobale();
     }
 
 	if (document.getElementById('view-presenze-studente')?.classList.contains('active-view')) {
