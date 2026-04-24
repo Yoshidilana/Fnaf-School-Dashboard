@@ -248,11 +248,11 @@ header {
         <p class="text-[10px] font-black text-yellow-900 uppercase tracking-[0.3em]">Menù Principale</p>
     </div>
         <button onclick="window.apriProfiloPersonale()" id="menu-profilo" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">👤</span>Profilo
+            <span class="text-lg">👤</span>PROFILO
         </button>
 
         <button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">🏫</span> Hub Classi
+            <span class="text-lg">🏫</span> HUB CLASSI
         </button>
 
         <button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
@@ -264,11 +264,11 @@ header {
         </button>
 
         <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">📅</span> Agenda
+            <span class="text-lg">📅</span> AGENDA
         </button>
 
         <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">📝</span>Voti
+            <span class="text-lg">📝</span> REGISTRO VOTI
         </button>
 
         <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
@@ -276,11 +276,11 @@ header {
         </button>
         
         <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">⚠️</span> Note e Mandati
+            <span class="text-lg">⚠️</span> NOTE
         </button>
 
         <button onclick="window.changeMenu('bacheca')" id="menu-bacheca" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">📢</span> Bacheca Avvisi
+            <span class="text-lg">📢</span> BACHECA
         </button>
     </nav>
 
@@ -860,7 +860,7 @@ header {
                 </div>
                 <div class="flex justify-between text-[10px] font-bold uppercase">
                     <span class="text-zinc-400">Versione:</span>
-                    <span class="text-zinc-800">v2.0-Alpha</span>
+                    <span class="text-zinc-800">v3.0-Alpha</span>
                 </div>
             </div>
         </div>
@@ -1028,25 +1028,29 @@ window.updateDateContext();
 loadBacheca();
 
         // --- PERMESSI ---
-        const ROLES = {
+const ROLES = {
     ADMIN: 'admin',
     PRESIDE: 'preside',
-    VICE_PRESIDE: 'vicepreside', // Aggiunto
+    VICE_PRESIDE: 'vicepreside',
     PROF: 'prof',
     BIDELLO: 'bidello',
+    TECNICO: 'tecnico',      // Nuovo
+    SEGRETERIA: 'segreteria', // Nuovo
     STUDENTE: 'studente',
     OSPITE: 'ospite'
 };
 
-        function getRoleType(roleStr) {
+function getRoleType(roleStr) {
     if(!roleStr) return ROLES.OSPITE;
-    const r = roleStr.toLowerCase().replace(/\s+/g, ''); // Rimuove tutti gli spazi (es: "vice preside" -> "vicepreside")
+    const r = roleStr.toLowerCase().replace(/\s+/g, '');
     
     if(r.includes('admin')) return ROLES.ADMIN;
-    if(r.includes('vicepreside')) return ROLES.VICE_PRESIDE; // Controllo specifico prima di preside
+    if(r.includes('vicepreside')) return ROLES.VICE_PRESIDE;
     if(r.includes('preside')) return ROLES.PRESIDE;
     if(r.includes('prof') || r.includes('docente')) return ROLES.PROF;
     if(r.includes('bidello') || r.includes('ata')) return ROLES.BIDELLO;
+    if(r.includes('tecnico')) return ROLES.TECNICO;
+    if(r.includes('segreteria')) return ROLES.SEGRETERIA;
     if(r.includes('studente')) return ROLES.STUDENTE;
     return ROLES.OSPITE;
 }
@@ -1068,12 +1072,11 @@ function applyRoleUI() {
     const roleLabel = document.getElementById('user-role-label');
     if (roleLabel) roleLabel.innerText = window.currentUserData?.role || 'Ospite';
     
-    const isStaff = type === ROLES.PRESIDE || type === ROLES.PROF || type === ROLES.VICE_PRESIDE;
-    const isPreside = type === ROLES.PRESIDE || type === ROLES.VICE_PRESIDE;
-    const isBidello = type === ROLES.BIDELLO;
+    const isStaffDidattico = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE].includes(type);
+    const isManagement = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(type);
+    const isOperativo = [ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA].includes(type);
+    const isStaffGenerale = isStaffDidattico || isOperativo || type === ROLES.ADMIN;
     const isStudente = type === ROLES.STUDENTE;
-    const isPersonale = isStaff || isBidello;
-    const isOspite = type === ROLES.OSPITE;
     const isAdmin = type === ROLES.ADMIN;
 
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
@@ -1086,40 +1089,38 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
         const el = document.getElementById(id);
         if (el) el.classList.toggle('hidden', !show);
     };
-	
-	    // --- SIDEBAR: CHI VEDE COSA ---
-    toggle('menu-profilo', !isOspite);
-    toggle('menu-classi', isPersonale || isAdmin || isOspite);      // Ora visibile anche ai bidelli
-    toggle('menu-appello', isStaff);     // Solo Staff vede Appello rapido
-    toggle('menu-agenda', isStudente);   // Solo Studenti vedono Agenda in Sidebar
-    toggle('menu-registro', isStudente); // Solo Studenti vedono Registro in Sidebar
-    toggle('menu-pagella', isStudente);  // Solo Studenti vedono Pagella in Sidebar
-    toggle('menu-note', isStudente);     // Solo Studenti vedono Note in Sidebar
-    toggle('menu-bacheca', true);        // Tutti vedono la bacheca
-    toggle('class-filter-container', isPersonale || isAdmin || isOspite); 
-    toggle('home-btn-classi', isPersonale || isAdmin || isOspite);  // Ora visibile anche ai bidelli
-      toggle('home-btn-agenda', isStudente);   // Mostra Agenda solo a Studenti
-    toggle('home-btn-registro', isStudente); // Mostra Registro solo a Studenti
-    toggle('home-btn-note', isStudente);     // Mostra Note solo a Studenti
-    toggle('home-btn-pagella', isStudente);  // Mostra Pagella solo a Studenti
-   toggle('home-profilo-btn', !isOspite);
-   toggle('menu-presenze-studente', isStudente);
 
-// --- AZIONI PROF / PRESIDE / BIDELLO ---
-// Invece di "if(isStaff)", passiamo direttamente la condizione al toggle.
-// Se isStaff è false, il pannello si SPEGNE automaticamente.
-toggle('prof-actions-agenda', isStaff);
-toggle('prof-comm-panel', isStaff);
-toggle('btn-add-note', isStaff);
-toggle('prof-grade-panel', isStaff);
-toggle('note-date-container', isStaff);
+    // Sidebar e Menu
+    toggle('menu-profilo', type !== ROLES.OSPITE);
+    toggle('menu-classi', isStaffGenerale || type === ROLES.OSPITE);
+    toggle('menu-appello', isStaffDidattico);
+    toggle('menu-agenda', isStudente);
+    toggle('menu-registro', isStudente);
+    toggle('menu-pagella', isStudente);
+    toggle('menu-note', isStudente);
+    toggle('menu-bacheca', true);
+    toggle('menu-presenze-studente', isStudente);
+    toggle('home-profilo-btn', type !== ROLES.OSPITE);
 
-// Pannello bacheca: se non sei preside o bidello, DEVE sparire
-toggle('bacheca-admin-panel', isPreside || isBidello);
+    // Azioni in Agenda e Bacheca
+    // Tecnici, Segreteria e Bidelli possono ora scrivere avvisi in agenda
+    toggle('prof-comm-panel', isStaffDidattico || isOperativo); 
+    toggle('prof-actions-agenda', isStaffDidattico); // Solo i prof firmano/danno compiti
+    toggle('btn-add-note', isStaffDidattico);
+    toggle('prof-grade-panel', isStaffDidattico);
+    toggle('note-date-container', isStaffDidattico);
+    toggle('prof-actions-agenda', isStaffDidattico);
+    
+    // Bacheca: Admin, Presidi, Segreteria, Tecnici e Bidelli possono scrivere circolari
+    toggle('bacheca-admin-panel', isManagement || type === ROLES.BIDELLO);
 
-// Campanella notifiche
-toggle('notif-bell', isPreside);
+    // Hub: Visibile a tutto lo staff, ma le azioni interne saranno filtrate
+    toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
 
+   // --- EXTRA ---
+    toggle('notif-bell', type === ROLES.PRESIDE || type === ROLES.ADMIN); // La campanella ora anche all'Admin
+
+// --- FILTRO CLASSI (Spostato dentro la funzione) ---    
     const classButtons = document.querySelectorAll('.class-filter-btn');
     classButtons.forEach(btn => {
         const classePulsante = btn.getAttribute('data-class');
@@ -1135,6 +1136,7 @@ toggle('notif-bell', isPreside);
         }
     });
 
+// --- INIZIALIZZAZIONE AUTOMATICA ---
     if(isStudente) {
         window.selectedClass = miaClasse;
         window.selectedStudentId = window.currentUserId;
@@ -1320,11 +1322,11 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
         
         const currentUser = (window.currentUserData?.name || "").trim();
-        const canWrite = ['preside', 'vicepreside', 'bidello', 'prof'].includes(role);
+        const canWrite = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.PROF, ROLES.ADMIN].includes(role);
 
         // Rendering Lista Avvisi (Ambra)
         const avvisiHtml = (data.comunicazioni || []).map((com, idx) => {
-            const isBoss = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO].includes(role);
+            const isBoss = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.ADMIN].includes(role);
             const isOwner = (role === 'prof' && currentUser === (com.autore || "").trim());
             return `
                 <div class="relative group p-3 pr-10 bg-amber-50 border-l-4 border-amber-500 rounded-lg shadow-sm mb-3 text-left">
@@ -3729,7 +3731,7 @@ window.hubManager = {
                     const r = roleStr.toLowerCase();
                     if (r.includes('preside') || r.includes('admin')) return 'bg-red-100 text-red-700 border-red-200';
                     if (r.includes('prof')) return 'bg-blue-100 text-blue-700 border-blue-200';
-                    if (r.includes('studente')) return 'bg-zinc-100 text-zinc-600 border-zinc-200';
+                    if (r.includes('studente')) return 'bg-green-100 text-zinc-600 border-zinc-200';
                     return 'bg-amber-100 text-amber-700 border-amber-200'; // Bidelli/Tecnici
                 };
 
@@ -3767,23 +3769,31 @@ window.hubManager = {
     },
 
     // Mostra il form per aggiungere un nuovo utente
-    nuovoUtente: function() {
+       nuovoUtente: function() {
+        const role = window.userRole;
+        const isAuthorized = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(role);
+
+        if (!isAuthorized) {
+            alert("⛔ Accesso Negato: Solo la Segreteria o l'Amministrazione possono registrare nuovi utenti.");
+            return;
+        }
+
         const container = document.getElementById('hub-dynamic-content');
         container.classList.remove('hidden');
         container.innerHTML = `
             <div class="bg-white p-6 rounded-2xl border-2 border-zinc-900 shadow-xl space-y-4">
                 <h3 class="font-black uppercase text-xs border-b pb-2">Registra Nuovo Utente</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input id="new-u-id" type="text" placeholder="ID Discord (es: 477766915096313867)" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-red-600">
+                    <input id="new-u-id" type="text" placeholder="ID Discord" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-red-600">
                     <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-red-600">
                     <select id="new-u-role" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none">
                         <option value="Studente">Studente</option>
                         <option value="Prof">Prof</option>
                         <option value="Preside">Preside</option>
+                        <option value="Vice Preside">Vice Preside</option>
                         <option value="Bidello">Bidello</option>
-			<option value="Tecnico">Tecnico</option>
-			<option value="Segreteria">Segreteria</option>
-			<option value="Vice Preside">Vice Preside</option>
+                        <option value="Tecnico">Tecnico</option>
+                        <option value="Segreteria">Segreteria</option>
                     </select>
                     <select id="new-u-class" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none">
                         <option value="None">Nessuna Classe</option>
