@@ -442,37 +442,62 @@ header {
     <div id="grid-studenti" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </div>
 
-		<div id="view-profilo-target" class="tab-content hidden space-y-6 p-4 md:p-6">    
-    <div class="glass-light p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white">
-        <div class="flex flex-col md:flex-row justify-between items-start gap-6">
-            <div class="flex items-center gap-6">
-                <img id="target-profile-avatar" src="" class="w-24 h-24 rounded-2xl border-4 border-zinc-100 shadow-sm object-cover bg-zinc-200">
-                <div>
-                    <span id="target-profile-class-badge" class="px-2 py-1 bg-zinc-100 text-zinc-500 text-[10px] font-black rounded-lg uppercase tracking-wider">Caricamento...</span>
-                    <h1 id="target-profile-name" class="text-3xl font-black uppercase text-zinc-800 leading-none mt-2">NOME</h1>
-                    <p class="text-green-500 text-[10px] font-bold uppercase mt-2 tracking-widest">Studente della Fazbear School</p>
+		<div id="view-profilo-target" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
+    <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white/50 backdrop-blur-md">
+        <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+            
+            <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left w-full">
+                <div class="relative group">
+                    <img id="target-profile-avatar" src="" class="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-white shadow-lg object-cover bg-zinc-200 transition-transform group-hover:scale-105">
+                </div>
+                <div class="flex-1">
+                    <span id="target-profile-class-badge" class="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Caricamento...</span>
+                    <h1 id="target-profile-name" class="text-3xl md:text-5xl font-black text-zinc-900 mt-2 leading-none uppercase tracking-tighter">NOME</h1>
+                    <p class="text-green-600 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Studente della Fazbear School</p>
                 </div>
             </div>
-            <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-100 text-center min-w-[120px]">
-                <p class="text-[9px] font-black text-zinc-400 uppercase mb-1">Media Personale</p>
-                <p id="target-profile-media" class="text-4xl font-black text-red-600">0.0</p>
+
+            <div class="w-full md:w-48 bg-white p-6 rounded-3xl border border-zinc-100 text-center shadow-inner relative overflow-hidden flex-shrink-0">
+                <p class="text-[10px] font-black text-zinc-400 uppercase mb-1 tracking-widest">Media Personale</p>
+                <p id="target-profile-media" class="text-5xl font-black text-red-600 relative z-10">0.0</p>
+                <div class="absolute bottom-0 left-0 w-full h-2 bg-zinc-100">
+                    <div id="target-media-progress-bar" class="h-full bg-gradient-to-r from-red-500 to-red-700 transition-all duration-1000 shadow-[0_0_10px_rgba(239,68,68,0.4)]" style="width: 0%"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-3">
-        <button onclick="window.changeMenu('registro')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">📊 REGISTRO</button>
-        <button onclick="window.changeMenu('note')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">⚠️ NOTE</button>
-        <button onclick="window.changeMenu('pagella')" class="bg-white p-4 rounded-2xl border-2 border-zinc-200 hover:border-red-600 font-black italic text-sm transition-all text-center shadow-sm">🎓 PAGELLA</button>
+    <div class="grid grid-cols-3 gap-4">
+        <button onclick="window.changeMenu('registro')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 hover:-translate-y-1 transition-all shadow-sm">
+            <span class="block text-lg mb-1">📊</span>
+            <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Registro</span>
+        </button>
+        <button onclick="window.changeMenu('note')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 hover:-translate-y-1 transition-all shadow-sm">
+            <span class="block text-lg mb-1">⚠️</span>
+            <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Note</span>
+        </button>
+        <button onclick="window.changeMenu('pagella')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 hover:-translate-y-1 transition-all shadow-sm">
+            <span class="block text-lg mb-1">🎓</span>
+            <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Pagella</span>
+        </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
-            <div id="target-voti-list" class="space-y-3"></div> </div>
-        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
-            <div id="target-note-list" class="space-y-3"></div> </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex-shrink-0 flex items-center gap-2">
+                <span class="bg-red-50 p-1 rounded-lg">🎯</span> Ultimi Voti Registrati
+            </h3>
+            <div id="target-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+                </div>
+        </div>
+
+        <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex-shrink-0 flex items-center gap-2">
+                <span class="bg-amber-50 p-1 rounded-lg">⚠️</span> Note e Provvedimenti
+            </h3>
+            <div id="target-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+                </div>
+        </div>
     </div>
 </div>
             
