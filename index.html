@@ -836,16 +836,20 @@ header {
         <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Amministrazione Fazbear School System</p>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">👥 Utenti</h3>
-            <button class="w-full p-3 bg-zinc-50 hover:bg-zinc-100 rounded-xl text-[10px] font-black uppercase transition-all mb-2 text-left flex justify-between items-center">
-                Lista Completa <span>→</span>
-            </button>
-            <button class="w-full p-3 bg-zinc-50 hover:bg-zinc-100 rounded-xl text-[10px] font-black uppercase transition-all text-left flex justify-between items-center">
-                Aggiungi Nuovo <span>+</span>
-            </button>
-        </div>
+    <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
+    <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">👥 Utenti</h3>
+    
+    <button onclick="window.hubManager.mostraListaUtenti()" class="w-full p-3 bg-zinc-50 hover:bg-zinc-100 rounded-xl text-[10px] font-black uppercase transition-all mb-2 text-left flex justify-between items-center">
+        Lista Completa <span>→</span>
+    </button>
+    
+    <button onclick="window.hubManager.nuovoUtente()" class="w-full p-3 bg-zinc-50 hover:bg-zinc-100 rounded-xl text-[10px] font-black uppercase transition-all text-left flex justify-between items-center">
+        Aggiungi Nuovo <span>+</span>
+    </button>
+</div>
+
+<div id="hub-dynamic-content" class="mt-6 hidden">
+    </div>
 
         <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
             <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🖥️ Sistema</h3>
@@ -3683,6 +3687,150 @@ window.verifyGoldenPass = function() {
         input.classList.add('border-red-600');
         // Suono di errore se lo hai
         if(typeof playHonk === 'function') playHonk(); 
+    }
+};
+	// --- GESTORE AMMINISTRAZIONE (HUB) ---
+window.hubManager = {
+    // Mostra la lista di tutti gli utenti registrati
+    mostraListaUtenti: async function() {
+        const container = document.getElementById('hub-dynamic-content');
+        container.classList.remove('hidden');
+        container.innerHTML = '<p class="text-center p-4 animate-pulse text-[10px] font-black uppercase">Sincronizzazione Database...</p>';
+
+        try {
+            const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
+            let html = `
+                <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div class="p-4 border-b border-zinc-100 bg-zinc-50 flex justify-between items-center">
+                        <input type="text" id="hub-user-search" placeholder="Cerca utente o ID..." 
+                               class="bg-white border border-zinc-300 rounded-lg px-3 py-1.5 text-[10px] outline-none focus:border-red-600 w-1/2"
+                               oninput="window.hubManager.filtraUtenti(this.value)">
+                        <span class="text-[9px] font-black text-zinc-400 uppercase">Totale: ${snap.size}</span>
+                    </div>
+                    <div class="max-h-[400px] overflow-y-auto custom-scroll">
+                        <table class="w-full text-left text-[10px]">
+                            <thead class="bg-zinc-900 text-white sticky top-0">
+                                <tr>
+                                    <th class="p-3 uppercase">Nome / ID</th>
+                                    <th class="p-3 uppercase">Ruolo</th>
+                                    <th class="p-3 uppercase">Classe</th>
+                                    <th class="p-3 uppercase text-right">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="hub-users-body">`;
+
+            snap.forEach(docSnap => {
+                const u = docSnap.data();
+                const id = docSnap.id;
+                const role = u.role || 'ospite';
+
+                // Funzione helper per i colori dei ruoli
+                const getRoleColor = (roleStr) => {
+                    const r = roleStr.toLowerCase();
+                    if (r.includes('preside') || r.includes('admin')) return 'bg-red-100 text-red-700 border-red-200';
+                    if (r.includes('prof')) return 'bg-blue-100 text-blue-700 border-blue-200';
+                    if (r.includes('studente')) return 'bg-zinc-100 text-zinc-600 border-zinc-200';
+                    return 'bg-amber-100 text-amber-700 border-amber-200'; // Bidelli/Tecnici
+                };
+
+                html += `
+                    <tr class="border-b border-zinc-100 hover:bg-zinc-50 user-row" data-search="${(u.name || '').toLowerCase()} ${id.toLowerCase()}">
+                        <td class="p-3">
+                            <p class="font-black text-zinc-800 uppercase">${u.name || 'N.D.'}</p>
+                            <p class="text-[8px] text-zinc-400 font-mono">${id}</p>
+                        </td>
+                        <td class="p-3">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase border ${getRoleColor(role)}">
+                                ${role}
+                            </span>
+                        </td>
+                        <td class="p-3 font-bold text-red-600">${u.classe || '-'}</td>
+                        <td class="p-3 text-right">
+                            <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">🗑️</button>
+                        </td>
+                    </tr>`;
+            });
+
+            html += `</tbody></table></div></div>`;
+            container.innerHTML = html;
+        } catch (e) {
+            container.innerHTML = `<p class="text-red-500 p-4 text-[10px]">Errore: ${e.message}</p>`;
+        }
+    },
+
+    // Filtro rapido per la ricerca
+    filtraUtenti: function(val) {
+        const query = val.toLowerCase();
+        document.querySelectorAll('.user-row').forEach(row => {
+            row.style.display = row.dataset.search.includes(query) ? '' : 'none';
+        });
+    },
+
+    // Mostra il form per aggiungere un nuovo utente
+    nuovoUtente: function() {
+        const container = document.getElementById('hub-dynamic-content');
+        container.classList.remove('hidden');
+        container.innerHTML = `
+            <div class="bg-white p-6 rounded-2xl border-2 border-zinc-900 shadow-xl space-y-4">
+                <h3 class="font-black uppercase text-xs border-b pb-2">Registra Nuovo Utente</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input id="new-u-id" type="text" placeholder="ID Discord (es: 477766915096313867)" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-red-600">
+                    <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-red-600">
+                    <select id="new-u-role" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none">
+                        <option value="Studente">Studente</option>
+                        <option value="Prof">Prof</option>
+                        <option value="Preside">Preside</option>
+                        <option value="Bidello">Bidello</option>
+			<option value="Tecnico">Tecnico</option>
+			<option value="Segreteria">Segreteria</option>
+			<option value="Vice Preside">Vice Preside</option>
+                    </select>
+                    <select id="new-u-class" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none">
+                        <option value="None">Nessuna Classe</option>
+                        <option value="A">Classe A</option>
+                        <option value="B">Classe B</option>
+                        <option value="C">Classe C</option>
+                    </select>
+                </div>
+                <button onclick="window.hubManager.salvaNuovoUtente()" class="w-full bg-zinc-900 text-white p-4 rounded-xl font-black uppercase text-[10px] hover:bg-red-700 transition-all">Salva nel Database</button>
+            </div>`;
+    },
+
+    // Salva i dati su Firestore
+    salvaNuovoUtente: async function() {
+        const id = document.getElementById('new-u-id').value.trim();
+        const name = document.getElementById('new-u-name').value.trim();
+        const role = document.getElementById('new-u-role').value;
+        const classe = document.getElementById('new-u-class').value;
+
+        if(!id || !name) return alert("ID e Nome sono obbligatori!");
+
+        // Identifica se l'utente fa parte del corpo docente/direttivo
+        const isStaffDidattico = ['Prof', 'Preside', 'Vice Preside'].includes(role);
+
+        try {
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), {
+                name: name,
+                role: role,
+                classe: classe === 'None' ? null : classe, // Converte "None" in null per pulizia database
+                materie: isStaffDidattico ? [] : null      // Inizializza l'array materie solo per chi deve insegnare
+            });
+            alert("Utente registrato con successo!");
+            this.mostraListaUtenti();
+        } catch (e) {
+            alert("Errore: " + e.message);
+        }
+    },
+
+    // Elimina un utente
+    eliminaUtente: async function(id) {
+        if(!confirm(`Sei sicuro di voler eliminare l'utente ${id}?`)) return;
+        try {
+            await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id));
+            this.mostraListaUtenti();
+        } catch (e) {
+            alert("Errore: " + e.message);
+        }
     }
 };
 
