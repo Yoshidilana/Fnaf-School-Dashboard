@@ -442,8 +442,7 @@ header {
     <div id="grid-studenti" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </div>
 
-		<div id="view-profilo-target" class="tab-content hidden space-y-6 p-4 md:p-6">
-    
+		<div id="view-profilo-target" class="tab-content hidden space-y-6 p-4 md:p-6">    
     <div class="glass-light p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white">
         <div class="flex flex-col md:flex-row justify-between items-start gap-6">
             <div class="flex items-center gap-6">
@@ -598,38 +597,50 @@ header {
     </div>
 </div>
 
-		<div id="view-profilo" class="tab-content space-y-6">
-    <div class="glass-light p-8 rounded-2xl border-l-8 border-red-700 shadow-xl">
-        <div class="flex flex-col md:flex-row justify-between items-start gap-6">
-            <div class="flex items-center gap-6">
-                <img id="profilo-avatar" src="" class="w-24 h-24 rounded-2xl border-4 border-zinc-100 shadow-sm object-cover bg-zinc-200">
-                <div>
-    		    <span id="profilo-classe-badge" class="...">Classe -</span>
-    		    <h1 id="profilo-nome" class="...">Caricamento...</h1>
-    	   	   <p id="profilo-sottotitolo" class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Utente della Fazbear School</p>
-		</div>
+		<div id="view-profilo" class="tab-content space-y-6 max-w-7xl mx-auto p-4">
+    <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white/50 backdrop-blur-md">
+        <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+            
+            <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left w-full">
+                <div class="relative group">
+                    <img id="profilo-avatar" src="" class="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-white shadow-lg object-cover bg-zinc-200 transition-transform group-hover:scale-105">
+                    <div class="absolute -bottom-2 -right-2 bg-green-500 w-5 h-5 border-4 border-white rounded-full"></div>
+                </div>
+                <div class="flex-1">
+                    <span id="profilo-classe-badge" class="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Classe -</span>
+                    <h1 id="profilo-nome" class="text-3xl md:text-5xl font-black text-zinc-900 mt-2 leading-none uppercase tracking-tighter">Caricamento...</h1>
+                    <p id="profilo-sottotitolo" class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Fazbear School System II</p>
+                </div>
             </div>
-            <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-100 text-center min-w-[120px]">
-                <p class="text-[9px] font-black text-zinc-400 uppercase mb-1">Media Personale</p>
-                <p id="profilo-media" class="text-4xl font-black text-red-600">0.0</p>
+
+            <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-100 text-center min-w-[140px] relative overflow-hidden flex-shrink-0">
+    <p class="text-[9px] font-black text-zinc-400 uppercase mb-1">Media Personale</p>
+    <p id="profilo-media" class="...">0.0</p>
+                <div class="absolute bottom-0 left-0 w-full h-1 bg-zinc-200">
+                    <div id="media-progress-bar" class="h-full bg-red-600 transition-all duration-1000" style="width: 0%"></div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="profilo-content-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="glass-light p-6 rounded-2xl">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
-            <div id="profilo-voti-list" class="space-y-3">
+    <div id="profilo-content-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div class="glass-light p-6 rounded-3xl bg-white/40 border border-white shadow-sm flex flex-col">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-6 flex items-center gap-2 border-b border-zinc-100 pb-3">
+                <span class="bg-red-100 p-1 rounded-lg">🎯</span> Ultimi Voti Registrati
+            </h3>
+            <div id="profilo-voti-list" class="space-y-4">
                 </div>
         </div>
-        <div class="glass-light p-6 rounded-2xl">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
-            <div id="profilo-note-list" class="space-y-3">
+
+        <div class="glass-light p-6 rounded-3xl bg-white/40 border border-white shadow-sm flex flex-col">
+            <h3 class="font-black uppercase text-zinc-800 text-xs mb-6 flex items-center gap-2 border-b border-zinc-100 pb-3">
+                <span class="bg-amber-100 p-1 rounded-lg">⚠️</span> Note e Provvedimenti
+            </h3>
+            <div id="profilo-note-list" class="space-y-4">
                 </div>
         </div>
     </div>
 </div>
-
 
             <!-- VIEW: REGISTRO -->
             <div id="view-registro" class="tab-content space-y-6">
@@ -2473,9 +2484,12 @@ window.toggleDebug = () => {
         if (typeof window.changeMenu === 'function') window.changeMenu('profilo');
 
         // --- LOGICA RUOLO ---
-        const roleStr = (d.role || 'Studente').toLowerCase();
-        const isStaff = ['prof', 'docente', 'preside', 'vice', 'direttore', 'bidello', 'admin'].some(x => roleStr.includes(x));
+        const roleStr = (d.role || 'Ospite').toLowerCase();
         const ruoloEffettivo = (d.role || 'Studente').toUpperCase();
+	const isOspite = roleStr.includes('ospite');
+	const isDocente = ['prof', 'docente', 'vice', 'preside'].some(x => roleStr.includes(x));
+	const isAmministrativo = ['admin', 'segreteria', 'tecnico', 'bidello', 'personale'].some(x => roleStr.includes(x));
+	const isStaff = isDocente || isAmministrativo;
 
         // --- 4. POPOLAMENTO HEADER PROFILO (VERSIONE UNIFICATA NPC + DISCORD) ---
 const nomeEl = document.getElementById('profilo-nome');
@@ -2508,9 +2522,14 @@ if (avatarEl) {
 
 // Classe (come prima)
 if (badgeEl) {
-    if (isStaff || d.classe === 'None' || !d.classe) {
+    if (isStaff) {
+        // Se è Staff (Prof, Admin, ecc.)
         badgeEl.innerText = `Staff scolastico - A.S. ${as}`;
+    } else if (isOspite) {
+        // Se è un Ospite (Login Discord senza ruolo nel DB)
+        badgeEl.innerText = `Accesso Ospite`;
     } else {
+        // Se è uno Studente con una classe assegnata
         badgeEl.innerText = `CLASSE: ${d.classe || data.classe || 'N/A'} - A.S. ${as}`;
     }
 }
@@ -2528,58 +2547,97 @@ if (ruoloEl) {
         const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
         const noteFiltrate = (data.note || []).filter(n => n.anno === as);
 
-        // 5. MEDIA O RUOLO (Sostituisce "STAFF" con il ruolo reale)
-        const mediaEl = document.getElementById('profilo-media');
-        if (isStaff) {
-            if (mediaEl) {
-                // Invece di "STAFF", scriviamo "PRESIDE", "BIDELLO", ecc.
-                mediaEl.innerText = ruoloEffettivo; 
-                // Rimpiccioliamo un po' il font se il nome è lungo (es. VICE PRESIDE)
-                mediaEl.className = "text-xl font-black text-zinc-400 leading-tight uppercase";
-                
-                // Opzionale: Cambiamo l'etichetta sopra da "Media Personale" a "Inquadramento"
-                const labelMedia = mediaEl.parentElement.querySelector('p');
-                if (labelMedia) labelMedia.innerText = "RUOLO ISTITUZIONALE";
-            }
-        } else {
-            const media = votiFiltrati.length > 0 
-    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
-    : "0.0";
+     // --- 5. MEDIA O RUOLO (Con integrazione Barra e Ospite) ---
+const mediaEl = document.getElementById('profilo-media');
+const barraEl = document.getElementById('media-progress-bar'); // La barra che abbiamo aggiunto nell'HTML
 
-if (mediaEl) {
-    mediaEl.innerText = media;
-                mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
-                
-                // Ripristiniamo l'etichetta per gli studenti
-                const labelMedia = mediaEl.parentElement.querySelector('p');
-                if (labelMedia) labelMedia.innerText = "MEDIA PERSONALE";
-            }
+if (isStaff) {
+    if (mediaEl) {
+        mediaEl.innerText = ruoloEffettivo; 
+        mediaEl.className = "text-xl font-black text-zinc-400 leading-tight uppercase";
+        
+        const labelMedia = mediaEl.parentElement.querySelector('p');
+        if (labelMedia) labelMedia.innerText = "RUOLO ISTITUZIONALE";
+        
+        // Per lo staff la barra rimane vuota o possiamo nasconderla
+        if (barraEl) barraEl.style.width = "0%";
+    }
+} else if (isOspite) {
+    if (mediaEl) {
+        mediaEl.innerText = "---";
+        mediaEl.className = "text-4xl font-black text-zinc-300";
+        
+        const labelMedia = mediaEl.parentElement.querySelector('p');
+        if (labelMedia) labelMedia.innerText = "ACCESSO LIMITATO";
+        
+        if (barraEl) barraEl.style.width = "0%";
+    }
+} else {
+    // Calcolo Media Studente
+    const media = votiFiltrati.length > 0 
+        ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
+        : "0.0";
+
+    if (mediaEl) {
+        mediaEl.innerText = media;
+        mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+        
+        const labelMedia = mediaEl.parentElement.querySelector('p');
+        if (labelMedia) labelMedia.innerText = "MEDIA PERSONALE";
+        
+        // Aggiornamento dinamico della barra (es. media 7.8 -> 78%)
+        if (barraEl) {
+            const percentuale = Math.min(parseFloat(media) * 10, 100);
+            barraEl.style.width = `${percentuale}%`;
+            // Cambia colore alla barra se la media è insufficiente
+            barraEl.className = `h-full transition-all duration-1000 ${parseFloat(media) < 6 ? 'bg-red-600' : 'bg-green-500'}`;
         }
-
+    }
+}
         // 6. GESTIONE CONTENUTI DINAMICI (DASHBOARD STAFF vs LISTE STUDENTE)
 const gridContenuti = document.getElementById('profilo-content-grid');
 
 if (isStaff) {
-    // 1. Pulizia Header per Staff
     if (badgeEl) badgeEl.innerText = `Staff scolastico - A.S. ${as}`;
     
-    // Recuperiamo le materie (assumendo che siano nel documento 'assignments' o 'records')
-    // Se è un array lo uniamo con una virgola, se è stringa la usiamo così com'è
-    let materieDocente = d.materie || data.materie || "Nessuna materia assegnata";
-    if (Array.isArray(materieDocente)) materieDocente = materieDocente.join(', ');
-
-    // 2. Trasformazione Griglia in Dashboard
     if (gridContenuti) {
+        // Prepariamo i dati specifici
+        let infoSpecifica = "";
+        let bottoniExtra = "";
+
+        if (isDocente) {
+            let materieDocente = d.materie || data.materie || "Nessuna materia";
+            if (Array.isArray(materieDocente)) materieDocente = materieDocente.join(', ');
+            
+            infoSpecifica = `
+                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
+                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Materie Insegnate</p>
+                    <p class="text-[9px] font-black text-red-600 uppercase break-words">${materieDocente}</p>
+                </div>`;
+            bottoniExtra = `
+                <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-md">
+                    <span>Agenda Classi</span> <span class="text-lg">📋</span>
+                </button>`;
+        } else {
+            // Layout per Admin, Bidelli, Tecnici
+            infoSpecifica = `
+                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
+                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Settore Operativo</p>
+                    <p class="text-[9px] font-black text-zinc-800 uppercase">${ruoloEffettivo}</p>
+                </div>`;
+            bottoniExtra = `
+                <button onclick="window.changeMenu('hub')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-md">
+                    <span>Pannello di Controllo</span> <span class="text-lg">⚙️</span>
+                </button>`;
+        }
+
         gridContenuti.innerHTML = `
             <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-red-700 text-xs mb-4 border-b pb-2">👨‍🏫 Area Personale Scolastico</h3>
+                <h3 class="font-black uppercase text-red-700 text-xs mb-4 border-b pb-2">🏢 Area Personale</h3>
                 <div class="space-y-4">
-                    <p class="text-[11px] font-bold text-zinc-500 uppercase leading-tight">Benvenuto. Da qui puoi gestire le tue attività quotidiane della Fazbear School.</p>
+                    <p class="text-[11px] font-bold text-zinc-500 uppercase leading-tight">Benvenuto nel portale gestionale.</p>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
-                            <p class="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Materie Insegnate</p>
-                            <p class="text-[9px] font-black text-red-600 uppercase break-words">${materieDocente}</p>
-                        </div>
+                        ${infoSpecifica}
                         <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
                             <p class="text-[8px] font-black text-zinc-400 uppercase">Status</p>
                             <p class="text-[10px] font-black text-green-600 uppercase">In Servizio</p>
@@ -2589,40 +2647,31 @@ if (isStaff) {
             </div>
 
             <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🛠️ Strumenti Gestionali</h3>
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🛠️ Strumenti</h3>
                 <div class="flex flex-col gap-3">
-                    <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-md">
-                        <span>Vai all'Agenda Classi</span>
-                        <span class="text-lg">📋</span>
-                    </button>
-                    <button onclick="window.changeMenu('registro')" class="w-full p-4 bg-white border-2 border-zinc-200 text-zinc-800 rounded-2xl font-black text-[10px] uppercase hover:border-red-600 transition-all flex justify-between items-center shadow-sm">
-                        <span>Apri Registro Generale</span>
-                        <span class="text-lg">📊</span>
+                    ${bottoniExtra}
+                    <button onclick="window.changeMenu('registro')" class="w-full p-4 bg-white border-2 border-zinc-200 text-zinc-800 rounded-2xl font-black text-[10px] uppercase hover:border-red-600 transition-all flex justify-between items-center">
+                        <span>Registro Generale</span> <span class="text-lg">📊</span>
                     </button>
                 </div>
-            </div>
-        `;
+            </div>`;
     }
-
+} else if (isOspite) {
+    // ... Logica Ospite (quella che avevi già, va benissimo) ...
 } else {
-    // SE È STUDENTE: Ripristiniamo la visualizzazione standard
-    const mediaBox = document.getElementById('profilo-media')?.parentElement;
-    if (mediaBox) mediaBox.classList.remove('hidden');
-
+    // STUDENTE: Fix del "muro di voti"
     if (gridContenuti) {
         gridContenuti.innerHTML = `
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🎯 Ultimi Voti Registrati</h3>
-                <div id="profilo-voti-list" class="space-y-3"></div>
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 flex flex-col h-[400px]">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2 flex-shrink-0">🎯 Ultimi Voti</h3>
+                <div id="profilo-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
             </div>
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">⚠️ Note e Provvedimenti</h3>
-                <div id="profilo-note-list" class="space-y-3"></div>
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 flex flex-col h-[400px]">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2 flex-shrink-0">⚠️ Note</h3>
+                <div id="profilo-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
             </div>
         `;
     }
-    
-    // Popoliamo le liste (già previsto dal tuo codice originale)
     renderListaProfilo('profilo-voti-list', votiFiltrati, false, "voti", as);
     renderListaProfilo('profilo-note-list', noteFiltrate, false, "note", as);
 }
@@ -2642,7 +2691,7 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
     }
 
     if (!lista || lista.length === 0) {
-        el.innerHTML = `<p class="text-[9px] text-zinc-300 italic text-center py-4">Nessun dato per l'A.S. ${anno}</p>`;
+        el.innerHTML = `<p class="text-[9px] text-zinc-700 italic text-center py-4">Nessun dato per l'A.S. ${anno}</p>`;
         return;
     }
 
