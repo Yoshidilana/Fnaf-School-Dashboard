@@ -1287,23 +1287,66 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
 
 	
 if (role === 'ospite') {
-    infoHtml = '<p class="bold-text-zinc-900 text-[9px] text-center py-4 uppercase font-bold">Area riservata agli utenti loggati</p>';
+            infoHtml = `
+                <div class="p-6 text-center">
+                    <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Area Riservata</p>
+                    <p class="text-[9px] text-zinc-500 italic mt-1">Effettua il login per vedere i dettagli</p>
+                </div>`;
 } else if (role === 'studente') {
             const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
             const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
-            infoHtml += myNote.map(n => `<div class="p-3 bg-red-50 text-blue-700 font-bold rounded-xl mb-2 text-[10px] border border-yellow-400 shadow-sm uppercase">⚠️ NOTA: ${n.testo}</div>`).join('');
-            infoHtml += myVoti.map(v => `<div class="p-3 bg-green-900 text-white rounded-xl mb-2 text-[10px] border border-red-900 shadow-lg flex justify-between items-center"><span>⭐ VOTO IN ${safeCap(v.materia)}</span><span class="text-lg font-black text-blue-600">${v.voto}</span></div>`).join('');
-        } else {
-            infoHtml += note.map(n => `<div class="p-3 bg-white border border-zinc-100 rounded-xl text-[10px] mb-2 shadow-sm text-zinc-700"><b>${n.studente}</b>: ${n.testo}</div>`).join('');
-            infoHtml += voti.map(v => `
-                <div class="p-3 bg-white border border-blue-100 rounded-xl text-[10px] mb-2 shadow-sm flex flex-col gap-1">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-zinc-800">${v.studente} - <span class="text-blue-600 uppercase ">${safeCap(v.materia)}</span>:</span>
-                        <span class="font-black text-blue-600 text-sm">${v.voto}</span>
+
+            // Note Studente
+            infoHtml += myNote.map(n => `
+                <div class="p-4 bg-red-50 border-l-4 border-red-600 rounded-2xl shadow-sm mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[8px] font-black uppercase text-red-700 tracking-tighter">⚠️ Nota Disciplinare</span>
                     </div>
-                    <p class="text-[9px] font-bold text-green-500">- ${v.argomento || "Nessun argomento"}</p>
+                    <p class="text-xs font-bold text-red-900 leading-tight">${n.testo}</p>
                 </div>`).join('');
+
+            // Voti Studente
+            infoHtml += myVoti.map(v => `
+                <div class="p-4 bg-green-50 border-l-4 border-green-600 rounded-2xl shadow-sm mb-3 flex justify-between items-center">
+                    <div>
+                        <span class="text-[8px] font-black uppercase text-green-700 tracking-tighter">⭐ Nuova Valutazione</span>
+                        <p class="text-xs font-black text-zinc-800 uppercase">${safeCap(v.materia)}</p>
+                    </div>
+                    <span class="text-xl font-black text-green-700">${v.voto}</span>
+                </div>`).join('');
+                } else {
+            // Vista Staff (Prof/Preside/Admin)
+            infoHtml += note.map(n => `
+                <div class="p-3 bg-white border border-zinc-100 rounded-2xl shadow-sm mb-2">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        <span class="text-[9px] font-black text-zinc-900 uppercase">${n.studente}</span>
+                    </div>
+                    <p class="text-[10px] text-zinc-600 font-medium pl-3.5 border-l border-zinc-200">${n.testo}</p>
+                </div>`).join('');
+
+            infoHtml += voti.map(v => `
+                <div class="p-3 bg-white border border-zinc-100 rounded-2xl shadow-sm mb-2 group">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-black text-zinc-900 uppercase">${v.studente}</span>
+                            <span class="text-[8px] font-bold text-blue-600 uppercase tracking-tighter">${safeCap(v.materia)}</span>
+                        </div>
+                        <span class="text-sm font-black text-zinc-900 bg-zinc-50 px-2 py-1 rounded-lg border border-zinc-100">${v.voto}</span>
+                    </div>
+                    <p class="text-[8px] text-zinc-400 mt-1 italic">${v.argomento || "Nessun argomento"}</p>
+                </div>`).join('');
+
         }
+
+        const dailyContainer = document.getElementById('agenda-daily-info');
+        if (dailyContainer) {
+            dailyContainer.innerHTML = infoHtml || `
+                <div class="py-10 text-center opacity-20">
+                    <p class="text-[10px] font-black uppercase tracking-widest">Nessuna Attività</p>
+                </div>`;
+        }
+
         document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<p class="text-zinc-300 text-[10px] italic text-center py-4 uppercase font-bold">Nessun aggiornamento</p>';
     });
 
