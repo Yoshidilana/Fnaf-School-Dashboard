@@ -71,6 +71,66 @@
     border-color: #e4e4e7;
 }
 
+/* Estetica Input Modal Rimodernata */
+.modal-input {
+    width: 100%;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.modal-input:focus {
+    border-color: #dc2626;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.modal-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #64748b;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+}
+
+ /* Estetica Note Rimodernata */
+.note-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 1.25rem;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.note-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.note-accent-disciplinare { border-left: 4px solid #dc2626; }
+.note-accent-mandato { border-left: 4px solid #0f172a; background: #f8fafc; }
+
+.note-badge {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.025em;
+}
+
+.badge-disciplinare { background: #fef2f2; color: #dc2626; }
+.badge-mandato { background: #0f172a; color: #fbbf24; }
+
    /* Miglioramenti Estetici Top & Sidebar */
 .sidebar-item { 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -757,57 +817,76 @@ header {
                 <div id="bacheca-container" class="space-y-3 overflow-y-auto"></div>
             </div>
 
-            <!-- VIEW: Pagella -->
-            <div id="view-pagella" class="tab-content space-y-6">
-    <div class="flex flex-col md:flex-row md:items-end justify-between border-b-2 border-zinc-200 pb-6 mb-8 gap-4">
-        <div>
-            <div class="flex items-center gap-2 mb-1">
-                <span id="pagella-anno-scolastico" class="text-[10px] font-black uppercase text-zinc-400 tracking-[0.2em]">A.S. 2023/2024</span>
-                <span id="pagella-classe-label" class="bg-red-700 text-white text-[8px] font-black px-1.5 py-0.5 rounded">CLASSE -</span>
-            </div>
-            <h2 id="pagella-student-name" class="text-4xl font-black uppercase text-zinc-900 tracking-tighter italic">-</h2>
+            <!-- VIEW: Pagella Rimodernata -->
+<div id="view-pagella" class="tab-content hidden p-4 md:p-8 max-w-5xl mx-auto">
+    <!-- Documento Pagella -->
+    <div class="bg-white shadow-2xl rounded-sm border-t-[12px] border-red-700 p-6 md:p-12 text-zinc-800 relative overflow-hidden">
+        <!-- Filigrana di sfondo (opzionale) -->
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
+            <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" class="w-96">
         </div>
-        
-        <div class="flex flex-col items-end gap-3">
-            <div class="flex bg-zinc-100 p-1 rounded-full border border-zinc-200">
-                <button onclick="switchQuad(1)" id="btn-q1" class="px-5 py-2 rounded-full text-[9px] font-black uppercase transition-all bg-white text-black shadow-sm">1° Periodo</button>
-                <button onclick="switchQuad(2)" id="btn-q2" class="px-5 py-2 rounded-full text-[9px] font-black uppercase transition-all text-zinc-400 hover:text-zinc-600">2° Periodo</button>
+
+        <!-- Header Documento -->
+        <div class="flex flex-col md:flex-row justify-between items-start border-b-2 border-zinc-900 pb-8 mb-8 gap-6">
+            <div class="space-y-1">
+                <h1 class="text-3xl font-black tracking-tighter uppercase italic">Fazbear <span class="text-red-700">High School</span></h1>
+                <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">Documento di Valutazione Periodica</p>
+                <div class="pt-4 space-y-1">
+                    <p class="text-xs font-bold"><span id="pagella-gender-label">STUDENT@</span>: <span id="pagella-student-name" class="border-b border-dotted border-zinc-400 pb-0.5">---</span></p>
+                    <p class="text-xs font-bold">CLASSE: <span id="pagella-classe-label" class="border-b border-dotted border-zinc-400 pb-0.5">---</span></p>
+                    <p class="text-xs font-bold">ANNO SCOLASTICO: <span id="pagella-anno-scolastico" class="border-b border-dotted border-zinc-400 pb-0.5">---</span></p>
+                </div>
             </div>
-            <button onclick="window.print()" class="flex items-center gap-2 bg-white border border-zinc-300 text-zinc-900 text-[9px] font-black px-4 py-2 rounded-lg hover:bg-zinc-50 transition-all uppercase shadow-sm">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                Stampa Pagella
-            </button>
+
+            <div class="flex flex-col items-end gap-4">
+                <div class="flex bg-zinc-100 p-1 rounded-lg border border-zinc-200">
+                    <button onclick="switchQuad(1)" id="btn-q1" class="px-4 py-2 rounded text-[9px] font-black uppercase transition-all bg-white shadow-sm">1° Quadrimestre</button>
+                    <button onclick="switchQuad(2)" id="btn-q2" class="px-4 py-2 rounded text-[9px] font-black uppercase transition-all text-zinc-400">2° Quadrimestre</button>
+                </div>
+                <button onclick="window.print()" class="text-[9px] font-black uppercase bg-zinc-900 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Stampa PDF</button>
+            </div>
         </div>
-    </div>
 
-    <div id="container-q1" class="block bg-white rounded-xl border border-zinc-500 overflow-hidden shadow-sm">
-        <table class="w-full text-left">
-            <thead class="bg-zinc-50 border-b border-zinc-900 text-zinc-900 font-black uppercase text-[10px]">
-    <tr>
-        <th class="p-4 tracking-widest">Materia</th>
-        <th class="p-4 text-center tracking-widest border-x border-zinc-900 bg-zinc-100/50">Voto</th>
-        <th class="p-4 text-right tracking-widest">Recupero</th>
-    </tr>
-</thead>
-            <tbody id="pagella-q1-body" class="divide-y divide-zinc-100"></tbody>
-        </table>
-    </div>
-
-    <div id="container-q2" class="hidden bg-white rounded-xl border border-zinc-500 overflow-hidden shadow-sm">
-    <table class="w-full text-left">
-        <thead class="bg-zinc-50 border-b border-zinc-900 text-zinc-900 font-black uppercase text-[10px]">
-            <tr>
-                <th class="p-4 tracking-widest">Materia</th>
-                
-                <th class="p-4 text-center tracking-widest border-x border-zinc-900 bg-zinc-100/50">
-                    Voto
-                </th>
-                
-                <th class="p-4 text-right tracking-widest">Debito</th>
+        <!-- Tabella Voti Rimodernata con Commenti -->
+<div class="min-h-[400px] overflow-x-auto">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="border-b-2 border-zinc-900 text-[10px] font-black uppercase tracking-widest">
+                <th class="py-4 pr-4">Materia</th>
+                <th class="py-4 text-center px-2">Voto</th>
+                <th class="py-4 px-4">Commento del Docente</th>
+                <th class="py-4 text-right">Esito</th>
             </tr>
         </thead>
-            <tbody id="pagella-q2-body" class="divide-y divide-zinc-100"></tbody>
-        </table>
+        <tbody id="pagella-table-body" class="divide-y divide-zinc-200">
+            <!-- Popolato via JS -->
+        </tbody>
+    </table>
+</div>
+
+        <!-- Sezione Commento / Giudizio -->
+        <div class="mt-12 pt-8 border-t-2 border-zinc-900">
+            <h3 class="text-[10px] font-black uppercase tracking-widest mb-4 flex justify-between items-center">
+                Giudizio del Consiglio di Classe
+                <button id="btn-edit-comment" onclick="window.editPagellaComment()" class="hidden text-red-600 hover:underline">Modifica Giudizio</button>
+            </h3>
+            <div id="pagella-comment-box" class="p-6 bg-zinc-50 border border-zinc-200 rounded-sm italic text-sm text-zinc-600 leading-relaxed">
+                Nessun giudizio inserito per questo periodo.
+            </div>
+        </div>
+
+        <!-- Firme -->
+        <div class="mt-16 flex justify-between items-end opacity-60">
+            <div class="text-center">
+                <p class="text-[8px] font-bold uppercase">Il Segretario</p>
+                <div class="w-32 border-b border-zinc-400 mt-8">Glitchtrap</div>
+            </div>
+            <div class="text-center">
+                <p class="text-[8px] font-bold uppercase">Il Dirigente Scolastico</p>
+                <p class="text-[10px] font-serif italic mt-2">Golden Freddy</p>
+                <div class="w-48 border-b border-zinc-400 mt-2"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1362,7 +1441,7 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
 
         // Rendering Firme
         const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
-        const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
+const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
     <div class="group flex gap-5 p-4 rounded-2xl border border-zinc-100 hover:border-red-200 hover:bg-red-50/30 transition-all">
         <div class="flex flex-col items-center justify-center w-14 h-14 bg-white border-2 border-zinc-100 rounded-2xl shadow-sm group-hover:border-red-200 shrink-0">
             <span class="text-lg font-black text-zinc-900 leading-none">${f.ora}°</span>
@@ -1373,7 +1452,10 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
                 <h4 class="text-xs font-black uppercase text-red-600 tracking-tight">${f.materia}</h4>
                 <span class="text-[9px] font-bold text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded-md">${f.prof}</span>
             </div>
-            <p class="text-sm text-zinc-700 font-medium leading-snug">${f.argomento || "Nessun argomento inserito"}</p>
+            <!-- Modifica qui sotto: aggiunta del tipo davanti all'argomento -->
+            <p class="text-sm text-zinc-700 font-medium leading-snug">
+                <span class="font-black text-zinc-900">${f.tipo || 'Lezione'}:</span> ${f.argomento || "Nessun argomento inserito"}
+            </p>
         </div>
     </div>`).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Nessuna lezione registrata</div>';
 
@@ -1674,18 +1756,34 @@ if (resMediaElem) {
                 });
                 const reversedNotes = [...filteredNotes].reverse();
                 document.getElementById('notes-list-global').innerHTML = reversedNotes.map((n) => {
-                    const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
-                    return `
-                    <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="${n.tipo === 'mandato' ? 'bg-black text-amber-400' : 'bg-red-600 text-white'} text-[8px] px-2 py-0.5 rounded font-black uppercase">${n.tipo}</span>
-                            <span class="text-[8px] text-zinc-400 font-bold">${n.data}</span>
-                        </div>
-                        <p id="note-text-${realIdx}" class="text-xs text-zinc-700">"${n.testo}"</p>
-                        <p class="mt-2 text-[8px] font-black uppercase text-zinc-400">Emesso da: ${n.prof || n.autore}</p>
-                        ${renderNoteActions(n, realIdx, studentId)}
-                    </div>`;
-                }).join('') || `<p class="p-10 text-center opacity-30 uppercase font-black italic text-xs">Nessuna nota per l'A.S. ${aySelezionato}</p>`;
+    const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
+    const isMandato = n.tipo === 'mandato';
+    
+    return `
+    <div class="note-card ${isMandato ? 'note-accent-mandato' : 'note-accent-disciplinare'} group">
+        <div class="flex justify-between items-start mb-3">
+            <div class="flex flex-col gap-1">
+                <span class="note-badge ${isMandato ? 'badge-mandato' : 'badge-disciplinare'} w-fit">
+                    ${isMandato ? '⚡ Mandato Presidenziale' : '⚠️ Nota Disciplinare'}
+                </span>
+                <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">${n.data}</span>
+            </div>
+            ${renderNoteActions(n, realIdx, studentId)}
+        </div>
+        
+        <p id="note-text-${realIdx}" class="text-sm text-zinc-700 leading-relaxed font-medium italic">
+            "${n.testo}"
+        </p>
+        
+        <div class="mt-4 pt-3 border-t border-zinc-100 flex justify-between items-center">
+            <p class="text-[9px] font-black uppercase text-zinc-400">
+                Emesso da: <span class="text-zinc-900">${n.prof || n.autore}</span>
+            </p>
+        </div>
+    </div>`;
+}).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
+                    <p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p>
+                 </div>`;
             });
         }
 
@@ -1781,7 +1879,6 @@ await setDoc(agendaRef, {
         };
 
         window.openModal = (type) => {
-    // --- AGGIUNTA: Controllo validità classe per Firme e Compiti ---
     const classiValide = ['A', 'B', 'C'];
     if ((type === 'firme' || type === 'compiti') && !classiValide.includes(window.selectedClass)) {
         alert("⚠️ Azione negata: Seleziona prima una classe valida (A, B o C) dal menu in alto.");
@@ -1793,60 +1890,117 @@ await setDoc(agendaRef, {
     document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
     
     if(type === 'firme') {
-                body.innerHTML = `
-                    <p class="text-[10px] uppercase font-bold text-zinc-400">Firma Ora Lezione</p>
-                    <input id="m-ora" type="number" placeholder="Ora (es. 1)" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
-                    <select id="m-mat" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
+        // Generazione opzioni ore (1-12 per coprire attività pomeridiane/gite)
+        let oreOptions = "";
+        for(let i=1; i<=12; i++) {
+            oreOptions += `<option value="${i}">${i}° Ora</option>`;
+        }
+
+        body.innerHTML = `
+            <div class="space-y-4">
+                <div>
+                    <label class="modal-label">Dettagli Lezione</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <select id="m-ora" class="modal-input">
+                            ${oreOptions}
+                            <option value="Extra">Extra/Serale</option>
+                        </select>
+                        <select id="m-tipo" class="modal-input">
+                            <option value="Lezione">Lezione</option>
+                            <option value="Supplenza">Supplenza</option>
+                            <option value="Compresenza">Compresenza</option>
+                            <option value="Sorveglianza">Sorveglianza (Gita)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="modal-label">Materia</label>
+                    <select id="m-mat" class="modal-input">
                         ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
                     </select>
-                    <input id="m-arg" type="text" placeholder="Argomento..." class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
-                `;
-                confirm.onclick = async () => {
-                    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
-                    await setDoc(ref, { firme: arrayUnion({ ora: document.getElementById('m-ora').value, materia: document.getElementById('m-mat').value, argomento: document.getElementById('m-arg').value, prof: window.currentUserData.name, profId: window.currentUserId }) }, { merge: true });
-                    window.closeModal();
-                };
-         } else if(type === 'compiti') {
-    
-    const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+                </div>
+                <div>
+                    <label class="modal-label">Argomento trattato</label>
+                    <input id="m-arg" type="text" placeholder="Es: Spiegazione capitolo 4..." class="modal-input">
+                </div>
+            </div>
+        `;
+        confirm.onclick = async () => {
+            const ora = document.getElementById('m-ora').value;
+            const tipo = document.getElementById('m-tipo').value;
+            const mat = document.getElementById('m-mat').value;
+            const arg = document.getElementById('m-arg').value;
+            
+            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
+            await setDoc(ref, { 
+                firme: arrayUnion({ 
+                    ora: ora, 
+                    tipo: tipo,
+                    materia: mat, 
+                    argomento: arg, 
+                    prof: window.currentUserData.name, 
+                    profId: window.currentUserId 
+                }) 
+            }, { merge: true });
+            window.closeModal();
+        };
 
-    body.innerHTML = `
-        <p class="text-[10px] uppercase font-bold text-zinc-500">Assegna Compiti per Casa</p>
-        <select id="m-compiti-mat" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
-            ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
-        </select>
-        <textarea id="m-compiti-txt" placeholder="Descrizione compiti..." class="w-full bg-zinc-900 p-2 rounded text-xs border border-zinc-700 h-24 text-white"></textarea>
-    `;
-
-    confirm.onclick = async () => {
-        const mat = document.getElementById('m-compiti-mat').value;
-        const txt = document.getElementById('m-compiti-txt').value;
-        if(!txt) return;
-
-        const agendaId = `${window.selectedClass}_${inputCal.value}`;
-        const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
-        
-        await setDoc(ref, { 
-            compiti: arrayUnion({ 
-                // Usiamo cap() per assicurarci che la prima lettera sia maiuscola nel salvataggio
-                materia: cap(mat), 
-                testo: cap(txt), 
-                prof: cap(window.currentUserData.name), 
-                profId: window.currentUserId 
-            }) 
-        }, { merge: true });
-
-        window.closeModal();
-    };                
-            } else if(type === 'note') {
-                body.innerHTML = `
-                    <select id="m-type" class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700">
-                        <option value="nota">Nota Disciplinare</option>
-                        ${(window.userRole === ROLES.PRESIDE || window.userRole === ROLES.PROF) ? '<option value="mandato">Mandato Presidenziale</option>' : ''}
+    } else if(type === 'compiti') {
+        const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+        body.innerHTML = `
+            <div class="space-y-4">
+                <div>
+                    <label class="modal-label">Materia di riferimento</label>
+                    <select id="m-compiti-mat" class="modal-input">
+                        ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
                     </select>
-                    <textarea id="m-txt" placeholder="Motivazione..." class="w-full bg-zinc-100 p-2 rounded text-xs border border-zinc-700 h-24"></textarea>
-                `;
-                confirm.onclick = async () => {
+                </div>
+                <div>
+                    <label class="modal-label">Descrizione attività</label>
+                    <textarea id="m-compiti-txt" placeholder="Inserisci i compiti o le scadenze..." class="modal-input h-32 resize-none"></textarea>
+                </div>
+            </div>
+        `;
+        confirm.onclick = async () => {
+            const mat = document.getElementById('m-compiti-mat').value;
+            const txt = document.getElementById('m-compiti-txt').value;
+            if(!txt) return;
+
+            const agendaId = `${window.selectedClass}_${inputCal.value}`;
+            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+            
+            await setDoc(ref, { 
+                compiti: arrayUnion({ 
+                    materia: cap(mat), 
+                    testo: cap(txt), 
+                    prof: cap(window.currentUserData.name), 
+                    profId: window.currentUserId 
+                }) 
+            }, { merge: true });
+            window.closeModal();
+        };                
+    } else if(type === 'note') {
+    document.getElementById('modal-title').innerText = "Emissione Provvedimento";
+    body.innerHTML = `
+        <div class="space-y-5">
+            <div>
+                <label class="modal-label">Tipo di Provvedimento</label>
+                <select id="m-type" class="modal-input">
+                    <option value="nota">Nota Disciplinare Standard</option>
+                    ${(window.userRole === 'preside' || window.userRole === 'prof' || window.userRole === 'admin') ? '<option value="mandato">Mandato Presidenziale (Urgente)</option>' : ''}
+                </select>
+            </div>
+            <div>
+                <label class="modal-label">Motivazione Dettagliata</label>
+                <textarea id="m-txt" 
+                    placeholder="Descrivi l'accaduto in modo formale..." 
+                    class="modal-input h-32 resize-none pt-3"></textarea>
+                <p class="text-[9px] text-zinc-400 mt-2 uppercase font-bold">La nota verrà registrata permanentemente nel profilo dello studente.</p>
+            </div>
+        </div>
+    `;
+    confirm.className = "w-full bg-zinc-900 hover:bg-red-700 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg transition-all";
+    confirm.onclick = async () => {
                     const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
                     const inputCal = document.getElementById('global-calendar');
                     const dParts = inputCal.value.split('-');
@@ -2257,78 +2411,91 @@ window.editNote = async (idx, studentId) => {
         loadStudentRecords(studentId);
     }
 };
-        // Funzione per switchare la visualizzazione
+ // Fix per lo switch quadrimestre
 window.switchQuad = (q) => {
-    const q1 = document.getElementById('container-q1');
-    const q2 = document.getElementById('container-q2');
     const b1 = document.getElementById('btn-q1');
     const b2 = document.getElementById('btn-q2');
-
+    
     if (q === 1) {
-        q1.classList.remove('hidden'); q2.classList.add('hidden');
-        b1.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase bg-white shadow-sm text-zinc-800";
-        b2.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase text-zinc-400";
+        b1.className = "px-4 py-2 rounded text-[9px] font-black uppercase transition-all bg-white shadow-sm text-zinc-900";
+        b2.className = "px-4 py-2 rounded text-[9px] font-black uppercase transition-all text-zinc-400";
     } else {
-        q1.classList.add('hidden'); q2.classList.remove('hidden');
-        b2.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase bg-white shadow-sm text-zinc-800";
-        b1.className = "px-6 py-2 rounded-xl text-[10px] font-black uppercase text-zinc-400";
+        b2.className = "px-4 py-2 rounded text-[9px] font-black uppercase transition-all bg-white shadow-sm text-zinc-900";
+        b1.className = "px-4 py-2 rounded text-[9px] font-black uppercase transition-all text-zinc-400";
     }
+    
+    // Ricarica i dati con il nuovo filtro
+    if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
 };
 
-window.renderPagella = (voti, aySelezionato) => {
-    const q1Body = document.getElementById('pagella-q1-body');
-    const q2Body = document.getElementById('pagella-q2-body');
-    if (!q1Body || !q2Body) return;
+window.renderPagella = async (voti, aySelezionato) => {
+    const tbody = document.getElementById('pagella-table-body');
+    const commentBox = document.getElementById('pagella-comment-box');
+    const genderLabel = document.getElementById('pagella-gender-label');
+    const classLabel = document.getElementById('pagella-classe-label');
+    const nameLabel = document.getElementById('pagella-student-name');
+    const editBtn = document.getElementById('btn-edit-comment');
+    
+    if (!tbody || !window.selectedStudentId) return;
 
-    const votiAnno = voti.filter(v => {
-        // Fallback: se manca il campo 'anno', lo calcola dalla data
-        let vAy = v.anno;
-        if(!vAy && v.data) {
-            const p = v.data.split('/');
-            vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-        }
-        return vAy === aySelezionato;
-    });
-
-    const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
-    let h1 = ""; let h2 = "";
-
-    if (materie.length === 0) {
-        const empty = '<tr><td colspan="3" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold tracking-widest">Nessun voto registrato per l\'A.S. ' + aySelezionato + '</td></tr>';
-        q1Body.innerHTML = empty;
-        q2Body.innerHTML = empty;
-        return;
+    // --- 1. RECUPERO DATI STUDENTE (Header) ---
+    const student = window.allStudents.find(s => s.id === window.selectedStudentId) || 
+                    (window.allUsers ? window.allUsers.find(s => s.id === window.selectedStudentId) : null);
+    
+    if (student) {
+        const role = (student.role || "").toLowerCase();
+        if (genderLabel) genderLabel.innerText = role.includes("studentessa") ? "STUDENTESSA" : "STUDENTE";
+        if (classLabel) classLabel.innerText = student.classe || "N/A";
+        if (nameLabel) nameLabel.innerText = student.name.toUpperCase();
     }
 
-    materie.forEach(m => {
-        const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m);
-        const vQ1 = m_voti.filter(v => isDateInQ(v.data, 1));
-        const vQ2 = m_voti.filter(v => isDateInQ(v.data, 2));
+    // --- 2. GESTIONE PERMESSI STAFF ---
+    const isStaff = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
+    if (editBtn) editBtn.classList.toggle('hidden', !isStaff);
 
-        const valQ1 = vQ1.length ? (vQ1.reduce((a,b) => a + window.parseVotoScolastico(b.voto), 0) / vQ1.length) : null;
-        const valQ2 = vQ2.length ? (vQ2.reduce((a,b) => a + window.parseVotoScolastico(b.voto), 0) / vQ2.length) : null;
+    const currentQ = document.getElementById('btn-q1').classList.contains('bg-white') ? 1 : 2;
+    const votiAnno = voti.filter(v => (v.anno === aySelezionato));
+    const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
 
-        const row = (materia, val) => {
-            const displayVoto = val !== null ? Math.round(val) : "-";
-            const badgeColor = val !== null && Math.round(val) < 6 ? 'bg-red-50 text-red-600' : 'bg-green-600 text-white';
-            const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Sì");
+    // --- 3. RECUPERO RECORD (Commenti e Giudizio) ---
+    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+    const snap = await getDoc(recordRef);
+    const recordData = snap.exists() ? snap.data() : {};
+    const commentiMaterie = recordData[`commenti_materie_q${currentQ}`] || {};
+
+    // --- 4. RENDERING TABELLA ---
+    if (materie.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold">Nessun dato registrato</td></tr>';
+    } else {
+        tbody.innerHTML = materie.map(m => {
+            const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
+            const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
             
+            const displayVoto = val !== null ? Math.round(val) : "-";
+            const color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
+            const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
+            
+            const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
+            const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
+
             return `
-            <tr class="hover:bg-zinc-50 border-b border-zinc-900">
-                <td class="p-4 font-black uppercase text-blue-800 text-[10px]">${materia}</td>
-                <td class="p-4 text-center border-x border-zinc-900">
-                    <span class="inline-block px-3 py-1 rounded-lg font-black text-[11px] ${badgeColor}">${displayVoto}</span>
-                </td>
-                <td class="p-4 text-right text-[11px] font-bold">${esito}</td>
-            </tr>`;
-        };
+                <tr class="border-b border-zinc-100 group">
+                    <td class="py-4 font-bold uppercase text-xs">${m}</td>
+                    <td class="py-4 text-center font-black text-sm ${color}">${displayVoto}</td>
+                    <td class="py-4 px-4">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-[10px] text-zinc-600 italic leading-tight">${commentoMateria}</p>
+                            ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
+                        </div>
+                    </td>
+                    <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
+                </tr>`;
+        }).join('');
+    }
 
-        h1 += row(m, valQ1);
-        h2 += row(m, valQ2);
-    });
-
-    q1Body.innerHTML = h1;
-    q2Body.innerHTML = h2;
+    // --- 5. GIUDIZIO GLOBALE ---
+    const field = `commento_q${currentQ}`;
+    commentBox.innerText = recordData[field] || "Nessun giudizio di condotta inserito.";
 };
         
      window.addAvviso = async (testo, cls) => {
@@ -3952,6 +4119,52 @@ window.hubManager = {
     }
   }
 }
+
+// Funzione per salvare il commento (Solo Docenti)
+window.editPagellaComment = async () => {
+    const currentQ = document.getElementById('btn-q1').classList.contains('bg-white') ? 1 : 2;
+    const nuovoCommento = prompt("Inserisci il giudizio globale per il " + currentQ + "° Quadrimestre:");
+    
+    if (nuovoCommento !== null) {
+        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+        const dataUpdate = {};
+        dataUpdate[`commento_q${currentQ}`] = nuovoCommento;
+        
+        await setDoc(recordRef, dataUpdate, { merge: true });
+        alert("Giudizio salvato!");
+        // Refresh
+        const snap = await getDoc(recordRef);
+        window.renderPagella(snap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
+    }
+};
+	window.editSubjectComment = async (materia, quad) => {
+    const nuovoCommento = prompt(`Inserisci il commento per ${materia.toUpperCase()} (${quad}° Quadrimestre):`);
+    if (nuovoCommento === null) return;
+
+    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+    const snap = await getDoc(recordRef);
+    const currentData = snap.exists() ? snap.data() : {};
+    
+    // Prepariamo l'oggetto dei commenti
+    const fieldName = `commenti_materie_q${quad}`;
+    const commentiAttuali = currentData[fieldName] || {};
+    commentiAttuali[materia.toLowerCase().trim()] = nuovoCommento;
+
+    const update = {};
+    update[fieldName] = commentiAttuali;
+
+    try {
+        await setDoc(recordRef, update, { merge: true });
+        alert("Commento materia salvato!");
+        // Refresh dei dati
+        const newSnap = await getDoc(recordRef);
+        window.renderPagella(newSnap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
+    } catch (e) {
+        console.error(e);
+        alert("Errore durante il salvataggio.");
+    }
+};
+
     </script>
 </body>
 </html>
