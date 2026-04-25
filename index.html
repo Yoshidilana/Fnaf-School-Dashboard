@@ -115,6 +115,45 @@
     border-color: #e4e4e7;
 }
 
+ /* Estetica Bacheca Rimodernata */
+.bacheca-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    display: flex;
+    gap: 1rem;
+}
+
+.bacheca-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e1;
+}
+
+.bacheca-icon-box {
+    width: 48px;
+    height: 48px;
+    background: #fef2f2;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.25rem;
+    color: #dc2626;
+}
+
+.bacheca-admin-input-group {
+    background: white;
+    border-radius: 24px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
 /* Estetica Input Modal Rimodernata */
 .modal-input {
     width: 100%;
@@ -858,16 +897,35 @@ header {
                 <div id="notes-list-global" class="grid gap-3 overflow-y-auto custom-scroll"></div>
             </div>
 
-            <!-- VIEW: BACHECA -->
-            <div id="view-bacheca" class="tab-content space-y-4">
-                <h2 class="text-2xl font-black uppercase italic text-zinc-800">Bacheca</h2>
-                <div id="bacheca-admin-panel" class="hidden glass p-4 flex gap-3 items-center">
-    <input type="date" class="shared-calendar bg-zinc-900 text-white text-xs p-2 rounded border border-zinc-700">
-    <input id="input-bacheca-text" type="text" placeholder="Scrivi comunicazione..." class="flex-1 bg-zinc-900 border border-zinc-700 rounded p-2 text-xs text-white">
-    <button onclick="window.addBacheca()" class="bg-zinc-100 text-black px-4 py-2 rounded text-[10px] font-black uppercase">Pubblica</button>
+            <!-- VIEW: BACHECA RIMODERNATA -->
+<div id="view-bacheca" class="tab-content space-y-8 max-w-4xl mx-auto">
+    <div class="flex flex-col gap-2">
+        <h2 class="text-3xl font-black uppercase italic text-zinc-900 tracking-tighter">Bacheca <span class="text-red-600">Circolari</span></h2>
+        <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Comunicazioni ufficiali della Fazbear High School</p>
+    </div>
+
+    <!-- Pannello Creazione (Solo Admin/Staff) -->
+    <div id="bacheca-admin-panel" class="hidden bacheca-admin-input-group space-y-4">
+        <div class="flex items-center gap-2 mb-2">
+            <span class="text-red-600">✍️</span>
+            <span class="text-[10px] font-black uppercase text-zinc-500">Nuova Comunicazione Ufficiale</span>
+        </div>
+        <div class="flex flex-col md:flex-row gap-3">
+            <input type="date" class="shared-calendar modal-input md:w-40">
+            <input id="input-bacheca-text" type="text" placeholder="Scrivi il contenuto della circolare..." 
+                   class="flex-1 modal-input">
+            <button onclick="window.addBacheca()" 
+                    class="bg-zinc-900 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase hover:bg-red-700 transition-all shadow-lg">
+                Pubblica
+            </button>
+        </div>
+    </div>
+
+    <!-- Container Messaggi -->
+    <div id="bacheca-container" class="grid gap-4">
+        <!-- Popolato via JS -->
+    </div>
 </div>
-                <div id="bacheca-container" class="space-y-3 overflow-y-auto"></div>
-            </div>
 
             <!-- VIEW: Pagella Rimodernata -->
 <div id="view-pagella" class="tab-content hidden p-4 md:p-8 max-w-5xl mx-auto">
@@ -2165,26 +2223,40 @@ await setDoc(agendaRef, {
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'bulletin', 'general'), d => {
         const data = d.exists() ? d.data() : { posts: [] };
         
-        // Calcolo robusto dell'Anno Scolastico corrente
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth() + 1;
-        const calculatedAS = currentMonth >= 9 ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`;
-        
-        // Usa l'anno del DOM se presente, altrimenti quello calcolato
         const ayElem = document.getElementById('current-academic-year');
-        const currentAS = (ayElem && ayElem.innerText.includes('/')) ? ayElem.innerText.replace('A.S. ', '') : calculatedAS;
+        const currentAS = (ayElem && ayElem.innerText.includes('/')) ? ayElem.innerText.replace('A.S. ', '') : "2025/2026";
         
         const filteredPosts = data.posts.filter(p => p.anno === currentAS);
 
-        container.innerHTML = filteredPosts.slice().reverse().map((p, idx) => `
-            <div class="bg-white p-4 rounded-xl border border-zinc-200 shadow-sm relative group">
-                <p class="text-sm text-zinc-800">${p.text}</p>
-                <div class="mt-2 text-[8px] font-black uppercase text-zinc-400">${p.date} — Da: ${p.author}</div>
-                ${(['preside', 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase())) ? 
-`<button onclick="window.deleteBacheca(${idx})" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-red-500 hover:scale-110 transition-all">✕</button>` : ''}
+        container.innerHTML = filteredPosts.slice().reverse().map((p, idx) => {
+            const isBoss = ['preside', 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase());
+            
+            return `
+            <div class="bacheca-card group">
+                <div class="bacheca-icon-box">📢</div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[9px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Circolare Ufficiale</span>
+                        <span class="text-[9px] font-bold text-zinc-400 uppercase">${p.date.split(' — ')[0]}</span>
+                    </div>
+                    <p class="text-sm text-zinc-800 font-medium leading-relaxed pr-6">${p.text}</p>
+                    <div class="mt-4 pt-3 border-t border-zinc-50 flex justify-between items-center">
+                        <p class="text-[9px] font-black uppercase text-zinc-400">Emesso da: <span class="text-zinc-900">${p.author}</span></p>
+                        <span class="text-[8px] font-bold text-zinc-300 italic">${p.date.split(' — ')[1] || ''}</span>
+                    </div>
+                </div>
+                ${isBoss ? `
+                <button onclick="window.deleteBacheca(${idx})" 
+                        class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-zinc-300 hover:text-red-600 transition-all p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>` : ''}
             </div>
-        `).join('') || '<p class="text-center p-10 opacity-20 uppercase font-black">Nessun avviso per l\'A.S. ' + currentAS + '</p>';
+        `}).join('') || `
+            <div class="text-center p-20 border-2 border-dashed border-zinc-200 rounded-[32px]">
+                <p class="text-zinc-300 uppercase font-black italic text-xs tracking-widest">Nessuna circolare per l'A.S. ${currentAS}</p>
+            </div>`;
     });
 }
 
