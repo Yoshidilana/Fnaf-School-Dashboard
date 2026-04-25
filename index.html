@@ -930,6 +930,8 @@ header {
         const auth = getAuth(app);
         const db = getFirestore(app);
         const APP_ID = 'fnaf-school-bot';
+        window.allUsers = [];
+       window.allStudents = [];
 	 window.db = db;
          window.collection = collection;
     window.getDocs = getDocs;
@@ -2864,6 +2866,9 @@ window.selectAndGoToProfile = async (id) => {
             return;
         }
     }
+	if ((!window.allUsers || window.allUsers.length === 0) && window.allStudents) {
+        window.allUsers = window.allStudents;
+    }
 
     // 3. RECUPERO DATI TARGET (Fix Errore 'find')
     // Aggiungiamo un controllo di sicurezza per evitare il crash
@@ -3764,7 +3769,7 @@ window.hubManager = {
 
         try {
             const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
-window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+           window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             let html = `
                 <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
                     <div class="p-4 border-b border-zinc-100 bg-zinc-50 space-y-3">
