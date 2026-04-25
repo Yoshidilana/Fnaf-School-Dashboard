@@ -442,10 +442,10 @@ header {
     <div id="grid-studenti" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </div>
 
-		<div id="view-profilo-target" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
+		<!-- VIEW: PROFILO TARGET (STUDENTI & STAFF) -->
+<div id="view-profilo-target" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
     <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white/50 backdrop-blur-md">
         <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
-            
             <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left w-full">
                 <div class="relative group">
                     <img id="target-profile-avatar" src="" class="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-white shadow-lg object-cover bg-zinc-200 transition-transform group-hover:scale-105">
@@ -453,50 +453,60 @@ header {
                 <div class="flex-1">
                     <span id="target-profile-class-badge" class="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Caricamento...</span>
                     <h1 id="target-profile-name" class="text-3xl md:text-5xl font-black text-zinc-900 mt-2 leading-none uppercase tracking-tighter">NOME</h1>
-                    <p class="text-green-600 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Studente della Fazbear School</p>
+                    <p id="target-profile-sub" class="text-green-600 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Studente della Fazbear School</p>
                 </div>
             </div>
 
-            <div class="w-full md:w-48 bg-white p-6 rounded-3xl border border-zinc-100 text-center shadow-inner relative overflow-hidden flex-shrink-0">
+            <!-- Media (Visibile solo per Studenti) -->
+            <div id="target-media-box" class="w-full md:w-48 bg-white p-6 rounded-3xl border border-zinc-100 text-center shadow-inner relative overflow-hidden flex-shrink-0">
                 <p class="text-[10px] font-black text-zinc-400 uppercase mb-1 tracking-widest">Media Personale</p>
                 <p id="target-profile-media" class="text-5xl font-black text-red-600 relative z-10">0.0</p>
                 <div class="absolute bottom-0 left-0 w-full h-2 bg-zinc-100">
-                    <div id="target-media-progress-bar" class="h-full bg-gradient-to-r from-red-500 to-red-700 transition-all duration-1000 shadow-[0_0_10px_rgba(239,68,68,0.4)]" style="width: 0%"></div>
+                    <div id="target-media-progress-bar" class="h-full bg-gradient-to-r from-red-500 to-red-700 transition-all duration-1000" style="width: 0%"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-4">
-        <button onclick="window.changeMenu('registro')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 hover:-translate-y-1 transition-all shadow-sm">
-            <span class="block text-lg mb-1">📊</span>
-            <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Registro</span>
-        </button>
-        <button onclick="window.changeMenu('note')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 hover:-translate-y-1 transition-all shadow-sm">
-            <span class="block text-lg mb-1">⚠️</span>
-            <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Note</span>
-        </button>
-        <button onclick="window.changeMenu('pagella')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 hover:-translate-y-1 transition-all shadow-sm">
-            <span class="block text-lg mb-1">🎓</span>
-            <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Pagella</span>
-        </button>
+    <!-- Sezione Info Staff (Nascosta di default) -->
+    <div id="target-staff-info" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
+            <h3 class="text-[10px] font-black uppercase text-zinc-400 mb-4">Dettagli Professionali</h3>
+            <div id="target-staff-details" class="space-y-2">
+                <!-- Popolato via JS -->
+            </div>
+        </div>
+        <div class="bg-zinc-900 p-6 rounded-3xl text-white shadow-xl">
+            <h3 class="text-[10px] font-black uppercase text-red-500 mb-4">Status Sistema</h3>
+            <p class="text-xs font-bold">L'utente è un membro verificato dello Staff della Fazbear School. Dispone di permessi di accesso ai registri e alla gestione scolastica.</p>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex-shrink-0 flex items-center gap-2">
-                <span class="bg-red-50 p-1 rounded-lg">🎯</span> Ultimi Voti Registrati
-            </h3>
-            <div id="target-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow">
-                </div>
+    <!-- Sezione Liste (Visibile solo per Studenti) -->
+    <div id="target-student-lists" class="space-y-6">
+        <div class="grid grid-cols-3 gap-4">
+            <button onclick="window.changeMenu('registro')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 transition-all shadow-sm">
+                <span class="block text-lg mb-1">📊</span>
+                <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Registro</span>
+            </button>
+            <button onclick="window.changeMenu('note')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 transition-all shadow-sm">
+                <span class="block text-lg mb-1">⚠️</span>
+                <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Note</span>
+            </button>
+            <button onclick="window.changeMenu('pagella')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 transition-all shadow-sm">
+                <span class="block text-lg mb-1">🎓</span>
+                <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Pagella</span>
+            </button>
         </div>
-
-        <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex-shrink-0 flex items-center gap-2">
-                <span class="bg-amber-50 p-1 rounded-lg">⚠️</span> Note e Provvedimenti
-            </h3>
-            <div id="target-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow">
-                </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex items-center gap-2">🎯 Ultimi Voti</h3>
+                <div id="target-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
+            </div>
+            <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex items-center gap-2">⚠️ Note</h3>
+                <div id="target-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -1118,7 +1128,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
 
    // --- EXTRA ---
-    toggle('notif-bell', type === ROLES.PRESIDE || type === ROLES.ADMIN); // La campanella ora anche all'Admin
+    toggle('notif-bell', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 
 // --- FILTRO CLASSI (Spostato dentro la funzione) ---    
     const classButtons = document.querySelectorAll('.class-filter-btn');
@@ -1873,27 +1883,23 @@ await setDoc(agendaRef, {
         window.toggleNotifPanel = () => {
     const panel = document.getElementById('notif-panel');
     const badge = document.getElementById('notif-count');
-    const bell = document.getElementById('notif-bell');
 
     if (!panel) return;
 
-    // 1. Controllo Permessi: solo Preside e Vice Preside possono aprire
-    const haPermesso = window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE;
+    // AGGIORNATO: Anche l'Admin deve avere il permesso di apertura
+    const haPermesso = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
 
     if (!haPermesso) {
         console.log("Accesso notifiche negato: Ruolo non autorizzato.");
         return; 
     }
 
-    // 2. Se ha i permessi, procediamo a mostrare/nascondere il pannello
     const isOpening = panel.classList.contains('hidden');
     panel.classList.toggle('hidden');
 
-    // 3. Reset del Pallino: se stiamo aprendo il pannello, azzeriamo il conteggio e nascondiamo il rosso
     if (isOpening && badge) {
         badge.innerText = "0";
-        badge.classList.add('hidden'); // Nascondiamo il pallino rosso
-        // Opzionale: se vuoi resettare anche nel DB dovresti fare una chiamata qui
+        badge.classList.add('hidden');
     }
 };
        
@@ -3693,7 +3699,7 @@ window.verifyGoldenPass = function() {
 };
 	// --- GESTORE AMMINISTRAZIONE (HUB) ---
 window.hubManager = {
-    // Mostra la lista di tutti gli utenti registrati
+    // 1. MOSTRA LISTA
     mostraListaUtenti: async function() {
         const container = document.getElementById('hub-dynamic-content');
         container.classList.remove('hidden');
@@ -3703,20 +3709,28 @@ window.hubManager = {
             const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
             let html = `
                 <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
-                    <div class="p-4 border-b border-zinc-100 bg-zinc-50 flex justify-between items-center">
-                        <input type="text" id="hub-user-search" placeholder="Cerca utente o ID..." 
-                               class="bg-white border border-zinc-300 rounded-lg px-3 py-1.5 text-[10px] outline-none focus:border-red-600 w-1/2"
-                               oninput="window.hubManager.filtraUtenti(this.value)">
-                        <span class="text-[9px] font-black text-zinc-400 uppercase">Totale: ${snap.size}</span>
+                    <div class="p-4 border-b border-zinc-100 bg-zinc-50 space-y-3">
+                        <div class="flex flex-col md:flex-row gap-3 justify-between items-center">
+                            <input type="text" id="hub-user-search" placeholder="Cerca per nome o ID..." 
+                                   class="bg-white border border-zinc-300 rounded-lg px-3 py-2 text-[10px] outline-none focus:border-red-600 w-full md:w-1/3"
+                                   oninput="window.hubManager.filtraUtenti()">
+                            <div class="flex flex-wrap gap-1 justify-center">
+                                <button onclick="window.hubManager.setFiltroRuolo('all')" class="hub-filter-btn active bg-zinc-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Tutti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('dirigenza')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Dirigenza</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('prof')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Docenti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('personale')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Personale</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('studente')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Studenti</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="max-h-[400px] overflow-y-auto custom-scroll">
+                    <div class="max-h-[500px] overflow-y-auto custom-scroll">
                         <table class="w-full text-left text-[10px]">
-                            <thead class="bg-zinc-900 text-white sticky top-0">
+                            <thead class="bg-zinc-900 text-white sticky top-0 z-20">
                                 <tr>
-                                    <th class="p-3 uppercase">Nome / ID</th>
-                                    <th class="p-3 uppercase">Ruolo</th>
-                                    <th class="p-3 uppercase">Classe</th>
-                                    <th class="p-3 uppercase text-right">Azioni</th>
+                                    <th class="p-4 uppercase tracking-widest">Utente</th>
+                                    <th class="p-4 uppercase tracking-widest">Ruolo</th>
+                                    <th class="p-4 uppercase tracking-widest">Classe</th>
+                                    <th class="p-4 uppercase tracking-widest text-right">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody id="hub-users-body">`;
@@ -3725,30 +3739,34 @@ window.hubManager = {
                 const u = docSnap.data();
                 const id = docSnap.id;
                 const role = u.role || 'ospite';
+                const roleType = getRoleType(role);
 
-                // Funzione helper per i colori dei ruoli
-                const getRoleColor = (roleStr) => {
-                    const r = roleStr.toLowerCase();
-                    if (r.includes('preside') || r.includes('admin')) return 'bg-red-100 text-red-700 border-red-200';
-                    if (r.includes('prof')) return 'bg-blue-100 text-blue-700 border-blue-200';
-                    if (r.includes('studente')) return 'bg-green-100 text-zinc-600 border-zinc-200';
-                    return 'bg-amber-100 text-amber-700 border-amber-200'; // Bidelli/Tecnici
-                };
+                if (roleType === ROLES.OSPITE) return;
+
+                const foto = u.avatar || u.avatar_npc || `https://ui-avatars.com/api/?name=${u.name || 'U'}&background=random`;
 
                 html += `
-                    <tr class="border-b border-zinc-100 hover:bg-zinc-50 user-row" data-search="${(u.name || '').toLowerCase()} ${id.toLowerCase()}">
+                    <tr class="border-b border-zinc-100 hover:bg-red-50/30 transition-colors user-row cursor-pointer" 
+                        data-role-cat="${this.getCategoriaRuolo(roleType)}"
+                        data-search="${(u.name || '').toLowerCase()} ${id.toLowerCase()}"
+                        onclick="window.hubManager.vaiAlProfilo('${id}', '${roleType}')">
                         <td class="p-3">
-                            <p class="font-black text-zinc-800 uppercase">${u.name || 'N.D.'}</p>
-                            <p class="text-[8px] text-zinc-400 font-mono">${id}</p>
+                            <div class="flex items-center gap-3">
+                                <img src="${foto}" class="w-8 h-8 rounded-lg object-cover border border-zinc-200 shadow-sm">
+                                <div>
+                                    <p class="font-black text-zinc-800 uppercase leading-none">${u.name || 'N.D.'}</p>
+                                    <p class="text-[7px] text-zinc-400 font-mono mt-1">${id}</p>
+                                </div>
+                            </div>
                         </td>
                         <td class="p-3">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase border ${getRoleColor(role)}">
+                            <span class="px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase border ${this.getRoleStyle(roleType)}">
                                 ${role}
                             </span>
                         </td>
-                        <td class="p-3 font-bold text-red-600">${u.classe || '-'}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">🗑️</button>
+                        <td class="p-3 font-bold text-zinc-500">${u.classe || '-'}</td>
+                        <td class="p-3 text-right" onclick="event.stopPropagation()">
+                            <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-zinc-300 hover:text-red-600 p-2 transition-colors">🗑️</button>
                         </td>
                     </tr>`;
             });
@@ -3760,16 +3778,8 @@ window.hubManager = {
         }
     },
 
-    // Filtro rapido per la ricerca
-    filtraUtenti: function(val) {
-        const query = val.toLowerCase();
-        document.querySelectorAll('.user-row').forEach(row => {
-            row.style.display = row.dataset.search.includes(query) ? '' : 'none';
-        });
-    },
-
-    // Mostra il form per aggiungere un nuovo utente
-       nuovoUtente: function() {
+    // 2. NUOVO UTENTE
+    nuovoUtente: function() {
         const role = window.userRole;
         const isAuthorized = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(role);
 
@@ -3806,43 +3816,80 @@ window.hubManager = {
             </div>`;
     },
 
-    // Salva i dati su Firestore
+    // 3. SALVA E ELIMINA
     salvaNuovoUtente: async function() {
         const id = document.getElementById('new-u-id').value.trim();
         const name = document.getElementById('new-u-name').value.trim();
         const role = document.getElementById('new-u-role').value;
         const classe = document.getElementById('new-u-class').value;
-
         if(!id || !name) return alert("ID e Nome sono obbligatori!");
-
-        // Identifica se l'utente fa parte del corpo docente/direttivo
         const isStaffDidattico = ['Prof', 'Preside', 'Vice Preside'].includes(role);
-
         try {
             await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), {
-                name: name,
-                role: role,
-                classe: classe === 'None' ? null : classe, // Converte "None" in null per pulizia database
-                materie: isStaffDidattico ? [] : null      // Inizializza l'array materie solo per chi deve insegnare
+                name: name, role: role, classe: classe === 'None' ? null : classe, materie: isStaffDidattico ? [] : null
             });
             alert("Utente registrato con successo!");
             this.mostraListaUtenti();
-        } catch (e) {
-            alert("Errore: " + e.message);
-        }
+        } catch (e) { alert("Errore: " + e.message); }
     },
 
-    // Elimina un utente
     eliminaUtente: async function(id) {
         if(!confirm(`Sei sicuro di voler eliminare l'utente ${id}?`)) return;
         try {
             await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id));
             this.mostraListaUtenti();
-        } catch (e) {
-            alert("Errore: " + e.message);
+        } catch (e) { alert("Errore: " + e.message); }
+    },
+
+    // 4. HELPERS E FILTRI (Prima erano fuori per errore!)
+    getCategoriaRuolo: function(roleType) {
+        if ([ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(roleType)) return 'dirigenza';
+        if (roleType === ROLES.PROF) return 'prof';
+        if ([ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA].includes(roleType)) return 'personale';
+        if (roleType === ROLES.STUDENTE) return 'studente';
+        return 'altro';
+    },
+
+    getRoleStyle: function(roleType) {
+        if (roleType === ROLES.ADMIN || roleType === ROLES.PRESIDE) return 'bg-red-50 text-red-700 border-red-100';
+        if (roleType === ROLES.PROF) return 'bg-blue-50 text-blue-700 border-blue-100';
+        if (roleType === ROLES.STUDENTE) return 'bg-zinc-50 text-zinc-600 border-zinc-200';
+        return 'bg-amber-50 text-amber-700 border-amber-100';
+    },
+
+    currentRoleFilter: 'all',
+    setFiltroRuolo: function(cat) {
+        this.currentRoleFilter = cat;
+        document.querySelectorAll('.hub-filter-btn').forEach(btn => {
+            const onclickText = btn.getAttribute('onclick');
+            const isActive = onclickText && onclickText.includes(`'${cat}'`);
+            btn.className = isActive ? 
+                "hub-filter-btn active bg-zinc-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase" : 
+                "hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase";
+        });
+        this.filtraUtenti();
+    },
+
+    filtraUtenti: function() {
+        const searchInput = document.getElementById('hub-user-search');
+        const query = searchInput ? searchInput.value.toLowerCase() : '';
+        const cat = this.currentRoleFilter;
+
+        document.querySelectorAll('.user-row').forEach(row => {
+            const matchesSearch = row.dataset.search.includes(query);
+            const matchesRole = (cat === 'all' || row.dataset.roleCat === cat);
+            row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
+        });
+    },
+
+    vaiAlProfilo: function(id, roleType) {
+        if (roleType === ROLES.STUDENTE) {
+            if (typeof window.selectAndGoToProfile === 'function') window.selectAndGoToProfile(id);
+        } else {
+            if (typeof window.apriProfiloPersonale === 'function') window.apriProfiloPersonale(id);
         }
     }
-};
+}; 
 
     </script>
 </body>
