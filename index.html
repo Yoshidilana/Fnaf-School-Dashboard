@@ -1114,7 +1114,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
 
 // --- AGGIUNGI QUESTE RIGHE MANCANTI ---
 // Gestione Filtri in alto
-toggle('class-filter-container', isStaffGenerale || type === ROLES.OSPITE);
+toggle('class-filter-container', isStaffGenerale);
 toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
 
 // Bottoni Home per Studenti (Quelli che erano spariti)
@@ -2846,48 +2846,65 @@ window.vaiADataRapida = () => {
     }
 };
 
-	window.selectAndGoToProfile = async (id) => {
-    // 1. DEFINIZIONE RUOLI E PERMESSI
-    const isSuperAdmin = (window.userRole === 'admin'); 
-    const isStaff = ['Preside', 'Vice Preside', 'Prof'].includes(window.userRole);
-    const isStudente = (window.userRole === 'Studente');
+window.selectAndGoToProfile = async (id) => {
+    // 1. DEFINIZIONE RUOLI DI CHI GUARDA
+    const myRole = String(window.userRole || 'Ospite').toLowerCase();
+    const isStudenteOsservatore = myRole.includes('studente');
 
-    // 2. CONTROLLO ACCESSO (CHI PUÒ VEDERE COSA)
-    const role = String(window.userRole).toLowerCase();
-
-if (role === 'studente') { 
-    if (String(window.currentUserId) === String(id)) {
-        alert("✨ Ehi, questo sei tu!...");
-        return;
-    } else {
-        alert("⛔ Accesso riservato...");
-        return;
-    }
-}
-
-    // 3. SE SIAMO QUI, L'UTENTE È STAFF O ADMIN -> PROCEDIAMO AL CARICAMENTO
-
-    // Cerchiamo lo studente nella lista locale
-    const student = window.allStudents.find(s => s.id === id);
-    if (!student) {
-        console.error("Studente non trovato nella lista locale.");
-        return;
+    // 2. CONTROLLO ACCESSO
+    if (isStudenteOsservatore) { 
+        if (String(window.currentUserId) === String(id)) {
+            // Se sono io, potrei voler andare al mio profilo personale
+            if (typeof window.apriProfiloPersonale === 'function') {
+                window.apriProfiloPersonale();
+                return;
+            }
+        } else {
+            alert("⛔ Accesso riservato: non puoi visualizzare i profili degli altri utenti.");
+            return;
+        }
     }
 
-const roleDisplay = document.getElementById('res-student-role');
-    if (roleDisplay) {
-        roleDisplay.innerText = (student.role || 'Studente').toUpperCase();
+    // 3. RECUPERO DATI TARGET (Fix Errore 'find')
+    // Aggiungiamo un controllo di sicurezza per evitare il crash
+    if (!window.allUsers || !Array.isArray(window.allUsers)) {
+        console.error("Errore: La lista globale window.allUsers non è definita o non è un array.");
+        alert("⚠️ Errore di sincronizzazione dati. Riprova tra un istante.");
+        return;
     }
 
+    const targetUser = window.allUsers.find(u => String(u.id) === String(id)); 
+    
+    if (!targetUser) {
+        console.error("Utente non trovato con ID:", id);
+        return;
+    }
+
+    // 4. IDENTIFICAZIONE TARGET
+    const rawRole = (targetUser.role || 'Ospite');
+    const targetRoleUpper = rawRole.toUpperCase();
+    const isTargetStudente = rawRole.toLowerCase().includes('studente');
+
+    // 5. AGGIORNAMENTO UI TESTATA (ID presenti nel tuo HTML)
+    const roleDisplay = document.getElementById('res-student-role');
+    if (roleDisplay) roleDisplay.innerText = targetRoleUpper;
+
+    const badgeDisplay = document.getElementById('target-profile-class-badge');
+    if (badgeDisplay) {
+        badgeDisplay.innerText = isTargetStudente ? 
+            `CLASSE: ${targetUser.classe || 'N/A'}` : 
+            targetRoleUpper;
+    }
+
+    // Salviamo l'ID selezionato per le funzioni successive (voti/note)
     window.selectedStudentId = id;
 
-    try {
+try {
+	let media = "0.0";
         // A. MOSTRA LA SCHEDA (Feedback immediato)
-        if (typeof window.changeMenu === 'function') {
-            window.changeMenu('profilo-target');
-        }
+        if (typeof window.changeMenu === 'function') window.changeMenu('profilo-target');
 
-        // B. CALCOLO ANNO SCOLASTICO
+        // B. CALCOLO ANNO SCOLASTICO (Resta uguale)
         const inputCal = document.getElementById('global-calendar');
         const dataCal = inputCal ? inputCal.value : ""; 
         const dataScelta = dataCal ? new Date(dataCal) : new Date();
@@ -2896,83 +2913,112 @@ const roleDisplay = document.getElementById('res-student-role');
             : `${dataScelta.getFullYear() - 1}/${dataScelta.getFullYear()}`;
 
         // C. RECUPERO DATI DA FIREBASE (Records)
-        // Uso la tua logica: doc(db, 'artifacts', ...)
         const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', id);
         const recordSnap = await getDoc(recordRef);
         const data = recordSnap.exists() ? recordSnap.data() : { voti: [], note: [] };
 
-        // D. AGGIORNAMENTO INTERFACCIA (Header e Nomi)
+        // [D] AGGIORNAMENTO INTERFACCIA (Usa 'targetUser' o 'student' in base a come lo hai chiamato sopra)
+        const u = targetUser; // Assicuriamoci che l'oggetto sia quello trovato col .find()
+        
         const nameDisplay = document.getElementById('target-profile-name');
         const badgeDisplay = document.getElementById('target-profile-class-badge');
-        
-        if (nameDisplay) nameDisplay.innerText = student.name.toUpperCase();
-        if (badgeDisplay) badgeDisplay.innerText = `CLASSE: ${student.classe || 'N/A'} - A.S. ${as}`;
-
-	// --- SINCRONIZZAZIONE PAGELLA ---
-        const pagellaName = document.getElementById('pagella-student-name');
-        const pagellaClassLabel = document.getElementById('pagella-classe-label');
-        if(pagellaName) pagellaName.innerText = student.name;
-        if(pagellaClassLabel) {
-            pagellaClassLabel.innerText = `CLASSE ${student.classe || '-'}`;
-        }
-
-
-        // E. GESTIONE AVATAR
+        const subDisplay = document.getElementById('target-profile-sub');
         const avatarEl = document.getElementById('target-profile-avatar');
+
+        if (nameDisplay) nameDisplay.innerText = u.name.toUpperCase();
         if (avatarEl) {
-            avatarEl.src = student.avatar || student.avatar_npc || `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
-            avatarEl.onerror = () => {
-                avatarEl.src = `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
-            };
+            avatarEl.src = u.avatar || u.avatar_npc || `https://ui-avatars.com/api/?name=${u.name}&background=7f1d1d&color=fff`;
         }
-
-        // F. FILTRO DATI E MEDIA
-        const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
-        const noteFiltrate = (data.note || []).filter(n => n.anno === as);
-
-        const mediaEl = document.getElementById('target-profile-media');
-        const media = votiFiltrati.length > 0 
-    ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
-    : "0.0";
         
-        if (mediaEl) {
-            mediaEl.innerText = media;
-            mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+        // Determiniamo il ruolo target
+        const isTargetStudente = (u.role || '').toLowerCase().includes('studente');
+
+        // [E] GESTIONE VISIBILITÀ SEZIONI (In base al tuo nuovo HTML)
+        const mediaBox = document.getElementById('target-media-box');
+        const studentLists = document.getElementById('target-student-lists');
+        const staffInfo = document.getElementById('target-staff-info');
+
+        if (isTargetStudente) {
+            if (mediaBox) mediaBox.classList.remove('hidden');
+            if (studentLists) studentLists.classList.remove('hidden');
+            if (staffInfo) staffInfo.classList.add('hidden');
+            if (subDisplay) subDisplay.innerText = "Studente della Fazbear School";
+            if (badgeDisplay) badgeDisplay.innerText = `CLASSE: ${u.classe || 'N/A'} - A.S. ${as}`;
+        } else {
+            if (mediaBox) mediaBox.classList.add('hidden');
+            if (studentLists) studentLists.classList.add('hidden');
+            if (staffInfo) staffInfo.classList.remove('hidden');
+            if (subDisplay) subDisplay.innerText = "Personale della Fazbear School";
+            if (badgeDisplay) badgeDisplay.innerText = `${(u.role || 'Staff').toUpperCase()} - A.S. ${as}`;
+            
+            // Popoliamo i dettagli dello staff nel tuo nuovo box
+            const staffDetails = document.getElementById('target-staff-details');
+            if (staffDetails) {
+                staffDetails.innerHTML = `
+                    <p class="text-xs"><b>Incarico:</b> ${u.role}</p>
+                    <p class="text-xs"><b>Status:</b> <span class="text-green-600">Attivo</span></p>
+                    <p class="text-xs"><b>Settore:</b> Scolastico</p>
+                `;
+            }
         }
 
-        // G. RENDER LISTE (Voti e Note)
-        if (typeof renderListaProfilo === 'function') {
-            renderListaProfilo('target-voti-list', votiFiltrati, false, "voti", as);
-            renderListaProfilo('target-note-list', noteFiltrate, false, "note", as);
+        // [F] CALCOLO MEDIA E RENDER (Solo se Studente)
+        if (isTargetStudente) {
+            const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
+            const noteFiltrate = (data.note || []).filter(n => n.anno === as);
+            
+            const mediaEl = document.getElementById('target-profile-media');
+            media = votiFiltrati.length > 0 
+                ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
+                : "0.0";
+            
+            if (mediaEl) {
+                mediaEl.innerText = media;
+                mediaEl.className = `text-5xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+            }
+
+            if (typeof renderListaProfilo === 'function') {
+                renderListaProfilo('target-voti-list', votiFiltrati, false, "voti", as);
+                renderListaProfilo('target-note-list', noteFiltrate, false, "note", as);
+            }
+
+            // H. CARICAMENTO LOGICA SIDEBAR (Solo per studenti)
+            if (typeof loadStudentRecords === 'function') loadStudentRecords(id);
         }
 
-        // H. CARICAMENTO LOGICA SIDEBAR (Carica i dati nei tab Registro/Note del prof)
-        if (typeof loadStudentRecords === 'function') {
-            loadStudentRecords(id);
+		// 1. Forza la visibilità dell'header nel Registro (Solo se Target è Studente)
+    const headerRegistro = document.getElementById('student-header');
+    if (headerRegistro) {
+        if (isTargetStudente) {
+            headerRegistro.classList.remove('hidden');
+            headerRegistro.classList.add('flex');
+        } else {
+            // Se è staff, nascondiamo l'header del registro scolastico
+            headerRegistro.classList.add('hidden');
+            headerRegistro.classList.remove('flex');
         }
+    }
 
-	// 1. Forza la visibilità dell'header nel Registro
-const headerRegistro = document.getElementById('student-header');
-if (headerRegistro) {
-    headerRegistro.classList.remove('hidden');
-    headerRegistro.classList.add('flex'); // Assicura che si veda
-}
+    // 2. Scrivi il nome nel Registro (Sempre utile come feedback)
+    const nomeRegistro = document.getElementById('res-student-name');
+    if (nomeRegistro) {
+        // Usiamo targetUser che è l'oggetto trovato col .find()
+        nomeRegistro.innerText = targetUser.name.toUpperCase();
+    }
 
-// 2. Scrivi il nome nel Registro
-const nomeRegistro = document.getElementById('res-student-name');
-if (nomeRegistro) {
-    nomeRegistro.innerText = student.name.toUpperCase();
-}
-
-// 3. Scrivi la media nel Registro
-const mediaRegistro = document.getElementById('res-student-media');
-if (mediaRegistro) {
-    // Usa la variabile 'media' che hai già calcolato per il profilo
-    mediaRegistro.innerText = media; 
-}
+    // 3. Scrivi la media nel Registro (Solo se Target è Studente)
+    const mediaRegistro = document.getElementById('res-student-media');
+    if (mediaRegistro) {
+        if (isTargetStudente) {
+            // 'media' è la variabile calcolata nel blocco [F] precedente
+            mediaRegistro.innerText = media; 
+        } else {
+            mediaRegistro.innerText = "--"; 
+        }
+    }
 
     } catch (error) {
-        console.error("Errore nel caricamento profilo studente:", error);
+        console.error("Errore nel caricamento profilo:", error);
     }
 };
 
@@ -3718,6 +3764,7 @@ window.hubManager = {
 
         try {
             const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
+window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             let html = `
                 <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
                     <div class="p-4 border-b border-zinc-100 bg-zinc-50 space-y-3">
@@ -3894,14 +3941,12 @@ window.hubManager = {
     },
 
     vaiAlProfilo: function(id, roleType) {
-        if (roleType === ROLES.STUDENTE) {
-            if (typeof window.selectAndGoToProfile === 'function') window.selectAndGoToProfile(id);
-        } else {
-            if (typeof window.apriProfiloPersonale === 'function') window.apriProfiloPersonale(id);
-        }
+    // Ora usiamo una sola funzione che gestisce la "visualizzazione profilo altrui"
+    if (typeof window.selectAndGoToProfile === 'function') {
+        window.selectAndGoToProfile(id, roleType); 
     }
-}; 
-
+  }
+}
     </script>
 </body>
 </html>
