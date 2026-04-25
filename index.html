@@ -1112,6 +1112,17 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-presenze-studente', isStudente);
     toggle('home-profilo-btn', type !== ROLES.OSPITE);
 
+// --- AGGIUNGI QUESTE RIGHE MANCANTI ---
+// Gestione Filtri in alto
+toggle('class-filter-container', isStaffGenerale || type === ROLES.OSPITE);
+toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
+
+// Bottoni Home per Studenti (Quelli che erano spariti)
+toggle('home-btn-agenda', isStudente);
+toggle('home-btn-registro', isStudente);
+toggle('home-btn-note', isStudente);
+toggle('home-btn-pagella', isStudente);
+
     // Azioni in Agenda e Bacheca
     // Tecnici, Segreteria e Bidelli possono ora scrivere avvisi in agenda
     toggle('prof-comm-panel', isStaffDidattico || isOperativo); 
