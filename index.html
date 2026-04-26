@@ -3371,7 +3371,8 @@ try {
         // 4. Tasto per il Preside
         const adminActions = document.getElementById('admin-actions-prof');
         if (adminActions) {
-            if (window.userRole === 'Preside' || window.userRole === 'Admin') {
+            const userRole = (window.userRole || '').toLowerCase();
+        if (userRole === 'preside' || userRole === 'admin' || userRole === 'vice_preside') {
                 adminActions.classList.remove('hidden');
                 adminActions.innerHTML = `
                     <button onclick="window.apriModalValutaProf('${targetId}')" 
