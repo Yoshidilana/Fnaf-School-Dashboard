@@ -395,13 +395,10 @@ header {
         </button>
 
 <button onclick="window.mostraGestioneStaff()" 
-        id="menu-gestione-staff-btn" 
+        id="menu-gestione-staff" 
         class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950 hover:bg-yellow-700 transition-all">
     <span class="text-lg">👔</span> 
-    <span class="flex flex-col items-start">
-        <span class="font-black uppercase">Gestione Staff</span>
-        <span class="text-[7px] bg-yellow-900 text-white px-1 rounded">AREA DIRIGENZA</span>
-    </span>
+    <span class="font-black uppercase">Gestione Staff</span>
 </button>
 
         <button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
@@ -495,21 +492,6 @@ header {
     </div>
 </div>
 
-	<div id="menu-gestione-staff" class="menu-section hidden p-4">
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h2 class="text-2xl font-black uppercase italic text-zinc-800 leading-tight">Gestione Personale</h2>
-            <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Fascicoli Riservati Dirigenza</p>
-        </div>
-        <div class="bg-zinc-100 p-2 rounded-2xl">
-            <span class="text-xl">👔</span>
-        </div>
-    </div>
-
-    <div id="staff-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        </div>
-</div>
-
 	<!-- VIEW: HUB CLASSE -->
 <div id="view-classi" class="tab-content hidden p-6">
     <!-- Stato 1: Selezione Classe (visibile se selectedClass è null) -->
@@ -547,6 +529,21 @@ header {
 </button>
         </div>
     </div>
+</div>
+	
+	<div id="view-gestione-staff" class="tab-content hidden p-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-black uppercase italic text-zinc-800 leading-tight">Gestione Personale</h2>
+            <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Fascicoli Riservati Dirigenza</p>
+        </div>
+        <div class="bg-zinc-100 p-2 rounded-2xl">
+            <span class="text-xl">👔</span>
+        </div>
+    </div>
+
+    <div id="staff-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        </div>
 </div>
 
 <!-- VIEW: REGISTRO VOTI GLOBALE -->
@@ -853,6 +850,7 @@ header {
         </div>
     </div>
 </div>
+		
 
             <!-- VIEW: REGISTRO RIMODERNATO -->
 <div id="view-registro" class="tab-content space-y-6">
@@ -1368,7 +1366,7 @@ toggle('home-btn-pagella', isStudente);
     toggle('notif-bell', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 
 // --- GESTIONE PERSONALE (Solo Vertici) ---
- toggle('menu-gestione-staff-btn', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
+toggle('menu-gestione-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 
 // --- FILTRO CLASSI (Spostato dentro la funzione) ---    
     const classButtons = document.querySelectorAll('.class-filter-btn');
@@ -4497,71 +4495,40 @@ window.editPagellaComment = async () => {
     };
 };
 	window.mostraGestioneStaff = async function() {
-    // 1. Attiviamo la View e mostriamo un caricamento
-    if (typeof window.changeMenu === 'function') window.changeMenu('gestione-staff');
+    // Chiama il sistema ufficiale. 
+    // Lui cercherà "view-gestione-staff" e accenderà il tasto "menu-gestione-staff"
+    window.changeMenu('gestione-staff'); 
 
     const container = document.getElementById('staff-list-container');
     if (!container) return;
 
-    container.innerHTML = `
-        <div class="col-span-full text-center py-12">
-            <div class="animate-spin text-2xl mb-2">🌀</div>
-            <p class="text-[9px] font-black uppercase text-zinc-400 tracking-widest">Sincronizzazione Personale...</p>
-        </div>
-    `;
+    container.innerHTML = `<p class="text-center p-10 animate-pulse text-[10px] font-black uppercase">Sincronizzazione Database...</p>`;
 
     try {
-        // 2. RECUPERO DATI (Stesso percorso che usa il tuo hubManager)
         const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
-        
-        // Salviamo globalmente per coerenza con il resto del sistema
-        window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const users = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-        // 3. Filtriamo solo lo Staff (Escludiamo studenti e ospiti)
-        const staffMembers = window.allUsers.filter(u => {
+        const staff = users.filter(u => {
             const r = (u.role || '').toLowerCase();
             return !r.includes('studente') && r !== 'ospite' && r !== '';
         });
 
-        if (staffMembers.length === 0) {
-            container.innerHTML = `<p class="col-span-full text-center py-10 text-[10px] font-black text-zinc-400 uppercase">Nessun membro dello staff trovato.</p>`;
-            return;
-        }
-
-        // 4. Generiamo la griglia professionale
-        container.innerHTML = ""; 
-        staffMembers.forEach(staff => {
+        container.innerHTML = "";
+        staff.forEach(s => {
             const card = document.createElement('div');
-            card.className = "glass-light p-4 rounded-3xl border border-zinc-100 flex items-center gap-4 cursor-pointer hover:border-red-600 transition-all shadow-sm bg-white active:scale-95 group";
-            
-            const foto = staff.avatar || staff.avatar_npc || `https://ui-avatars.com/api/?name=${staff.name || 'U'}&background=random`;
-            
-            // Nota: Le stelle/ammonizioni qui non ci sono ancora perché stanno nei 'records'
-            // Ma la card ora si aprirà correttamente.
+            card.className = "bg-white p-4 rounded-3xl border-2 border-zinc-100 flex items-center gap-4 cursor-pointer hover:border-red-600 transition-all active:scale-95 group";
             card.innerHTML = `
-                <div class="relative">
-                    <img src="${foto}" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-50 shadow-sm group-hover:rotate-2 transition-transform">
-                    <div class="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white"></div>
-                </div>
+                <img src="${s.avatar || s.avatar_npc || 'https://ui-avatars.com/api/?name=' + s.name}" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-50 shadow-sm">
                 <div class="flex-1">
-                    <p class="text-[11px] font-black uppercase text-zinc-800 leading-none mb-1">${staff.name || 'Senza Nome'}</p>
-                    <p class="text-[8px] font-bold text-red-600 uppercase tracking-tighter">${staff.role || 'Staff'}</p>
-                    <p class="text-[7px] text-zinc-400 font-mono mt-1 opacity-60">${staff.id}</p>
-                </div>
-                <div class="bg-zinc-50 p-2 rounded-xl group-hover:bg-red-600 group-hover:text-white transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
-                    </svg>
+                    <p class="text-[11px] font-black uppercase text-zinc-800 leading-none">${s.name || 'N.D.'}</p>
+                    <p class="text-[8px] font-bold text-red-600 uppercase mt-1">${s.role || 'Staff'}</p>
                 </div>
             `;
-
-            card.onclick = () => window.selectAndGoToProfile(staff.id);
+            card.onclick = () => window.selectAndGoToProfile(s.id);
             container.appendChild(card);
         });
-
     } catch (e) {
-        console.error("Errore caricamento staff:", e);
-        container.innerHTML = `<p class="col-span-full text-red-500 text-[10px] font-bold p-6">Errore Database: ${e.message}</p>`;
+        container.innerHTML = `<p class="text-red-500 p-4 text-[10px]">Errore: ${e.message}</p>`;
     }
 };
 
