@@ -394,6 +394,16 @@ header {
             <span class="text-lg">👤</span>PROFILO
         </button>
 
+<button onclick="window.mostraGestioneStaff()" 
+        id="menu-gestione-staff-btn" 
+        class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950 hover:bg-yellow-700 transition-all">
+    <span class="text-lg">👔</span> 
+    <span class="flex flex-col items-start">
+        <span class="font-black uppercase">Gestione Staff</span>
+        <span class="text-[7px] bg-yellow-900 text-white px-1 rounded">AREA DIRIGENZA</span>
+    </span>
+</button>
+
         <button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
             <span class="text-lg">🏫</span> HUB CLASSI
         </button>
@@ -483,6 +493,21 @@ header {
     </button>
 </div>
     </div>
+</div>
+
+	<div id="menu-gestione-staff" class="menu-section hidden p-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h2 class="text-2xl font-black uppercase italic text-zinc-800 leading-tight">Gestione Personale</h2>
+            <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Fascicoli Riservati Dirigenza</p>
+        </div>
+        <div class="bg-zinc-100 p-2 rounded-2xl">
+            <span class="text-xl">👔</span>
+        </div>
+    </div>
+
+    <div id="staff-list-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        </div>
 </div>
 
 	<!-- VIEW: HUB CLASSE -->
@@ -612,18 +637,27 @@ header {
     </div>
 
     <!-- Sezione Info Staff (Nascosta di default) -->
-    <div id="target-staff-info" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div id="target-staff-info" class="hidden space-y-6"> <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
             <h3 class="text-[10px] font-black uppercase text-zinc-400 mb-4">Dettagli Professionali</h3>
             <div id="target-staff-details" class="space-y-2">
-                <!-- Popolato via JS -->
-            </div>
+                </div>
         </div>
         <div class="bg-zinc-900 p-6 rounded-3xl text-white shadow-xl">
             <h3 class="text-[10px] font-black uppercase text-red-500 mb-4">Status Sistema</h3>
-            <p class="text-xs font-bold">L'utente è un membro verificato dello Staff della Fazbear School. Dispone di permessi di accesso ai registri e alla gestione scolastica.</p>
+            <p class="text-xs font-bold mb-4">L'utente è un membro verificato dello Staff. Dispone di permessi di accesso ai registri.</p>
+            <div id="staff-stars-count" class="flex gap-2 text-lg"></div>
         </div>
     </div>
+
+    <div id="target-staff-evaluations" class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
+        <h3 class="text-[10px] font-black uppercase text-zinc-400 mb-4 border-b pb-2">🏅 Fascicolo Note di Servizio</h3>
+        <div id="staff-notes-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scroll">
+            </div>
+        <div id="admin-actions-prof" class="mt-4 hidden">
+            </div>
+    </div>
+</div>
 
     <!-- Sezione Liste (Visibile solo per Studenti) -->
     <div id="target-student-lists" class="space-y-6">
@@ -1264,6 +1298,7 @@ function getRoleType(roleStr) {
         if(window.selectedClass) renderStudentList();
         applyRoleUI(); // Riapplica dopo aver caricato gli studenti
     });
+    listenNotifications();
     checkAuth();
 });
 
@@ -1331,6 +1366,9 @@ toggle('home-btn-pagella', isStudente);
 
    // --- EXTRA ---
     toggle('notif-bell', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
+
+// --- GESTIONE PERSONALE (Solo Vertici) ---
+ toggle('menu-gestione-staff-btn', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 
 // --- FILTRO CLASSI (Spostato dentro la funzione) ---    
     const classButtons = document.querySelectorAll('.class-filter-btn');
@@ -1523,6 +1561,7 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
     const dateKey = document.getElementById('global-calendar')?.value || ""; 
     const role = window.userRole; // Già mappato da applyRoleUI
     const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN, ROLES.PROF].includes(role);
+    const isAdmin = typeof isStaff !== 'undefined' && isStaff;
     
     // Caricamento interfaccia Appello per Staff
     if (isStaff && typeof window.loadAttendance === 'function' && cls !== 'ALL') {
@@ -1551,7 +1590,7 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
 
         // Rendering Firme
         const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
-const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
+const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map((f, idx) => `
     <div class="group flex gap-5 p-4 rounded-2xl border border-zinc-100 hover:border-red-200 hover:bg-red-50/30 transition-all">
         <div class="flex flex-col items-center justify-center w-14 h-14 bg-white border-2 border-zinc-100 rounded-2xl shadow-sm group-hover:border-red-200 shrink-0">
             <span class="text-lg font-black text-zinc-900 leading-none">${f.ora}°</span>
@@ -1561,7 +1600,12 @@ const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map(f => `
             <div class="flex justify-between items-start mb-1">
                 <h4 class="text-xs font-black uppercase text-red-600 tracking-tight">${f.materia}</h4>
                 <span class="text-[9px] font-bold text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded-md">${f.prof}</span>
-            </div>
+            ${isAdmin ? `
+                    <button onclick="deleteFirma(${idx}, '${cls}')" class="text-zinc-300 hover:text-red-600 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    </button>
+                    ` : ''}
+                </div>
             <!-- Modifica qui sotto: aggiunta del tipo davanti all'argomento -->
             <p class="text-sm text-zinc-700 font-medium leading-snug">
                 <span class="font-black text-zinc-900">${f.tipo || 'Lezione'}:</span> ${f.argomento || "Nessun argomento inserito"}
@@ -2187,27 +2231,30 @@ await setDoc(agendaRef, {
             const badge = document.getElementById('notif-count');
             const listContent = document.getElementById('notif-list-content');
 
-            // Aggiorna il numero sulla campanella
-            badge.innerText = alerts.length;
+            if(badge) {
+                badge.innerText = alerts.length;
+                if(alerts.length === 0) {
+                    badge.classList.add('hidden');
+                } else {
+                    badge.classList.remove('hidden');
+                }
+            }
             
-            if(alerts.length === 0) {
-                badge.classList.add('hidden');
-                if(listContent) listContent.innerHTML = '<p class="text-center text-[9px] text-zinc-400 italic py-4">Nessun mandato</p>';
-            } else {
-                badge.classList.remove('hidden');
-                // Popola il contenuto del pannello (quello che hai incollato nell'HTML)
-                if(listContent) {
+            if(listContent) {
+                if(alerts.length === 0) {
+                    listContent.innerHTML = '<p class="text-center text-[9px] text-zinc-400 italic py-4">Nessun mandato</p>';
+                } else {
                     listContent.innerHTML = alerts.slice().reverse().map(a => `
-                        <div class="p-3 bg-zinc-50 border-l-4 border-amber-500 rounded-lg shadow-sm text-[10px]">
+                        <div class="p-3 bg-zinc-50 border-l-4 border-amber-500 rounded-lg shadow-sm text-[10px] mb-3">
                             <p class="font-black text-zinc-900 leading-tight">${a.msg}</p>
                             <span class="text-[8px] font-bold text-zinc-400 bg-zinc-200 px-1 rounded">${a.time || ''}</span>
                             <p class="text-zinc-700 bg-white p-2 border border-zinc-200 rounded mt-1 mb-2 font-medium">${a.motivo || 'Nessun motivo specificato'}</p>
+                            
+                            <div class="flex justify-between items-center mt-2 pt-2 border-t border-zinc-200/60">
+                                <p class="text-[9px] text-zinc-500 italic">Inviato da: <span class="text-zinc-700 font-semibold">${a.autore || 'Sistema'}</span></p>
+                                <p class="text-[8px] text-zinc-400 font-medium">${a.data || ''}</p>
+                            </div>
                         </div>
-                         <div class="flex justify-between items-center mt-2 pt-2 border-t border-zinc-200/60">
-                            <p class="text-[9px] text-zinc-500 italic">Inviato da: <span class="text-zinc-700 font-semibold">${a.autore || 'Sistema'}</span></p>
-                            <p class="text-[8px] text-zinc-400 font-medium">${a.data || ''}</p>
-                        </div>
-                    </div>
                     `).join('');
                 }
             }
@@ -2983,8 +3030,12 @@ const gridContenuti = document.getElementById('profilo-content-grid');
 if (isStaff) {
     if (badgeEl) badgeEl.innerText = `Staff scolastico - A.S. ${as}`;
     
+    // --- NUOVA LOGICA VALUTAZIONI (Recupero dati) ---
+    const valutazioni = data.valutazioni || [];
+    const stelle = valutazioni.filter(v => v.tipo === 'stella').length;
+    const ammonizioni = valutazioni.filter(v => v.tipo === 'ammonizione').length;
+
     if (gridContenuti) {
-        // Prepariamo i dati specifici
         let infoSpecifica = "";
         let bottoniExtra = "";
 
@@ -3002,7 +3053,6 @@ if (isStaff) {
                     <span>Agenda Classi</span> <span class="text-lg">📋</span>
                 </button>`;
         } else {
-            // Layout per Admin, Bidelli, Tecnici
             infoSpecifica = `
                 <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
                     <p class="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Settore Operativo</p>
@@ -3022,8 +3072,11 @@ if (isStaff) {
                     <div class="grid grid-cols-2 gap-3">
                         ${infoSpecifica}
                         <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
-                            <p class="text-[8px] font-black text-zinc-400 uppercase">Status</p>
-                            <p class="text-[10px] font-black text-green-600 uppercase">In Servizio</p>
+                            <p class="text-[8px] font-black text-zinc-400 uppercase">Valutazione</p>
+                            <p class="text-[10px] font-black uppercase flex justify-center gap-1">
+                                ${stelle > 0 ? "⭐".repeat(stelle) : ""}
+                                ${ammonizioni > 0 ? "⚠️".repeat(ammonizioni) : (stelle === 0 ? "N/D" : "")}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -3037,6 +3090,28 @@ if (isStaff) {
                         <span>Registro Generale</span> <span class="text-lg">📊</span>
                     </button>
                 </div>
+            </div>
+
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm col-span-full">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🏅 Fascicolo Note di Servizio</h3>
+                <div class="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scroll">
+                    ${valutazioni.slice().reverse().map(v => `
+                        <div class="p-3 ${v.tipo === 'stella' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'} border rounded-xl">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-[9px] font-black uppercase ${v.tipo === 'stella' ? 'text-yellow-700' : 'text-red-700'}">${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}</span>
+                                <span class="text-[8px] font-bold text-zinc-400">${v.date}</span>
+                            </div>
+                            <p class="text-[10px] font-medium text-zinc-700 italic">"${v.motivo}"</p>
+                            <p class="text-[7px] mt-1 uppercase font-black text-zinc-400">- Da: ${v.da}</p>
+                        </div>
+                    `).join('') || '<p class="text-center py-4 text-[10px] italic text-zinc-400 uppercase">Nessuna nota nel fascicolo.</p>'}
+                </div>
+
+                ${(window.userRole === 'Preside' || window.userRole === 'Admin') ? `
+                    <button onclick="window.apriModalValutaProf('${targetId}')" class="w-full mt-4 p-2 bg-zinc-900 text-white rounded-lg text-[9px] font-black uppercase hover:bg-red-700 transition-all">
+                        Valuta Personale
+                    </button>
+                ` : ''}
             </div>`;
     }
 } else if (isOspite) {
@@ -3196,67 +3271,121 @@ window.selectAndGoToProfile = async (id) => {
     window.selectedStudentId = id;
 
 try {
-	let media = "0.0";
-        // A. MOSTRA LA SCHEDA (Feedback immediato)
-        if (typeof window.changeMenu === 'function') window.changeMenu('profilo-target');
+    let media = "0.0";
+    // A. MOSTRA LA SCHEDA
+    if (typeof window.changeMenu === 'function') window.changeMenu('profilo-target');
 
-        // B. CALCOLO ANNO SCOLASTICO (Resta uguale)
-        const inputCal = document.getElementById('global-calendar');
-        const dataCal = inputCal ? inputCal.value : ""; 
-        const dataScelta = dataCal ? new Date(dataCal) : new Date();
-        const as = (dataScelta.getMonth() + 1 >= 9) 
-            ? `${dataScelta.getFullYear()}/${dataScelta.getFullYear() + 1}` 
-            : `${dataScelta.getFullYear() - 1}/${dataScelta.getFullYear()}`;
+    // B. CALCOLO ANNO SCOLASTICO
+    const inputCal = document.getElementById('global-calendar');
+    const dataCal = inputCal ? inputCal.value : ""; 
+    const dataScelta = dataCal ? new Date(dataCal) : new Date();
+    const as = (dataScelta.getMonth() + 1 >= 9) 
+        ? `${dataScelta.getFullYear()}/${dataScelta.getFullYear() + 1}` 
+        : `${dataScelta.getFullYear() - 1}/${dataScelta.getFullYear()}`;
 
-        // C. RECUPERO DATI DA FIREBASE (Records)
-        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', id);
-        const recordSnap = await getDoc(recordRef);
-        const data = recordSnap.exists() ? recordSnap.data() : { voti: [], note: [] };
+    // C. RECUPERO DATI DA FIREBASE (Fondamentale: qui ci sono le valutazioni!)
+    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', id);
+    const recordSnap = await getDoc(recordRef);
+    const data = recordSnap.exists() ? recordSnap.data() : { voti: [], note: [], valutazioni: [] };
 
-        // [D] AGGIORNAMENTO INTERFACCIA (Usa 'targetUser' o 'student' in base a come lo hai chiamato sopra)
-        const u = targetUser; // Assicuriamoci che l'oggetto sia quello trovato col .find()
+    // [D] AGGIORNAMENTO INTERFACCIA
+    const u = targetUser; 
+    const nameDisplay = document.getElementById('target-profile-name');
+    const badgeDisplay = document.getElementById('target-profile-class-badge');
+    const subDisplay = document.getElementById('target-profile-sub');
+    const avatarEl = document.getElementById('target-profile-avatar');
+
+    if (nameDisplay) nameDisplay.innerText = u.name.toUpperCase();
+    if (avatarEl) {
+        avatarEl.src = u.avatar || u.avatar_npc || `https://ui-avatars.com/api/?name=${u.name}&background=7f1d1d&color=fff`;
+    }
+    
+    const isTargetStudente = (u.role || '').toLowerCase().includes('studente');
+
+    // [E] GESTIONE VISIBILITÀ E POPOLAMENTO SEZIONI
+    const mediaBox = document.getElementById('target-media-box');
+    const studentLists = document.getElementById('target-student-lists');
+    const staffInfo = document.getElementById('target-staff-info');
+
+    if (isTargetStudente) {
+        // --- LOGICA STUDENTE ---
+        if (mediaBox) mediaBox.classList.remove('hidden');
+        if (studentLists) studentLists.classList.remove('hidden');
+        if (staffInfo) staffInfo.classList.add('hidden');
+        if (subDisplay) subDisplay.innerText = "Studente della Fazbear School";
+        if (badgeDisplay) badgeDisplay.innerText = `CLASSE: ${u.classe || 'N/A'} - A.S. ${as}`;
         
-        const nameDisplay = document.getElementById('target-profile-name');
-        const badgeDisplay = document.getElementById('target-profile-class-badge');
-        const subDisplay = document.getElementById('target-profile-sub');
-        const avatarEl = document.getElementById('target-profile-avatar');
+        // (Qui andrebbe la tua logica esistente per calcolare la media voti studente)
 
-        if (nameDisplay) nameDisplay.innerText = u.name.toUpperCase();
-        if (avatarEl) {
-            avatarEl.src = u.avatar || u.avatar_npc || `https://ui-avatars.com/api/?name=${u.name}&background=7f1d1d&color=fff`;
+    } else {
+        // --- LOGICA STAFF ---
+        if (mediaBox) mediaBox.classList.add('hidden');
+        if (studentLists) studentLists.classList.add('hidden');
+        if (staffInfo) staffInfo.classList.remove('hidden');
+        
+        if (subDisplay) subDisplay.innerText = "Personale della Fazbear School";
+        const ruoloDisplay = (u.role || 'Staff').toUpperCase();
+        if (badgeDisplay) badgeDisplay.innerText = `${ruoloDisplay} - A.S. ${as}`;
+
+        // --- DATI VALUTAZIONE (Presi da 'data', non da 'u'!) ---
+        const targetId = id; // Usiamo l'id passato alla funzione
+        const valutazioni = data.valutazioni || []; 
+        const stelle = valutazioni.filter(v => v.tipo === 'stella').length;
+        const ammonizioni = valutazioni.filter(v => v.tipo === 'ammonizione').length;
+
+        // 1. Popoliamo i dettagli nel box bianco
+        const staffDetails = document.getElementById('target-staff-details');
+        if (staffDetails) {
+            staffDetails.innerHTML = `
+                <p class="text-xs flex justify-between"><b>Incarico:</b> <span>${u.role}</span></p>
+                <p class="text-xs flex justify-between"><b>Status:</b> <span class="text-green-600 font-bold">Attivo</span></p>
+                <p class="text-xs flex justify-between"><b>Settore:</b> <span>Scolastico</span></p>
+            `;
         }
-        
-        // Determiniamo il ruolo target
-        const isTargetStudente = (u.role || '').toLowerCase().includes('studente');
 
-        // [E] GESTIONE VISIBILITÀ SEZIONI (In base al tuo nuovo HTML)
-        const mediaBox = document.getElementById('target-media-box');
-        const studentLists = document.getElementById('target-student-lists');
-        const staffInfo = document.getElementById('target-staff-info');
+        // 2. Stelle e Ammonizioni nel box nero
+        const starsCount = document.getElementById('staff-stars-count');
+        if (starsCount) {
+            starsCount.innerHTML = `
+                ${"⭐".repeat(stelle)}
+                ${ammonizioni > 0 ? "⚠️".repeat(ammonizioni) : ""}
+                ${(stelle === 0 && ammonizioni === 0) ? '<span class="text-[10px] text-zinc-500 italic uppercase">Fascicolo Immacolato</span>' : ""}
+            `;
+        }
 
-        if (isTargetStudente) {
-            if (mediaBox) mediaBox.classList.remove('hidden');
-            if (studentLists) studentLists.classList.remove('hidden');
-            if (staffInfo) staffInfo.classList.add('hidden');
-            if (subDisplay) subDisplay.innerText = "Studente della Fazbear School";
-            if (badgeDisplay) badgeDisplay.innerText = `CLASSE: ${u.classe || 'N/A'} - A.S. ${as}`;
-        } else {
-            if (mediaBox) mediaBox.classList.add('hidden');
-            if (studentLists) studentLists.classList.add('hidden');
-            if (staffInfo) staffInfo.classList.remove('hidden');
-            if (subDisplay) subDisplay.innerText = "Personale della Fazbear School";
-            if (badgeDisplay) badgeDisplay.innerText = `${(u.role || 'Staff').toUpperCase()} - A.S. ${as}`;
-            
-            // Popoliamo i dettagli dello staff nel tuo nuovo box
-            const staffDetails = document.getElementById('target-staff-details');
-            if (staffDetails) {
-                staffDetails.innerHTML = `
-                    <p class="text-xs"><b>Incarico:</b> ${u.role}</p>
-                    <p class="text-xs"><b>Status:</b> <span class="text-green-600">Attivo</span></p>
-                    <p class="text-xs"><b>Settore:</b> Scolastico</p>
+        // 3. Lista Storica delle Note di Servizio
+        const notesList = document.getElementById('staff-notes-list');
+        if (notesList) {
+            notesList.innerHTML = valutazioni.slice().reverse().map(v => `
+                <div class="p-4 ${v.tipo === 'stella' ? 'bg-yellow-50 border-yellow-100' : 'bg-red-50 border-red-100'} border rounded-2xl mb-2">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-[9px] font-black uppercase ${v.tipo === 'stella' ? 'text-yellow-700' : 'text-red-700'}">
+                            ${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}
+                        </span>
+                        <span class="text-[8px] font-bold text-zinc-400">${v.date}</span>
+                    </div>
+                    <p class="text-[11px] font-medium text-zinc-700 italic">"${v.motivo}"</p>
+                    <p class="text-[8px] mt-2 uppercase font-black text-zinc-400">Firmato: ${v.da}</p>
+                </div>
+            `).join('') || '<p class="text-center py-6 text-[10px] font-bold text-zinc-300 uppercase italic">Nessun record trovato.</p>';
+        }
+
+        // 4. Tasto per il Preside
+        const adminActions = document.getElementById('admin-actions-prof');
+        if (adminActions) {
+            if (window.userRole === 'Preside' || window.userRole === 'Admin') {
+                adminActions.classList.remove('hidden');
+                adminActions.innerHTML = `
+                    <button onclick="window.apriModalValutaProf('${targetId}')" 
+                            class="w-full p-3 bg-zinc-900 text-white rounded-2xl text-[10px] font-black uppercase hover:bg-red-700 transition-all shadow-lg active:scale-95">
+                        Valuta Membro Staff
+                    </button>
                 `;
+            } else {
+                adminActions.classList.add('hidden');
             }
         }
+    }
 
         // [F] CALCOLO MEDIA E RENDER (Solo se Studente)
         if (isTargetStudente) {
@@ -4286,6 +4415,153 @@ window.editPagellaComment = async () => {
     } catch (e) {
         console.error(e);
         alert("Errore durante il salvataggio.");
+    }
+};
+
+	window.deleteFirma = async (idx, cls) => {
+    if(!confirm("Vuoi davvero eliminare questa firma? L'azione è irreversibile.")) return;
+    
+    const dateKey = document.getElementById('global-calendar').value; // Prende la data selezionata
+    const docRef = doc(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'agendas', `${cls}_${dateKey}`);
+    
+    try {
+        const snap = await getDoc(docRef);
+        if(snap.exists()){
+            let firme = snap.data().firme || [];
+            firme.splice(idx, 1); // Rimuove la firma all'indice selezionato
+            await updateDoc(docRef, { firme: firme });
+            alert("Firma rimossa con successo!");
+            // Qui dovresti ricaricare la funzione loadClassAgenda() per aggiornare la vista
+        }
+    } catch (e) {
+        console.error("Errore cancellazione:", e);
+    }
+};
+
+	window.apriModalValutaProf = (profId) => {
+    const body = document.getElementById('modal-body');
+    const confirm = document.getElementById('modal-confirm');
+    const title = document.getElementById('modal-title');
+    const overlay = document.getElementById('modal-overlay');
+
+    if(!body || !confirm) return;
+
+    title.innerText = "Valutazione Docente";
+    overlay.classList.replace('hidden', 'flex');
+
+    body.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Tipo Provvedimento</label>
+                <select id="v-prof-tipo" class="w-full p-2 bg-zinc-100 border-none rounded-lg text-xs font-bold">
+                    <option value="stella">Stella ⭐ (Elogio)</option>
+                    <option value="ammonizione">Ammonizione ⚠️ (Richiamo)</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">Motivazione</label>
+                <textarea id="v-prof-motivo" placeholder="Inserisci il motivo..." class="w-full p-2 bg-zinc-100 border-none rounded-lg text-xs h-24 resize-none"></textarea>
+            </div>
+        </div>
+    `;
+
+    confirm.onclick = async () => {
+        const tipo = document.getElementById('v-prof-tipo').value;
+        const motivo = document.getElementById('v-prof-motivo').value;
+
+        if(!motivo) return alert("Devi inserire una motivazione!");
+
+        const profRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', profId);
+        
+        const nuovaValutazione = {
+            tipo: tipo,
+            motivo: motivo,
+            da: window.userName || "Dirigenza",
+            date: new Date().toLocaleDateString('it-IT') // Produce lo stesso formato GG/MM/AAAA del bot
+        };
+
+        try {
+            // Usiamo arrayUnion per essere identici al bot
+            await setDoc(profRef, {
+                valutazioni: arrayUnion(nuovaValutazione)
+            }, { merge: true });
+
+            alert("✅ Valutazione salvata correttamente!");
+            if(typeof window.closeModal === 'function') window.closeModal();
+            // Ricarichiamo il profilo per vedere subito la stella/ammonizione
+            window.selectAndGoToProfile(profId); 
+        } catch (e) {
+            console.error("Errore salvataggio valutazione:", e);
+            alert("Errore tecnico nel database.");
+        }
+    };
+};
+	window.mostraGestioneStaff = async function() {
+    // 1. Attiviamo la View e mostriamo un caricamento
+    if (typeof window.changeMenu === 'function') window.changeMenu('gestione-staff');
+
+    const container = document.getElementById('staff-list-container');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="col-span-full text-center py-12">
+            <div class="animate-spin text-2xl mb-2">🌀</div>
+            <p class="text-[9px] font-black uppercase text-zinc-400 tracking-widest">Sincronizzazione Personale...</p>
+        </div>
+    `;
+
+    try {
+        // 2. RECUPERO DATI (Stesso percorso che usa il tuo hubManager)
+        const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
+        
+        // Salviamo globalmente per coerenza con il resto del sistema
+        window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // 3. Filtriamo solo lo Staff (Escludiamo studenti e ospiti)
+        const staffMembers = window.allUsers.filter(u => {
+            const r = (u.role || '').toLowerCase();
+            return !r.includes('studente') && r !== 'ospite' && r !== '';
+        });
+
+        if (staffMembers.length === 0) {
+            container.innerHTML = `<p class="col-span-full text-center py-10 text-[10px] font-black text-zinc-400 uppercase">Nessun membro dello staff trovato.</p>`;
+            return;
+        }
+
+        // 4. Generiamo la griglia professionale
+        container.innerHTML = ""; 
+        staffMembers.forEach(staff => {
+            const card = document.createElement('div');
+            card.className = "glass-light p-4 rounded-3xl border border-zinc-100 flex items-center gap-4 cursor-pointer hover:border-red-600 transition-all shadow-sm bg-white active:scale-95 group";
+            
+            const foto = staff.avatar || staff.avatar_npc || `https://ui-avatars.com/api/?name=${staff.name || 'U'}&background=random`;
+            
+            // Nota: Le stelle/ammonizioni qui non ci sono ancora perché stanno nei 'records'
+            // Ma la card ora si aprirà correttamente.
+            card.innerHTML = `
+                <div class="relative">
+                    <img src="${foto}" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-50 shadow-sm group-hover:rotate-2 transition-transform">
+                    <div class="absolute -bottom-1 -right-1 bg-green-500 w-3 h-3 rounded-full border-2 border-white"></div>
+                </div>
+                <div class="flex-1">
+                    <p class="text-[11px] font-black uppercase text-zinc-800 leading-none mb-1">${staff.name || 'Senza Nome'}</p>
+                    <p class="text-[8px] font-bold text-red-600 uppercase tracking-tighter">${staff.role || 'Staff'}</p>
+                    <p class="text-[7px] text-zinc-400 font-mono mt-1 opacity-60">${staff.id}</p>
+                </div>
+                <div class="bg-zinc-50 p-2 rounded-xl group-hover:bg-red-600 group-hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+            `;
+
+            card.onclick = () => window.selectAndGoToProfile(staff.id);
+            container.appendChild(card);
+        });
+
+    } catch (e) {
+        console.error("Errore caricamento staff:", e);
+        container.innerHTML = `<p class="col-span-full text-red-500 text-[10px] font-bold p-6">Errore Database: ${e.message}</p>`;
     }
 };
 
