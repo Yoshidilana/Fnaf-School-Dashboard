@@ -33,8 +33,7 @@
         backdrop-filter: blur(10px);
         border: 1px solid rgba(226, 232, 240, 1);
     }
-      
-      /* Estetica Registro Voti Moderna */
+
 .registry-container {
     background: #ffffff;
     border-radius: 24px;
@@ -115,7 +114,7 @@
     border-color: #e4e4e7;
 }
 
- /* Estetica Bacheca Rimodernata */
+
 .bacheca-card {
     background: white;
     border-radius: 20px;
@@ -333,17 +332,6 @@ header {
                 <option value="05">MAG</option><option value="06">GIU</option>
             </select>
             <button onclick="window.vaiADataRapida()" class="bg-zinc-900 text-white text-[8px] px-2 py-1 rounded-lg font-black hover:bg-red-600 transition-colors">GO</button>
-        </div>
-
-        <!-- Class Filter -->
-        <div id="class-filter-container" class="filter-container flex items-center gap-1">
-            <button onclick="window.filterByClass('A')" data-class="A" class="class-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">A</button>
-            <button onclick="window.filterByClass('B')" data-class="B" class="class-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">B</button>
-            <button onclick="window.filterByClass('C')" data-class="C" class="class-filter-btn px-3 py-1.5 rounded-lg text-[10px] font-black transition-all">C</button>
-            <div class="w-[1px] h-4 bg-zinc-300 mx-1"></div>
-            <select id="fast-student-filter" onchange="window.selectAndGoToProfile(this.value)" class="bg-transparent text-[10px] font-black uppercase outline-none pr-2">
-                <option value="">Studente...</option>
-            </select>
         </div>
 
         <!-- Current Date Display -->
@@ -602,14 +590,32 @@ header {
     </div>
 </div>
 
-		<div id="view-studenti" class="tab-content hidden p-4 md:p-6">
+		<!-- VIEW: ELENCO STUDENTI -->
+<div id="view-studenti" class="tab-content hidden p-4 md:p-6">
+    <!-- PULSANTE TORNA ALL'HUB CLASSE AGGIUNTO QUI -->
+    <div class="flex justify-start mb-4">
+        <button onclick="window.changeMenu('classi')" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+            <span class="text-lg group-hover:-translate-x-1 transition-transform">⬅️</span>
+            <span class="text-[10px] font-black uppercase text-zinc-600">Torna all'Hub Classe</span>
+        </button>
+    </div>
+
     <h2 class="text-2xl font-black italic mb-4 uppercase">ELENCO STUDENTI</h2>
     <div id="grid-studenti" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
 </div>
 
 		<!-- VIEW: PROFILO TARGET (STUDENTI & STAFF) -->
 <div id="view-profilo-target" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
+    <!-- PULSANTE TORNA INDIETRO AGGIUNTO QUI -->
+    <div class="flex justify-start mb-2">
+        <button onclick="window.goBackFromProfile()" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+            <span class="text-lg group-hover:-translate-x-1 transition-transform">⬅️</span>
+            <span class="text-[10px] font-black uppercase text-zinc-600">Torna all'elenco</span>
+        </button>
+    </div>
+
     <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white/50 backdrop-blur-md">
+
         <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
             <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left w-full">
                 <div class="relative group">
@@ -703,7 +709,10 @@ header {
             <div class="flex flex-col">
                 <span id="period-indicator" class="text-[10px] font-black uppercase text-blue-600 tracking-tighter">Caricamento...</span>
                 <h2 class="text-xl font-black uppercase italic text-zinc-800 leading-none">Classe <span id="agenda-class-title" class="text-red-600">--</span></h2>
-            </div>
+                       <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-black px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
+        🏫 Cambia Classe
+    </button>
+</div>
         </div>
 
         <!-- Navigazione Rapida Spostata Qui -->
@@ -806,7 +815,16 @@ header {
     </div>
 </div>
 
-		<div id="view-profilo" class="tab-content space-y-6 max-w-7xl mx-auto p-4">
+		<!-- VIEW: PROFILO PERSONALE -->
+<div id="view-profilo" class="tab-content space-y-6 max-w-7xl mx-auto p-4">
+    <!-- PULSANTE TORNA ALLA HOME AGGIUNTO QUI -->
+    <div class="flex justify-start mb-2">
+        <button onclick="window.changeMenu('home')" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+            <span class="text-lg group-hover:-translate-x-1 transition-transform">🏠</span>
+            <span class="text-[10px] font-black uppercase text-zinc-600">Torna alla Home</span>
+        </button>
+    </div>
+
     <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white/50 backdrop-blur-md">
         <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
             
@@ -854,6 +872,26 @@ header {
 
             <!-- VIEW: REGISTRO RIMODERNATO -->
 <div id="view-registro" class="tab-content space-y-6">
+<!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
+<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
+    <div class="flex items-center gap-3">
+        <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
+            ⬅️ Elenco Studenti
+        </button>
+        <!-- MODIFICATO QUI: da changeMenu a resetClassSelection -->
+        <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
+            🏫 Cambia Classe
+        </button>
+    </div>
+
+    
+    <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
+        <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
+        <select onchange="window.selectAndGoToProfile(this.value)" 
+        class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+    </select>
+    </div>
+</div>
     <!-- Header Studente (Card) -->
     <div id="student-header" class="hidden bg-white p-6 rounded-[24px] border border-zinc-200 shadow-sm flex justify-between items-center">
         <div class="flex items-center gap-4">
@@ -926,6 +964,27 @@ header {
             <button id="btn-add-note" onclick="window.openModal('note')" class="bg-amber-600 text-white text-[9px] font-bold px-4 py-2 rounded uppercase">Emetti Nota</button>
         </div>
     </div>
+	
+	<!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
+<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
+    <div class="flex items-center gap-3">
+        <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
+            ⬅️ Elenco Studenti
+        </button>
+        <!-- MODIFICATO QUI: da changeMenu a resetClassSelection -->
+        <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
+            🏫 Cambia Classe
+        </button>
+    </div>
+    
+    <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
+        <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
+        <select onchange="window.selectAndGoToProfile(this.value)" 
+        class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+    </select>
+    </div>
+</div>	
+
                 <div id="notes-list-global" class="grid gap-3 overflow-y-auto custom-scroll"></div>
             </div>
 
@@ -961,6 +1020,25 @@ header {
 
             <!-- VIEW: Pagella Rimodernata -->
 <div id="view-pagella" class="tab-content hidden p-4 md:p-8 max-w-5xl mx-auto">
+<!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
+<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
+    <div class="flex items-center gap-3">
+        <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
+            ⬅️ Elenco Studenti
+        </button>
+        <!-- MODIFICATO QUI: da changeMenu a resetClassSelection -->
+        <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-zinc-100 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
+            🏫 Cambia Classe
+        </button>
+    </div>
+    
+    <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
+        <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
+        <select onchange="window.selectAndGoToProfile(this.value)" 
+        class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+    </select>
+    </div>
+</div>
     <!-- Documento Pagella -->
     <div class="bg-white shadow-2xl rounded-sm border-t-[12px] border-red-700 p-6 md:p-12 text-zinc-800 relative overflow-hidden">
         <!-- Filigrana di sfondo (opzionale) -->
@@ -1212,12 +1290,14 @@ inputCal.value = dataLocale;
     if (pagellaAyElem) pagellaAyElem.innerText = `Pagelle ${ay}`;
 
     // 3. Refresh Dati Classe e Registro
-    if (window.selectedClass) {
-        window.handleClassChange();
-        if (window.loadAttendance && window.selectedClass !== 'ALL') {
-            window.loadAttendance(window.selectedClass, dateValue);
-        }
+// Chiamiamo handleClassChange solo se abbiamo una classe selezionata o se l'utente è uno studente
+if (window.selectedClass || (window.userRole === 'studente' && window.currentUserData?.classe)) {
+    window.handleClassChange();
+
+    if (window.loadAttendance && window.selectedClass && window.selectedClass !== 'ALL') {
+        window.loadAttendance(window.selectedClass, dateValue);
     }
+}
 
 	  // AGGIUNTA: Refresh del Registro Voti Globale se la vista è attiva
     if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) {
@@ -1324,6 +1404,16 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
         if (el) el.classList.toggle('hidden', !show);
     };
 
+     // --- GESTIONE VISIBILITÀ ELEMENTI PER STUDENTI ---
+    
+    // 1. Nascondi la barra di navigazione tra studenti (Registro, Note, Pagella)
+    // Usiamo querySelectorAll perché la classe è ripetuta in più viste
+    document.querySelectorAll('.student-nav-bar').forEach(nav => {
+        nav.classList.toggle('hidden', isStudente);
+    });
+	   // 2. Nascondi il pulsante "Cambia Classe" nell'Agenda
+    toggle('agenda-change-class-btn', !isStudente);
+
     // Sidebar e Menu
     toggle('menu-profilo', type !== ROLES.OSPITE);
     toggle('menu-classi', isStaffGenerale || type === ROLES.OSPITE);
@@ -1338,7 +1428,6 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
 
 // --- AGGIUNGI QUESTE RIGHE MANCANTI ---
 // Gestione Filtri in alto
-toggle('class-filter-container', isStaffGenerale);
 toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
 
 // Bottoni Home per Studenti (Quelli che erano spariti)
@@ -1368,72 +1457,55 @@ toggle('home-btn-pagella', isStudente);
 // --- GESTIONE PERSONALE (Solo Vertici) ---
 toggle('menu-gestione-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 
-// --- FILTRO CLASSI (Spostato dentro la funzione) ---    
-    const classButtons = document.querySelectorAll('.class-filter-btn');
-    classButtons.forEach(btn => {
-        const classePulsante = btn.getAttribute('data-class');
-        if (isStudente) {
-            if (classePulsante !== miaClasse) {
-                btn.classList.add('hidden');
-            } else {
-                btn.classList.remove('hidden');
-                btn.classList.replace('cursor-pointer', 'cursor-default');
-            }
-        } else {
-            btn.classList.remove('hidden');
-        }
-    });
-
 // --- INIZIALIZZAZIONE AUTOMATICA ---
-    if(isStudente) {
-        window.selectedClass = miaClasse;
-        window.selectedStudentId = window.currentUserId;
-        if (miaClasse && typeof window.handleClassChange === 'function') window.handleClassChange(miaClasse);
-        if (typeof window.selectStudent === 'function') window.selectStudent(window.currentUserId);
-    } else {
-        // Se è Staff e la classe è None, di default non selezionare nessuna classe specifica
-        if (!window.selectedClass) window.selectedClass = null;
+if (isStudente) {
+    // Se è uno studente, forziamo la selezione della sua classe specifica
+    window.selectedClass = miaClasse;
+    window.selectedStudentId = window.currentUserId;
+    
+    // Chiamiamo handleClassChange solo se la classe è valida (A, B o C)
+    if (miaClasse && ['A', 'B', 'C'].includes(miaClasse)) {
+        if (typeof window.handleClassChange === 'function') {
+            window.handleClassChange(miaClasse);
+        }
     }
+    
+    if (typeof window.selectStudent === 'function') {
+        window.selectStudent(window.currentUserId);
+    }
+} else {
+    // Se è Staff e non ha ancora selezionato nulla, lasciamo null senza forzare handleClassChange
+    if (!window.selectedClass) window.selectedClass = null;
+}
 }
 
         // --- GESTIONE CLASSI E STUDENTI ---
-        window.handleClassChange = (classeDalPulsante) => {
-    const cls = classeDalPulsante || window.selectedClass;
-if (!cls || cls === 'ALL') {
-    console.warn("⚠️ Tentativo di caricamento agenda senza classe valida.");
-    return;
-}
+        window.handleClassChange = (classeForzata) => {
+    const cls = classeForzata || window.selectedClass;
 
-    window.selectedClass = cls;
-
-    const titleEl = document.getElementById('agenda-class-title');
-    if (titleEl) titleEl.innerText = cls || '---';
-
-    // --- AGGIUNTA: Nascondi pulsanti se la classe non è valida ---
-    const profActions = document.getElementById('prof-actions-agenda');
-    const profCommPanel = document.getElementById('prof-comm-panel');
-    const isClassValid = ['A', 'B', 'C'].includes(cls);
-
-    if (profActions) profActions.classList.toggle('hidden', !isClassValid);
-    if (profCommPanel) profCommPanel.classList.toggle('hidden', !isClassValid);
-
-    window.renderStudentList();
-
-    // Ricarichiamo tutto
-    window.renderStudentList();
-    if (typeof loadClassAgenda === 'function' && cls) {
-        loadClassAgenda(cls);
-	const isStaff = [ROLES.PRESIDE, ROLES.PROF, 'vicepreside'].includes(window.userRole?.toLowerCase());
-const isClassValid = ['A', 'B', 'C'].includes(cls);
-
-// I pulsanti appaiono SOLO se l'utente è Staff E la classe è selezionata
-if (profActions) profActions.classList.toggle('hidden', !(isStaff && isClassValid));
-if (profCommPanel) profCommPanel.classList.toggle('hidden', !(isStaff && isClassValid));
-        if (isStaff && typeof window.loadAttendance === 'function') {
-            window.loadAttendance(cls, document.getElementById('global-calendar').value);
-        }
+    // Se non c'è una classe valida (A, B, C), non carichiamo nulla
+    if (!cls || !['A', 'B', 'C'].includes(cls)) {
+        return;
     }
 
+    // Aggiorna il titolo dell'Agenda
+    const titleEl = document.getElementById('agenda-class-title');
+    if (titleEl) titleEl.innerText = cls;
+
+    // Carica gli studenti della classe
+    window.renderStudentList();
+
+    // Carica l'Agenda specifica della classe e della data selezionata
+    if (typeof loadClassAgenda === 'function') {
+        const dateKey = document.getElementById('global-calendar')?.value;
+        loadClassAgenda(cls, dateKey);
+    }
+
+    // Carica l'Appello se l'utente è Staff
+    const isStaff = ['prof', 'preside', 'vicepreside', 'admin'].includes(window.userRole);
+    if (isStaff && typeof window.loadAttendance === 'function') {
+        window.loadAttendance(cls, document.getElementById('global-calendar').value);
+    }
 };
 
         // Aggiungendo window. all'inizio, la rendi globale e indistruttibile
@@ -2409,30 +2481,34 @@ if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
 }
 
 window.changeMenu = (menu) => {
-    // Gestione visibilità Sidebar
+    // --- PEZZO AGGIUNTO (Blocco 5) ---
+    if (menu === 'studenti') {
+        if (typeof window.renderStudentList === 'function') window.renderStudentList();
+    }
+    if (['registro', 'note', 'pagella'].includes(menu)) {
+        window.updateQuickStudentSwitchers();
+    }
+
+    // --- LOGICA SIDEBAR ---
     if (menu === 'home') {
         document.body.classList.add('sidebar-hidden');
     } else {
         document.body.classList.remove('sidebar-hidden');
-        // Forza il refresh dei permessi quando la sidebar appare
         if(typeof applyRoleUI === 'function') applyRoleUI();
     }
-	if (menu === 'agenda' && (!window.selectedClass || window.selectedClass === 'ALL')) {
-    alert("⚠️ Seleziona prima una classe dal menu 'Classi' per visualizzare l'agenda.");
-    window.changeMenu('classi');
-    return;
-}
 
-if (menu === 'presenze-studente') {
-    window.loadStudentAttendanceHistory();
-}
+    // --- CONTROLLO AGENDA ---
+    if (menu === 'agenda' && (!window.selectedClass || window.selectedClass === 'ALL')) {
+        alert("⚠️ Seleziona prima una classe dal menu 'Classi' per visualizzare l'agenda.");
+        window.changeMenu('classi');
+        return;
+    }
 
-    // Reset stati attivi Sidebar
+    // --- LOGICA VISIVA (Hidden/Active) ---
     document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
     const activeBtn = document.getElementById(`menu-${menu}`);
     if (activeBtn) activeBtn.classList.add('active');
 
-    // Switch delle Viste
     document.querySelectorAll('.tab-content').forEach(v => {
         v.classList.remove('active-view');
         v.classList.add('hidden');
@@ -2444,7 +2520,7 @@ if (menu === 'presenze-studente') {
         targetView.classList.add('active-view');
     }
 
-    // Logica specifica per Hub Classi
+    // --- LOGICA HUB CLASSI ---
     if (menu === 'classi') {
         const selectionScreen = document.getElementById('class-selection-screen');
         const hubScreen = document.getElementById('class-hub-screen');
@@ -2459,7 +2535,6 @@ if (menu === 'presenze-studente') {
         }
     }
 };
-
 
         window.closeModal = () => document.getElementById('modal-overlay').classList.replace('flex', 'hidden');
 
@@ -3213,6 +3288,23 @@ window.vaiADataRapida = () => {
 };
 
 window.selectAndGoToProfile = async (id) => {
+const originalSelectAndGoToProfile = window.selectAndGoToProfile;
+window.selectAndGoToProfile = async (id) => {
+    // Eseguiamo la logica originale per caricare i dati
+    await originalSelectAndGoToProfile(id);
+    
+    // Dopo il caricamento, aggiorniamo i selettori rapidi
+    window.updateQuickStudentSwitchers();
+
+    // Se eravamo nel registro, rimaniamo nel registro ma con il nuovo studente
+    // (La funzione originale potrebbe forzare il cambio a 'profilo-target', 
+    // noi vogliamo che se l'utente è in 'registro', rimanga lì)
+    const currentActiveView = document.querySelector('.tab-content.active-view')?.id;
+    if (currentActiveView && ['view-registro', 'view-note', 'view-pagella'].includes(currentActiveView)) {
+        window.changeMenu(currentActiveView.replace('view-', ''));
+    }
+};
+
     // 1. DEFINIZIONE RUOLI DI CHI GUARDA
     const myRole = String(window.userRole || 'Ospite').toLowerCase();
     const isStudenteOsservatore = myRole.includes('studente');
@@ -3267,8 +3359,26 @@ window.selectAndGoToProfile = async (id) => {
 
     // Salviamo l'ID selezionato per le funzioni successive (voti/note)
     window.selectedStudentId = id;
+// --- [NOVITÀ: AGGIORNAMENTO SELETTORI RAPIDI] ---
+    // Chiamiamo la funzione del Blocco 4 per aggiornare la tendina "Passa a:"
+    if (typeof window.updateQuickStudentSwitchers === 'function') {
+        window.updateQuickStudentSwitchers();
+    }
 
-try {
+    try {
+        // --- [PUNTO CRITICO: LOGICA DI NAVIGAZIONE INTELLIGENTE] ---
+        
+        // Controlliamo in che pagina siamo ORA
+        const currentActiveView = document.querySelector('.tab-content.active-view')?.id;
+
+        // Se siamo già in Registro, Note o Pagella, NON cambiamo vista (Rimaniamo lì)
+        if (currentActiveView && ['view-registro', 'view-note', 'view-pagella'].includes(currentActiveView)) {
+            console.log("Cambio studente in corso... rimango nella vista attuale.");
+            // Qui sotto continuerà il tuo codice per renderizzare i dati (voti, note ecc.)
+        } else {
+            // Se invece veniamo dall'elenco o dall'hub, andiamo alla home del profilo
+            window.changeMenu('profilo-target');
+        }
     let media = "0.0";
     // A. MOSTRA LA SCHEDA
     if (typeof window.changeMenu === 'function') window.changeMenu('profilo-target');
@@ -3466,55 +3576,34 @@ if (notesList) {
     }
 }
  	window.filterByClass = (classeCliccata) => {
-    // --- AGGIUNTA: Reset dello studente al cambio classe ---
-    window.selectedStudentId = null;
-    
-    const studentHeader = document.getElementById('student-header');
-    if (studentHeader) studentHeader.classList.add('hidden');
-    
-    const fastFilter = document.getElementById('fast-student-filter');
-    if (fastFilter) fastFilter.value = ""; 
-    const isStudente = window.userRole === ROLES.STUDENTE;
-    const miaClasse = window.currentUserData?.classe;
+    if (!classeCliccata || classeCliccata === 'ALL') return;
 
-    // 1. CONTROLLO PRIVACY (Blindato)
-    if (isStudente) {
-        // Se lo studente prova a cliccare su una classe non sua o su "TUTTI"
-        if (classeCliccata !== miaClasse) {
-            alert(`🚫 Accesso negato: puoi visualizzare solo la tua classe (${miaClasse}).`);
-            return; // Blocca tutto
-        }
-    }
-
-    // 2. AGGIORNAMENTO STATO GLOBALE
+    // 1. Aggiornamento Stato Globale
     window.selectedClass = classeCliccata;
 
-    // 3. AGGIORNAMENTO ESTETICA PULSANTI (Logica centralizzata)
-    const buttons = document.querySelectorAll('.class-filter-btn');
-    buttons.forEach(btn => {
-        const btnClass = btn.getAttribute('data-class');
-        const isActive = btnClass === classeCliccata;
+    // 2. Sincronizzazione con l'Hub Classi (Mostra Hub, Nasconde Selezione)
+    const selectionScreen = document.getElementById('class-selection-screen');
+    const hubScreen = document.getElementById('class-hub-screen');
+    const hubTitle = document.getElementById('hub-class-name');
 
-        if (isActive) {
-            // Classi per il pulsante ATTIVO
-            btn.className = "class-filter-btn bg-red-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase shadow-md shadow-red-200 transition-all scale-105 z-10";
-        } else {
-            // Classi per il pulsante INATTIVO
-            btn.className = "class-filter-btn bg-white border border-zinc-300 text-zinc-900 px-5 py-2 rounded-xl text-[10px] font-black uppercase hover:border-red-600 transition-all hover:bg-zinc-50";
-        }
-    });
-
-    // 4. SINCRONIZZAZIONE TENDINA (Filtro rapido)
-    if (typeof window.updateFastFilter === 'function') {
-        window.updateFastFilter(classeCliccata);
+    if (selectionScreen && hubScreen) {
+        selectionScreen.classList.add('hidden');
+        hubScreen.classList.remove('hidden');
+        if (hubTitle) hubTitle.innerText = classeCliccata;
     }
 
-    // 5. CARICAMENTO DATI (Agenda ed Elenco)
+    // 3. Forza l'aggiornamento dei dati per la nuova classe
     if (typeof window.handleClassChange === 'function') {
         window.handleClassChange(classeCliccata);
     }
-    
 
+    // 4. Aggiorna i selettori rapidi nelle pagine dati
+    window.updateQuickStudentSwitchers();
+    
+    // 5. Porta l'utente alla vista Hub
+    window.changeMenu('classi');
+    
+    console.log(`📂 Classe selezionata: ${classeCliccata}`);
 };
 
 	window.deleteVoto = async (idRicevuto, studentId) => {
@@ -3576,51 +3665,6 @@ if (notesList) {
         console.error("Errore eliminazione:", error);
     }
 };
-
-	// Funzione per aggiornare la tendina degli studenti in base alla classe
-window.updateFastFilter = (selectedClass) => {
-    const select = document.getElementById('fast-student-filter');
-    if (!select) return;
-
-    select.innerHTML = '<option value="">Studente...</option>';
-    select.value = ""; // Forza il reset visivo
-    // Definiamo i ruoli da escludere (Staff)
-    const staffRoles = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.ADMIN];
-    // Definiamo le classi valide
-    const validClasses = ['A', 'B', 'C'];
-
-    const filtered = window.allStudents.filter(s => {
-        const role = getRoleType(s.role);
-        const studentClass = (s.classe || "").toUpperCase();
-        // 1. Verifichiamo che NON sia staff
-        const isNotStaff = !staffRoles.includes(role);
-        
-        // 2. Verifichiamo che appartenga a una classe valida (A, B o C)
-        const hasValidClass = validClasses.includes(studentClass);
-
-        // Se non è uno studente valido per le classi A, B, C, lo scartiamo a prescindere
-        if (!isNotStaff || !hasValidClass) return false;
-
-        // 3. Se il filtro classe è attivo (diverso da ALL), filtriamo ulteriormente
-        if (selectedClass && selectedClass !== 'ALL') {
-            return studentClass === selectedClass;
-        }
-
-        return true;
-    });
-
-    // Ordinamento alfabetico
-    filtered.sort((a, b) => a.name.localeCompare(b.name));
-
-    // Aggiunta opzioni alla tendina
-    filtered.forEach(student => {
-        const opt = document.createElement('option');
-        opt.value = student.id;
-        opt.textContent = student.name.toUpperCase();
-        select.appendChild(opt);
-    });
-};
-
 window.navDate = (unit, value) => {
     const cal = document.getElementById('global-calendar');
     if (!cal || !cal.value) return;
@@ -3869,18 +3913,31 @@ window.filterByClass = (cls) => {
 };
 
 	window.resetClassSelection = () => {
+    // 1. Reset variabili globali
     window.selectedClass = null;
-    document.getElementById('class-selection-screen').classList.remove('hidden');
-    document.getElementById('class-hub-screen').classList.add('hidden');
-    window.changeMenu('classi');
-};
-	document.addEventListener('DOMContentLoaded', () => {
-    window.changeMenu('home');
-});
+    window.selectedStudentId = null;
 
-	window.addEventListener('load', () => {
-    window.changeMenu('home');
-});
+    // 2. Reset UI Hub
+    const selectionScreen = document.getElementById('class-selection-screen');
+    const hubScreen = document.getElementById('class-hub-screen');
+    
+    if (selectionScreen && hubScreen) {
+        selectionScreen.classList.remove('hidden');
+        hubScreen.classList.add('hidden');
+    }
+
+    // 3. Pulizia dati visualizzati (Agenda, Titoli)
+    const titleEl = document.getElementById('agenda-class-title');
+    if (titleEl) titleEl.innerText = '--';
+    
+    const agendaFirme = document.getElementById('agenda-firme-list');
+    if (agendaFirme) agendaFirme.innerHTML = '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Seleziona una classe</div>';
+
+    // 4. Torna alla vista classi (che ora mostrerà la selezione A-B-C)
+    window.changeMenu('classi');
+    
+    console.log("🔄 Selezione classe resettata.");
+};
 
 	window.loadStudentAttendanceHistory = async () => {
     const container = document.getElementById('student-attendance-history');
@@ -4560,6 +4617,51 @@ window.editPagellaComment = async () => {
     } catch (e) {
         console.error("Errore eliminazione valutazione:", e);
         alert("Errore durante l'eliminazione.");
+    }
+};
+	// Funzione per aggiornare tutti i selettori "Passa a:" nelle varie viste
+window.updateQuickStudentSwitchers = () => {
+    const switchers = document.querySelectorAll('.quick-student-switcher');
+    if (!window.selectedClass || !switchers.length) return;
+
+    // Filtriamo solo gli studenti della classe attuale (escludendo lo staff)
+    const classmates = window.allStudents.filter(s => 
+        s.classe === window.selectedClass && 
+        !['prof', 'preside', 'admin', 'vicepreside'].includes((s.role || '').toLowerCase())
+    ).sort((a, b) => a.name.localeCompare(b.name));
+
+    switchers.forEach(select => {
+        select.innerHTML = classmates.map(s => `
+            <option value="${s.id}" ${s.id === window.selectedStudentId ? 'selected' : ''}>
+                ${s.name.toUpperCase()}
+            </option>
+        `).join('');
+    });
+};
+
+	// Funzione per tornare indietro dal profilo in base al ruolo dell'utente visualizzato
+window.goBackFromProfile = () => {
+    if (!window.selectedStudentId) {
+        window.changeMenu('home');
+        return;
+    }
+
+    // Cerchiamo l'utente nei dati caricati
+    const targetUser = window.allUsers.find(u => String(u.id) === String(window.selectedStudentId));
+    
+    if (targetUser) {
+        const role = (targetUser.role || '').toLowerCase();
+        // Se è uno studente, torna all'elenco studenti della classe
+        if (role.includes('studente')) {
+            window.changeMenu('studenti');
+        } 
+        // Se è staff, torna alla gestione staff
+        else {
+            window.changeMenu('gestione-staff');
+        }
+    } else {
+        // Fallback se non troviamo l'utente
+        window.changeMenu('home');
     }
 };
 
