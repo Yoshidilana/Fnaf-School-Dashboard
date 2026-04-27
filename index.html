@@ -217,7 +217,7 @@
 .sidebar-item { 
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
     border-radius: 12px; 
-    margin: 4px 4px; 
+    margin: 0px 0px; 
     font-size: 0.7rem; 
     font-weight: 800; 
     letter-spacing: 0.05em;
@@ -226,14 +226,13 @@
 
 .sidebar-item:hover { 
     background: rgba(255, 255, 255, 0.15); 
-    transform: translateX(4px);
     border-color: rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-item.active { 
-    background: #ffffff !important; 
+    background: #FFFF !important; 
     color: #b91c1c !important; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 12px rgba(0,0,0,0.1);
 }
 
 header {
@@ -423,6 +422,10 @@ header {
 
 <button onclick="window.changeMenu('chat-staff')" id="menu-chat-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
     <span class="text-lg">💬</span> SALA DOCENTI
+</button>
+
+<button onclick="window.changeMenu('notifiche-full')" id="menu-notifiche-full" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+    <span class="text-lg">📜</span> ARCHIVIO MANDATI
 </button>
     </nav>
 
@@ -931,12 +934,12 @@ header {
     <!-- Header Studente (Card) -->
     <div id="student-header" class="hidden bg-white p-6 rounded-[24px] border border-zinc-200 shadow-sm flex justify-between items-center">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-2xl">📊</div>
-            <div>
-                <span id="res-student-role" class="text-[8px] font-black uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded-md">---</span>
-                <h2 id="res-student-name" class="text-2xl font-black uppercase text-zinc-900 tracking-tighter">Dati Studente</h2>
-            </div>
+             <img id="res-student-avatar" src="" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-100 shadow-sm bg-zinc-50">
+        <div>
+            <span id="res-student-role" class="text-[8px] font-black uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded-md">---</span>
+            <h2 id="res-student-name" class="text-2xl font-black uppercase text-zinc-900 tracking-tighter">Dati Studente</h2>
         </div>
+    </div>
         <div class="text-right bg-zinc-900 p-4 rounded-2xl min-w-[120px]">
             <p class="text-[8px] uppercase font-black text-zinc-400 mb-1">Media Globale</p>
             <p id="res-student-media" class="text-2xl font-black text-white">0.0</p>
@@ -1145,6 +1148,20 @@ header {
         </div>
     </div>
 </div>
+		<!-- VIEW: ARCHIVIO NOTIFICHE COMPLETO -->
+<div id="view-notifiche-full" class="tab-content hidden p-6 max-w-5xl mx-auto">
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h2 class="text-3xl font-black uppercase italic text-zinc-900 tracking-tighter">Registro <span class="text-red-600">Mandati</span></h2>
+            <p class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Storico completo delle convocazioni e provvedimenti</p>
+        </div>
+        <button onclick="window.changeMenu('home')" class="bg-zinc-200 px-4 py-2 rounded-xl font-black text-[9px] uppercase">Chiudi Archivio</button>
+    </div>
+
+    <div id="notifiche-full-list" class="grid gap-4">
+        <!-- Popolato via JS -->
+    </div>
+</div>
 
 		<!-- VIEW: APPELLO (Corretto con classe tab-content) -->
 <div id="view-appello" class="tab-content hidden mb-6 bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
@@ -1219,6 +1236,7 @@ header {
     </div>
 </div>
 
+
             <!-- MODAL -->
             <div id="modal-overlay" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center p-4">
     <!-- Cambiato da 'glass' a 'glass-light' e rimosso text-white -->
@@ -1237,13 +1255,19 @@ header {
     </div>
 </div>
 
+		
+
             <div id="notif-panel" class="hidden absolute top-16 right-6 w-72 bg-white border border-zinc-300 rounded-xl shadow-2xl z-[100] p-4 animate-in fade-in zoom-in duration-200">
                 <div class="flex justify-between items-center mb-4 border-b pb-2">
                     <h3 class="text-[10px] font-black uppercase text-zinc-500 italic">Mandati Dirigenza</h3>
                     <button onclick="window.toggleNotifPanel()" class="text-zinc-400 hover:text-red-600">✕</button>
                 </div>
                 <div id="notif-list-content" class="space-y-3 max-h-64 overflow-y-auto custom-scroll">
-                    </div>
+<div class="mt-3 pt-2 border-t border-zinc-100">
+    <button onclick="window.changeMenu('notifiche-full')" class="w-full py-2 text-[9px] font-black uppercase text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+        Visualizza Archivio Completo →
+    </button>
+</div>
             </div>
 
         </main>
@@ -1493,6 +1517,7 @@ toggle('home-btn-pagella', isStudente);
 
 // --- GESTIONE PERSONALE (Solo Vertici) ---
 toggle('menu-gestione-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
+toggle('menu-notifiche-full', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 
 // --- INIZIALIZZAZIONE AUTOMATICA ---
 if (isStudente) {
@@ -1634,6 +1659,10 @@ window.renderStudentList = function() {
     
     document.getElementById('res-student-name').innerText = student.name;
     document.getElementById('res-student-role').innerText = (student.role || 'Studente').toUpperCase();
+    const avatarImg = document.getElementById('res-student-avatar');
+    if (avatarImg) {
+        avatarImg.src = student.avatar || student.avatar_npc || `https://ui-avatars.com/api/?name=${student.name}&background=7f1d1d&color=fff`;
+    }
 
     // 3. Gestione Pagella (se presente nel DOM)
     const pagellaName = document.getElementById('pagella-student-name');
@@ -2307,67 +2336,107 @@ await setDoc(agendaRef, {
                 };
             }
         };
+
          // --- NOTIFICHE ---
-        window.toggleNotifPanel = () => {
-    const panel = document.getElementById('notif-panel');
-    const badge = document.getElementById('notif-count');
-
-    if (!panel) return;
-
-    // AGGIORNATO: Anche l'Admin deve avere il permesso di apertura
-    const haPermesso = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
-
-    if (!haPermesso) {
-        console.log("Accesso notifiche negato: Ruolo non autorizzato.");
-        return; 
-    }
-
-    const isOpening = panel.classList.contains('hidden');
-    panel.classList.toggle('hidden');
-
-    if (isOpening && badge) {
-        badge.innerText = "0";
-        badge.classList.add('hidden');
-    }
-};
-       
-       function listenNotifications() {
+        function listenNotifications() {
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global'), d => {
         if(d.exists()) {
             const alerts = d.data().alerts || [];
             const badge = document.getElementById('notif-count');
             const listContent = document.getElementById('notif-list-content');
+            const fullListContent = document.getElementById('notifiche-full-list');
 
+            // --- LOGICA DI ORDINAMENTO PER DATA E ORA ---
+            // Ordiniamo i mandati in modo che il più recente (come data dell'evento) sia in alto
+            const sortedAlerts = [...alerts].sort((a, b) => {
+                // Trasformiamo "DD/MM/YYYY" + "HH:MM" in "YYYYMMDDHHMM" per il confronto
+                const dateA = a.data.split('/').reverse().join('') + (a.time || "00:00").replace(':', '');
+                const dateB = b.data.split('/').reverse().join('') + (b.time || "00:00").replace(':', '');
+                return dateB.localeCompare(dateA); // Ordine decrescente (più recente sopra)
+            });
+
+            // 1. Gestione Badge (basata sul numero totale di mandati nel DB)
             if(badge) {
-                badge.innerText = alerts.length;
-                if(alerts.length === 0) {
-                    badge.classList.add('hidden');
-                } else {
+                const lastSeenCount = localStorage.getItem('fnaf_notif_count') || 0;
+                const newCount = alerts.length;
+                if(newCount > lastSeenCount) {
+                    badge.innerText = newCount - lastSeenCount;
                     badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
                 }
             }
             
+            // 2. Rendering Popup (Mostra i primi 5 mandati dopo l'ordinamento per data)
             if(listContent) {
+                const recent = sortedAlerts.slice(0, 5);
                 if(alerts.length === 0) {
                     listContent.innerHTML = '<p class="text-center text-[9px] text-zinc-400 italic py-4">Nessun mandato</p>';
                 } else {
-                    listContent.innerHTML = alerts.slice().reverse().map(a => `
-                        <div class="p-3 bg-zinc-50 border-l-4 border-amber-500 rounded-lg shadow-sm text-[10px] mb-3">
-                            <p class="font-black text-zinc-900 leading-tight">${a.msg}</p>
-                            <span class="text-[8px] font-bold text-zinc-400 bg-zinc-200 px-1 rounded">${a.time || ''}</span>
-                            <p class="text-zinc-700 bg-white p-2 border border-zinc-200 rounded mt-1 mb-2 font-medium">${a.motivo || 'Nessun motivo specificato'}</p>
-                            
-                            <div class="flex justify-between items-center mt-2 pt-2 border-t border-zinc-200/60">
-                                <p class="text-[9px] text-zinc-500 italic">Inviato da: <span class="text-zinc-700 font-semibold">${a.autore || 'Sistema'}</span></p>
-                                <p class="text-[8px] text-zinc-400 font-medium">${a.data || ''}</p>
+                    listContent.innerHTML = recent.map(a => `
+                        <div class="p-3 bg-zinc-50 border-l-4 border-amber-500 rounded-lg shadow-sm text-[10px] mb-2">
+                            <div class="flex justify-between items-start mb-1">
+                                <p class="font-black text-zinc-900 leading-tight">${a.msg}</p>
+                                <span class="text-[7px] font-bold text-zinc-400">${a.data}</span>
                             </div>
+                            <p class="text-zinc-500 text-[8px] italic line-clamp-1">${a.motivo}</p>
                         </div>
                     `).join('');
                 }
             }
+
+            // 3. Rendering Archivio Completo (Tutti i mandati ordinati per data evento)
+            if(fullListContent) {
+                fullListContent.innerHTML = sortedAlerts.map(a => `
+                    <div class="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm flex flex-col md:flex-row justify-between gap-4">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="px-2 py-1 bg-amber-100 text-amber-700 text-[8px] font-black uppercase rounded-md">Mandato Ufficiale</span>
+                                <span class="text-[10px] font-bold text-zinc-400 uppercase">${a.data} — ${a.time}</span>
+                            </div>
+                            <h3 class="text-lg font-black text-zinc-900 uppercase tracking-tighter">${a.msg}</h3>
+                            <div class="mt-3 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 italic text-sm text-zinc-600">
+                                "${a.motivo}"
+                            </div>
+                        </div>
+                        <div class="md:text-right flex flex-col justify-end">
+                            <p class="text-[9px] font-black uppercase text-zinc-400">Emesso da</p>
+                            <p class="text-xs font-bold text-zinc-900">${a.autore || 'Sistema'}</p>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-center py-20 text-zinc-400 uppercase font-black italic">L\'archivio è vuoto</p>';
+            }
         }
     });
 }
+
+window.toggleNotifPanel = () => {
+    const panel = document.getElementById('notif-panel');
+    const badge = document.getElementById('notif-count');
+    if (!panel) return;
+
+    const haPermesso = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
+    if (!haPermesso) return;
+
+    const isOpening = panel.classList.contains('hidden');
+    panel.classList.toggle('hidden');
+
+    if (isOpening) {
+        // Quando apri il pannello, segna tutto come letto salvando il numero attuale di notifiche
+        const currentTotal = document.querySelectorAll('#notif-list-content > div').length; // Approssimativo, meglio prenderlo dai dati
+        // Per precisione, recuperiamo il totale dal DB o contiamo gli elementi renderizzati
+        // Ma la logica più sicura è resettare il badge visivamente e salvare lo stato
+        badge.classList.add('hidden');
+        
+        // Recuperiamo il numero totale di notifiche presenti al momento del click
+        getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global')).then(snap => {
+            if(snap.exists()) {
+                const total = (snap.data().alerts || []).length;
+                localStorage.setItem('fnaf_notif_count', total);
+            }
+        });
+    }
+};
 
         // --- BACHECA ---
        async function loadBacheca() {
@@ -3574,6 +3643,10 @@ if (notesList) {
         if (isTargetStudente) {
             headerRegistro.classList.remove('hidden');
             headerRegistro.classList.add('flex');
+            const avatarRegistro = document.getElementById('res-student-avatar');
+            if (avatarRegistro) {
+                avatarRegistro.src = targetUser.avatar || targetUser.avatar_npc || `https://ui-avatars.com/api/?name=${targetUser.name}&background=7f1d1d&color=fff`;
+            }
         } else {
             // Se è staff, nascondiamo l'header del registro scolastico
             headerRegistro.classList.add('hidden');
