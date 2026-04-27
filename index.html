@@ -3352,21 +3352,29 @@ try {
         }
 
         // 3. Lista Storica delle Note di Servizio
+       const isPowerUser = window.userRole === 'preside' || window.userRole === 'admin';
         const notesList = document.getElementById('staff-notes-list');
-        if (notesList) {
-            notesList.innerHTML = valutazioni.slice().reverse().map(v => `
-                <div class="p-4 ${v.tipo === 'stella' ? 'bg-yellow-50 border-yellow-100' : 'bg-red-50 border-red-100'} border rounded-2xl mb-2">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-[9px] font-black uppercase ${v.tipo === 'stella' ? 'text-yellow-700' : 'text-red-700'}">
-                            ${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}
-                        </span>
-                        <span class="text-[8px] font-bold text-zinc-400">${v.date}</span>
-                    </div>
-                    <p class="text-[11px] font-medium text-zinc-700 italic">"${v.motivo}"</p>
-                    <p class="text-[8px] mt-2 uppercase font-black text-zinc-400">Firmato: ${v.da}</p>
+if (notesList) {
+    notesList.innerHTML = valutazioni.slice().reverse().map(v => {
+        // Creiamo una stringa sicura per l'oggetto da passare alla funzione delete
+        const vString = JSON.stringify(v).replace(/"/g, '&quot;');
+        
+        return `
+        <div class="p-4 ${v.tipo === 'stella' ? 'bg-yellow-50 border-yellow-100' : 'bg-red-50 border-red-100'} border rounded-2xl mb-2 relative group">
+            <div class="flex justify-between items-center mb-1">
+                <span class="text-[9px] font-black uppercase ${v.tipo === 'stella' ? 'text-yellow-700' : 'text-red-700'}">
+                    ${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}
+                </span>
+                <div class="flex items-center gap-2">
+                    <span class="text-[8px] font-bold text-zinc-400">${v.date}</span>
+                    ${isPowerUser ? `<button onclick='window.eliminaValutazioneStaff("${id}", ${vString})' class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 transition-all">🗑️</button>` : ''}
                 </div>
-            `).join('') || '<p class="text-center py-6 text-[10px] font-bold text-zinc-300 uppercase italic">Nessun record trovato.</p>';
-        }
+            </div>
+            <p class="text-[11px] font-medium text-zinc-700 italic">"${v.motivo}"</p>
+            <p class="text-[8px] mt-2 uppercase font-black text-zinc-400">Firmato: ${v.da}</p>
+        </div>
+    `}).join('') || '<p class="text-center py-6 text-[10px] font-bold text-zinc-300 uppercase italic">Nessun record trovato.</p>';
+}
 
         // 4. Tasto per il Preside
         const adminActions = document.getElementById('admin-actions-prof');
@@ -4530,6 +4538,28 @@ window.editPagellaComment = async () => {
         });
     } catch (e) {
         container.innerHTML = `<p class="text-red-500 p-4 text-[10px]">Errore: ${e.message}</p>`;
+    }
+};
+
+   window.eliminaValutazioneStaff = async (profId, valutazioneObj) => {
+    if (!confirm("Vuoi rimuovere permanentemente questa nota dal fascicolo del docente?")) return;
+
+    const profRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', profId);
+    
+    try {
+        await updateDoc(profRef, {
+            valutazioni: arrayRemove(valutazioneObj)
+        });
+        alert("✅ Nota di servizio rimossa.");
+        // Ricarica la vista corrente per aggiornare i dati
+        if (document.getElementById('view-profilo-target').classList.contains('active-view')) {
+            window.selectAndGoToProfile(profId);
+        } else {
+            window.apriProfiloPersonale();
+        }
+    } catch (e) {
+        console.error("Errore eliminazione valutazione:", e);
+        alert("Errore durante l'eliminazione.");
     }
 };
 
