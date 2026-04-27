@@ -420,6 +420,10 @@ header {
         <button onclick="window.changeMenu('bacheca')" id="menu-bacheca" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
             <span class="text-lg">📢</span> BACHECA
         </button>
+
+<button onclick="window.changeMenu('chat-staff')" id="menu-chat-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+    <span class="text-lg">💬</span> SALA DOCENTI
+</button>
     </nav>
 
     <div class="px-8 mt-auto pt-6 border-t border-yellow-500/30">
@@ -687,6 +691,38 @@ header {
                 <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex items-center gap-2">⚠️ Note</h3>
                 <div id="target-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
             </div>
+        </div>
+    </div>
+</div>
+
+		<!-- VIEW: CHAT STAFF (SALA DOCENTI) -->
+<div id="view-chat-staff" class="tab-content hidden flex-col h-[calc(100vh-120px)] max-w-5xl mx-auto">
+    <div class="bg-white p-4 border-b border-zinc-200 rounded-t-3xl flex justify-between items-center shadow-sm">
+        <div>
+            <h2 class="text-xl font-black uppercase italic text-zinc-800 leading-none">Sala Docenti</h2>
+            <p class="text-[9px] font-bold text-red-600 uppercase tracking-widest mt-1">Canale Criptato Personale</p>
+        </div>
+        <div class="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase">
+            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live
+        </div>
+    </div>
+
+    <!-- Area Messaggi -->
+    <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-zinc-50/50 custom-scroll flex flex-col">
+        <!-- I messaggi appariranno qui -->
+    </div>
+
+    <!-- Input Area -->
+    <div class="p-4 bg-white border-t border-zinc-200 rounded-b-3xl shadow-lg">
+        <div class="flex gap-3 items-end">
+            <textarea id="staff-chat-input" 
+                class="flex-1 p-3 bg-zinc-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none resize-none" 
+                placeholder="Scrivi un messaggio ai colleghi..." rows="1"
+                onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.sendStaffMessage(); }"></textarea>
+            <button onclick="window.sendStaffMessage()" 
+                class="bg-zinc-900 text-white p-4 rounded-2xl hover:bg-red-700 transition-all shadow-md active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
         </div>
     </div>
 </div>
@@ -1425,6 +1461,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-bacheca', true);
     toggle('menu-presenze-studente', isStudente);
     toggle('home-profilo-btn', type !== ROLES.OSPITE);
+    toggle('menu-chat-staff', isStaffGenerale);
 
 // --- AGGIUNGI QUESTE RIGHE MANCANTI ---
 // Gestione Filtri in alto
@@ -2488,6 +2525,9 @@ window.changeMenu = (menu) => {
     if (['registro', 'note', 'pagella'].includes(menu)) {
         window.updateQuickStudentSwitchers();
     }
+	if (menu === 'chat-staff') {
+    window.loadStaffChat();
+}
 
     // --- LOGICA SIDEBAR ---
     if (menu === 'home') {
@@ -4662,6 +4702,87 @@ window.goBackFromProfile = () => {
     } else {
         // Fallback se non troviamo l'utente
         window.changeMenu('home');
+    }
+};
+
+	// --- SISTEMA CHAT STAFF ---
+let chatListener = null;
+
+window.loadStaffChat = () => {
+    const container = document.getElementById('staff-chat-messages');
+    if (!container) return;
+
+    // Pulizia listener precedente
+    if (chatListener) chatListener();
+
+    const chatRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'staff_chat', 'messages');
+    
+    chatListener = onSnapshot(chatRef, (d) => {
+        const data = d.exists() ? d.data() : { list: [] };
+        const messages = data.list || [];
+        
+        container.innerHTML = messages.map((m, idx) => {
+            const isMe = m.senderId === window.currentUserId;
+            const isAdmin = ['preside', 'admin', 'vicepreside'].includes(window.userRole);
+            
+            return `
+                <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
+                        <div class="flex items-center gap-2 mb-1">
+                            ${!isMe ? `<span class="text-[8px] font-black uppercase text-zinc-500">${m.senderName}</span>` : ''}
+                            <span class="text-[7px] text-zinc-400 font-bold">${m.time}</span>
+                        </div>
+                        <div class="relative p-3 rounded-2xl text-sm font-medium shadow-sm 
+                            ${isMe ? 'bg-zinc-900 text-white rounded-tr-none' : 'bg-white text-zinc-800 border border-zinc-200 rounded-tl-none'}">
+                            ${m.text}
+                            
+                            ${(isMe || isAdmin) ? `
+                                <button onclick="window.deleteStaffMessage(${idx})" 
+                                    class="absolute -top-2 -right-2 bg-white border border-zinc-200 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm text-red-600">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Auto-scroll verso il basso
+        container.scrollTop = container.scrollHeight;
+    });
+};
+
+window.sendStaffMessage = async () => {
+    const input = document.getElementById('staff-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const chatRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'staff_chat', 'messages');
+    const newMessage = {
+        text: text,
+        senderId: window.currentUserId,
+        senderName: window.currentUserData.name,
+        time: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
+        timestamp: Date.now()
+    };
+
+    try {
+        await setDoc(chatRef, { list: arrayUnion(newMessage) }, { merge: true });
+        input.value = "";
+    } catch (e) {
+        console.error("Errore invio chat:", e);
+    }
+};
+
+window.deleteStaffMessage = async (idx) => {
+    if (!confirm("Eliminare questo messaggio?")) return;
+    const chatRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'staff_chat', 'messages');
+    const snap = await getDoc(chatRef);
+    if (snap.exists()) {
+        const list = snap.data().list || [];
+        list.splice(idx, 1);
+        await updateDoc(chatRef, { list: list });
     }
 };
 
