@@ -348,6 +348,7 @@ header {
     </div>
 
     <!-- Profilo Utente Ristilizzato -->
+   <div class="flex items-center gap-2">
     <div id="user-profile" class="hidden items-center gap-3 bg-white border border-zinc-200 p-1.5 pr-5 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group" onclick="window.apriProfiloPersonale()">
         <div class="relative">
             <img id="user-avatar" src="" class="w-9 h-9 rounded-xl border-2 border-zinc-50 object-cover shadow-sm group-hover:border-red-500 transition-colors">
@@ -358,6 +359,13 @@ header {
             <span id="user-role-label" class="text-[7px] font-black text-red-600 uppercase tracking-[0.1em] mt-0.5">Ospite</span>
         </div>
     </div>
+
+    <button onclick="window.logoutDiscord()" class="p-2 text-zinc-400 hover:text-red-600 transition-colors" title="Esci">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+    </button>
+</div>
 
     <!-- Pulsante Login Ristilizzato -->
     <button id="login-btn" onclick="window.loginDiscord()" 
@@ -2514,77 +2522,104 @@ window.toggleNotifPanel = () => {
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=1469524509106110484&redirect_uri=${uri}&response_type=token&scope=identify`;
         };
 
-        async function checkAuth() {
+	async function checkAuth() {
     const params = new URLSearchParams(window.location.hash.slice(1));
-    const token = params.get('access_token');
+    let token = params.get('access_token');
+    
+    // --- LOGICA PERSISTENZA ---
     if (token) {
-        try {
-            const res = await fetch('https://discord.com/api/users/@me', { 
-                headers: { Authorization: `Bearer ${token}` } 
-            });
-            const user = await res.json();
-            window.currentUserId = user.id;
-            
-            // Creiamo l'URL dell'avatar e salviamolo globalmente
-            const discordAvatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-            window.currentAvatarUrl = discordAvatarUrl; 
-	     syncDiscordAvatar(user.id, discordAvatarUrl);
+        // Se il token è nell'URL, lo salviamo e puliamo l'indirizzo
+        localStorage.setItem('fnaf_discord_token', token);
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+        // Altrimenti lo cerchiamo nella memoria del browser
+        token = localStorage.getItem('fnaf_discord_token');
+    }
 
-            // Aggiorniamo la Top Bar
-            const loginBtn = document.getElementById('login-btn');
-            const userProfile = document.getElementById('user-profile');
-            if (loginBtn) loginBtn.classList.add('hidden');
-            if (userProfile) {
-                userProfile.classList.remove('hidden');
-                document.getElementById('user-name').innerText = user.username;
-                document.getElementById('user-avatar').src = discordAvatarUrl;
+    // Se non c'è il token, l'utente è un ospite
+    if (!token) {
+        applyRoleUI(); 
+        return;
+    }
+
+    try {
+        // Verifica il token con Discord
+        const res = await fetch('https://discord.com/api/users/@me', { 
+            headers: { Authorization: `Bearer ${token}` } 
+        });
+
+        // Se Discord dice che il token non è più valido (es. scaduto)
+        if (res.status === 401) {
+            localStorage.removeItem('fnaf_discord_token');
+            applyRoleUI();
+            return;
+        }
+
+        const user = await res.json();
+        window.currentUserId = user.id;
+        
+        // Gestione Avatar
+        const discordAvatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+        window.currentAvatarUrl = discordAvatarUrl; 
+        if (typeof syncDiscordAvatar === 'function') syncDiscordAvatar(user.id, discordAvatarUrl);
+
+        // Aggiornamento Top Bar
+        const loginBtn = document.getElementById('login-btn');
+        const userProfile = document.getElementById('user-profile');
+        if (loginBtn) loginBtn.classList.add('hidden');
+        if (userProfile) {
+            userProfile.classList.remove('hidden');
+            userProfile.style.display = 'flex'; // Forza il flex per l'allineamento
+            document.getElementById('user-name').innerText = user.username;
+            document.getElementById('user-avatar').src = discordAvatarUrl;
+        }
+
+        // --- CARICAMENTO DATI FIREBASE ---
+        const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
+        
+        if(uDoc.exists()) {
+            window.currentUserData = uDoc.data();
+            window.userRole = getRoleType(window.currentUserData.role);
+            
+            // Inizializzazioni varie
+            if (typeof loadBacheca === 'function') loadBacheca();
+            if (typeof window.handleClassChange === 'function') {
+                window.handleClassChange('ALL');
+            }
+            
+            applyRoleUI();
+
+            // --- LOGICA DEBUG (La tua originale) ---
+            const MY_ID = "477766915096313867";
+            const debugPanel = document.getElementById('debug-auth-panel');
+            if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
+                if (debugPanel) {
+                    debugPanel.style.setProperty('display', 'block', 'important');
+                    debugPanel.classList.remove('hidden');
+                    console.log("🛠️ Modalità Creatore Attiva");
+                }
+            } else {
+                if (debugPanel) debugPanel.remove();
             }
 
-            // Carichiamo i dati dal Database
-            const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
-            if(uDoc.exists()) {
-                window.currentUserData = uDoc.data();
-                window.userRole = getRoleType(window.currentUserData.role);
-		if (typeof loadBacheca === 'function') loadBacheca();
-		if (typeof window.handleClassChange === 'function') {
-        window.handleClassChange('ALL'); // O la stringa che usi per "TUTTI"
-    }
-                applyRoleUI();
-
-			const MY_ID = "477766915096313867";
-const debugPanel = document.getElementById('debug-auth-panel');
-
-if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
-    // SEI TU: Mostra il debug
-    if (debugPanel) {
-        debugPanel.style.setProperty('display', 'block', 'important');
-        debugPanel.classList.remove('hidden');
-        console.log("🛠️ Modalità Creatore Attiva");
-    }
-} else {
-    // NON SEI TU: Distruggi il debug così nessuno può hackerarlo
-    if (debugPanel) debugPanel.remove();
-}
-                        
-                        // Materie per i Prof
-                        if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
-                    const mSelect = document.getElementById('input-grade-subject');
-                    if (mSelect) {
-                        const mats = window.currentUserData.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
-                        mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
-                    }
+            // --- MATERIE PER I PROF (La tua originale) ---
+            if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
+                const mSelect = document.getElementById('input-grade-subject');
+                if (mSelect) {
+                    const mats = window.currentUserData.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
+                    mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
                 }
-            } // Chiusura if(uDoc.exists())
-
-            window.history.replaceState({}, document.title, window.location.pathname);
-
-        } catch (e) {
-            console.error("Errore durante il checkAuth:", e);
+            }
+        } else {
+            // Se l'utente ha il token ma non è nel database, lo trattiamo come ospite registrato
+            applyRoleUI();
         }
-    } else {
-        applyRoleUI(); // Ospite
+
+    } catch (e) {
+        console.error("Errore durante il checkAuth:", e);
+        // Se c'è un errore di rete (es. sei offline), non cancelliamo il token così riprova al prossimo avvio
     }
-}
+}       
 
 window.changeMenu = (menu) => {
     // --- PEZZO AGGIUNTO (Blocco 5) ---
@@ -4856,6 +4891,12 @@ window.deleteStaffMessage = async (idx) => {
         const list = snap.data().list || [];
         list.splice(idx, 1);
         await updateDoc(chatRef, { list: list });
+    }
+};
+	window.logoutDiscord = () => {
+    if(confirm("Vuoi uscire dal sistema?")) {
+        localStorage.removeItem('fnaf_discord_token');
+        location.reload(); // Ricarica la pagina per tornare allo stato "Ospite"
     }
 };
 
