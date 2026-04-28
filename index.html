@@ -5,338 +5,243 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fazbear Classroom - Sistema Gestionale</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
+<style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body { 
         font-family: 'Plus Jakarta Sans', sans-serif; 
-        background: #f8fafc; /* Grigio ardesia chiarissimo per un look pulito */
-        color: #0f172a; 
+        background: #09090b; 
+        color: #f4f4f5; 
         min-height: 100vh;
         display: flex; 
         flex-direction: column;
         overflow-y: auto;
     }
+	/* Colora la tendina che si apre (le option) */
+select option {
+    background-color: #18181b !important; /* Grigio scuro come le card */
+    color: #ffffff !important;           /* Testo bianco */
+    padding: 10px;
+}
 
-    /* Glassmorphism migliorato */
+/* Rimuove l'aspetto brutto di sistema su Windows/Chrome */
+select {
+    color-scheme: dark; /* Suggerisce al browser di usare il tema scuro per l'interfaccia di sistema */
+}
+
+    /* Glassmorphism Scuro */
     .glass-light {
-        background: rgba(255, 255, 255, 0.8) !important;
+        background: rgba(24, 24, 27, 0.9) !important;
         backdrop-filter: blur(12px) !important;
-        border: 1px solid rgba(226, 232, 240, 0.8) !important;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        border: 1px solid rgba(63, 63, 70, 0.5) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
     }
 
     .glass {
-        background: rgba(255, 255, 255, 0.95) !important;
+        background: rgba(18, 18, 18, 0.98) !important;
         backdrop-filter: blur(10px);
-        border: 1px solid rgba(226, 232, 240, 1);
+        border: 1px solid rgba(39, 39, 42, 1);
     }
 
-.registry-container {
-    background: #ffffff;
-    border-radius: 24px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-}
+    /* Registro Voti Dark */
+    .registry-container {
+        background: #18181b;
+        border-radius: 24px;
+        border: 1px solid #27272a;
+        overflow: hidden;
+    }
 
-.registry-table thead th {
-    background: #f8fafc;
-    text-transform: uppercase;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    color: #64748b;
-    padding: 1.25rem 1.5rem;
-    border-bottom: 2px solid #f1f5f9;
-}
+    .registry-table thead th {
+        background: #09090b;
+        color: #a1a1aa;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 2px solid #27272a;
+        text-transform: uppercase;
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+    }
 
-.registry-table tbody tr {
-    transition: all 0.2s ease;
-}
+    .registry-table tbody tr {
+        border-bottom: 1px solid #27272a;
+        transition: background 0.2s;
+    }
+    .registry-table tbody tr:hover { background-color: #27272a; }
+    .registry-table td { padding: 1.25rem 1.5rem; color: #e4e4e7; vertical-align: middle; }
 
-.registry-table tbody tr:hover {
-    background-color: #f8fafc;
-}
+    /* Badge Voti (Neon Style) */
+    .grade-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 0.75rem;
+        transition: all 0.2s;
+    }
+    .grade-positive { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
+    .grade-negative { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); }
+    .grade-neutral { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
 
-.registry-table td {
-    padding: 1.25rem 1.5rem;
-    vertical-align: middle;
-}
+    /* Cards (Bacheca, Note, Staff, Agenda) */
+    .bacheca-card, .note-card, .staff-card, .agenda-card {
+        background: #18181b !important;
+        border: 1px solid #27272a !important;
+        color: #f4f4f5 !important;
+        border-radius: 24px !important;
+        padding: 2rem !important;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
 
-.subject-column {
-    border-right: 1px solid #f1f5f9;
-}
+    .bacheca-card:hover, .note-card:hover, .agenda-card:hover {
+        transform: translateY(-4px);
+        border-color: #dc2626 !important;
+        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.1);
+    }
 
-.media-badge-large {
-    font-size: 1.1rem;
-    font-weight: 800;
-    padding: 0.5rem 1rem;
-    border-radius: 12px;
-    background: #f1f5f9;
-}
+    .note-accent-disciplinare { border-left: 5px solid #dc2626 !important; }
+    .note-accent-mandato { border-left: 5px solid #fbbf24 !important; background: #1e1b1e !important; }
 
-	.grade-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 0.75rem;
-    transition: all 0.2s;
-    border: 1px solid transparent;
-    cursor: help;
-}
+    /* Sidebar */
+    .sidebar-item { 
+        transition: all 0.3s; 
+        border-radius: 12px; 
+        font-size: 0.7rem; 
+        font-weight: 800; 
+        color: #a1a1aa;
+        letter-spacing: 0.05em;
+    }
+    .sidebar-item:hover { background: rgba(255, 255, 255, 0.05); color: #ffffff; }
+    .sidebar-item.active { background: #dc2626 !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
 
-.grade-badge:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
-.grade-positive {
-    background-color: #f0fdf4;
-    color: #16a34a;
-    border-color: #bbf7d0;
-}
-
-.grade-negative {
-    background-color: #fef2f2;
-    color: #dc2626;
-    border-color: #fecaca;
-}
-
-.grade-neutral {
-    background-color: #f4f4f5;
-    color: #71717a;
-    border-color: #e4e4e7;
-}
-
-
-.bacheca-card {
-    background: white;
-    border-radius: 20px;
-    border: 1px solid #e2e8f0;
-    padding: 1.5rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    display: flex;
-    gap: 1rem;
-}
-
-.bacheca-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.08);
-    border-color: #cbd5e1;
-}
-
-.bacheca-icon-box {
-    width: 48px;
-    height: 48px;
-    background: #fef2f2;
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 1.25rem;
-    color: #dc2626;
-}
-
-.bacheca-admin-input-group {
-    background: white;
-    border-radius: 24px;
-    padding: 1.5rem;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-/* Estetica Input Modal Rimodernata */
-.modal-input {
-    width: 100%;
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 10px 14px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #1e293b;
+/* 1. Stile base per i contenitori e gli input isolati */
+.modal-input, 
+.filter-container, 
+.quick-student-switcher, 
+.quad-switch-container {
+    background-color: #09090b !important;
+    border: 1px solid #3f3f46 !important;
+    color: #ffffff !important;
     outline: none;
-    transition: all 0.2s;
-}
-
-.modal-input:focus {
-    border-color: #dc2626;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-.modal-label {
-    display: block;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    color: #64748b;
-    margin-bottom: 6px;
-    letter-spacing: 0.05em;
-}
-
- /* Estetica Note Rimodernata */
-.note-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 1.25rem;
-    position: relative;
     transition: all 0.2s ease;
 }
 
-.note-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+/* 2. RENDIAMO INVISIBILI GLI INPUT DENTRO IL FILTER (Fondamentale!) */
+/* Se non togliamo il bordo a questi, restano quadrati dentro la pillola */
+.filter-container input, 
+.filter-container select {
+    background: transparent !important;
+    border: none !important; /* Rimuove il rettangolo interno */
+    color: #ffffff !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-.note-accent-disciplinare { border-left: 4px solid #dc2626; }
-.note-accent-mandato { border-left: 4px solid #0f172a; background: #f8fafc; }
-
-.note-badge {
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 6px;
-    letter-spacing: 0.025em;
+/* 🎯 FORMA ARROTONDATA (Pillola) */
+.filter-container, .quad-switch-container {
+    border-radius: 9999px !important; 
+    padding: 4px 12px !important; /* Aumentato leggermente per dare aria */
+    display: flex;
+    align-items: center;
 }
 
-.badge-disciplinare { background: #fef2f2; color: #dc2626; }
-.badge-mandato { background: #0f172a; color: #fbbf24; }
-
-   /* Miglioramenti Estetici Top & Sidebar */
-.sidebar-item { 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-    border-radius: 12px; 
-    margin: 0px 0px; 
-    font-size: 0.7rem; 
-    font-weight: 800; 
-    letter-spacing: 0.05em;
-    border: 1px solid transparent;
+/* 🎯 FORMA SQUADRATA (Modale e Switcher Studenti) */
+.modal-input, .quick-student-switcher {
+    border-radius: 12px !important; 
+    padding: 10px 14px !important;
 }
 
-.sidebar-item:hover { 
-    background: rgba(255, 255, 255, 0.15); 
-    border-color: rgba(255, 255, 255, 0.2);
+/* Effetto Focus */
+.modal-input:focus, .filter-container:focus-within {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
 }
+    .modal-label {
+        font-size: 0.7rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: #a1a1aa;
+        margin-bottom: 6px;
+    }
 
-.sidebar-item.active { 
-    background: #FFFF !important; 
-    color: #b91c1c !important; 
-    box-shadow: 0 1px 12px rgba(0,0,0,0.1);
-}
+    /* Override Globali per classi Tailwind residue */
+    .bg-white { background-color: #18181b !important; }
+    .text-zinc-800, .text-zinc-900, .text-zinc-700 { color: #f4f4f5 !important; }
+    .border-zinc-200, .border-zinc-100, .border-zinc-300 { border-color: #27272a !important; }
+    .bg-zinc-50, .bg-zinc-100, .bg-zinc-200 { background-color: #09090b !important; }
 
-header {
-    background: #ffffff !important;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-}
+    /* Componenti Specifici Pagella */
+    #view-pagella .bg-zinc-900 { background: #121214 !important; border: 1px solid #27272a; }
+    .quad-btn-inactive { color: #71717a !important; background: transparent !important; }
+    .quad-btn-active { background: #dc2626 !important; color: white !important; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2); }
 
-.filter-container {
-    background: #f4f4f5;
-    border-radius: 14px;
-    padding: 4px;
-    border: 1px solid #e4e4e7;
-}
-
-.top-btn-action {
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.top-btn-action:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.1);
-}
-
+    /* Utilità */
     .sidebar-hidden #main-sidebar { display: none !important; }
-    
     .tab-content { display: none; height: 100%; }
     .active-view { display: flex; animation: fadeIn 0.4s ease-out; flex-direction: column; }
-    
-    @keyframes fadeIn { 
-        from { opacity: 0; transform: translateY(10px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
     .custom-scroll::-webkit-scrollbar { width: 6px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
 </style>
 
-<button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden" style="display: none;">
+<button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden">
     🛠️
 </button>
 
-	<div id="test-bypass-panel" class="glass p-4 text-[10px] border-2 border-red-500 fixed bottom-20 right-4 z-[10000] shadow-2xl w-64 hidden" style="background: rgba(0,0,0,0.95); position: fixed; display: none;">
+<div id="test-bypass-panel" class="glass p-4 text-[10px] border-2 border-red-500 fixed bottom-20 right-4 z-[10000] shadow-2xl w-64 hidden" style="background: rgba(0,0,0,0.95);">
     <div class="flex justify-between items-center mb-4 border-b border-red-500 pb-2">
         <h3 class="font-black uppercase text-red-500">🛠️ Debug Access</h3>
         <button onclick="toggleDebug()" class="text-white hover:text-red-500 font-bold">CHIUDI X</button>
     </div>
-
     <div class="flex flex-col gap-2">
-        <label class="text-[8px] uppercase font-bold text-zinc-400">Inserisci ID Discord:</label>
-        <input type="text" id="debug-input-id" placeholder="Es: bonnieilconiglio2026" class="text-black p-2 rounded border-none outline-none text-xs">
-        
-        <button onclick="window.startBypass()" class="bg-red-700 hover:bg-red-600 text-white p-3 rounded font-black uppercase transition-colors mt-2">
-            🚀 Simula Login
-        </button>
-
-        <button onclick="location.reload()" class="bg-zinc-800 text-[8px] text-zinc-400 p-1 rounded uppercase mt-1">
-            🔄 Reset Totale (Logout)
-        </button>
-
-        <div id="debug-log" class="mt-4 font-monospace text-[9px] color-[#44ff44] bg-red p-2 max-h-32 overflow-auto rounded border border-zinc-800">
-            Log: Sistema pronto...
-        </div>
+        <input type="text" id="debug-input-id" placeholder="ID Discord" class="text-white bg-zinc-900 p-2 rounded border border-zinc-700 text-xs">
+        <button onclick="window.startBypass()" class="bg-red-700 hover:bg-red-600 text-white p-3 rounded font-black uppercase transition-colors mt-2">🚀 Simula Login</button>
+        <button onclick="location.reload()" class="bg-zinc-800 text-[8px] text-zinc-400 p-1 rounded uppercase mt-1">🔄 Reset Totale</button>
+        <div id="debug-log" class="mt-4 font-mono text-[9px] text-green-500 bg-black p-2 max-h-32 overflow-auto rounded border border-zinc-800">Log: Sistema pronto...</div>
     </div>
 </div>
+</div>
 
-   <!-- Top Bar Ristilizzata -->
-<header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-200 z-50">
+<!-- Top Bar -->
+<header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-800 bg-zinc-900 z-50">
     <div class="flex items-center gap-4">
-        <!-- Logo Section -->
         <div class="relative w-14 h-14 flex shrink-0 items-center justify-center cursor-pointer group" onclick="handleFreddyClick(event)">
             <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" 
                  class="h-12 w-auto object-contain group-active:scale-90 transition-transform">
             <div id="freddy-nose" class="absolute w-4 h-4 bg-transparent rounded-full top-[58%] left-[51%] -translate-x-1/2 -translate-y-1/2 z-10"></div>
         </div>
-
         <div class="flex flex-col -space-y-1">
-            <h1 class="font-black text-zinc-900 uppercase italic text-xl tracking-tighter">
-                Faz-<span class="text-red-600">Portal</span>
-            </h1>
-            <p id="current-academic-year" class="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">
-                A.S. 2025/2026
-            </p>
+            <h1 class="font-black text-white uppercase italic text-xl tracking-tighter">Faz-<span class="text-red-600">Portal</span></h1>
+            <p id="current-academic-year" class="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em]">A.S. 2025/2026</p>
         </div>
     </div>
 
     <!-- Central Filters -->
     <div class="flex items-center gap-3">
-        <!-- Date Quick Filter -->
         <div class="filter-container flex items-center gap-1 px-2">
-            <input type="text" id="quick-year-filter" placeholder="2025" class="text-[10px] bg-transparent w-12 text-center outline-none font-bold" onkeypress="if(event.key === 'Enter') window.vaiADataRapida()">
-            <select id="quick-month-filter" class="text-[10px] bg-transparent outline-none font-bold text-zinc-700" onchange="window.vaiADataRapida()">
+               <input type="text" id="quick-year-filter" placeholder="2025" 
+               class="text-[11px] bg-transparent w-12 text-center outline-none font-bold text-white placeholder-zinc-500" 
+               onkeypress="if(event.key === 'Enter') window.vaiADataRapida()">
+            <select id="quick-month-filter" class="text-[10px] bg-transparent outline-none font-bold">
                 <option value="09">SET</option><option value="10">OTT</option><option value="11">NOV</option><option value="12">DIC</option>
                 <option value="01">GEN</option><option value="02">FEB</option><option value="03">MAR</option><option value="04">APR</option>
                 <option value="05">MAG</option><option value="06">GIU</option>
             </select>
-            <button onclick="window.vaiADataRapida()" class="bg-zinc-900 text-white text-[8px] px-2 py-1 rounded-lg font-black hover:bg-red-600 transition-colors">GO</button>
+            <button onclick="window.vaiADataRapida()" class="bg-red-700 text-white text-[8px] px-2 py-1 rounded-lg font-black hover:bg-red-600 transition-colors">GO</button>
         </div>
 
         <!-- Current Date Display -->
         <div class="filter-container flex items-center gap-2 px-4 py-2">
             <span class="text-xs">📅</span>
-            <span id="current-date-display" class="text-[10px] font-black uppercase text-zinc-600">Seleziona Data</span>
+            <span id="current-date-display" class="text-[10px] font-black uppercase text-zinc-100">Seleziona Data</span>
         </div>
     </div>
 
@@ -351,7 +256,7 @@ header {
    <div class="flex items-center gap-2">
     <div id="user-profile" class="hidden items-center gap-3 bg-white border border-zinc-200 p-1.5 pr-5 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group" onclick="window.apriProfiloPersonale()">
         <div class="relative">
-            <img id="user-avatar" src="" class="w-9 h-9 rounded-xl border-2 border-zinc-50 object-cover shadow-sm group-hover:border-red-500 transition-colors">
+            <img id="user-avatar" src="" class="w-9 h-9 rounded-xl border-2 border-zinc-500 object-cover shadow-sm group-hover:border-red-500 transition-colors">
             <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
         </div>
         <div class="flex flex-col justify-center">
@@ -379,71 +284,68 @@ header {
     <div class="flex flex-1 bg-zinc-700">
 
         <!-- Sidebar Ristilizzata -->
-<aside id="main-sidebar" class="w-72 border-r border-zinc-200 bg-yellow-600 flex flex-col shrink-0 py-6 z-40 shadow-xl">
+<aside id="main-sidebar" class="w-72 border-r border-zinc-800 bg-zinc-900 flex flex-col shrink-0 py-6 z-40 shadow-xl">
     <div class="px-6 mb-8">
 <body class="sidebar-hidden">
-    <nav class="flex-1 space-y-1">
-        <p class="text-[10px] font-black text-yellow-900 uppercase tracking-[0.3em]">Menù Principale</p>
-    </div>
-        <button onclick="window.apriProfiloPersonale()" id="menu-profilo" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">👤</span>PROFILO
-        </button>
+        <nav class="flex-1 space-y-1">
+            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4">Menù Principale</p>
+            
+            <button onclick="window.apriProfiloPersonale()" id="menu-profilo" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
+                <span class="text-lg">👤</span>PROFILO
+            </button>
 
-<button onclick="window.mostraGestioneStaff()" 
-        id="menu-gestione-staff" 
-        class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950 hover:bg-yellow-700 transition-all">
-    <span class="text-lg">👔</span> 
-    <span class="font-black uppercase">Gestione Staff</span>
-</button>
+            <button onclick="window.mostraGestioneStaff()" id="menu-gestione-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
+                <span class="text-lg">👔</span> GESTIONE STAFF
+            </button>
 
-        <button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">🏫</span> HUB CLASSI
-        </button>
+            <button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
+                <span class="text-lg">🏫</span> HUB CLASSI
+            </button>
 
-        <button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+        <button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">📋</span> Registro Presenze
         </button>
 
-        <button onclick="window.changeMenu('presenze-studente')" id="menu-presenze-studente" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+        <button onclick="window.changeMenu('presenze-studente')" id="menu-presenze-studente" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">🕒</span> Assenze e Ritardi
         </button>
 
-        <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">📅</span> AGENDA
-        </button>
+            <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
+                <span class="text-lg">📅</span> AGENDA
+            </button>
 
-        <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+        <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">📝</span> REGISTRO VOTI
         </button>
 
-        <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+        <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">🎓</span> Pagella
         </button>
         
-        <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+        <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">⚠️</span> NOTE
         </button>
 
-        <button onclick="window.changeMenu('bacheca')" id="menu-bacheca" class="sidebar-item w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
-            <span class="text-lg">📢</span> BACHECA
-        </button>
+            <button onclick="window.changeMenu('bacheca')" id="menu-bacheca" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
+                <span class="text-lg">📢</span> BACHECA
+            </button>
 
-<button onclick="window.changeMenu('chat-staff')" id="menu-chat-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+<button onclick="window.changeMenu('chat-staff')" id="menu-chat-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
     <span class="text-lg">💬</span> SALA DOCENTI
 </button>
 
-<button onclick="window.changeMenu('notifiche-full')" id="menu-notifiche-full" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4 text-yellow-950">
+<button onclick="window.changeMenu('notifiche-full')" id="menu-notifiche-full" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
     <span class="text-lg">📜</span> ARCHIVIO MANDATI
 </button>
-    </nav>
-
-    <div class="px-8 mt-auto pt-6 border-t border-yellow-500/30">
-        <p class="text-[8px] font-bold text-yellow-900/40 uppercase">Fazbear Classroom Management v2.0</p>
+        </nav>
+    </div>
+    <div class="px-8 mt-auto pt-6 border-t border-zinc-800">
+        <p class="text-[8px] font-bold text-zinc-600 uppercase">Fazbear Classroom v4.0</p>
     </div>
 </aside>
 
         <!-- Contenuto -->
-        <main class="flex-1 bg-zinc-100 p-6 relative">
+        <main class="flex-1 bg-[#09090b] p-6 relative">
 
 	<!-- VIEW: HOME (Schermata di Benvenuto) -->
 <div id="view-home" class="tab-content active-view flex flex-col items-center justify-center min-h-[70vh] text-center">
@@ -453,41 +355,41 @@ header {
         
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full">
     <button id="home-profilo-btn" onclick="window.changeMenu('profilo')" 
-    class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
     <span class="text-3xl block mb-2">👤</span>
     <span class="font-black uppercase text-[10px]">Il Mio Profilo</span>
 </button>
-    <button onclick="window.changeMenu('bacheca')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
-        <span class="text-3xl block mb-2">📢</span>
-        <span class="font-black uppercase text-[10px]">Bacheca</span>
-    </button>
+    <button onclick="window.changeMenu('bacheca')" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
+    <span class="text-3xl block mb-2">📢</span>
+    <span class="font-black uppercase text-[10px] text-zinc-200">Bacheca</span>
+</button>
     
     <!-- Visibile solo a Staff/Admin/Ospiti -->
-    <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">🏫</span>
         <span class="font-black uppercase text-[10px]">Hub Classi</span>
     </button>
 
     <!-- Visibili solo agli Studenti -->
-    <button id="home-btn-agenda" onclick="window.changeMenu('agenda')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <button id="home-btn-agenda" onclick="window.changeMenu('agenda')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">📅</span>
         <span class="font-black uppercase text-[10px]">Agenda</span>
     </button>
-    <button id="home-btn-registro" onclick="window.changeMenu('registro')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <button id="home-btn-registro" onclick="window.changeMenu('registro')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">📝</span>
         <span class="font-black uppercase text-[10px]">Registro Voti</span>
     </button>
-    <button id="home-btn-note" onclick="window.changeMenu('note')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <button id="home-btn-note" onclick="window.changeMenu('note')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">⚠️</span>
         <span class="font-black uppercase text-[10px]">Note</span>
     </button>
 
-	<button id="home-btn-presenze" onclick="window.changeMenu('presenze-studente')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+	<button id="home-btn-presenze" onclick="window.changeMenu('presenze-studente')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
     <span class="text-3xl block mb-2">🕒</span>
     <span class="font-black uppercase text-[10px]">Assenze e Ritardi</span>
 </button>
 
-    <button id="home-btn-pagella" onclick="window.changeMenu('pagella')" class="hidden p-6 bg-white border-2 border-zinc-100 rounded-2xl hover:border-red-600 hover:scale-105 transition-all shadow-sm group">
+    <button id="home-btn-pagella" onclick="window.changeMenu('pagella')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">🎓</span>
         <span class="font-black uppercase text-[10px]">Pagella</span>
     </button>
@@ -497,39 +399,39 @@ header {
 
 	<!-- VIEW: HUB CLASSE -->
 <div id="view-classi" class="tab-content hidden p-6">
-    <!-- Stato 1: Selezione Classe (visibile se selectedClass è null) -->
+    <!-- Selezione Classe -->
     <div id="class-selection-screen" class="flex flex-col items-center justify-center min-h-[50vh]">
-        <h2 class="text-2xl font-black italic mb-8 uppercase text-zinc-800">Seleziona una Classe</h2>
+        <h2 class="text-2xl font-black italic mb-8 uppercase text-zinc-100">Seleziona una Classe</h2>
         <div class="flex gap-6">
-            <button onclick="window.filterByClass('A')" class="w-32 h-32 bg-white border-4 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black shadow-sm">A</button>
-            <button onclick="window.filterByClass('B')" class="w-32 h-32 bg-white border-4 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black shadow-sm">B</button>
-            <button onclick="window.filterByClass('C')" class="w-32 h-32 bg-white border-4 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black shadow-sm">C</button>
+            <button onclick="window.filterByClass('A')" class="w-32 h-32 bg-zinc-900 border-4 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black text-white shadow-xl">A</button>
+            <button onclick="window.filterByClass('B')" class="w-32 h-32 bg-zinc-900 border-4 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black text-white shadow-xl">B</button>
+            <button onclick="window.filterByClass('C')" class="w-32 h-32 bg-zinc-900 border-4 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex items-center justify-center text-4xl font-black text-white shadow-xl">C</button>
         </div>
     </div>
 
-    <!-- Stato 2: Hub Operativo (visibile dopo la selezione) -->
+    <!-- Hub Operativo -->
     <div id="class-hub-screen" class="hidden">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-black italic uppercase text-zinc-800">Gestione Classe <span id="hub-class-name" class="text-red-600">--</span></h2>
-            <button onclick="window.resetClassSelection()" class="text-[10px] font-black uppercase text-zinc-400 hover:text-red-600">🔄 Cambia Classe</button>
+            <h2 class="text-2xl font-black italic uppercase text-zinc-100">Gestione Classe <span id="hub-class-name" class="text-red-600">--</span></h2>
+            <button onclick="window.resetClassSelection()" class="text-[10px] font-black uppercase text-zinc-500 hover:text-red-600">🔄 Cambia Classe</button>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="window.changeMenu('studenti')" class="p-8 bg-white border-2 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-sm group">
+            <button onclick="window.changeMenu('studenti')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
                 <span class="text-4xl group-hover:scale-110 transition-transform">👥</span>
-                <span class="font-black uppercase text-xs tracking-widest">Elenco Studenti</span>
+                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Elenco Studenti</span>
             </button>
-            <button onclick="window.changeMenu('agenda')" class="p-8 bg-white border-2 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-sm group">
+            <button onclick="window.changeMenu('agenda')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
                 <span class="text-4xl group-hover:scale-110 transition-transform">📅</span>
-                <span class="font-black uppercase text-xs tracking-widest">Agenda Classe</span>
+                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Agenda Classe</span>
             </button>
-            <button onclick="window.renderGlobalClassRegistry()" class="p-8 bg-white border-2 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-sm group">
+            <button onclick="window.renderGlobalClassRegistry()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
                 <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
-                <span class="font-black uppercase text-xs tracking-widest">Registro Voti</span>
+                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti</span>
             </button>
-<button onclick="window.renderTabelloneGlobale()" class="p-8 bg-white border-2 border-zinc-200 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-sm group">
-    <span class="text-4xl group-hover:scale-110 transition-transform">📋</span>
-    <span class="font-black uppercase text-xs tracking-widest">Tabellone Scrutinio</span>
-</button>
+            <button onclick="window.renderTabelloneGlobale()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+                <span class="text-4xl group-hover:scale-110 transition-transform">📋</span>
+                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Tabellone Scrutinio</span>
+            </button>
         </div>
     </div>
 </div>
@@ -554,29 +456,27 @@ header {
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-4">
             <div>
-                <h2 class="text-2xl font-black italic uppercase text-zinc-800">Registro Voti Classe</h2>
-                <p id="reg-global-info" class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Caricamento...</p>
+                <h2 class="text-2xl font-black italic uppercase text-zinc-100">Registro Voti Classe</h2>
+                <p id="reg-global-info" class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Caricamento...</p>
             </div>
-            <!-- FILTRO MATERIE AGGIUNTO QUI -->
             <div id="reg-subject-filter-container" class="hidden">
                 <select id="reg-global-subject-select" onchange="window.renderGlobalClassRegistry(this.value)" 
-                    class="bg-white border-2 border-zinc-200 rounded-xl px-3 py-2 text-[10px] font-black uppercase outline-none focus:border-red-600 shadow-sm">
+                    class="bg-zinc-900 border-2 border-zinc-800 rounded-xl px-3 py-2 text-[10px] font-black uppercase text-white outline-none focus:border-red-600 shadow-sm">
                 </select>
             </div>
         </div>
-        <button onclick="window.changeMenu('classi')" class="bg-zinc-200 px-4 py-2 rounded-xl font-black text-[9px] uppercase">Indietro</button>
+        <button onclick="window.changeMenu('classi')" class="bg-zinc-800 text-zinc-300 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-700">Indietro</button>
     </div>
-    <div class="bg-white rounded-2xl shadow-xl border border-zinc-200 overflow-hidden">
+    <div class="registry-container border-zinc-800">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-[11px]">
-                <thead class="bg-zinc-900 text-white font-black uppercase">
+                <thead class="bg-black text-zinc-400 font-black uppercase">
                     <tr id="reg-global-head">
-                        <th class="p-4 border-r border-zinc-700">Studente</th>
-                        <!-- I voti verranno inseriti qui -->
+                        <th class="p-4 border-r border-zinc-800">Studente</th>
                         <th class="p-4 text-right">Media</th>
                     </tr>
                 </thead>
-                <tbody id="reg-global-body" class="divide-y divide-zinc-200"></tbody>
+                <tbody id="reg-global-body" class="divide-y divide-zinc-800 bg-zinc-900/50"></tbody>
             </table>
         </div>
     </div>
@@ -586,19 +486,19 @@ header {
 <div id="view-tabellone" class="tab-content hidden p-6">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h2 class="text-2xl font-black italic uppercase text-zinc-800">Tabellone Medie Classe <span id="tab-class-name" class="text-red-600">--</span></h2>
-            <p id="tab-info" class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Riepilogo generale di tutte le materie</p>
+            <h2 class="text-2xl font-black italic uppercase text-zinc-100">Tabellone Medie Classe <span id="tab-class-name" class="text-red-600">--</span></h2>
+            <p id="tab-info" class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Riepilogo generale di tutte le materie</p>
         </div>
-        <button onclick="window.changeMenu('classi')" class="bg-zinc-200 px-4 py-2 rounded-xl font-black text-[9px] uppercase">Indietro</button>
+        <button onclick="window.changeMenu('classi')" class="bg-zinc-800 text-zinc-300 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-700">Indietro</button>
     </div>
-    <div class="bg-white rounded-2xl shadow-xl border border-zinc-200 overflow-hidden">
+    <div class="registry-container border-zinc-800">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-[10px]">
-                <thead id="tabellone-head" class="bg-zinc-900 text-white font-black uppercase">
-                    <!-- Intestazione dinamica delle materie -->
+                <thead id="tabellone-head" class="bg-black text-zinc-400 font-black uppercase">
+                    <!-- Intestazione dinamica -->
                 </thead>
-                <tbody id="tabellone-body" class="divide-y divide-zinc-200">
-                    <!-- Righe studenti dinamiche -->
+                <tbody id="tabellone-body" class="divide-y divide-zinc-800 bg-zinc-900/50">
+                    <!-- Righe studenti -->
                 </tbody>
             </table>
         </div>
@@ -609,9 +509,9 @@ header {
 <div id="view-studenti" class="tab-content hidden p-4 md:p-6">
     <!-- PULSANTE TORNA ALL'HUB CLASSE AGGIUNTO QUI -->
     <div class="flex justify-start mb-4">
-        <button onclick="window.changeMenu('classi')" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+        <button onclick="window.changeMenu('classi')" class="group flex items-center gap-2 bg-zinc-800 border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
             <span class="text-lg group-hover:-translate-x-1 transition-transform">⬅️</span>
-            <span class="text-[10px] font-black uppercase text-zinc-600">Torna all'Hub Classe</span>
+            <span class="text-[10px] font-black uppercase text-zinc-100">Torna all'Hub Classe</span>
         </button>
     </div>
 
@@ -621,34 +521,31 @@ header {
 
 		<!-- VIEW: PROFILO TARGET (STUDENTI & STAFF) -->
 <div id="view-profilo-target" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
-    <!-- PULSANTE TORNA INDIETRO AGGIUNTO QUI -->
     <div class="flex justify-start mb-2">
-        <button onclick="window.goBackFromProfile()" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+        <button onclick="window.goBackFromProfile()" class="group flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-4 py-2 rounded-xl shadow-lg hover:border-red-600 transition-all">
             <span class="text-lg group-hover:-translate-x-1 transition-transform">⬅️</span>
-            <span class="text-[10px] font-black uppercase text-zinc-600">Torna all'elenco</span>
+            <span class="text-[10px] font-black uppercase text-zinc-400">Torna all'elenco</span>
         </button>
     </div>
 
-    <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white/50 backdrop-blur-md">
-
+    <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-2xl">
         <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
             <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left w-full">
                 <div class="relative group">
-                    <img id="target-profile-avatar" src="" class="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-white shadow-lg object-cover bg-zinc-200 transition-transform group-hover:scale-105">
+                    <img id="target-profile-avatar" src="" class="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-zinc-800 shadow-lg object-cover bg-zinc-900 transition-transform group-hover:scale-105">
                 </div>
                 <div class="flex-1">
-                    <span id="target-profile-class-badge" class="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Caricamento...</span>
-                    <h1 id="target-profile-name" class="text-3xl md:text-5xl font-black text-zinc-900 mt-2 leading-none uppercase tracking-tighter">NOME</h1>
-                    <p id="target-profile-sub" class="text-green-600 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Studente della Fazbear School</p>
+                    <span id="target-profile-class-badge" class="px-3 py-1 bg-red-700 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Caricamento...</span>
+                    <h1 id="target-profile-name" class="text-3xl md:text-5xl font-black text-white mt-2 leading-none uppercase tracking-tighter">NOME</h1>
+                    <p id="target-profile-sub" class="text-zinc-500 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Membro della Fazbear School</p>
                 </div>
             </div>
 
-            <!-- Media (Visibile solo per Studenti) -->
-            <div id="target-media-box" class="w-full md:w-48 bg-white p-6 rounded-3xl border border-zinc-100 text-center shadow-inner relative overflow-hidden flex-shrink-0">
-                <p class="text-[10px] font-black text-zinc-400 uppercase mb-1 tracking-widest">Media Personale</p>
+            <div id="target-media-box" class="w-full md:w-48 bg-black/40 p-6 rounded-3xl border border-zinc-800 text-center shadow-inner relative overflow-hidden flex-shrink-0">
+                <p class="text-[10px] font-black text-zinc-500 uppercase mb-1 tracking-widest">Media Personale</p>
                 <p id="target-profile-media" class="text-5xl font-black text-red-600 relative z-10">0.0</p>
-                <div class="absolute bottom-0 left-0 w-full h-2 bg-zinc-100">
-                    <div id="target-media-progress-bar" class="h-full bg-gradient-to-r from-red-500 to-red-700 transition-all duration-1000" style="width: 0%"></div>
+                <div class="absolute bottom-0 left-0 w-full h-2 bg-zinc-800">
+                    <div id="target-media-progress-bar" class="h-full bg-gradient-to-r from-red-600 to-red-800 transition-all duration-1000" style="width: 0%"></div>
                 </div>
             </div>
         </div>
@@ -680,29 +577,35 @@ header {
     <!-- Sezione Liste (Visibile solo per Studenti) -->
     <div id="target-student-lists" class="space-y-6">
         <div class="grid grid-cols-3 gap-4">
-            <button onclick="window.changeMenu('registro')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 transition-all shadow-sm">
+            <button onclick="window.changeMenu('registro')" class="group bg-zinc-900 p-4 rounded-2xl border-b-4 border-zinc-800 hover:border-red-600 transition-all shadow-lg">
                 <span class="block text-lg mb-1">📊</span>
-                <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Registro</span>
+                <span class="font-black text-[10px] uppercase text-zinc-500 group-hover:text-red-500">Registro</span>
             </button>
-            <button onclick="window.changeMenu('note')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 transition-all shadow-sm">
+            <button onclick="window.changeMenu('note')" class="group bg-zinc-900 p-4 rounded-2xl border-b-4 border-zinc-800 hover:border-red-600 transition-all shadow-lg">
                 <span class="block text-lg mb-1">⚠️</span>
-                <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Note</span>
+                <span class="font-black text-[10px] uppercase text-zinc-500 group-hover:text-red-500">Note</span>
             </button>
-            <button onclick="window.changeMenu('pagella')" class="group bg-white p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 transition-all shadow-sm">
+            <button onclick="window.changeMenu('pagella')" class="group bg-zinc-900 p-4 rounded-2xl border-b-4 border-zinc-800 hover:border-red-600 transition-all shadow-lg">
                 <span class="block text-lg mb-1">🎓</span>
                 <span class="font-black text-[10px] uppercase text-zinc-400 group-hover:text-red-700">Pagella</span>
             </button>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex items-center gap-2">🎯 Ultimi Voti</h3>
-                <div id="target-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
-            </div>
-            <div class="glass-light p-6 rounded-3xl bg-white border border-zinc-100 flex flex-col h-[450px]">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-3 flex items-center gap-2">⚠️ Note</h3>
-                <div id="target-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
-            </div>
-        </div>
+    <!-- Box Voti -->
+    <div class="glass-light p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
+        <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-800 pb-3 flex items-center gap-2">
+            <span class="bg-red-900/30 p-1 rounded-lg">🎯</span> Ultimi Voti
+        </h3>
+        <div id="target-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scroll flex-grow"></div>
+    </div>
+    <!-- Box Note -->
+    <div class="glass-light p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
+        <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-800 pb-3 flex items-center gap-2">
+            <span class="bg-amber-900/30 p-1 rounded-lg">⚠️</span> Note
+        </h3>
+        <div id="target-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scroll flex-grow"></div>
+    </div>
+</div>
     </div>
 </div>
 
@@ -742,16 +645,16 @@ header {
 <div id="view-agenda" class="tab-content hidden space-y-6 max-w-full overflow-x-hidden">
     
     <!-- Header Agenda con Calendario e Navigazione -->
-    <div class="bg-white p-5 rounded-3xl border border-zinc-200 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
-        <div class="flex items-center gap-5 w-full lg:w-auto">
-            <div class="p-3 bg-red-50 rounded-2xl">
-                <span class="text-2xl">📅</span>
-            </div>
-            <div class="flex flex-col">
-                <label class="text-[10px] font-black uppercase text-zinc-400 tracking-wider">Data Registro</label>
-                <input type="date" id="global-calendar" onchange="window.updateDateContext()" 
-                    class="bg-transparent text-lg font-black text-zinc-900 outline-none cursor-pointer">
-            </div>
+<div class="glass-light p-5 rounded-3xl border border-zinc-800 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-5 w-full lg:w-auto">
+        <div class="p-3 bg-zinc-900 rounded-2xl border border-zinc-800">
+            <span class="text-2xl">📅</span>
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[10px] font-black uppercase text-zinc-500 tracking-wider">Data Registro</label>
+            <input type="date" id="global-calendar" onchange="window.updateDateContext()" 
+                class="bg-transparent text-lg font-black text-white outline-none cursor-pointer">
+        </div>
             <div class="h-10 w-[1px] bg-zinc-200 hidden md:block"></div>
             <div class="flex flex-col">
                 <span id="period-indicator" class="text-[10px] font-black uppercase text-blue-600 tracking-tighter">Caricamento...</span>
@@ -815,7 +718,7 @@ header {
             <!-- Sezione Lezioni -->
             <div class="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-zinc-100 bg-zinc-50/50 flex justify-between items-center">
-                    <h3 class="text-[11px] font-black uppercase text-zinc-500 tracking-widest flex items-center gap-2">
+                    <h3 class="text-[11px] font-black uppercase text-zinc-900 tracking-widest flex items-center gap-2">
                         <span class="w-2 h-2 bg-red-600 rounded-full"></span> Diario delle Lezioni
                     </h3>
                 </div>
@@ -827,7 +730,7 @@ header {
             <!-- Sezione Compiti -->
             <div class="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-zinc-100 bg-zinc-50/50">
-                    <h3 class="text-[11px] font-black uppercase text-zinc-500 tracking-widest flex items-center gap-2">
+                    <h3 class="text-[11px] font-black uppercase text-zinc-900 tracking-widest flex items-center gap-2">
                         <span class="w-2 h-2 bg-blue-600 rounded-full"></span> Compiti e Scadenze
                     </h3>
                 </div>
@@ -842,7 +745,7 @@ header {
             <!-- Note e Voti -->
             <div class="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-zinc-100 bg-zinc-50/50">
-                    <h3 class="text-[11px] font-black uppercase text-zinc-500 tracking-widest">🎯 Attività Odierna</h3>
+                    <h3 class="text-[11px] font-black uppercase text-zinc-900 tracking-widest">🎯 Attività Odierna</h3>
                 </div>
                 <div id="agenda-daily-info" class="p-5 space-y-3">
                     <!-- Popolato via JS -->
@@ -852,7 +755,7 @@ header {
             <!-- Presenze -->
             <div class="bg-white rounded-3xl border border-zinc-200 shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-zinc-100 bg-zinc-50/50">
-                    <h3 class="text-[11px] font-black uppercase text-zinc-500 tracking-widest">👥 Stato Presenze</h3>
+                    <h3 class="text-[11px] font-black uppercase text-zinc-900 tracking-widest">👥 Stato Presenze</h3>
                 </div>
                 <div id="agenda-attendance-info" class="p-2 max-h-[400px] overflow-y-auto custom-scroll">
                     <!-- Popolato via JS -->
@@ -898,18 +801,20 @@ header {
     </div>
 
     <div id="profilo-content-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div class="glass-light p-6 rounded-3xl bg-white/40 border border-white shadow-sm flex flex-col">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-6 flex items-center gap-2 border-b border-zinc-100 pb-3">
-                <span class="bg-red-100 p-1 rounded-lg">🎯</span> Ultimi Voti Registrati
-            </h3>
+    <!-- Box Voti -->
+    <div class="glass-light p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
+        <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-800 pb-3 flex items-center gap-2">
+            <span class="bg-red-900/30 p-1 rounded-lg">🎯</span> Ultimi Voti
+        </h3>
             <div id="profilo-voti-list" class="space-y-4">
                 </div>
         </div>
 
-        <div class="glass-light p-6 rounded-3xl bg-white/40 border border-white shadow-sm flex flex-col">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-6 flex items-center gap-2 border-b border-zinc-100 pb-3">
-                <span class="bg-amber-100 p-1 rounded-lg">⚠️</span> Note e Provvedimenti
-            </h3>
+    <!-- Box Note -->
+    <div class="glass-light p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
+        <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-800 pb-3 flex items-center gap-2">
+            <span class="bg-amber-900/30 p-1 rounded-lg">⚠️</span> Note
+        </h3>
             <div id="profilo-note-list" class="space-y-4">
                 </div>
         </div>
@@ -940,12 +845,12 @@ header {
     </div>
 </div>
     <!-- Header Studente (Card) -->
-    <div id="student-header" class="hidden bg-white p-6 rounded-[24px] border border-zinc-200 shadow-sm flex justify-between items-center">
+    <div id="student-header" class="hidden bg-zinc-900 p-6 rounded-[24px] border border-zinc-800 shadow-sm flex justify-between items-center">
         <div class="flex items-center gap-4">
              <img id="res-student-avatar" src="" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-100 shadow-sm bg-zinc-50">
         <div>
-            <span id="res-student-role" class="text-[8px] font-black uppercase tracking-widest text-red-600 bg-red-50 px-2 py-1 rounded-md">---</span>
-            <h2 id="res-student-name" class="text-2xl font-black uppercase text-zinc-900 tracking-tighter">Dati Studente</h2>
+            <span id="res-student-role" class="text-[8px] font-black uppercase tracking-widest text-red-600 bg-zinc-900 px-2 py-1 rounded-md">---</span>
+            <h2 id="res-student-name" class="text-2xl font-black uppercase text-zinc-100 tracking-tighter">Dati Studente</h2>
         </div>
     </div>
         <div class="text-right bg-zinc-900 p-4 rounded-2xl min-w-[120px]">
@@ -1087,23 +992,23 @@ header {
     </div>
 </div>
     <!-- Documento Pagella -->
-    <div class="bg-white shadow-2xl rounded-sm border-t-[12px] border-red-700 p-6 md:p-12 text-zinc-800 relative overflow-hidden">
+    <div class="bg-zinc-900 shadow-2xl rounded-sm border-t-[12px] border-red-700 p-6 md:p-12 text-zinc-100 relative overflow-hidden">
         <!-- Filigrana di sfondo (opzionale) -->
         <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
             <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" class="w-96">
         </div>
 
         <!-- Header Documento -->
-        <div class="flex flex-col md:flex-row justify-between items-start border-b-2 border-zinc-900 pb-8 mb-8 gap-6">
-            <div class="space-y-1">
-                <h1 class="text-3xl font-black tracking-tighter uppercase italic">Fazbear <span class="text-red-700">High School</span></h1>
-                <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-400">Documento di Valutazione Periodica</p>
-                <div class="pt-4 space-y-1">
-                    <p class="text-xs font-bold"><span id="pagella-gender-label">STUDENT@</span>: <span id="pagella-student-name" class="border-b border-dotted border-zinc-400 pb-0.5">---</span></p>
-                    <p class="text-xs font-bold">CLASSE: <span id="pagella-classe-label" class="border-b border-dotted border-zinc-400 pb-0.5">---</span></p>
-                    <p class="text-xs font-bold">ANNO SCOLASTICO: <span id="pagella-anno-scolastico" class="border-b border-dotted border-zinc-400 pb-0.5">---</span></p>
-                </div>
-            </div>
+<div class="flex flex-col md:flex-row justify-between items-start border-b-2 border-zinc-800 pb-8 mb-8 gap-6">
+    <div class="space-y-1">
+        <h1 class="text-3xl font-black tracking-tighter uppercase italic text-white">Fazbear <span class="text-red-700">High School</span></h1>
+        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Documento di Valutazione Periodica</p>
+        <div class="pt-4 space-y-1">
+            <p class="text-xs font-bold text-zinc-300"><span id="pagella-gender-label">STUDENT@</span>: <span id="pagella-student-name" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
+            <p class="text-xs font-bold text-zinc-300">CLASSE: <span id="pagella-classe-label" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
+            <p class="text-xs font-bold text-zinc-300">ANNO SCOLASTICO: <span id="pagella-anno-scolastico" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
+        </div>
+    </div>
 
             <div class="flex flex-col items-end gap-4">
                 <div class="flex bg-zinc-100 p-1 rounded-lg border border-zinc-200">
@@ -1617,17 +1522,16 @@ window.renderStudentList = function() {
     // Identifichiamo se la card è dello studente loggato
     const isMe = (window.userRole === ROLES.STUDENTE && window.currentUserId === s.id);
 
-    return `
-    <div onclick="window.selectAndGoToProfile('${s.id}')" 
-         class="bg-white border-2 border-zinc-200 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm ${isMe ? 'ring-2 ring-red-500/20' : ''}">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                ${avatarHTML}
-                <p class="font-black uppercase text-xs">${s.name}</p>
-            </div>
-            ${isMe ? '<span class="text-[8px] font-black bg-red-600 text-white px-2 py-1 rounded-md tracking-tighter">TU</span>' : ''}
+return `
+<div onclick="window.selectAndGoToProfile('${s.id}')" 
+     class="bg-zinc-900 border-2 border-zinc-800 p-4 rounded-xl hover:border-red-600 cursor-pointer transition-all shadow-sm">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            ${avatarHTML}
+            <p class="font-black uppercase text-xs text-zinc-200">${s.name}</p>
         </div>
-    </div>`;
+    </div>
+</div>`;
 }).join('');
 };
 
@@ -1735,24 +1639,23 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
         // Rendering Firme
         const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
 const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map((f, idx) => `
-    <div class="group flex gap-5 p-4 rounded-2xl border border-zinc-100 hover:border-red-200 hover:bg-red-50/30 transition-all">
-        <div class="flex flex-col items-center justify-center w-14 h-14 bg-white border-2 border-zinc-100 rounded-2xl shadow-sm group-hover:border-red-200 shrink-0">
-            <span class="text-lg font-black text-zinc-900 leading-none">${f.ora}°</span>
-            <span class="text-[7px] font-black uppercase text-zinc-400">Ora</span>
+    <div class="agenda-card group flex gap-5 p-4 rounded-2xl border border-zinc-800 hover:border-red-900 transition-all mb-4">
+        <div class="flex flex-col items-center justify-center w-14 h-14 bg-zinc-900 border-2 border-zinc-800 rounded-2xl shadow-sm shrink-0">
+            <span class="text-lg font-black text-white leading-none">${f.ora}°</span>
+            <span class="text-[7px] font-black uppercase text-zinc-500">Ora</span>
         </div>
         <div class="flex-1">
             <div class="flex justify-between items-start mb-1">
                 <h4 class="text-xs font-black uppercase text-red-600 tracking-tight">${f.materia}</h4>
-                <span class="text-[9px] font-bold text-zinc-400 bg-zinc-100 px-2 py-0.5 rounded-md">${f.prof}</span>
+                <span class="text-[9px] font-bold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-md">${f.prof}</span>
             ${isAdmin ? `
                     <button onclick="deleteFirma(${idx}, '${cls}')" class="text-zinc-300 hover:text-red-600 transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                     </button>
                     ` : ''}
-                </div>
-            <!-- Modifica qui sotto: aggiunta del tipo davanti all'argomento -->
-            <p class="text-sm text-zinc-700 font-medium leading-snug">
-                <span class="font-black text-zinc-900">${f.tipo || 'Lezione'}:</span> ${f.argomento || "Nessun argomento inserito"}
+            </div>
+            <p class="text-sm text-zinc-300 font-medium leading-snug">
+                <span class="font-black text-white">${f.tipo || 'Lezione'}:</span> ${f.argomento || "Nessun argomento"}
             </p>
         </div>
     </div>`).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Nessuna lezione registrata</div>';
@@ -3361,16 +3264,16 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
     if (!el) return;
 
     if (isStaff && tipo === "voti") {
-        el.innerHTML = `<div class="py-6 opacity-40 text-center"><p class="text-[10px] font-black uppercase text-zinc-400">Registro Docente</p></div>`;
+        el.innerHTML = `<div class="py-6 opacity-40 text-center"><p class="text-[10px] font-black uppercase text-zinc-500">Registro Docente</p></div>`;
         return;
     }
 
     if (!lista || lista.length === 0) {
-        el.innerHTML = `<p class="text-[9px] text-zinc-700 italic text-center py-4">Nessun dato per l'A.S. ${anno}</p>`;
+        el.innerHTML = `<p class="text-[9px] text-zinc-500 italic text-center py-4 uppercase font-bold">Nessun dato per l'A.S. ${anno}</p>`;
         return;
     }
 
-    // Ordinamento per data (DD/MM/YYYY -> YYYYMMDD)
+    // Ordinamento per data (più recenti in alto)
     const listaOrdinata = [...lista].sort((a, b) => {
         const dataA = a.data.split('/').reverse().join('');
         const dataB = b.data.split('/').reverse().join('');
@@ -3379,22 +3282,38 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
 
     el.innerHTML = listaOrdinata.map(item => {
         if (tipo === "voti") {
+            const val = window.parseVotoScolastico(item.voto);
+            const colorClass = val < 6 ? 'text-red-500' : 'text-green-400';
+            const borderClass = val < 6 ? 'border-red-900/30' : 'border-green-900/30';
+
             return `
-                <div class="flex justify-between items-center bg-zinc-50 p-3 rounded-lg border border-zinc-100 mb-2">
+                <div class="flex justify-between items-center bg-zinc-900/50 p-3 rounded-xl border ${borderClass} mb-2 hover:bg-zinc-800 transition-colors">
                     <div class="flex flex-col">
                         <div class="flex items-center gap-2 mb-1">
-                            <p class="font-black text-[10px] uppercase text-zinc-800">${item.materia}</p>
-                            <span class="text-[8px] px-1.5 py-0.5 bg-zinc-200 text-zinc-600 rounded font-bold">${item.data}</span>
+                            <p class="font-black text-[10px] uppercase text-zinc-100">${item.materia}</p>
+                            <span class="text-[8px] px-1.5 py-0.5 bg-zinc-800 text-zinc-400 rounded font-black border border-zinc-700">${item.data}</span>
                         </div>
-                        <p class="text-[9px] text-zinc-500 font-medium">${item.argomento || 'Nessun argomento'}</p>
+                        <p class="text-[9px] text-zinc-500 font-medium italic">${item.argomento || 'Valutazione'}</p>
                     </div>
-                    <span class="text-lg font-black ${parseFloat(item.voto) < 6 ? 'text-red-600' : 'text-zinc-900'}">${item.voto}</span>
+                    <span class="text-xl font-black ${colorClass}">${item.voto}</span>
                 </div>`;
         } else {
+            // Stile per le NOTE (Dark Mode)
+            const isMandato = item.tipo === 'mandato';
+            const bgClass = isMandato ? 'bg-amber-900/10' : 'bg-red-900/10';
+            const borderClass = isMandato ? 'border-amber-600' : 'border-red-600';
+            const textClass = isMandato ? 'text-amber-200' : 'text-red-200';
+
             return `
-                <div class="bg-red-50 p-3 rounded-lg border-l-4 border-red-500 mb-2">
-                    <p class="text-[8px] font-black text-red-800 uppercase mb-1">${item.data}</p>
-                    <p class="text-[10px] text-red-800 italic font-medium">"${item.testo}"</p>
+                <div class="${bgClass} p-4 rounded-xl border-l-4 ${borderClass} border-y border-r border-white/5 mb-2">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[8px] font-black uppercase ${isMandato ? 'text-amber-500' : 'text-red-500'} tracking-widest">
+                            ${isMandato ? '⚡ Mandato' : '⚠️ Nota Disciplinare'}
+                        </span>
+                        <span class="text-[8px] font-bold text-zinc-500">${item.data}</span>
+                    </div>
+                    <p class="text-[11px] ${textClass} italic font-medium leading-relaxed">"${item.testo}"</p>
+                    <p class="text-[7px] mt-2 uppercase font-black text-zinc-500">Emesso da: ${item.prof || item.autore}</p>
                 </div>`;
         }
     }).join('');
@@ -4241,7 +4160,7 @@ window.filterByClass = (cls) => {
 
         return `
             <tr class="hover:bg-zinc-50 transition-colors">
-                <td class="p-4 font-black uppercase border-r border-zinc-100 sticky left-0 bg-white z-10 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">${s.name}</td>
+                <td class="p-4 font-black uppercase border-r border-zinc-100 sticky left-0 bg-zinc-900 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">${s.name}</td>
                 ${celleMaterie}
                 <td class="p-4 text-right font-black text-sm bg-zinc-50 ${mediaGenerale < 6 ? 'text-red-600' : 'text-blue-600'}">${mediaGenerale}</td>
             </tr>`;
@@ -4730,14 +4649,14 @@ window.editPagellaComment = async () => {
         container.innerHTML = "";
         staff.forEach(s => {
             const card = document.createElement('div');
-            card.className = "bg-white p-4 rounded-3xl border-2 border-zinc-100 flex items-center gap-4 cursor-pointer hover:border-red-600 transition-all active:scale-95 group";
-            card.innerHTML = `
-                <img src="${s.avatar || s.avatar_npc || 'https://ui-avatars.com/api/?name=' + s.name}" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-50 shadow-sm">
-                <div class="flex-1">
-                    <p class="text-[11px] font-black uppercase text-zinc-800 leading-none">${s.name || 'N.D.'}</p>
-                    <p class="text-[8px] font-bold text-red-600 uppercase mt-1">${s.role || 'Staff'}</p>
-                </div>
-            `;
+card.className = "bg-zinc-900 p-4 rounded-3xl border-2 border-zinc-800 flex items-center gap-4 cursor-pointer hover:border-red-600 transition-all active:scale-95 group";
+card.innerHTML = `
+    <img src="${s.avatar || s.avatar_npc}" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-800 shadow-sm">
+    <div class="flex-1">
+        <p class="text-[11px] font-black uppercase text-zinc-100 leading-none">${s.name || 'N.D.'}</p>
+        <p class="text-[8px] font-bold text-red-500 uppercase mt-1">${s.role || 'Staff'}</p>
+    </div>
+`;
             card.onclick = () => window.selectAndGoToProfile(s.id);
             container.appendChild(card);
         });
