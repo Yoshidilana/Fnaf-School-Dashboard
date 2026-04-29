@@ -853,9 +853,9 @@ select {
     
     <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
         <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
-        <select onchange="window.selectAndGoToProfile(this.value)" 
-        class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
-    </select>
+        <select onchange="window.quickSwitchStudent(this.value)" 
+    class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+</select>
     </div>
 </div>
     <!-- Header Studente (Card) -->
@@ -945,9 +945,9 @@ select {
     
     <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
         <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
-        <select onchange="window.selectAndGoToProfile(this.value)" 
-        class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
-    </select>
+        <select onchange="window.quickSwitchStudent(this.value)" 
+    class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+</select>
     </div>
 </div>	
 
@@ -1000,9 +1000,9 @@ select {
     
     <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
         <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
-        <select onchange="window.selectAndGoToProfile(this.value)" 
-        class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
-    </select>
+        <select onchange="window.quickSwitchStudent(this.value)" 
+    class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+</select>
     </div>
 </div>
     <!-- Documento Pagella -->
@@ -3460,6 +3460,7 @@ window.selectAndGoToProfile = async (id) => {
             // Se invece veniamo dall'elenco o dall'hub, andiamo alla home del profilo
             window.changeMenu('profilo-target');
         }
+
     let media = "0.0";
     // A. MOSTRA LA SCHEDA
     if (typeof window.changeMenu === 'function') window.changeMenu('profilo-target');
@@ -4717,18 +4718,22 @@ window.updateQuickStudentSwitchers = () => {
     const switchers = document.querySelectorAll('.quick-student-switcher');
     if (!window.selectedClass || !switchers.length) return;
 
-    // Filtriamo solo gli studenti della classe attuale (escludendo lo staff)
+    // Filtriamo gli studenti della classe (escludendo lo staff)
     const classmates = window.allStudents.filter(s => 
         s.classe === window.selectedClass && 
         !['prof', 'preside', 'admin', 'vicepreside'].includes((s.role || '').toLowerCase())
     ).sort((a, b) => a.name.localeCompare(b.name));
 
     switchers.forEach(select => {
+        // Genera le opzioni
         select.innerHTML = classmates.map(s => `
             <option value="${s.id}" ${s.id === window.selectedStudentId ? 'selected' : ''}>
                 ${s.name.toUpperCase()}
             </option>
         `).join('');
+        
+        // Forza il valore visualizzato su quello dello studente attuale
+        select.value = window.selectedStudentId;
     });
 };
 
@@ -4857,6 +4862,22 @@ window.deleteStaffMessage = async (idx) => {
         localStorage.removeItem('fnaf_discord_token');
         location.reload(); // Ricarica la pagina per tornare allo stato "Ospite"
     }
+};
+	// NUOVA FUNZIONE: Cambia lo studente restando nella pagina attuale
+window.quickSwitchStudent = (id) => {
+    if (!id) return;
+    
+    console.log("🔄 Switch rapido studente ID:", id);
+    
+    // 1. Aggiorna l'ID globale dello studente selezionato
+    window.selectedStudentId = id;
+    
+    // 2. Chiama la funzione che aggiorna l'header e i dati (Voti, Note, Pagella)
+    // Questa funzione NON cambia la "view" (il menu), quindi resti dove sei
+    window.selectStudent(id);
+    
+    // 3. Sincronizza tutte le tendine "Passa a:" sparse per il sito
+    window.updateQuickStudentSwitchers();
 };
 
     </script>
