@@ -52,6 +52,11 @@ select {
         border: 1px solid #27272a;
         overflow: hidden;
     }
+	input[type="time"], 
+input[type="date"], 
+select {
+    color-scheme: dark !important;
+}
 
     .registry-table thead th {
         background: #09090b;
@@ -302,10 +307,6 @@ select {
                 <span class="text-lg">🏫</span> HUB CLASSI
             </button>
 
-        <button onclick="window.changeMenu('appello')" id="menu-appello" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
-            <span class="text-lg">📋</span> Registro Presenze
-        </button>
-
         <button onclick="window.changeMenu('presenze-studente')" id="menu-presenze-studente" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">🕒</span> Assenze e Ritardi
         </button>
@@ -409,31 +410,44 @@ select {
         </div>
     </div>
 
-    <!-- Hub Operativo -->
-    <div id="class-hub-screen" class="hidden">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-black italic uppercase text-zinc-100">Gestione Classe <span id="hub-class-name" class="text-red-600">--</span></h2>
-            <button onclick="window.resetClassSelection()" class="text-[10px] font-black uppercase text-zinc-500 hover:text-red-600">🔄 Cambia Classe</button>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <button onclick="window.changeMenu('studenti')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
-                <span class="text-4xl group-hover:scale-110 transition-transform">👥</span>
-                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Elenco Studenti</span>
-            </button>
-            <button onclick="window.changeMenu('agenda')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
-                <span class="text-4xl group-hover:scale-110 transition-transform">📅</span>
-                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Agenda Classe</span>
-            </button>
-            <button onclick="window.renderGlobalClassRegistry()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
-                <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
-                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti</span>
-            </button>
-            <button onclick="window.renderTabelloneGlobale()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
-                <span class="text-4xl group-hover:scale-110 transition-transform">📋</span>
-                <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Tabellone Scrutinio</span>
-            </button>
-        </div>
+    <!-- Hub Operativo Aggiornato -->
+<div id="class-hub-screen" class="hidden">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-black italic uppercase text-zinc-100">Gestione Classe <span id="hub-class-name" class="text-red-600">--</span></h2>
+        <button onclick="window.resetClassSelection()" class="text-[10px] font-black uppercase text-zinc-500 hover:text-red-600">🔄 Cambia Classe</button>
     </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Elenco Studenti -->
+        <button onclick="window.changeMenu('studenti')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+            <span class="text-4xl group-hover:scale-110 transition-transform">👥</span>
+            <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Elenco Studenti</span>
+        </button>
+
+        <!-- Agenda Classe -->
+        <button onclick="window.changeMenu('agenda')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+            <span class="text-4xl group-hover:scale-110 transition-transform">📅</span>
+            <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Agenda Classe</span>
+        </button>
+
+        <!-- Registro Presenze (SPOSTATO QUI) -->
+        <button id="hub-btn-appello" onclick="window.changeMenu('appello')" class="hidden p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+            <span class="text-4xl group-hover:scale-110 transition-transform">✅</span>
+            <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Presenze</span>
+        </button>
+
+        <!-- Registro Voti -->
+        <button onclick="window.renderGlobalClassRegistry()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+            <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
+            <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti</span>
+        </button>
+
+        <!-- Tabellone Scrutinio -->
+        <button onclick="window.renderTabelloneGlobale()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+            <span class="text-4xl group-hover:scale-110 transition-transform">📋</span>
+            <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Tabellone Scrutinio</span>
+        </button>
+    </div>
+</div>
 </div>
 	
 	<div id="view-gestione-staff" class="tab-content hidden p-4">
@@ -622,7 +636,7 @@ select {
     </div>
 
     <!-- Area Messaggi -->
-    <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-zinc-50/50 custom-scroll flex flex-col">
+    <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-zinc-900 custom-scroll flex flex-col">
         <!-- I messaggi appariranno qui -->
     </div>
 
@@ -1076,22 +1090,26 @@ select {
     </div>
 </div>
 
-		<!-- VIEW: APPELLO (Corretto con classe tab-content) -->
-<div id="view-appello" class="tab-content hidden mb-6 bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
+		<!-- VIEW: APPELLO (Versione Dark Fix) -->
+<div id="view-appello" class="tab-content hidden mb-6 bg-[#18181b] p-4 rounded-2xl border border-zinc-800 shadow-sm">
     <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center gap-2">
-            <div class="w-2 h-6 bg-red-600 rounded-full"></div>
-            <h3 class="font-black uppercase text-xs tracking-tighter text-zinc-900">Registro Appello - <span id="att-class-display">--</span></h3>
+        <div class="flex items-center gap-4">
+            <!-- Pulsante Indietro Dark -->
+            <button onclick="window.changeMenu('classi')" class="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-all">⬅️</button>
+            <div>
+                <h3 class="font-black uppercase text-xs tracking-tighter text-white">Registro Appello - <span id="att-class-display" class="text-red-500">--</span></h3>
+                <p class="text-[8px] font-bold text-zinc-500 uppercase">Data: <span id="att-date-display">--</span></p>
+            </div>
         </div>
-        <button onclick="window.saveAttendance()" class="bg-zinc-900 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase hover:bg-red-600 transition-all shadow-lg">
-            Salva Appello del <span id="att-date-display">--</span>
+        <button onclick="window.saveAttendance()" class="bg-red-700 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase hover:bg-red-600 transition-all shadow-lg">
+            Salva Appello
         </button>
     </div>
     
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead>
-                <tr class="text-[9px] font-black text-zinc-400 uppercase border-b border-zinc-100">
+                <tr class="text-[9px] font-black text-zinc-500 uppercase border-b border-zinc-800">
                     <th class="pb-2">Studente</th>
                     <th class="pb-2 text-center">Stato</th>
                     <th class="pb-2 text-center">Entrata</th>
@@ -1390,7 +1408,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     // Sidebar e Menu
     toggle('menu-profilo', type !== ROLES.OSPITE);
     toggle('menu-classi', isStaffGenerale || type === ROLES.OSPITE);
-    toggle('menu-appello', isStaffDidattico);
+    toggle('hub-btn-appello', isStaffDidattico); // Accendilo nell'Hub solo per lo Staff
     toggle('menu-agenda', isStudente);
     toggle('menu-registro', isStudente);
     toggle('menu-pagella', isStudente);
@@ -3780,21 +3798,29 @@ window.navDate = (unit, value) => {
     const tbody = document.getElementById('attendance-body');
     if(!tbody) return;
     
+    
     tbody.innerHTML = '';
     classStudents.forEach(s => {
         const info = attData[s.id] || { status: 'presente', entry: '08:00', exit: '13:00' };
         tbody.innerHTML += `
-            <tr class="border-b border-zinc-50">
-                <td class="py-2 text-[10px] font-black uppercase text-zinc-700">${s.name}</td>
+            <tr class="border-b border-zinc-800/50 hover:bg-zinc-800/30 transition-colors">
+                <td class="py-3 text-[10px] font-black uppercase text-zinc-200">${s.name}</td>
                 <td class="py-2 text-center">
-                    <select data-sid="${s.id}" class="att-status p-1 bg-zinc-100 rounded font-black text-[9px] outline-none">
+                    <select data-sid="${s.id}" 
+                        class="att-status p-1 bg-zinc-900 border border-zinc-700 text-white rounded font-black text-[9px] outline-none focus:border-red-600">
                         <option value="presente" ${info.status === 'presente' ? 'selected' : ''}>P</option>
                         <option value="assente" ${info.status === 'assente' ? 'selected' : ''}>A</option>
                         <option value="ritardo" ${info.status === 'ritardo' ? 'selected' : ''}>R</option>
                     </select>
                 </td>
-                <td class="py-2 text-center"><input type="time" value="${info.entry}" class="att-entry text-[9px] border rounded p-0.5"></td>
-                <td class="py-2 text-center"><input type="time" value="${info.exit}" class="att-exit text-[9px] border rounded p-0.5"></td>
+                <td class="py-2 text-center">
+                    <input type="time" value="${info.entry}" 
+                        class="att-entry text-[9px] bg-zinc-900 border border-zinc-700 text-white rounded p-1 outline-none focus:border-red-600 color-scheme-dark">
+                </td>
+                <td class="py-2 text-center">
+                    <input type="time" value="${info.exit}" 
+                        class="att-exit text-[9px] bg-zinc-900 border border-zinc-700 text-white rounded p-1 outline-none focus:border-red-600 color-scheme-dark">
+                </td>
             </tr>`;
     });
 };
@@ -4739,7 +4765,6 @@ window.loadStaffChat = () => {
     const container = document.getElementById('staff-chat-messages');
     if (!container) return;
 
-    // Pulizia listener precedente
     if (chatListener) chatListener();
 
     const chatRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'staff_chat', 'messages');
@@ -4752,30 +4777,40 @@ window.loadStaffChat = () => {
             const isMe = m.senderId === window.currentUserId;
             const isAdmin = ['preside', 'admin', 'vicepreside'].includes(window.userRole);
             
+            // Fallback per messaggi vecchi che non hanno la foto salvata o se manca
+            const avatarUrl = m.senderAvatar || `https://ui-avatars.com/api/?name=${m.senderName}&background=7f1d1d&color=fff`;
+
             return `
-                <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[80%]">
-                        <div class="flex items-center gap-2 mb-1">
+                <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2 group mb-2">
+                    
+                    <!-- Avatar per gli ALTRI (a sinistra) -->
+                    ${!isMe ? `<img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-zinc-700 shadow-md mb-1 shrink-0">` : ''}
+                    
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
+                        <div class="flex items-center gap-2 mb-1 px-1">
                             ${!isMe ? `<span class="text-[8px] font-black uppercase text-zinc-500">${m.senderName}</span>` : ''}
-                            <span class="text-[7px] text-zinc-400 font-bold">${m.time}</span>
+                            <span class="text-[7px] text-zinc-500 font-bold">${m.time}</span>
                         </div>
+                        
                         <div class="relative p-3 rounded-2xl text-sm font-medium shadow-sm 
-                            ${isMe ? 'bg-zinc-900 text-white rounded-tr-none' : 'bg-white text-zinc-800 border border-zinc-200 rounded-tl-none'}">
+                            ${isMe ? 'bg-red-700 text-white rounded-br-none' : 'bg-zinc-800 text-zinc-100 border border-zinc-700 rounded-bl-none'}">
                             ${m.text}
                             
                             ${(isMe || isAdmin) ? `
                                 <button onclick="window.deleteStaffMessage(${idx})" 
-                                    class="absolute -top-2 -right-2 bg-white border border-zinc-200 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm text-red-600">
+                                    class="absolute -top-2 -right-2 bg-zinc-900 border border-zinc-700 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm text-red-500 hover:text-red-400">
                                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
                                 </button>
                             ` : ''}
                         </div>
                     </div>
+
+                    <!-- Avatar per ME (a destra) -->
+                    ${isMe ? `<img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-zinc-700 shadow-md mb-1 shrink-0">` : ''}
                 </div>
             `;
         }).join('');
 
-        // Auto-scroll verso il basso
         container.scrollTop = container.scrollHeight;
     });
 };
@@ -4786,10 +4821,15 @@ window.sendStaffMessage = async () => {
     if (!text) return;
 
     const chatRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'staff_chat', 'messages');
+    
+    // Recuperiamo l'avatar attuale dell'utente loggato
+    const userAvatar = window.currentUserData.avatar || window.currentUserData.avatar_npc || "";
+
     const newMessage = {
         text: text,
         senderId: window.currentUserId,
         senderName: window.currentUserData.name,
+        senderAvatar: userAvatar, // <--- AGGIUNTO: Salviamo la foto nel messaggio
         time: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }),
         timestamp: Date.now()
     };
