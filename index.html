@@ -1215,6 +1215,15 @@ select {
             projectId: "fnaf-school-bot", 
             appId: "1:862125328005:web:463c6fb776a0f7e1e24bec" 
         };
+	
+	   const LISTA_MATERIE = {
+    "italiano": "🇮🇹", "latino": "📜", "inglese": "🇬🇧", "francese": "🇫🇷", 
+    "spagnolo": "🇪🇸", "tedesco": "🇩🇪", "storia": "🏛️", "filosofia": "🤔", 
+    "matematica": "📐", "fisica": "⚛️", "scienze": "🧪", "arte": "🎨", 
+    "musica": "🎵", "sport": "⛳", "ginnastica": "🏃", "magia": "🪄", 
+    "religione": "🙏", "cinese": "🇨🇳", "geostoria": "🏛️🗺️", 
+    "educazione civica": "🧑‍✈️", "condotta": "😈😇"
+};
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -1896,6 +1905,7 @@ if (resMediaElem) {
     const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
+    const emoji = LISTA_MATERIE[m.toLowerCase().trim()] || "📚";
     
     // Sostituisci il calcolo della media di materia (avg) con questo:
     const avg = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
@@ -1904,8 +1914,12 @@ if (resMediaElem) {
     <tr class="group">
         <td class="subject-column">
             <div class="flex flex-col">
-                <span class="font-black text-zinc-800 uppercase text-[11px] tracking-tight">${m}</span>
-                <span class="text-[8px] text-zinc-400 font-bold uppercase mt-0.5">Docente: ${m_voti[0]?.prof || 'N.D.'}</span>
+                <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">
+                    ${emoji} ${m.toUpperCase()} 
+                </span>
+                <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">
+                    Docente: ${m_voti[0]?.prof || 'N.D.'}
+                </span>
             </div>
         </td>
         <td class="text-center">
@@ -2133,11 +2147,15 @@ await setDoc(agendaRef, {
                     </div>
                 </div>
                 <div>
-                    <label class="modal-label">Materia</label>
-                    <select id="m-mat" class="modal-input">
-                        ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
-                    </select>
-                </div>
+    <label class="modal-label">Materia</label>
+    <select id="m-mat" class="modal-input">
+        ${(window.currentUserData?.materie || ['Presidenza']).map(m => {
+            const cleanMat = m.toLowerCase().trim();
+            const emoji = LISTA_MATERIE[cleanMat] || "✒️"; // Usa la penna se non trova l'emoji
+            return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
+        }).join('')}
+    </select>
+</div>
                 <div>
                     <label class="modal-label">Argomento trattato</label>
                     <input id="m-arg" type="text" placeholder="Es: Spiegazione capitolo 4..." class="modal-input">
@@ -2525,12 +2543,19 @@ window.toggleNotifPanel = () => {
 
             // --- MATERIE PER I PROF (La tua originale) ---
             if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
-                const mSelect = document.getElementById('input-grade-subject');
-                if (mSelect) {
-                    const mats = window.currentUserData.materie || (window.userRole === ROLES.PRESIDE ? ['Dirigenza'] : []);
-                    mSelect.innerHTML = mats.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
-                }
-            }
+    const mSelect = document.getElementById('input-grade-subject');
+    
+    if (mSelect) {
+        // Prende le materie del prof, se non ci sono usa una lista vuota
+        const mats = window.currentUserData.materie || []; 
+        
+        mSelect.innerHTML = mats.map(m => {
+            const cleanMat = m.toLowerCase().trim();
+            const emoji = LISTA_MATERIE[cleanMat] || "📚"; // Cerca l'emoji, altrimenti usa il libro
+            return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
+        }).join('');
+    }
+}
         } else {
             // Se l'utente ha il token ma non è nel database, lo trattiamo come ospite registrato
             applyRoleUI();
@@ -4420,59 +4445,82 @@ window.hubManager = {
     },
 
     // 2. NUOVO UTENTE
-    nuovoUtente: function() {
-        const role = window.userRole;
-        const isAuthorized = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(role);
+ nuovoUtente: function() {
+    const role = window.userRole;
+    const isAuthorized = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(role);
 
-        if (!isAuthorized) {
-            alert("⛔ Accesso Negato: Solo la Segreteria o l'Amministrazione possono registrare nuovi utenti.");
-            return;
-        }
+    if (!isAuthorized) {
+        alert("⛔ Accesso Negato: Solo la Segreteria o l'Amministrazione possono registrare nuovi utenti.");
+        return;
+    }
 
-        const container = document.getElementById('hub-dynamic-content');
-        container.classList.remove('hidden');
-        container.innerHTML = `
-            <div class="bg-white p-6 rounded-2xl border-2 border-zinc-900 shadow-xl space-y-4">
-                <h3 class="font-black uppercase text-xs border-b pb-2">Registra Nuovo Utente</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input id="new-u-id" type="text" placeholder="ID Discord" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-red-600">
-                    <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-red-600">
-                    <select id="new-u-role" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none">
-                        <option value="Studente">Studente</option>
-                        <option value="Prof">Prof</option>
-                        <option value="Preside">Preside</option>
-                        <option value="Vice Preside">Vice Preside</option>
-                        <option value="Bidello">Bidello</option>
-                        <option value="Tecnico">Tecnico</option>
-                        <option value="Segreteria">Segreteria</option>
-                    </select>
-                    <select id="new-u-class" class="p-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none">
-                        <option value="None">Nessuna Classe</option>
-                        <option value="A">Classe A</option>
-                        <option value="B">Classe B</option>
-                        <option value="C">Classe C</option>
-                    </select>
+    const container = document.getElementById('hub-dynamic-content');
+    container.classList.remove('hidden');
+    container.innerHTML = `
+        <div class="bg-[#18181b] p-6 rounded-2xl border border-[#27272a] shadow-2xl space-y-4">
+            <h3 class="font-black uppercase text-[10px] border-b border-[#27272a] pb-2 text-zinc-400">Registra Nuovo Utente</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input id="new-u-id" type="text" placeholder="ID Discord" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
+                <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
+                
+                <select id="new-u-role" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white" 
+                    onchange="document.getElementById('materia-input-group').classList.toggle('hidden', this.value !== 'Prof')">
+                    <option value="Studente">Studente</option>
+                    <option value="Prof">Prof</option>
+                    <option value="Preside">Preside</option>
+                    <option value="Vice Preside">Vice Preside</option>
+                    <option value="Bidello">Bidello</option>
+                    <option value="Tecnico">Tecnico</option>
+                    <option value="Segreteria">Segreteria</option>
+                </select>
+
+                <select id="new-u-class" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white">
+                    <option value="None">Nessuna Classe</option>
+                    <option value="A">Classe A</option>
+                    <option value="B">Classe B</option>
+                    <option value="C">Classe C</option>
+                </select>
+
+                <div id="materia-input-group" class="hidden col-span-full">
+                    <label class="text-[9px] font-black uppercase text-zinc-500 ml-1">Materie (separate da virgola)</label>
+                    <input id="new-u-materie" type="text" placeholder="es: italiano, storia, latino" class="w-full p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
                 </div>
-                <button onclick="window.hubManager.salvaNuovoUtente()" class="w-full bg-zinc-900 text-white p-4 rounded-xl font-black uppercase text-[10px] hover:bg-red-700 transition-all">Salva nel Database</button>
-            </div>`;
-    },
+            </div>
+            <button onclick="window.hubManager.salvaNuovoUtente()" class="w-full bg-red-600 text-white p-4 rounded-xl font-black uppercase text-[10px] hover:bg-red-700 transition-all shadow-lg shadow-red-900/20">Salva nel Database</button>
+        </div>`;
+},
 
     // 3. SALVA E ELIMINA
     salvaNuovoUtente: async function() {
-        const id = document.getElementById('new-u-id').value.trim();
-        const name = document.getElementById('new-u-name').value.trim();
-        const role = document.getElementById('new-u-role').value;
-        const classe = document.getElementById('new-u-class').value;
-        if(!id || !name) return alert("ID e Nome sono obbligatori!");
-        const isStaffDidattico = ['Prof', 'Preside', 'Vice Preside'].includes(role);
-        try {
-            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), {
-                name: name, role: role, classe: classe === 'None' ? null : classe, materie: isStaffDidattico ? [] : null
-            });
-            alert("Utente registrato con successo!");
-            this.mostraListaUtenti();
-        } catch (e) { alert("Errore: " + e.message); }
-    },
+    const id = document.getElementById('new-u-id').value.trim();
+    const name = document.getElementById('new-u-name').value.trim();
+    const role = document.getElementById('new-u-role').value;
+    const classe = document.getElementById('new-u-class').value;
+    const materieRaw = document.getElementById('new-u-materie').value;
+
+    if(!id || !name) return alert("⚠️ ID e Nome sono obbligatori!");
+
+    // Gestione array materie
+    let arrayMaterie = null;
+    if (role === 'Prof' && materieRaw) {
+        // Converte "Matematica, ITALIANO" in ["matematica", "italiano"]
+        arrayMaterie = materieRaw.split(',').map(m => m.trim().toLowerCase()).filter(m => m !== "");
+    }
+
+    try {
+        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), {
+            name: name,
+            role: role,
+            classe: classe === 'None' ? null : classe,
+            materie: arrayMaterie
+        });
+        alert("✅ Utente registrato correttamente!");
+        this.mostraListaUtenti();
+    } catch (e) {
+        console.error(e);
+        alert("❌ Errore: " + e.message);
+    }
+},
 
     eliminaUtente: async function(id) {
         if(!confirm(`Sei sicuro di voler eliminare l'utente ${id}?`)) return;
