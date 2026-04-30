@@ -1318,14 +1318,6 @@ if (window.selectedClass || (window.userRole === 'studente' && window.currentUse
     if (document.getElementById('view-profilo')?.classList.contains('active-view')) {
         window.apriProfiloPersonale();
     }
-
-	// RE-INSERISCI QUESTO: È il pezzo che fa funzionare i calendari al click
-document.addEventListener('change', (e) => {
-    if (e.target.classList.contains('shared-calendar') || e.target.id === 'global-calendar') {
-        console.log("Data cambiata manualmente:", e.target.value);
-        window.updateDateContext(e.target.value);
-    }
-});
     
     // PEZZO MANCANTE 2: Profilo dello studente selezionato (Target)
     const viewProfiloTarget = document.getElementById('view-profilo-target');
@@ -4149,22 +4141,26 @@ window.filterByClass = (cls) => {
     const cls = window.selectedClass;
     if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica.");
 
+    // Cambia menu
     window.changeMenu('tabellone');
+    
     const thead = document.getElementById('tabellone-head');
     const tbody = document.getElementById('tabellone-body');
     const tabTitle = document.getElementById('tab-class-name');
     
     if(tabTitle) tabTitle.innerText = cls;
+    
+    // Placeholder di caricamento
     tbody.innerHTML = '<tr><td colspan="20" class="p-10 text-center animate-pulse font-black uppercase">Generazione scrutinio in corso...</td></tr>';
 
     const classStudents = window.allStudents.filter(s => s.classe === cls);
     const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
     
-    let allData = [];
     let materieSet = new Set();
 
-    // 1. Recupero massivo dei dati
-    for (const student of classStudents) {
+    // --- 1. RECUPERO MASSIVO E PARALLELO (FIX LAG) ---
+    // Avviamo tutte le 8 richieste insieme invece di aspettare una per una
+    const promesseStudenti = classStudents.map(async (student) => {
         const recRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', student.id);
         const snap = await getDoc(recRef);
         const voti = snap.exists() ? (snap.data().voti || []) : [];
@@ -4174,47 +4170,52 @@ window.filterByClass = (cls) => {
         
         votiAnno.forEach(v => {
             const mat = v.materia.toUpperCase().trim();
-            materieSet.add(mat);
+            materieSet.add(mat); // Il Set raccoglie le materie uniche di tutti
             if (!medieStudente[mat]) medieStudente[mat] = [];
             medieStudente[mat].push(window.parseVotoScolastico(v.voto));
         });
 
-        allData.push({ name: student.name, medie: medieStudente });
-    }
+        return { name: student.name, medie: medieStudente };
+    });
+
+    // Qui aspettiamo che il "gruppo" di richieste finisca
+    const allData = await Promise.all(promesseStudenti);
 
     const materieOrdinate = Array.from(materieSet).sort();
 
-    // 2. Render Intestazione
+    // --- 2. RENDER INTESTAZIONE ---
     thead.innerHTML = `
         <tr>
-            <th class="p-4 border-r border-zinc-700 sticky left-0 bg-zinc-900 z-10">Studente</th>
-            ${materieOrdinate.map(m => `<th class="p-4 text-center border-r border-zinc-700">${m}</th>`).join('')}
-            <th class="p-4 text-right bg-red-800">Media Gen.</th>
+            <th class="p-4 border-r border-zinc-700 sticky left-0 bg-zinc-900 z-10 text-zinc-400 text-[10px] uppercase font-black">Studente</th>
+            ${materieOrdinate.map(m => `<th class="p-4 text-center border-r border-zinc-700 text-zinc-400 text-[10px] uppercase font-black">${m}</th>`).join('')}
+            <th class="p-4 text-right bg-red-900 text-white text-[10px] uppercase font-black">Media Gen.</th>
         </tr>`;
 
-    // 3. Render Righe
+    // --- 3. RENDER RIGHE ---
     tbody.innerHTML = allData.map(s => {
         let sommaMedie = 0;
         let contaMaterie = 0;
 
         const celleMaterie = materieOrdinate.map(m => {
             const votiMat = s.medie[m];
-            if (!votiMat) return `<td class="p-4 text-center text-zinc-300 border-r border-zinc-100">-</td>`;
+            if (!votiMat) return `<td class="p-4 text-center text-zinc-600 border-r border-zinc-800">-</td>`;
             
             const mediaMat = (votiMat.reduce((a, b) => a + b, 0) / votiMat.length).toFixed(1);
             sommaMedie += parseFloat(mediaMat);
             contaMaterie++;
             
-            return `<td class="p-4 text-center font-bold border-r border-zinc-100 ${mediaMat < 6 ? 'text-red-600' : 'text-green-600'}">${mediaMat}</td>`;
+            const colorClass = mediaMat < 6 ? 'text-red-500' : 'text-green-500';
+            return `<td class="p-4 text-center font-bold border-r border-zinc-800 ${colorClass}">${mediaMat}</td>`;
         }).join('');
 
         const mediaGenerale = contaMaterie > 0 ? (sommaMedie / contaMaterie).toFixed(1) : "0.0";
+        const colorMediaGen = mediaGenerale < 6 ? 'text-red-500' : 'text-blue-400';
 
         return `
-            <tr class="hover:bg-zinc-50 transition-colors">
-                <td class="p-4 font-black uppercase border-r border-zinc-100 sticky left-0 bg-zinc-900 z-10 shadow-[2px_0_5px_rgba(0,0,0,0.05)]">${s.name}</td>
+            <tr class="hover:bg-zinc-800/50 transition-colors border-b border-zinc-800">
+                <td class="p-4 font-black uppercase border-r border-zinc-800 sticky left-0 bg-zinc-900 z-10 text-zinc-200 text-xs">${s.name}</td>
                 ${celleMaterie}
-                <td class="p-4 text-right font-black text-sm bg-zinc-50 ${mediaGenerale < 6 ? 'text-red-600' : 'text-blue-600'}">${mediaGenerale}</td>
+                <td class="p-4 text-right font-black text-sm bg-zinc-900/50 ${colorMediaGen}">${mediaGenerale}</td>
             </tr>`;
     }).join('');
 };
@@ -4927,6 +4928,13 @@ window.quickSwitchStudent = (id) => {
     // 3. Sincronizza tutte le tendine "Passa a:" sparse per il sito
     window.updateQuickStudentSwitchers();
 };
+
+document.addEventListener('change', (e) => {
+    if (e.target.classList.contains('shared-calendar') || e.target.id === 'global-calendar') {
+        console.log("Data cambiata manualmente:", e.target.value);
+        window.updateDateContext(e.target.value);
+    }
+});
 
     </script>
 </body>
