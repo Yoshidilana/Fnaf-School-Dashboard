@@ -341,7 +341,7 @@ select {
         </nav>
     </div>
     <div class="px-8 mt-auto pt-6 border-t border-zinc-800">
-        <p class="text-[8px] font-bold text-zinc-600 uppercase">Fazbear Classroom v4.0</p>
+        <p class="text-[8px] font-bold text-zinc-600 uppercase">Fazbear Classroom v3.0</p>
     </div>
 </aside>
 
@@ -673,6 +673,9 @@ select {
             <div class="flex flex-col">
                 <span id="period-indicator" class="text-[10px] font-black uppercase text-blue-600 tracking-tighter">Caricamento...</span>
                 <h2 class="text-xl font-black uppercase italic text-zinc-800 leading-none">Classe <span id="agenda-class-title" class="text-red-600">--</span></h2>
+    <button onclick="window.changeMenu('classi')" class="btn-staff-nav hidden mt-2 bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border border-red-700/30 w-fit">
+        ⬅️ Torna all'Hub Classe
+    </button>
                        <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-black px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
         🏫 Cambia Classe
     </button>
@@ -841,13 +844,19 @@ select {
 <!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
 <div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
     <div class="flex items-center gap-3">
+        <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
+            ⬅️ Torna all'Hub Classe
+        </button>
         <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
-            ⬅️ Elenco Studenti
+            👥 Elenco Studenti
         </button>
         <!-- MODIFICATO QUI: da changeMenu a resetClassSelection -->
         <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
             🏫 Cambia Classe
         </button>
+    <button onclick="window.changeMenu('profilo-target')" class="btn-staff-nav hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-3 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
+        👤 Profilo Studente
+    </button>
     </div>
 
     
@@ -934,9 +943,15 @@ select {
 	<!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
 <div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
     <div class="flex items-center gap-3">
+        <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
+            ⬅️ Torna all'Hub Classe
+        </button>
         <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
             ⬅️ Elenco Studenti
         </button>
+    <button onclick="window.changeMenu('profilo-target')" class="btn-staff-nav hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-3 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
+        👤 Profilo Studente
+    </button>
         <!-- MODIFICATO QUI: da changeMenu a resetClassSelection -->
         <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
             🏫 Cambia Classe
@@ -989,6 +1004,9 @@ select {
 <!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
 <div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
     <div class="flex items-center gap-3">
+        <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
+            ⬅️ Torna all'Hub Classe
+        </button>
         <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
             ⬅️ Elenco Studenti
         </button>
@@ -996,6 +1014,9 @@ select {
         <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-zinc-100 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
             🏫 Cambia Classe
         </button>
+    <button onclick="window.changeMenu('profilo-target')" class="btn-staff-nav hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-3 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
+        👤 Profilo Studente
+    </button>
     </div>
     
     <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
@@ -1153,7 +1174,7 @@ select {
                 </div>
                 <div class="flex justify-between text-[10px] font-bold uppercase">
                     <span class="text-zinc-400">Versione:</span>
-                    <span class="text-zinc-800">v3.0-Alpha</span>
+                    <span class="text-zinc-800">v3.0-Stable</span>
                 </div>
             </div>
         </div>
@@ -1450,6 +1471,22 @@ toggle('home-btn-pagella', isStudente);
 // --- GESTIONE PERSONALE (Solo Vertici) ---
 toggle('menu-gestione-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 toggle('menu-notifiche-full', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
+
+    // --- NUOVA LOGICA NAVIGAZIONE STAFF ---
+    // Mostra i pulsanti "Hub" e "Profilo Studente" solo allo Staff
+    document.querySelectorAll('.btn-staff-nav').forEach(btn => {
+        if (isStaffGenerale) {
+            btn.classList.remove('hidden');
+        } else {
+            btn.classList.add('hidden');
+        }
+    });
+
+    // Il resto del codice nasconde già l'intera barra agli studenti, 
+    // ma questo aggiunge un secondo livello di sicurezza.
+    document.querySelectorAll('.student-nav-bar').forEach(nav => {
+        nav.classList.toggle('hidden', isStudente);
+    });
 
 // --- INIZIALIZZAZIONE AUTOMATICA ---
 if (isStudente) {
