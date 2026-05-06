@@ -11,14 +11,14 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body { 
-        font-family: 'Plus Jakarta Sans', sans-serif; 
-        background: #09090b; 
-        color: #f4f4f5; 
-        min-height: 100vh;
-        display: flex; 
-        flex-direction: column;
-        overflow-y: auto;
-    }
+    font-family: 'Plus Jakarta Sans', sans-serif; 
+    background: #121214; /* Modificato: era #09090b */
+    color: #f4f4f5; 
+    min-height: 100vh;
+    display: flex; 
+    flex-direction: column;
+    overflow-y: auto;
+}
 	/* Colora la tendina che si apre (le option) */
 select option {
     background-color: #18181b !important; /* Grigio scuro come le card */
@@ -116,22 +116,31 @@ select {
 
     /* Sidebar */
     .sidebar-item { 
-        transition: all 0.3s; 
-        border-radius: 12px; 
-        font-size: 0.7rem; 
-        font-weight: 800; 
-        color: #a1a1aa;
-        letter-spacing: 0.05em;
-    }
-    .sidebar-item:hover { background: rgba(255, 255, 255, 0.05); color: #ffffff; }
-    .sidebar-item.active { background: #dc2626 !important; color: #ffffff !important; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
+    transition: all 0.3s; 
+    border-radius: 12px; 
+    font-size: 0.7rem; 
+    font-weight: 800; 
+    color: #a1a1aa; /* Grigio chiaro per i testi non attivi */
+    letter-spacing: 0.05em;
+}
+
+.sidebar-item:hover { 
+    background: rgba(255, 255, 255, 0.05); 
+    color: #ffffff; 
+}
+
+.sidebar-item.active { 
+    background: #dc2626 !important; /* Manteniamo il rosso solo per l'elemento selezionato */
+    color: #ffffff !important; 
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); 
+}
 
 /* 1. Stile base per i contenitori e gli input isolati */
 .modal-input, 
 .filter-container, 
 .quick-student-switcher, 
 .quad-switch-container {
-    background-color: #09090b !important;
+    background-color: #1c1c1f !important; /* Leggermente più chiaro per staccare dal fondo */
     border: 1px solid #3f3f46 !important;
     color: #ffffff !important;
     outline: none;
@@ -177,10 +186,10 @@ select {
     }
 
     /* Override Globali per classi Tailwind residue */
-    .bg-white { background-color: #18181b !important; }
-    .text-zinc-800, .text-zinc-900, .text-zinc-700 { color: #f4f4f5 !important; }
-    .border-zinc-200, .border-zinc-100, .border-zinc-300 { border-color: #27272a !important; }
-    .bg-zinc-50, .bg-zinc-100, .bg-zinc-200 { background-color: #09090b !important; }
+.bg-white { background-color: #18181b !important; }
+.text-zinc-800, .text-zinc-900, .text-zinc-700 { color: #f4f4f5 !important; }
+.border-zinc-200, .border-zinc-100, .border-zinc-300 { border-color: #27272a !important; }
+.bg-zinc-50, .bg-zinc-100, .bg-zinc-200 { background-color: #121214 !important; } /* Modificato: era #09090b */
 
     /* Componenti Specifici Pagella */
     #view-pagella .bg-zinc-900 { background: #121214 !important; border: 1px solid #27272a; }
@@ -216,7 +225,7 @@ select {
 </div>
 
 <!-- Top Bar -->
-<header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-800 bg-zinc-900 z-50">
+<header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-800 bg-[#18181b] z-50">
     <div class="flex items-center gap-4">
         <div class="relative w-14 h-14 flex shrink-0 items-center justify-center cursor-pointer group" onclick="handleFreddyClick(event)">
             <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" 
@@ -289,7 +298,7 @@ select {
     <div class="flex flex-1 bg-zinc-700">
 
         <!-- Sidebar Ristilizzata -->
-<aside id="main-sidebar" class="w-72 border-r border-zinc-800 bg-zinc-900 flex flex-col shrink-0 py-6 z-40 shadow-xl">
+<aside id="main-sidebar" class="w-72 border-r border-zinc-800 bg-[#18181b] flex flex-col shrink-0 py-6 z-40 shadow-xl">
     <div class="px-6 mb-8">
 <body class="sidebar-hidden">
         <nav class="flex-1 space-y-1">
@@ -314,6 +323,10 @@ select {
             <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
                 <span class="text-lg">📅</span> AGENDA
             </button>
+
+	<button onclick="window.changeMenu('didattica')" id="menu-didattica" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
+    <span class="text-lg">📚</span> MATERIALE DIDATTICO
+</button>
 
         <button onclick="window.changeMenu('registro')" id="menu-registro" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">📝</span> REGISTRO VOTI
@@ -346,7 +359,7 @@ select {
 </aside>
 
         <!-- Contenuto -->
-        <main class="flex-1 bg-[#09090b] p-6 relative">
+        <main class="flex-1 bg-[#121214] p-6 relative">
 
 	<!-- VIEW: HOME (Schermata di Benvenuto) -->
 <div id="view-home" class="tab-content active-view flex flex-col items-center justify-center min-h-[70vh] text-center">
@@ -388,6 +401,11 @@ select {
 	<button id="home-btn-presenze" onclick="window.changeMenu('presenze-studente')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
     <span class="text-3xl block mb-2">🕒</span>
     <span class="font-black uppercase text-[10px]">Assenze e Ritardi</span>
+</button>
+
+		<button id="home-btn-didattica" onclick="window.changeMenu('didattica')" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
+    <span class="text-3xl block mb-2">📖</span>
+    <span class="font-black uppercase text-[10px] text-zinc-200">Didattica</span>
 </button>
 
     <button id="home-btn-pagella" onclick="window.changeMenu('pagella')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
@@ -440,6 +458,12 @@ select {
             <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
             <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti</span>
         </button>
+
+	<!-- Didattica e Materiali (AGGIUNTO) -->
+<button onclick="window.changeMenu('didattica')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+    <span class="text-4xl group-hover:scale-110 transition-transform">📚</span>
+    <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Didattica e Materiali</span>
+</button>
 
         <!-- Tabellone Scrutinio -->
         <button onclick="window.renderTabelloneGlobale()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
@@ -835,6 +859,29 @@ select {
             <div id="profilo-note-list" class="space-y-4">
                 </div>
         </div>
+    </div>
+</div>
+
+
+		<!-- VIEW: DIDATTICA -->
+<div id="view-didattica" class="tab-content hidden space-y-6">
+    <div class="flex justify-between items-center bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-lg">
+        <div>
+            <h2 class="text-2xl font-black uppercase italic text-white">Materiale Didattico</h2>
+            <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Dispense, PDF e Risorse di Studio</p>
+        </div>
+        <button id="btn-add-didattica" onclick="window.openModalDidattica()" class="hidden bg-red-700 text-white text-[10px] font-black px-6 py-3 rounded-xl uppercase hover:bg-red-600 transition-all">
+            Carica Materiale +
+        </button>
+    </div>
+
+    <!-- Filtro Materia -->
+    <div class="flex gap-2 overflow-x-auto pb-2 custom-scroll" id="didattica-filter-materie">
+        <!-- Popolato via JS -->
+    </div>
+
+    <div id="didattica-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- I materiali appariranno qui -->
     </div>
 </div>
 		
@@ -1243,7 +1290,7 @@ select {
     "matematica": "📐", "fisica": "⚛️", "scienze": "🧪", "arte": "🎨", 
     "musica": "🎵", "sport": "⛳", "ginnastica": "🏃", "magia": "🪄", 
     "religione": "🙏", "cinese": "🇨🇳", "geostoria": "🏛️🗺️", 
-    "educazione civica": "🧑‍✈️", "condotta": "😈😇"
+    "educazione civica": "🧑‍✈️", "condotta": "😈😇", "informatica": "💻🖥️"
 };
 
         const app = initializeApp(firebaseConfig);
@@ -1471,6 +1518,10 @@ toggle('home-btn-pagella', isStudente);
 // --- GESTIONE PERSONALE (Solo Vertici) ---
 toggle('menu-gestione-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 toggle('menu-notifiche-full', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
+
+toggle('menu-didattica', type === ROLES.STUDENTE);
+toggle('home-btn-didattica', type === ROLES.STUDENTE);
+toggle('btn-add-didattica', isStaffDidattico || type === ROLES.ADMIN);
 
     // --- NUOVA LOGICA NAVIGAZIONE STAFF ---
     // Mostra i pulsanti "Hub" e "Profilo Studente" solo allo Staff
@@ -1976,14 +2027,14 @@ if (resMediaElem) {
                 .filter(m => !materieNormalizzate.includes(m));
 
             if(altreMaterie.length > 0) {
-                vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[10px] font-black uppercase text-center text-zinc-500">Altre Materie Registrate</td></tr>`;
+                vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[10px] font-black uppercase text-center text-zinc-500">Altre Materie</td></tr>`;
                 altreMaterie.forEach(m => {
                     const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m);
                     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
                     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
                     const avg = (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1);
 
-                    vHtml += `<tr class="bg-zinc-50/50">
+                    vHtml += `<tr class="bg-zinc-900">
                         <td class="p-2 pl-4 font-bold uppercase text-blue-800">${m}</td>
                         <td class="p-2">${q1.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
                         <td class="p-2">${q2.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
@@ -2214,7 +2265,7 @@ await setDoc(agendaRef, {
     } else if(type === 'compiti') {
         const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
         body.innerHTML = `
-            <div class="space-y-4">
+            <div class="flex gap-4">
                 <div>
                     <label class="modal-label">Materia di riferimento</label>
                     <select id="m-compiti-mat" class="modal-input">
@@ -2638,6 +2689,9 @@ window.changeMenu = (menu) => {
         targetView.classList.remove('hidden');
         targetView.classList.add('active-view');
     }
+	if (menu === 'didattica') {
+    window.loadDidattica();
+}
 
     // --- LOGICA HUB CLASSI ---
     if (menu === 'classi') {
@@ -2827,34 +2881,75 @@ window.renderPagella = async (voti, aySelezionato) => {
     const commentiMaterie = recordData[`commenti_materie_q${currentQ}`] || {};
 
     // --- 4. RENDERING TABELLA ---
-    if (materie.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold">Nessun dato registrato</td></tr>';
-    } else {
-        tbody.innerHTML = materie.map(m => {
-            const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
-            const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
-            
-            const displayVoto = val !== null ? Math.round(val) : "-";
-            const color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
-            const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
-            
-            const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
-            const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
+if (materie.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold">Nessun dato registrato</td></tr>';
+} else {
+    // Filtriamo "condotta" dalle materie normali se presente per gestirla dopo
+    const materieFiltrate = materie.filter(m => m !== 'condotta');
 
+    let htmlRighe = materieFiltrate.map(m => {
+        const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
+        
+        // LOGICA RELIGIONE: Giudizio invece di Voto
+        if (m === 'religione') {
+            const giudizioRel = recordData[`giudizio_religione_q${currentQ}`] || "Non Valutato";
+            const puòModificareRel = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes('religione'));
+            
             return `
                 <tr class="border-b border-zinc-100 group">
-                    <td class="py-4 font-bold uppercase text-xs">${m}</td>
-                    <td class="py-4 text-center font-black text-sm ${color}">${displayVoto}</td>
+                    <td class="py-4 font-bold uppercase text-xs">🙏 RELIGIONE</td>
+                    <td class="py-4 text-center font-black text-[10px] text-blue-600 uppercase">${giudizioRel}</td>
                     <td class="py-4 px-4">
                         <div class="flex flex-col gap-1">
-                            <p class="text-[10px] text-zinc-600 italic leading-tight">${commentoMateria}</p>
-                            ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
+                            <p class="text-[10px] text-zinc-600 italic leading-tight">Valutazione dell'insegnamento della religione cattolica.</p>
+                            ${puòModificareRel ? `<button onclick="window.editReligioneGiudizio(${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Assegna Giudizio</button>` : ''}
                         </div>
                     </td>
-                    <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
+                    <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">-</td>
                 </tr>`;
-        }).join('');
-    }
+        }
+
+        // LOGICA MATERIE STANDARD
+        const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
+        const displayVoto = val !== null ? Math.round(val) : "-";
+        const color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
+        const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
+        const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
+        const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
+
+        return `
+            <tr class="border-b border-zinc-100 group">
+                <td class="py-4 font-bold uppercase text-xs">${LISTA_MATERIE[m] || '📚'} ${m.toUpperCase()}</td>
+                <td class="py-4 text-center font-black text-sm ${color}">${displayVoto}</td>
+                <td class="py-4 px-4">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-[10px] text-zinc-600 italic leading-tight">${commentoMateria}</p>
+                        ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
+                    </div>
+                </td>
+                <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
+            </tr>`;
+    }).join('');
+
+    // AGGIUNTA RIGA CONDOTTA (Sempre in fondo)
+    const votoCondotta = recordData[`condotta_q${currentQ}`] || "9"; // Default 9 se non impostato
+    const isPreside = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
+    
+    htmlRighe += `
+        <tr class="bg-zinc-50/50 group">
+            <td class="py-4 font-black uppercase text-xs">😇 CONDOTTA</td>
+            <td class="py-4 text-center font-black text-sm ${parseInt(votoCondotta) < 6 ? 'text-red-600' : 'text-zinc-900'}">${votoCondotta}</td>
+            <td class="py-4 px-4">
+                <div class="flex flex-col gap-1">
+                    <p class="text-[10px] text-zinc-500 italic leading-tight">Valutazione del comportamento e del rispetto del regolamento.</p>
+                    ${isPreside ? `<button onclick="window.editCondotta(${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica (Solo Dirigenza)</button>` : ''}
+                </div>
+            </td>
+            <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${parseInt(votoCondotta) < 6 ? 'SI' : 'NO'}</td>
+        </tr>`;
+
+    tbody.innerHTML = htmlRighe;
+}
 
     // --- 5. GIUDIZIO GLOBALE ---
     const field = `commento_q${currentQ}`;
@@ -4972,6 +5067,181 @@ document.addEventListener('change', (e) => {
         window.updateDateContext(e.target.value);
     }
 });
+	
+	// Funzione per modificare la Condotta (Solo Presidi/Admin)
+window.editCondotta = async (quad) => {
+    const nuovoVoto = prompt(`Inserisci il voto di Condotta per il ${quad}° Quadrimestre (es: 8, 9, 10):`);
+    if (nuovoVoto === null || nuovoVoto === "") return;
+
+    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+    const update = {};
+    update[`condotta_q${quad}`] = nuovoVoto;
+
+    try {
+        await setDoc(recordRef, update, { merge: true });
+        alert("Voto condotta aggiornato!");
+        // Refresh pagella
+        const snap = await getDoc(recordRef);
+        window.renderPagella(snap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+// Funzione per modificare il Giudizio di Religione (Solo Prof Religione o Presidi)
+window.editReligioneGiudizio = async (quad) => {
+    const opzioni = ["Insufficiente", "Sufficiente", "Buono", "Distinto", "Ottimo"];
+    const nuovoGiudizio = prompt(`Inserisci il giudizio di Religione (${opzioni.join(", ")}):`);
+    
+    if (nuovoGiudizio === null || nuovoGiudizio === "") return;
+
+    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+    const update = {};
+    update[`giudizio_religione_q${quad}`] = nuovoGiudizio;
+
+    try {
+        await setDoc(recordRef, update, { merge: true });
+        alert("Giudizio religione salvato!");
+        // Refresh pagella
+        const snap = await getDoc(recordRef);
+        window.renderPagella(snap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+	// --- SISTEMA DIDATTICA ---
+let didatticaListener = null;
+
+window.loadDidattica = () => {
+    const cls = window.selectedClass;
+    const container = document.getElementById('didattica-container');
+    if (!container) return;
+
+    if (!cls || cls === 'ALL') {
+        container.innerHTML = `<p class="col-span-full text-center py-20 text-zinc-500 font-black uppercase text-xs italic">Seleziona una classe per vedere il materiale</p>`;
+        return;
+    }
+
+    if (didatticaListener) didatticaListener();
+
+    const docRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'didattica', cls);
+    
+    didatticaListener = onSnapshot(docRef, (d) => {
+        const data = d.exists() ? d.data() : { materiali: [] };
+        const lista = data.materiali || [];
+
+        if (lista.length === 0) {
+            container.innerHTML = `<p class="col-span-full text-center py-20 text-zinc-500 font-black uppercase text-xs italic">Nessun materiale caricato per la classe ${cls}</p>`;
+            return;
+        }
+
+        container.innerHTML = lista.slice().reverse().map((m, idx) => {
+            const isOwner = m.autoreId === window.currentUserId || ['admin', 'preside'].includes(window.userRole);
+            const emoji = LISTA_MATERIE[m.materia.toLowerCase()] || "📄";
+
+            return `
+                <div class="bacheca-card group relative">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-zinc-800 text-white text-[8px] font-black px-2 py-1 rounded uppercase border border-zinc-700">${m.materia}</span>
+                        <span class="text-[8px] font-bold text-zinc-500">${m.data}</span>
+                    </div>
+                    <h3 class="text-sm font-black text-white uppercase mb-1">${m.titolo}</h3>
+                    <p class="text-[10px] text-zinc-400 mb-4 line-clamp-2">${m.descrizione}</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-zinc-800">
+                        <div class="flex flex-col">
+                            <span class="text-[7px] font-black text-zinc-500 uppercase">Docente</span>
+                            <span class="text-[9px] font-bold text-zinc-300">${m.autore}</span>
+                        </div>
+                        <a href="${m.link}" target="_blank" class="bg-red-700 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all flex items-center gap-2">
+                            Scarica PDF 📥
+                        </a>
+                    </div>
+
+                    ${isOwner ? `
+                        <button onclick="window.deleteMateriale(${idx})" class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-600 transition-all">
+                            🗑️
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+    });
+};
+
+window.openModalDidattica = () => {
+    const body = document.getElementById('modal-body');
+    const confirm = document.getElementById('modal-confirm');
+    const title = document.getElementById('modal-title');
+    
+    title.innerText = "Carica Materiale Didattico";
+    document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+
+    body.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="modal-label">Materia</label>
+                <select id="did-materia" class="modal-input">
+                    ${(window.currentUserData?.materie || ['Generale']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+                </select>
+            </div>
+            <div>
+                <label class="modal-label">Titolo della dispensa</label>
+                <input id="did-titolo" type="text" placeholder="Es: Analisi del Canto I" class="modal-input">
+            </div>
+            <div>
+                <label class="modal-label">Link al File (PDF/Drive)</label>
+                <input id="did-link" type="url" placeholder="https://drive.google.com/..." class="modal-input">
+            </div>
+            <div>
+                <label class="modal-label">Breve descrizione</label>
+                <textarea id="did-desc" placeholder="Cosa devono studiare gli studenti?" class="modal-input h-20 resize-none"></textarea>
+            </div>
+        </div>
+    `;
+
+    confirm.onclick = async () => {
+        const mat = document.getElementById('did-materia').value;
+        const tit = document.getElementById('did-titolo').value;
+        const link = document.getElementById('did-link').value;
+        const desc = document.getElementById('did-desc').value;
+
+        if(!tit || !link) return alert("Titolo e Link sono obbligatori!");
+
+        const cls = window.selectedClass;
+        const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'didattica', cls);
+        
+        const nuovoMateriale = {
+            materia: mat,
+            titolo: tit,
+            link: link,
+            descrizione: desc,
+            autore: window.currentUserData.name,
+            autoreId: window.currentUserId,
+            data: new Date().toLocaleDateString('it-IT'),
+            timestamp: Date.now()
+        };
+
+        await setDoc(ref, { materiali: arrayUnion(nuovoMateriale) }, { merge: true });
+        window.closeModal();
+        alert("✅ Materiale caricato con successo!");
+    };
+};
+
+window.deleteMateriale = async (idx) => {
+    if(!confirm("Eliminare questo materiale?")) return;
+    const cls = window.selectedClass;
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'didattica', cls);
+    const snap = await getDoc(ref);
+    if(snap.exists()){
+        const list = snap.data().materiali || [];
+        // Poiché facciamo il reverse nel render, l'indice originale è:
+        const originalIdx = list.length - 1 - idx;
+        list.splice(originalIdx, 1);
+        await updateDoc(ref, { materiali: list });
+    }
+};
 
     </script>
 </body>
