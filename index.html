@@ -416,7 +416,7 @@ select {
     <span class="font-black uppercase text-[10px]">Assenze e Ritardi</span>
 </button>
 
-		<button id="home-btn-didattica" onclick="window.changeMenu('didattica')" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
+		<button id="home-btn-didattica" onclick="window.changeMenu('didattica')" class="hidden p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
     <span class="text-3xl block mb-2">📖</span>
     <span class="font-black uppercase text-[10px] text-zinc-200">Didattica</span>
 </button>
@@ -480,13 +480,13 @@ select {
         </button>
 
         <!-- Registro Voti -->
-        <button onclick="window.renderGlobalClassRegistry()" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
-            <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
-            <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti</span>
-        </button>
+        <button id="hub-btn-registro-globale" onclick="window.renderGlobalClassRegistry()" class="hidden p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+    <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
+    <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti</span>
+</button>
 
 	<!-- Didattica e Materiali (AGGIUNTO) -->
-<button onclick="window.changeMenu('didattica')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+<button id="hub-btn-didattica" onclick="window.changeMenu('didattica')" class="hidden p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
     <span class="text-4xl group-hover:scale-110 transition-transform">📚</span>
     <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Didattica e Materiali</span>
 </button>
@@ -1538,6 +1538,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('home-profilo-btn', type !== ROLES.OSPITE);
     toggle('menu-chat-staff', isStaffGenerale);
     toggle('menu-counselor', type === ROLES.COUNSELOR);
+    toggle('hub-btn-registro-globale', isStaffDidattico);
 
 // --- AGGIUNGI QUESTE RIGHE MANCANTI ---
 // Gestione Filtri in alto
@@ -1569,7 +1570,8 @@ toggle('home-btn-pagella', isStudente);
     toggle('bacheca-admin-panel', isManagement || type === ROLES.BIDELLO);
 
     // Hub: Visibile a tutto lo staff, ma le azioni interne saranno filtrate
-    toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
+    toggle('hub-btn-registro-globale', isStaffDidattico);
+    toggle('hub-btn-didattica', type !== ROLES.OSPITE);
 
    // --- EXTRA ---
     toggle('notif-bell', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
@@ -3040,7 +3042,7 @@ return `
     
     htmlRighe += `
         <tr class="bg-zinc-50/50 group">
-            <td class="py-4 font-black uppercase text-xs">😇 CONDOTTA</td>
+            <td class="py-4 font-black uppercase text-xs">CONDOTTA</td>
             <td class="py-4 text-center font-black text-sm ${parseInt(votoCondotta) < 6 ? 'text-red-600' : 'text-zinc-900'}">${votoCondotta}</td>
             <td class="py-4 px-4">
                 <div class="flex flex-col gap-1">
@@ -3520,7 +3522,29 @@ if (isStaff) {
             </div>`;
     }
 } else if (isOspite) {
-    // ... Logica Ospite (quella che avevi già, va benissimo) ...
+    // LOGICA PER UTENTE NON REGISTRATO
+    if (nomeEl) nomeEl.innerText = "OSPITE ESTERNO";
+    if (badgeEl) badgeEl.innerText = "Accesso tramite Discord";
+    
+    if (mediaEl) {
+        mediaEl.innerText = "N.D.";
+        mediaEl.className = "text-4xl font-black text-zinc-400";
+        const labelMedia = mediaEl.parentElement.querySelector('p');
+        if (labelMedia) labelMedia.innerText = "STATO REGISTRAZIONE";
+    }
+
+    if (gridContenuti) {
+        gridContenuti.innerHTML = `
+            <div class="glass-light p-8 rounded-3xl border border-zinc-100 shadow-sm col-span-full text-center">
+                <span class="text-4xl block mb-4">🚪</span>
+                <h3 class="font-black uppercase text-zinc-800 text-lg mb-2">Profilo non configurato</h3>
+                <p class="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
+                    Il tuo account Discord non è ancora collegato a uno studente o a un membro dello staff. 
+                    Contatta la <b>Segreteria</b> fornendo il tuo ID: <br>
+                    <code class="bg-zinc-100 px-2 py-1 rounded text-red-600 font-bold">${targetId}</code>
+                </p>
+            </div>`;
+    }
 } else {
     // STUDENTE: Fix del "muro di voti"
     if (gridContenuti) {
@@ -5288,28 +5312,6 @@ window.editCondotta = async (quad) => {
     try {
         await setDoc(recordRef, update, { merge: true });
         alert("Voto condotta aggiornato!");
-        // Refresh pagella
-        const snap = await getDoc(recordRef);
-        window.renderPagella(snap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
-    } catch (e) {
-        console.error(e);
-    }
-};
-
-// Funzione per modificare il Giudizio di Religione (Solo Prof Religione o Presidi)
-window.editReligioneGiudizio = async (quad) => {
-    const opzioni = ["Insufficiente", "Sufficiente", "Buono", "Distinto", "Ottimo"];
-    const nuovoGiudizio = prompt(`Inserisci il giudizio di Religione (${opzioni.join(", ")}):`);
-    
-    if (nuovoGiudizio === null || nuovoGiudizio === "") return;
-
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
-    const update = {};
-    update[`giudizio_religione_q${quad}`] = nuovoGiudizio;
-
-    try {
-        await setDoc(recordRef, update, { merge: true });
-        alert("Giudizio religione salvato!");
         // Refresh pagella
         const snap = await getDoc(recordRef);
         window.renderPagella(snap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
