@@ -1326,6 +1326,15 @@ select {
     'AN', 'BN', 'CN'
 ];
 
+  const GIUDIZI_RELIGIONE = {
+    10: "Ottimo",
+    9: "Ottimo",
+    8: "Distinto",
+    7: "Buono",
+    6: "Sufficiente",
+    4: "Insufficiente"
+};
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -2975,46 +2984,54 @@ if (materie.length === 0) {
 
     let htmlRighe = materieFiltrate.map(m => {
         const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
-        
-        // LOGICA RELIGIONE: Giudizio invece di Voto
-        if (m === 'religione') {
-            const giudizioRel = recordData[`giudizio_religione_q${currentQ}`] || "Non Valutato";
-            const puòModificareRel = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes('religione'));
-            
-            return `
-                <tr class="border-b border-zinc-100 group">
-                    <td class="py-4 font-bold uppercase text-xs">🙏 RELIGIONE</td>
-                    <td class="py-4 text-center font-black text-[10px] text-blue-600 uppercase">${giudizioRel}</td>
-                    <td class="py-4 px-4">
-                        <div class="flex flex-col gap-1">
-                            <p class="text-[10px] text-zinc-600 italic leading-tight">Valutazione dell'insegnamento della religione cattolica.</p>
-                            ${puòModificareRel ? `<button onclick="window.editReligioneGiudizio(${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Assegna Giudizio</button>` : ''}
-                        </div>
-                    </td>
-                    <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">-</td>
-                </tr>`;
-        }
+
 
         // LOGICA MATERIE STANDARD
-        const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
-        const displayVoto = val !== null ? Math.round(val) : "-";
-        const color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
-        const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
-        const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
-        const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
+const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
 
-        return `
-            <tr class="border-b border-zinc-100 group">
-                <td class="py-4 font-bold uppercase text-xs">${LISTA_MATERIE[m] || '📚'} ${m.toUpperCase()}</td>
-                <td class="py-4 text-center font-black text-sm ${color}">${displayVoto}</td>
-                <td class="py-4 px-4">
-                    <div class="flex flex-col gap-1">
-                        <p class="text-[10px] text-zinc-600 italic leading-tight">${commentoMateria}</p>
-                        ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
-                    </div>
-                </td>
-                <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
-            </tr>`;
+// --- LOGICA IDENTICA AL BOT PER RELIGIONE ---
+let displayVoto;
+let color;
+
+if (m.toLowerCase() === 'religione') {
+    if (val === null) {
+        displayVoto = "-";
+        color = "text-zinc-400";
+    } else {
+        // Funzione get_giudizio_da_media del bot
+        const getGiudizio = (v) => {
+            if (v >= 9.0) return "Ottimo";
+            if (v >= 8.0) return "Distinto";
+            if (v >= 7.0) return "Buono";
+            if (v >= 6.0) return "Sufficiente";
+            return "Insufficiente";
+        };
+        displayVoto = `${getGiudizio(val)} ${val >= 6 ? '✅' : '❌'}`;
+        color = val >= 6 ? 'text-blue-600' : 'text-red-600';
+    }
+} else {
+    // Logica standard per le altre materie
+    displayVoto = val !== null ? Math.round(val) : "-";
+    color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
+}
+// --------------------------------------------
+
+const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
+const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
+const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
+
+return `
+    <tr class="border-b border-zinc-100 group">
+        <td class="py-4 font-bold uppercase text-xs">${LISTA_MATERIE[m] || '📚'} ${m.toUpperCase()}</td>
+        <td class="py-4 text-center font-black text-[10px] ${color} uppercase tracking-tighter">${displayVoto}</td>
+        <td class="py-4 px-4">
+            <div class="flex flex-col gap-1">
+                <p class="text-[10px] text-zinc-600 italic leading-tight">└ *${commentoMateria}*</p>
+                ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
+            </div>
+        </td>
+        <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
+    </tr>`;
     }).join('');
 
     // AGGIUNTA RIGA CONDOTTA (Sempre in fondo)
