@@ -111,6 +111,15 @@ select {
         box-shadow: 0 10px 30px rgba(220, 38, 38, 0.1);
     }
 
+    .note-accent-counselor {
+    	border-left: 4px solid #a855f7 !important; /* Viola */
+}
+
+    .badge-counselor {
+    	background: #f3e8ff;
+    	color: #7e22ce;
+}
+
     .note-accent-disciplinare { border-left: 5px solid #dc2626 !important; }
     .note-accent-mandato { border-left: 5px solid #fbbf24 !important; background: #1e1b1e !important; }
 
@@ -346,6 +355,10 @@ select {
 
 <button onclick="window.changeMenu('chat-staff')" id="menu-chat-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
     <span class="text-lg">💬</span> SALA DOCENTI
+</button>
+
+<button onclick="window.changeMenu('classi')" id="menu-counselor" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
+    <span class="text-lg">🧠</span> SPORTELLO ASCOLTO
 </button>
 
 <button onclick="window.changeMenu('notifiche-full')" id="menu-notifiche-full" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
@@ -1430,21 +1443,30 @@ const ROLES = {
     TECNICO: 'tecnico',      // Nuovo
     SEGRETERIA: 'segreteria', // Nuovo
     STUDENTE: 'studente',
-    OSPITE: 'ospite'
+    OSPITE: 'ospite',
+    COUNSELOR: 'counselor', // Nuovo ruolo
 };
 
 function getRoleType(roleStr) {
     if(!roleStr) return ROLES.OSPITE;
+    // Puliamo la stringa: tutto minuscolo e togliamo gli spazi
     const r = roleStr.toLowerCase().replace(/\s+/g, '');
     
     if(r.includes('admin')) return ROLES.ADMIN;
     if(r.includes('vicepreside')) return ROLES.VICE_PRESIDE;
     if(r.includes('preside')) return ROLES.PRESIDE;
     if(r.includes('prof') || r.includes('docente')) return ROLES.PROF;
+    
+    // AGGIUNGIAMO IL COUNSELOR
+    if(r.includes('counselor')) return ROLES.COUNSELOR;
+    
     if(r.includes('bidello') || r.includes('ata')) return ROLES.BIDELLO;
     if(r.includes('tecnico')) return ROLES.TECNICO;
     if(r.includes('segreteria')) return ROLES.SEGRETERIA;
-    if(r.includes('studente')) return ROLES.STUDENTE;
+    
+    // GESTIONE STUDENTI (Riconosce sia "studente" che "studentessa")
+    if(r.includes('studente') || r.includes('studentessa')) return ROLES.STUDENTE;
+    
     return ROLES.OSPITE;
 }
 
@@ -1468,7 +1490,7 @@ function applyRoleUI() {
     
     const isStaffDidattico = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE].includes(type);
     const isManagement = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(type);
-    const isOperativo = [ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA].includes(type);
+    const isOperativo = [ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.COUNSELOR].includes(type);
     const isStaffGenerale = isStaffDidattico || isOperativo || type === ROLES.ADMIN;
     const isStudente = type === ROLES.STUDENTE;
     const isAdmin = type === ROLES.ADMIN;
@@ -1506,6 +1528,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-presenze-studente', isStudente);
     toggle('home-profilo-btn', type !== ROLES.OSPITE);
     toggle('menu-chat-staff', isStaffGenerale);
+    toggle('menu-counselor', type === ROLES.COUNSELOR);
 
 // --- AGGIUNGI QUESTE RIGHE MANCANTI ---
 // Gestione Filtri in alto
@@ -1517,14 +1540,21 @@ toggle('home-btn-registro', isStudente);
 toggle('home-btn-note', isStudente);
 toggle('home-btn-pagella', isStudente);
 
-    // Azioni in Agenda e Bacheca
-    // Tecnici, Segreteria e Bidelli possono ora scrivere avvisi in agenda
+    // --- GESTIONE PERMESSI PULITA ---
+    
+    // Il Counselor può scrivere avvisi/comunicazioni
     toggle('prof-comm-panel', isStaffDidattico || isOperativo); 
-    toggle('prof-actions-agenda', isStaffDidattico); // Solo i prof firmano/danno compiti
-    toggle('btn-add-note', isStaffDidattico);
+
+    // Solo i prof firmano e danno compiti (Counselor NO)
+    toggle('prof-actions-agenda', isStaffDidattico); 
+
+    // Note e Colloqui: Visibile a Prof e Counselor
+    const canEmitNotes = isStaffDidattico || type === ROLES.COUNSELOR;
+    toggle('btn-add-note', canEmitNotes);
+    toggle('note-date-container', canEmitNotes);
+
+    // Voti: RIGOROSAMENTE solo Staff Didattico
     toggle('prof-grade-panel', isStaffDidattico);
-    toggle('note-date-container', isStaffDidattico);
-    toggle('prof-actions-agenda', isStaffDidattico);
     
     // Bacheca: Admin, Presidi, Segreteria, Tecnici e Bidelli possono scrivere circolari
     toggle('bacheca-admin-panel', isManagement || type === ROLES.BIDELLO);
@@ -2085,14 +2115,32 @@ if (resMediaElem) {
                 const reversedNotes = [...filteredNotes].reverse();
                 document.getElementById('notes-list-global').innerHTML = reversedNotes.map((n) => {
     const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
+    
+    // --- NUOVA LOGICA TIPOLOGIE ---
     const isMandato = n.tipo === 'mandato';
+    const isColloquio = n.tipo === 'colloquio';
+    
+    // Definiamo classi e scritte in base al tipo
+    let cardClass = 'note-accent-disciplinare';
+    let badgeClass = 'badge-disciplinare';
+    let etichetta = '⚠️ Nota Disciplinare';
+
+    if (isMandato) {
+        cardClass = 'note-accent-mandato';
+        badgeClass = 'badge-mandato';
+        etichetta = '⚡ Mandato Presidenziale';
+    } else if (isColloquio) {
+        cardClass = 'note-accent-counselor'; // Dovrai aggiungere questa classe CSS o usarne una esistente
+        badgeClass = 'badge-counselor';       // Dovrai aggiungere questa classe CSS
+        etichetta = '🧠 Colloquio di Supporto';
+    }
     
     return `
-    <div class="note-card ${isMandato ? 'note-accent-mandato' : 'note-accent-disciplinare'} group">
+    <div class="note-card ${cardClass} group">
         <div class="flex justify-between items-start mb-3">
             <div class="flex flex-col gap-1">
-                <span class="note-badge ${isMandato ? 'badge-mandato' : 'badge-disciplinare'} w-fit">
-                    ${isMandato ? '⚡ Mandato Presidenziale' : '⚠️ Nota Disciplinare'}
+                <span class="note-badge ${badgeClass} w-fit">
+                    ${etichetta}
                 </span>
                 <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">${n.data}</span>
             </div>
@@ -2313,71 +2361,94 @@ await setDoc(agendaRef, {
         };                
     } else if(type === 'note') {
     document.getElementById('modal-title').innerText = "Emissione Provvedimento";
+    const currentRole = (window.userRole || '').toLowerCase();
+
     body.innerHTML = `
         <div class="space-y-5">
             <div>
                 <label class="modal-label">Tipo di Provvedimento</label>
                 <select id="m-type" class="modal-input">
                     <option value="nota">Nota Disciplinare Standard</option>
-                    ${(window.userRole === 'preside' || window.userRole === 'prof' || window.userRole === 'admin') ? '<option value="mandato">Mandato Presidenziale (Urgente)</option>' : ''}
+                    ${['preside', 'vicepreside', 'prof', 'admin'].includes(currentRole) ? '<option value="mandato">Mandato Presidenziale (Urgente)</option>' : ''}
+                    ${currentRole === 'counselor' ? '<option value="colloquio">Colloquio di Supporto</option>' : ''}
                 </select>
             </div>
             <div>
                 <label class="modal-label">Motivazione Dettagliata</label>
                 <textarea id="m-txt" 
-                    placeholder="Descrivi l'accaduto in modo formale..." 
+                    placeholder="Descrivi l'accaduto o i dettagli del colloquio..." 
                     class="modal-input h-32 resize-none pt-3"></textarea>
-                <p class="text-[9px] text-zinc-400 mt-2 uppercase font-bold">La nota verrà registrata permanentemente nel profilo dello studente.</p>
+                <p class="text-[9px] text-zinc-400 mt-2 uppercase font-bold">Il record verrà registrato permanentemente nel profilo dello studente.</p>
             </div>
         </div>
     `;
+
     confirm.className = "w-full bg-zinc-900 hover:bg-red-700 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg transition-all";
+    
     confirm.onclick = async () => {
-                    const stud = window.allStudents.find(s=>s.id===window.selectedStudentId);
-                    const inputCal = document.getElementById('global-calendar');
-                    const dParts = inputCal.value.split('-');
-                    const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-                    const month = parseInt(dParts[1]);
-                    const year = parseInt(dParts[0]);
-                    const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-                    const note = {
-                        id: crypto.randomUUID(),
-                        testo: document.getElementById('m-txt').value, 
-                        tipo: document.getElementById('m-type').value, 
-                        autore: window.currentUserData.name, 
-                        prof: window.currentUserData.name,
-                        profId: window.currentUserId,
-                        data: dataScelta,
-                        anno: annoScolastico,
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
-                    
-                    const agendaId = `${window.selectedClass}_${inputCal.value}`;
-                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
-                    await setDoc(agendaRef, { 
+        const stud = window.allStudents.find(s => s.id === window.selectedStudentId);
+        const inputCal = document.getElementById('global-calendar');
+        const dParts = inputCal.value.split('-');
+        const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+        const month = parseInt(dParts[1]);
+        const year = parseInt(dParts[0]);
+        const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+        
+        const noteType = document.getElementById('m-type').value;
+        const notaTesto = document.getElementById('m-txt').value || "Nessun dettaglio inserito";
+
+        const note = {
+            id: crypto.randomUUID(),
+            testo: notaTesto, 
+            tipo: noteType, 
+            autore: window.currentUserData.name, 
+            prof: window.currentUserData.name,
+            profId: window.currentUserId,
+            data: dataScelta,
+            anno: annoScolastico,
+            timestamp: new Date().toISOString()
+        };
+        
+        // 1. Salva nel profilo dello studente
+        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
+        
+        // 2. Salva nell'agenda di classe (così i prof vedono perché manca l'alunno)
+        const agendaId = `${window.selectedClass}_${inputCal.value}`;
+        const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+        await setDoc(agendaRef, { 
             note: arrayUnion({
                 ...note, 
                 studente: stud.name, 
                 studenteId: stud.id
             }) 
         }, { merge: true });
-                        if(note.tipo === 'mandato') {
-                        // Notifica al Preside (se emesso da altri, ma qui è solo preside)
-                        // Invia record notifica a tutti i prof
-                        const inputCal = document.getElementById('global-calendar');
-                        const dParts = inputCal.value.split('-');
-                        const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-                        const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
-                        const inputElement = document.getElementById('m-txt');
-                        const notaTesto = inputElement ? inputElement.value : "Motivazione non inserita";   
-                        await setDoc(notifRef, { alerts: arrayUnion({ msg: `MANDATO: ${stud.name} convocato dal Preside`, motivo: notaTesto, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), data: dataScelta, autore: window.currentUserData.name }) }, { merge: true });
-                    }
-                    window.closeModal();
-                };
+
+        // 3. Gestione Notifiche Globali (Mandati e Colloqui)
+        if(noteType === 'mandato' || noteType === 'colloquio') {
+            const notifRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'notifications', 'global');
+            let messaggio = "";
+            
+            if(noteType === 'mandato') {
+                messaggio = `MANDATO: ${stud.name} convocato dal Preside`;
+            } else {
+                messaggio = `SUPPORTO: ${stud.name} è a colloquio con il Counselor`;
             }
-        };
+
+            await setDoc(notifRef, { 
+                alerts: arrayUnion({ 
+                    msg: messaggio, 
+                    motivo: notaTesto, 
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
+                    data: dataScelta, 
+                    autore: window.currentUserData.name 
+                }) 
+            }, { merge: true });
+        }
+
+        window.closeModal();
+      };
+    }
+  };
 
          // --- NOTIFICHE ---
         function listenNotifications() {
@@ -3214,13 +3285,17 @@ window.toggleDebug = () => {
         // 3. NAVIGAZIONE
         if (typeof window.changeMenu === 'function') window.changeMenu('profilo');
 
-        // --- LOGICA RUOLO ---
-        const roleStr = (d.role || 'Ospite').toLowerCase();
-        const ruoloEffettivo = (d.role || 'Studente').toUpperCase();
-	const isOspite = roleStr.includes('ospite');
-	const isDocente = ['prof', 'docente', 'vice', 'preside'].some(x => roleStr.includes(x));
-	const isAmministrativo = ['admin', 'segreteria', 'tecnico', 'bidello', 'personale'].some(x => roleStr.includes(x));
-	const isStaff = isDocente || isAmministrativo;
+  // --- LOGICA RUOLO ---
+const roleStr = (d.role || 'Ospite').toLowerCase();
+const ruoloEffettivo = (d.role || 'Studente').toUpperCase();
+const isOspite = roleStr.includes('ospite');
+
+// Aggiungi 'counselor' qui dentro per farlo riconoscere come staff
+const isDocente = ['prof', 'docente', 'vice', 'preside'].some(x => roleStr.includes(x));
+const isAmministrativo = ['admin', 'segreteria', 'tecnico', 'bidello', 'personale', 'counselor'].some(x => roleStr.includes(x));
+
+// Ora isStaff sarà TRUE anche per il counselor
+const isStaff = isDocente || isAmministrativo;
 
         // --- 4. POPOLAMENTO HEADER PROFILO (VERSIONE UNIFICATA NPC + DISCORD) ---
 const nomeEl = document.getElementById('profilo-nome');
@@ -3353,7 +3428,19 @@ if (isStaff) {
                 <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-md">
                     <span>Agenda Classi</span> <span class="text-lg">📋</span>
                 </button>`;
+        } else if (roleStr.includes('counselor')) {
+            // --- BOX SPECIFICO COUNSELOR ---
+            infoSpecifica = `
+                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 text-center">
+                    <p class="text-[8px] font-black text-purple-400 uppercase tracking-tighter">Settore Operativo</p>
+                    <p class="text-[9px] font-black text-purple-700 uppercase">Supporto e Ascolto</p>
+                </div>`;
+            bottoniExtra = `
+                <button onclick="window.changeMenu('hub')" class="w-full p-4 bg-purple-700 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-purple-800 transition-all flex justify-between items-center shadow-md">
+                    <span>Pannello Supporto</span> <span class="text-lg">🧠</span>
+                </button>`;
         } else {
+            // --- STAFF GENERICO (Bidello, Tecnico, Segreteria) ---
             infoSpecifica = `
                 <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
                     <p class="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Settore Operativo</p>
@@ -3689,10 +3776,33 @@ window.selectAndGoToProfile = async (id) => {
         // 1. Popoliamo i dettagli nel box bianco
         const staffDetails = document.getElementById('target-staff-details');
         if (staffDetails) {
+            // Recupero e formattazione materie
+            let rawMaterie = u.materie || data.materie || [];
+            let displayMaterie = "N/D";
+            
+            if (Array.isArray(rawMaterie)) {
+                displayMaterie = rawMaterie.length > 0 ? rawMaterie.join(', ').toUpperCase() : "N/D";
+            } else if (typeof rawMaterie === 'string' && rawMaterie !== "") {
+                displayMaterie = rawMaterie.toUpperCase();
+            }
+
             staffDetails.innerHTML = `
-                <p class="text-xs flex justify-between"><b>Incarico:</b> <span>${u.role}</span></p>
-                <p class="text-xs flex justify-between"><b>Status:</b> <span class="text-green-600 font-bold">Attivo</span></p>
-                <p class="text-xs flex justify-between"><b>Settore:</b> <span>Scolastico</span></p>
+                <p class="text-xs flex justify-between border-b border-zinc-50 pb-1">
+                    <b class="text-zinc-400 uppercase text-[9px]">Incarico:</b> 
+                    <span class="font-bold text-zinc-800">${u.role}</span>
+                </p>
+                <p class="text-xs flex justify-between border-b border-zinc-50 pb-1">
+                    <b class="text-zinc-400 uppercase text-[9px]">Materia/e:</b> 
+                    <span class="font-black text-red-600">${displayMaterie}</span>
+                </p>
+                <p class="text-xs flex justify-between border-b border-zinc-50 pb-1">
+                    <b class="text-zinc-400 uppercase text-[9px]">Status:</b> 
+                    <span class="text-green-600 font-bold">Attivo</span>
+                </p>
+                <p class="text-xs flex justify-between">
+                    <b class="text-zinc-400 uppercase text-[9px]">Settore:</b> 
+                    <span class="text-zinc-500">Scolastico</span>
+                </p>
             `;
         }
 
@@ -4579,8 +4689,9 @@ window.hubManager = {
                         </td>
                         <td class="p-3 font-bold text-zinc-500">${u.classe || '-'}</td>
                         <td class="p-3 text-right" onclick="event.stopPropagation()">
-                            <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-zinc-300 hover:text-red-600 p-2 transition-colors">🗑️</button>
-                        </td>
+    <button onclick="window.hubManager.modificaUtente('${id}')" class="text-zinc-300 hover:text-blue-500 p-2 transition-colors">✏️</button>
+    <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-zinc-300 hover:text-red-600 p-2 transition-colors">🗑️</button>
+</td>
                     </tr>`;
             });
 
@@ -4613,12 +4724,14 @@ window.hubManager = {
                 <select id="new-u-role" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white" 
                     onchange="document.getElementById('materia-input-group').classList.toggle('hidden', this.value !== 'Prof')">
                     <option value="Studente">Studente</option>
+		    <option value="Studente">Studentessa</option>
                     <option value="Prof">Prof</option>
                     <option value="Preside">Preside</option>
                     <option value="Vice Preside">Vice Preside</option>
                     <option value="Bidello">Bidello</option>
                     <option value="Tecnico">Tecnico</option>
                     <option value="Segreteria">Segreteria</option>
+		    <option value="Counselor">Counselor scolastico</option>
                 </select>
 
                 <select id="new-u-class" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white">
@@ -4644,6 +4757,12 @@ window.hubManager = {
         <option value="CN">Classe CN</option>
     </optgroup>
 </select>
+
+		<div class="mb-4">
+    <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">URL Foto Profilo (Opzionale)</label>
+    <input type="text" id="reg-avatar" placeholder="Incolla il link dell'immagine..." 
+        class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-white text-sm outline-none focus:border-red-600 transition-all">
+</div>
 
                 <div id="materia-input-group" class="hidden col-span-full">
                     <label class="text-[9px] font-black uppercase text-zinc-500 ml-1">Materie (separate da virgola)</label>
@@ -4676,13 +4795,42 @@ window.hubManager = {
             name: name,
             role: role,
             classe: classe === 'None' ? null : classe,
-            materie: arrayMaterie
+            materie: arrayMaterie,
+	    avatar: document.getElementById('reg-avatar').value.trim() || "https://ui-avatars.com/api/?name=" + name
         });
         alert("✅ Utente registrato correttamente!");
         this.mostraListaUtenti();
     } catch (e) {
         console.error(e);
         alert("❌ Errore: " + e.message);
+    }
+},
+
+modificaUtente: function(id) {
+    const u = window.allUsers.find(user => user.id === id);
+    if(!u) return;
+
+    // Apriamo il modulo di inserimento
+    this.nuovoUtente();
+    
+    // Cambiamo il titolo e blocchiamo l'ID (non si può cambiare l'ID di un utente esistente)
+    document.querySelector('#hub-dynamic-content h3').innerText = "Modifica Utente";
+    const idInput = document.getElementById('new-u-id');
+    idInput.value = id;
+    idInput.disabled = true;
+    idInput.style.opacity = "0.5";
+
+    // Riempiamo i campi con i dati attuali
+    document.getElementById('new-u-name').value = u.name || '';
+    document.getElementById('new-u-role').value = u.role || 'Studente';
+    document.getElementById('new-u-class').value = u.classe || 'None';
+    document.getElementById('reg-avatar').value = u.avatar || u.avatar_npc || '';
+    
+    if(u.role === 'Prof' || u.role === 'prof') {
+        const matInput = document.getElementById('new-u-materie');
+        const matGroup = document.getElementById('materia-input-group');
+        matGroup.classList.remove('hidden');
+        matInput.value = Array.isArray(u.materie) ? u.materie.join(', ') : (u.materie || '');
     }
 },
 
@@ -4696,19 +4844,31 @@ window.hubManager = {
 
     // 4. HELPERS E FILTRI (Prima erano fuori per errore!)
     getCategoriaRuolo: function(roleType) {
-        if ([ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(roleType)) return 'dirigenza';
-        if (roleType === ROLES.PROF) return 'prof';
-        if ([ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA].includes(roleType)) return 'personale';
-        if (roleType === ROLES.STUDENTE) return 'studente';
-        return 'altro';
-    },
+    const r = (roleType || '').toLowerCase();
+    
+    if ([ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(r)) return 'dirigenza';
+    if (r === ROLES.PROF) return 'prof';
+    
+    // Counselor nel personale
+    if ([ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.COUNSELOR].includes(r)) return 'personale';
+    
+    // Se la stringa contiene "studente" o "studentessa", la categoria è studente
+    if (r.includes('studente') || r.includes('studentessa')) return 'studente';
+    
+    return 'altro';
+},
 
     getRoleStyle: function(roleType) {
-        if (roleType === ROLES.ADMIN || roleType === ROLES.PRESIDE) return 'bg-red-50 text-red-700 border-red-100';
-        if (roleType === ROLES.PROF) return 'bg-blue-50 text-blue-700 border-blue-100';
-        if (roleType === ROLES.STUDENTE) return 'bg-zinc-50 text-zinc-600 border-zinc-200';
-        return 'bg-amber-50 text-amber-700 border-amber-100';
-    },
+    const r = (roleType || '').toLowerCase();
+    
+    if (r === ROLES.ADMIN || r === ROLES.PRESIDE) return 'bg-red-50 text-red-700 border-red-100';
+    if (r === ROLES.PROF) return 'bg-blue-50 text-blue-700 border-blue-100';
+    if (r === ROLES.COUNSELOR) return 'bg-purple-50 text-purple-700 border-purple-100'; 
+    
+    if (r.includes('studente') || r.includes('studentessa')) return 'bg-zinc-50 text-zinc-600 border-zinc-200';
+    
+    return 'bg-amber-50 text-amber-700 border-amber-100';
+},
 
     currentRoleFilter: 'all',
     setFiltroRuolo: function(cat) {
