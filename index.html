@@ -10,68 +10,72 @@
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    body { 
+    /* --- NUOVA PALETTE FNAF BROWN --- */
+body { 
     font-family: 'Plus Jakarta Sans', sans-serif; 
-    background: #121214; /* Modificato: era #09090b */
-    color: #f4f4f5; 
+    background: #1a120b; /* Marrone scurissimo (quasi nero) */
+    color: #e7e5e4; 
     min-height: 100vh;
     display: flex; 
     flex-direction: column;
     overflow-y: auto;
 }
-	/* Colora la tendina che si apre (le option) */
-select option {
-    background-color: #18181b !important; /* Grigio scuro come le card */
-    color: #ffffff !important;           /* Testo bianco */
-    padding: 10px;
+
+/* Sfondo principale del contenuto */
+main {
+    background-color: #1a120b !important;
 }
 
-/* Rimuove l'aspetto brutto di sistema su Windows/Chrome */
-select {
-    color-scheme: dark; /* Suggerisce al browser di usare il tema scuro per l'interfaccia di sistema */
+/* Sidebar e Header: Marrone leggermente più caldo per staccare */
+#main-sidebar, header {
+    background-color: #241a11 !important;
+    border-color: #3d2b1f !important;
 }
 
-    /* Glassmorphism Scuro */
-    .glass-light {
-        background: rgba(24, 24, 27, 0.9) !important;
-        backdrop-filter: blur(12px) !important;
-        border: 1px solid rgba(63, 63, 70, 0.5) !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-    }
-
-    .glass {
-        background: rgba(18, 18, 18, 0.98) !important;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(39, 39, 42, 1);
-    }
-
-    /* Registro Voti Dark */
-    .registry-container {
-        background: #18181b;
-        border-radius: 24px;
-        border: 1px solid #27272a;
-        overflow: hidden;
-    }
-	input[type="time"], 
-input[type="date"], 
-select {
-    color-scheme: dark !important;
+/* Glassmorphism con tinta marrone */
+.glass-light {
+    background: rgba(45, 30, 18, 0.9) !important; /* Marrone cioccolato trasparente */
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(120, 80, 50, 0.3) !important;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
 }
 
-    .registry-table thead th {
-        background: #09090b;
-        color: #a1a1aa;
-        padding: 1.25rem 1.5rem;
-        border-bottom: 2px solid #27272a;
-        text-transform: uppercase;
-        font-size: 0.65rem;
-        letter-spacing: 0.1em;
-    }
+/* Cards (Bacheca, Note, ecc.) */
+.bacheca-card, .note-card, .staff-card, .agenda-card, .registry-container {
+    background: #2d1e12 !important; /* Marrone "Freddy" */
+    border: 1px solid #3d2b1f !important;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+}
 
-    .registry-table tbody tr {
-        border-bottom: 1px solid #27272a;
-        transition: background 0.2s;
-    }
+/* Hover delle card: un marrone più acceso invece del rosso puro */
+.bacheca-card:hover, .note-card:hover, .agenda-card:hover {
+    border-color: #854d0e !important; /* Marrone dorato/ruggine */
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px rgba(133, 77, 14, 0.2);
+}
+
+/* Input e Select */
+.modal-input, .filter-container, .quick-student-switcher, select option {
+    background-color: #1a120b !important;
+    border: 1px solid #443022 !important;
+    color: #f5f5f4 !important;
+}
+
+/* Override per le classi Tailwind residue */
+.bg-zinc-900, .bg-[#18181b] { background-color: #241a11 !important; }
+.bg-[#121214], .bg-zinc-700 { background-color: #1a120b !important; }
+.border-zinc-800 { border-color: #3d2b1f !important; }
+
+/* Registro Voti: Intestazioni scure */
+.registry-table thead th {
+    background: #140d07 !important;
+    color: #a8a29e;
+    border-bottom: 2px solid #3d2b1f;
+}
+
+.registry-table tbody tr:hover {
+    background-color: #3d2b1f !important;
+}
     .registry-table tbody tr:hover { background-color: #27272a; }
     .registry-table td { padding: 1.25rem 1.5rem; color: #e4e4e7; vertical-align: middle; }
 
@@ -89,7 +93,7 @@ select {
     }
     .grade-positive { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
     .grade-negative { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); }
-    .grade-neutral { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
+    .grade-neutral { background: #3d2b1f; color: #d6d3d1; border: 1px solid #57534e; }
 
     /* Cards (Bacheca, Note, Staff, Agenda) */
     .bacheca-card, .note-card, .staff-card, .agenda-card {
@@ -139,9 +143,8 @@ select {
 }
 
 .sidebar-item.active { 
-    background: #dc2626 !important; /* Manteniamo il rosso solo per l'elemento selezionato */
-    color: #ffffff !important; 
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); 
+    background: #78350f !important; /* Marrone bruciato/ruggine */
+    box-shadow: 0 4px 12px rgba(120, 53, 15, 0.4); 
 }
 
 /* 1. Stile base per i contenitori e gli input isolati */
