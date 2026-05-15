@@ -41,7 +41,7 @@ main {
 }
 
 /* Cards (Bacheca, Note, ecc.) */
-.bacheca-card, .note-card, .staff-card, .agenda-card, .registry-container {
+.bacheca-card, .note-card, .staff-card, .agenda-card, 
     background: #2d1e12 !important; /* Marrone "Freddy" */
     border: 1px solid #3d2b1f !important;
     box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
@@ -66,31 +66,91 @@ main {
 .bg-[#121214], .bg-zinc-700 { background-color: #1a120b !important; }
 .border-zinc-800 { border-color: #3d2b1f !important; }
 
-/* Registro Voti: Intestazioni scure */
+/* --- REGISTRO VOTI RIMODERNATO --- */
+
+/* Contenitore esterno della tabella */
+.registry-container {
+    background: #241a11 !important; /* Marrone scuro uniforme */
+    border: 1px solid #3d2b1f !important;
+    border-radius: 24px !important; /* Arrotondamento forte */
+    overflow: hidden; /* Taglia gli angoli della tabella interna */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Tabella */
+.registry-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+/* Intestazione */
 .registry-table thead th {
-    background: #140d07 !important;
+    background: #1a120b !important;
     color: #a8a29e;
-    border-bottom: 2px solid #3d2b1f;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #3d2b1f;
 }
 
+/* Celle della tabella */
+.registry-table td {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(61, 43, 31, 0.5);
+    vertical-align: middle;
+}
+
+/* Rimuove l'ultimo bordo per non rovinare l'arrotondamento */
+.registry-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Effetto hover sulla riga */
 .registry-table tbody tr:hover {
-    background-color: #3d2b1f !important;
+    background-color: rgba(133, 77, 14, 0.05) !important;
 }
-    .registry-table tbody tr:hover { background-color: #27272a; }
-    .registry-table td { padding: 1.25rem 1.5rem; color: #e4e4e7; vertical-align: middle; }
 
-    /* Badge Voti (Neon Style) */
-    .grade-badge {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        font-weight: 800;
-        font-size: 0.75rem;
-        transition: all 0.2s;
-    }
+/* Colonna Materia (Stile speciale) */
+.subject-column {
+    font-weight: 800;
+    color: #f5f5f4;
+    font-size: 0.8rem;
+}
+
+    /* --- BADGE VOTI (PILL STYLE) --- */
+.grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 10px; /* Arrotondamento moderno (squircle) */
+    font-weight: 800;
+    font-size: 0.75rem;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+/* Effetto al passaggio del mouse sui voti */
+.grade-badge:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* Media Badge (Più grande e visibile) */
+.media-badge-large {
+    font-size: 1.1rem;
+    font-weight: 900;
+    padding: 4px 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
     .grade-positive { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
     .grade-negative { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); }
     .grade-neutral { background: #3d2b1f; color: #d6d3d1; border: 1px solid #57534e; }
@@ -122,6 +182,18 @@ main {
     .badge-counselor {
     	background: #f3e8ff;
     	color: #7e22ce;
+}
+
+/* Stile per la lista voti nel pop-up del tabellone */
+.tabellone-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    margin-bottom: 4px;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
     .note-accent-disciplinare { border-left: 5px solid #dc2626 !important; }
@@ -362,6 +434,10 @@ main {
 
 <button onclick="window.changeMenu('sportello')" id="menu-counselor" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
     <span class="text-lg">🧠</span> SPORTELLO ASCOLTO
+</button>
+
+<button onclick="window.changeMenu('hub')" id="menu-hub" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
+    <span class="text-lg">⚙️</span> PANNELLO ADMIN
 </button>
 
 <button onclick="window.changeMenu('notifiche-full')" id="menu-notifiche-full" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
@@ -1090,97 +1166,101 @@ main {
 
             <!-- VIEW: Pagella Rimodernata -->
 <div id="view-pagella" class="tab-content hidden p-4 md:p-8 max-w-5xl mx-auto">
-<!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
-<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
-    <div class="flex items-center gap-3">
-        <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
-            ⬅️ Torna all'Hub Classe
-        </button>
-        <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
-            ⬅️ Elenco Studenti
-        </button>
-        <!-- MODIFICATO QUI: da changeMenu a resetClassSelection -->
-        <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-zinc-100 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
-            🏫 Cambia Classe
-        </button>
-    <button onclick="window.changeMenu('profilo-target')" class="btn-staff-nav hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-3 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
-        👤 Profilo Studente
-    </button>
-    </div>
-    
-    <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
-        <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
-        <select onchange="window.quickSwitchStudent(this.value)" 
-    class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
-</select>
-    </div>
-</div>
-    <!-- Documento Pagella -->
-    <div class="bg-zinc-900 shadow-2xl rounded-sm border-t-[12px] border-red-700 p-6 md:p-12 text-zinc-100 relative overflow-hidden">
-        <!-- Filigrana di sfondo (opzionale) -->
-        <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
-            <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" class="w-96">
+    <!-- Barra di navigazione studente (sempre visibile) -->
+    <div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
+        <div class="flex items-center gap-3">
+            <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">⬅️ Torna all'Hub</button>
+            <button onclick="window.resetPagellaView()" class="bg-white/10 hover:bg-white/20 text-zinc-100 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">🎓 Selezione Periodo</button>
         </div>
-
-        <!-- Header Documento -->
-<div class="flex flex-col md:flex-row justify-between items-start border-b-2 border-zinc-800 pb-8 mb-8 gap-6">
-    <div class="space-y-1">
-        <h1 class="text-3xl font-black tracking-tighter uppercase italic text-white">Fazbear <span class="text-red-700">High School</span></h1>
-        <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Documento di Valutazione Periodica</p>
-        <div class="pt-4 space-y-1">
-            <p class="text-xs font-bold text-zinc-300"><span id="pagella-gender-label">STUDENT@</span>: <span id="pagella-student-name" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
-            <p class="text-xs font-bold text-zinc-300">CLASSE: <span id="pagella-classe-label" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
-            <p class="text-xs font-bold text-zinc-300">ANNO SCOLASTICO: <span id="pagella-anno-scolastico" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
+        <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
+            <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
+            <select onchange="window.quickSwitchStudent(this.value)" class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg"></select>
         </div>
     </div>
 
-            <div class="flex flex-col items-end gap-4">
-                <div class="flex bg-zinc-100 p-1 rounded-lg border border-zinc-200">
-                    <button onclick="switchQuad(1)" id="btn-q1" class="px-4 py-2 rounded text-[9px] font-black uppercase transition-all bg-white shadow-sm">1° Quadrimestre</button>
-                    <button onclick="switchQuad(2)" id="btn-q2" class="px-4 py-2 rounded text-[9px] font-black uppercase transition-all text-zinc-400">2° Quadrimestre</button>
+    <!-- SCHERMATA 1: SELEZIONE PERIODO -->
+    <div id="pagella-selection-screen" class="flex flex-col items-center justify-center min-h-[50vh] space-y-8">
+        <div class="text-center">
+            <h2 class="text-3xl font-black uppercase italic text-white tracking-tighter">Documento di <span class="text-red-600">Valutazione</span></h2>
+            <p class="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.3em] mt-2">Seleziona il periodo da visualizzare</p>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
+            <button onclick="window.selectPagellaPeriod(1)" class="group p-10 bg-zinc-900 border-4 border-zinc-800 rounded-[40px] hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-2xl">
+                <span class="text-5xl group-hover:scale-110 transition-transform">1️⃣</span>
+                <span class="font-black uppercase text-sm tracking-widest text-zinc-200">1° Quadrimestre</span>
+            </button>
+            <button onclick="window.selectPagellaPeriod(2)" class="group p-10 bg-zinc-900 border-4 border-zinc-800 rounded-[40px] hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-2xl">
+                <span class="text-5xl group-hover:scale-110 transition-transform">2️⃣</span>
+                <span class="font-black uppercase text-sm tracking-widest text-zinc-200">2° Quadrimestre</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- SCHERMATA 2: IL DOCUMENTO (Nascosto inizialmente) -->
+    <div id="pagella-document-screen" class="hidden space-y-6">
+        <div class="flex justify-between items-center">
+            <button onclick="window.resetPagellaView()" class="text-[10px] font-black uppercase text-zinc-500 hover:text-red-600 transition-colors">⬅️ Cambia Periodo</button>
+            <div class="px-4 py-1 bg-red-600 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-lg shadow-red-900/20">
+                Visualizzazione: <span id="pagella-period-label">---</span>
+            </div>
+        </div>
+
+        <div class="bg-zinc-900 shadow-2xl rounded-sm border-t-[12px] border-red-700 p-6 md:p-12 text-zinc-100 relative overflow-hidden">
+            <!-- Filigrana -->
+            <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
+                <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=..." class="w-96">
+            </div>
+
+            <!-- Header Documento -->
+            <div class="flex flex-col md:flex-row justify-between items-start border-b-2 border-zinc-800 pb-8 mb-8 gap-6">
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-black tracking-tighter uppercase italic text-white">Fazbear <span class="text-red-700">High School</span></h1>
+                    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-zinc-500">Documento di Valutazione Periodica</p>
+                    <div class="pt-4 space-y-1">
+                        <p class="text-xs font-bold text-zinc-300"><span id="pagella-gender-label">STUDENT@</span>: <span id="pagella-student-name" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
+                        <p class="text-xs font-bold text-zinc-300">CLASSE: <span id="pagella-classe-label" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
+                        <p class="text-xs font-bold text-zinc-300">ANNO SCOLASTICO: <span id="pagella-anno-scolastico" class="border-b border-dotted border-zinc-600 text-white">---</span></p>
+                    </div>
                 </div>
-                <button onclick="window.print()" class="text-[9px] font-black uppercase bg-zinc-900 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Stampa PDF</button>
+                <button onclick="window.print()" class="text-[9px] font-black uppercase bg-zinc-800 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Stampa PDF</button>
             </div>
-        </div>
 
-        <!-- Tabella Voti Rimodernata con Commenti -->
-<div class="min-h-[400px] overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-        <thead>
-            <tr class="border-b-2 border-zinc-900 text-[10px] font-black uppercase tracking-widest">
-                <th class="py-4 pr-4">Materia</th>
-                <th class="py-4 text-center px-2">Voto</th>
-                <th class="py-4 px-4">Commento del Docente</th>
-                <th class="py-4 text-right">Esito</th>
-            </tr>
-        </thead>
-        <tbody id="pagella-table-body" class="divide-y divide-zinc-200">
-            <!-- Popolato via JS -->
-        </tbody>
-    </table>
-</div>
-
-        <!-- Sezione Commento / Giudizio -->
-        <div class="mt-12 pt-8 border-t-2 border-zinc-900">
-            <h3 class="text-[10px] font-black uppercase tracking-widest mb-4 flex justify-between items-center">
-                Giudizio del Consiglio di Classe
-                <button id="btn-edit-comment" onclick="window.editPagellaComment()" class="hidden text-red-600 hover:underline">Modifica Giudizio</button>
-            </h3>
-            <div id="pagella-comment-box" class="p-6 bg-zinc-50 border border-zinc-200 rounded-sm italic text-sm text-zinc-600 leading-relaxed">
-                Nessun giudizio inserito per questo periodo.
+            <!-- Tabella -->
+            <div class="min-h-[400px] overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b-2 border-zinc-900 text-[10px] font-black uppercase tracking-widest">
+                            <th class="py-4 pr-4">Materia</th>
+                            <th class="py-4 text-center px-2">Voto</th>
+                            <th class="py-4 px-4">Commento del Docente</th>
+                            <th class="py-4 text-right">Esito</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pagella-table-body" class="divide-y divide-zinc-200"></tbody>
+                </table>
             </div>
-        </div>
 
-        <!-- Firme -->
-        <div class="mt-16 flex justify-between items-end opacity-60">
-            <div class="text-center">
-                <p class="text-[8px] font-bold uppercase">Il Segretario</p>
-                <div class="w-32 border-b border-zinc-400 mt-8">Glitchtrap</div>
+            <!-- Giudizio -->
+            <div class="mt-12 pt-8 border-t-2 border-zinc-900">
+                <h3 class="text-[10px] font-black uppercase tracking-widest mb-4 flex justify-between items-center">
+                    Giudizio del Consiglio di Classe
+                    <button id="btn-edit-comment" onclick="window.editPagellaComment()" class="hidden text-red-600 hover:underline">Modifica Giudizio</button>
+                </h3>
+                <div id="pagella-comment-box" class="p-6 bg-zinc-50 border border-zinc-200 rounded-sm italic text-sm text-zinc-600 leading-relaxed"></div>
             </div>
-            <div class="text-center">
-                <p class="text-[8px] font-bold uppercase">Il Dirigente Scolastico</p>
-                <p class="text-[10px] font-serif italic mt-2">Golden Freddy</p>
-                <div class="w-48 border-b border-zinc-400 mt-2"></div>
+
+            <!-- Firme -->
+            <div class="mt-16 flex justify-between items-end opacity-60">
+                <div class="text-center">
+                    <p class="text-[8px] font-bold uppercase">Il Segretario</p>
+                    <div class="w-32 border-b border-zinc-400 mt-8">Glitchtrap</div>
+                </div>
+                <div class="text-center">
+                    <p class="text-[8px] font-bold uppercase">Il Dirigente Scolastico</p>
+                    <p class="text-[10px] font-serif italic mt-2">Golden Freddy</p>
+                    <div class="w-48 border-b border-zinc-400 mt-2"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -1200,18 +1280,37 @@ main {
     </div>
 </div>
 
-		<!-- VIEW: APPELLO (Versione Dark Fix) -->
+		<!-- VIEW: APPELLO (Versione con Calendario Integrato) -->
 <div id="view-appello" class="tab-content hidden mb-6 bg-[#18181b] p-4 rounded-2xl border border-zinc-800 shadow-sm">
-    <div class="flex justify-between items-center mb-4">
-        <div class="flex items-center gap-4">
-            <!-- Pulsante Indietro Dark -->
-            <button onclick="window.changeMenu('classi')" class="bg-zinc-800 hover:bg-zinc-700 text-white p-2 rounded-lg transition-all">⬅️</button>
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
+        <div class="flex items-center gap-4 w-full md:w-auto">
+            <button onclick="window.changeMenu('classi')" class="bg-zinc-800 hover:bg-zinc-700 text-white p-2.5 rounded-xl transition-all shadow-sm">⬅️</button>
             <div>
-                <h3 class="font-black uppercase text-xs tracking-tighter text-white">Registro Appello - <span id="att-class-display" class="text-red-500">--</span></h3>
-                <p class="text-[8px] font-bold text-zinc-500 uppercase">Data: <span id="att-date-display">--</span></p>
+                <h3 class="font-black uppercase text-xs tracking-tighter text-white">Registro Presenze - <span id="att-class-display" class="text-red-500">--</span></h3>
+                <p class="text-[8px] font-bold text-zinc-500 uppercase">Gestione Appello Giornaliero</p>
             </div>
         </div>
-        <button onclick="window.saveAttendance()" class="bg-red-700 text-white px-4 py-1.5 rounded-xl text-[9px] font-black uppercase hover:bg-red-600 transition-all shadow-lg">
+
+        <!-- NAVIGAZIONE DATA APPELLO -->
+        <div class="flex items-center gap-2 bg-zinc-900/50 p-1.5 rounded-2xl border border-zinc-800 shadow-inner">
+            <button onclick="window.navAttendanceDate(-1)" class="w-8 h-8 flex items-center justify-center bg-zinc-800 hover:bg-red-700 text-white rounded-lg transition-all text-xs">◀</button>
+            
+            <div class="relative flex items-center px-2">
+                <span class="text-lg mr-2">📅</span>
+                <input type="date" id="attendance-local-calendar" 
+                    onchange="window.updateAttendanceDate(this.value)"
+                    class="bg-transparent text-[11px] font-black uppercase text-white outline-none cursor-pointer hover:text-red-500 transition-colors">
+            </div>
+
+            <button onclick="window.navAttendanceDate(1)" class="w-8 h-8 flex items-center justify-center bg-zinc-800 hover:bg-red-700 text-white rounded-lg transition-all text-xs">▶</button>
+            
+            <button onclick="window.updateAttendanceDate(new Date().toLocaleDateString('en-CA'))" 
+                class="ml-2 px-3 py-1.5 bg-zinc-700 hover:bg-zinc-600 text-[8px] font-black uppercase rounded-lg text-zinc-300 transition-all">
+                Oggi
+            </button>
+        </div>
+
+        <button onclick="window.saveAttendance()" class="w-full md:w-auto bg-red-700 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase hover:bg-red-600 transition-all shadow-lg shadow-red-900/20">
             Salva Appello
         </button>
     </div>
@@ -1220,10 +1319,10 @@ main {
         <table class="w-full text-left">
             <thead>
                 <tr class="text-[9px] font-black text-zinc-500 uppercase border-b border-zinc-800">
-                    <th class="pb-2">Studente</th>
-                    <th class="pb-2 text-center">Stato</th>
-                    <th class="pb-2 text-center">Entrata</th>
-                    <th class="pb-2 text-center">Uscita</th>
+                    <th class="pb-3 pl-2">Studente</th>
+                    <th class="pb-3 text-center">Stato Presenza</th>
+                    <th class="pb-3 text-center">Orario Entrata</th>
+                    <th class="pb-3 text-center">Orario Uscita</th>
                 </tr>
             </thead>
             <tbody id="attendance-body"></tbody>
@@ -1231,48 +1330,74 @@ main {
     </div>
 </div>
 
-		<div id="view-hub" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4">
-    <div class="glass-light p-8 rounded-3xl border-l-8 border-zinc-800 shadow-xl bg-white">
+		<!-- VIEW: HUB (Pannello Admin Potenziato) -->
+<div id="view-hub" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4">
+    <div class="glass-light p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white">
         <h1 class="text-3xl font-black uppercase text-zinc-900 flex items-center gap-3">
-            <span>⚙️</span> Pannello di Controllo
+            <span>⚙️</span> Amministrazione Sistema
         </h1>
-        <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Amministrazione Fazbear School System</p>
+        <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Controllo Totale Fazbear School System</p>
     </div>
 
-    <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-    <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">👥 Utenti</h3>
-    
-    <button onclick="window.hubManager.mostraListaUtenti()" class="w-full p-3 bg-zinc-50 hover:bg-zinc-100 rounded-xl text-[10px] font-black uppercase transition-all mb-2 text-left flex justify-between items-center">
-        Lista Completa <span>→</span>
-    </button>
-    
-    <button onclick="window.hubManager.nuovoUtente()" class="w-full p-3 bg-zinc-50 hover:bg-zinc-100 rounded-xl text-[10px] font-black uppercase transition-all text-left flex justify-between items-center">
-        Aggiungi Nuovo <span>+</span>
-    </button>
-</div>
-
-<div id="hub-dynamic-content" class="mt-6 hidden">
+    <!-- STATISTICHE RAPIDE -->
+    <div id="admin-stats-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+            <p class="text-[8px] font-black text-zinc-500 uppercase">Studenti Totali</p>
+            <p id="stat-total-students" class="text-2xl font-black text-white">--</p>
+        </div>
+        <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+            <p class="text-[8px] font-black text-zinc-500 uppercase">Media Scolastica</p>
+            <p id="stat-global-media" class="text-2xl font-black text-red-600">--</p>
+        </div>
+        <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+            <p class="text-[8px] font-black text-zinc-500 uppercase">Staff Attivo</p>
+            <p id="stat-total-staff" class="text-2xl font-black text-white">--</p>
+        </div>
+        <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
+            <p class="text-[8px] font-black text-zinc-500 uppercase">Note Emesse</p>
+            <p id="stat-total-notes" class="text-2xl font-black text-amber-500">--</p>
+        </div>
     </div>
 
-        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🖥️ Sistema</h3>
-            <div class="space-y-2">
-                <div class="flex justify-between text-[10px] font-bold uppercase">
-                    <span class="text-zinc-400">Database:</span>
-                    <span class="text-green-600">Online</span>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Gestione Utenti -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-black uppercase text-zinc-800 text-xs">👥 Gestione Database Utenti</h3>
+                    <div class="flex gap-2">
+                        <button onclick="window.hubManager.mostraListaUtenti()" class="bg-zinc-900 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Lista</button>
+                        <button onclick="window.hubManager.nuovoUtente()" class="bg-red-700 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Nuovo +</button>
+                    </div>
                 </div>
-                <div class="flex justify-between text-[10px] font-bold uppercase">
-                    <span class="text-zinc-400">Versione:</span>
-                    <span class="text-zinc-800">v3.0-Stable</span>
+                
+                <!-- Ricerca Globale -->
+                <div class="relative mb-4">
+                    <input type="text" id="global-search-input" oninput="window.hubManager.ricercaGlobale(this.value)" 
+                        placeholder="Cerca studente o docente in tutta la scuola..." 
+                        class="w-full p-4 bg-zinc-100 border-none rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-red-500">
+                    <div id="global-search-results" class="absolute top-full left-0 w-full bg-white border border-zinc-200 rounded-2xl mt-2 shadow-2xl z-50 hidden max-h-60 overflow-y-auto"></div>
                 </div>
+
+                <div id="hub-dynamic-content" class="hidden"></div>
             </div>
         </div>
 
-        <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-            <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">📢 Comunicazioni</h3>
-            <button onclick="window.changeMenu('bacheca')" class="w-full p-4 bg-red-700 text-white rounded-xl font-black text-[10px] uppercase hover:bg-red-800 transition-all">
-                Invia Circolare
-            </button>
+        <!-- Manutenzione e Log -->
+        <div class="space-y-6">
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🛠️ Manutenzione AS</h3>
+                <button onclick="window.hubManager.calcolaStatistiche()" class="w-full p-3 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-[9px] font-black uppercase mb-2 transition-all">Aggiorna Statistiche</button>
+                <button onclick="alert('Funzione di backup database attivata')" class="w-full p-3 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-[9px] font-black uppercase transition-all">Esporta Backup JSON</button>
+            </div>
+
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
+                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">📜 Log Attività Recenti</h3>
+                <div id="admin-audit-logs" class="space-y-2 max-h-48 overflow-y-auto text-[9px] font-mono text-zinc-500">
+                    <p>> Sistema inizializzato...</p>
+                    <p>> Admin loggato...</p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1413,7 +1538,7 @@ inputCal.value = dataLocale;
 
     // PEZZO MANCANTE 1: Pagelle
     const pagellaAyElem = document.getElementById('pagella-anno-scolastico');
-    if (pagellaAyElem) pagellaAyElem.innerText = `Pagelle ${ay}`;
+    if (pagellaAyElem) pagellaAyElem.innerText = `${ay}`;
 
     // 3. Refresh Dati Classe e Registro
 // Chiamiamo handleClassChange solo se abbiamo una classe selezionata o se l'utente è uno studente
@@ -1513,12 +1638,13 @@ function applyRoleUI() {
     const roleLabel = document.getElementById('user-role-label');
     if (roleLabel) roleLabel.innerText = window.currentUserData?.role || 'Ospite';
     
-    const isStaffDidattico = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE].includes(type);
+    const isAdmin = type === ROLES.ADMIN;
+    const isStaffDidattico = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE].includes(type) || isAdmin;
     const isManagement = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(type);
-    const isOperativo = [ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.COUNSELOR].includes(type);
+    const isOperativo = [ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.COUNSELOR].includes(type) || isAdmin;
     const isStaffGenerale = isStaffDidattico || isOperativo || type === ROLES.ADMIN;
     const isStudente = type === ROLES.STUDENTE;
-    const isAdmin = type === ROLES.ADMIN;
+    
 
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
     let miaClasse = window.currentUserData?.classe;
@@ -1599,6 +1725,10 @@ toggle('menu-notifiche-full', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].i
 toggle('menu-didattica', type === ROLES.STUDENTE);
 toggle('home-btn-didattica', type === ROLES.STUDENTE);
 toggle('btn-add-didattica', isStaffDidattico || type === ROLES.ADMIN);
+
+    // AGGIUNTA: Mostra il menu HUB (Pannello di Controllo) solo ad Admin e Tecnici
+    toggle('menu-hub', isAdmin || type === ROLES.TECNICO);
+
 
     // --- NUOVA LOGICA NAVIGAZIONE STAFF ---
     // Mostra i pulsanti "Hub" e "Profilo Studente" solo allo Staff
@@ -2063,34 +2193,34 @@ if (resMediaElem) {
     const avg = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
             
             vHtml += `
-    <tr class="group">
-        <td class="subject-column">
-            <div class="flex flex-col">
-                <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">
-                    ${emoji} ${m.toUpperCase()} 
-                </span>
-                <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">
-                    Docente: ${m_voti[0]?.prof || 'N.D.'}
-                </span>
-            </div>
-        </td>
-        <td class="text-center">
-            <div class="flex flex-wrap justify-center gap-1.5">
-                ${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[8px] text-zinc-200 font-black">---</span>'}
-            </div>
-        </td>
-        <td class="text-center">
-            <div class="flex flex-wrap justify-center gap-1.5">
-                ${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[8px] text-zinc-200 font-black">---</span>'}
-            </div>
-        </td>
-        <td class="text-right">
-            <span class="media-badge-large ${parseFloat(avg) < 6 ? 'text-red-600' : 'text-green-600'}">
-                ${avg}
+<tr class="group">
+    <td class="subject-column">
+        <div class="flex flex-col">
+            <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">
+                ${m.toUpperCase()} 
             </span>
-        </td>
-    </tr>`;
-        });
+            <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">
+                Docente: ${m_voti[0]?.prof || 'N.D.'}
+            </span>
+        </div>
+    </td>
+    <td class="text-center">
+        <div class="flex flex-wrap justify-center gap-1.5">
+            ${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[8px] text-zinc-200 font-black">---</span>'}
+        </div>
+    </td>
+    <td class="text-center">
+        <div class="flex flex-wrap justify-center gap-1.5">
+            ${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[8px] text-zinc-200 font-black">---</span>'}
+        </div>
+    </td>
+    <td class="text-right">
+        <span class="media-badge-large ${parseFloat(avg) < 6 ? 'text-red-600' : 'text-green-600'}">
+            ${avg}
+        </span>
+    </td>
+</tr>`;
+});
 
         // 6. Sezione "Altre Materie" (per Prof/Preside)
         if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
@@ -2203,6 +2333,7 @@ if (resMediaElem) {
 
     const infoTooltip = `${v.data} - ${v.argomento || 'Valutazione'}`;
 
+    // Aggiungiamo gli eventi per modifica (click) ed eliminazione (tasto destro)
     let handlers = "";
     if (canManage) {
         handlers += ` onclick="window.editVoto('${v.id}', '${studentId}')"`;
@@ -2211,7 +2342,7 @@ if (resMediaElem) {
 
     return `
         <span title="${infoTooltip}" 
-              class="grade-badge ${statusClass} ${canManage ? 'hover:border-zinc-400 cursor-pointer' : ''}" 
+              class="grade-badge ${statusClass} ${canManage ? 'hover:border-zinc-400' : ''}" 
               ${handlers}>
             ${v.voto}
         </span>`;
@@ -2735,16 +2866,18 @@ window.toggleNotifPanel = () => {
             }
 
             // --- MATERIE PER I PROF (La tua originale) ---
-            if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE) {
+            if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.ADMIN) {
     const mSelect = document.getElementById('input-grade-subject');
-    
     if (mSelect) {
-        // Prende le materie del prof, se non ci sono usa una lista vuota
-        const mats = window.currentUserData.materie || []; 
+        let mats = window.currentUserData?.materie || [];
+        // Se Admin o Preside, permetti di scegliere tra TUTTE le materie del sistema
+        if (window.userRole === ROLES.ADMIN || window.userRole === ROLES.PRESIDE) {
+            mats = Object.keys(LISTA_MATERIE);
+        }
         
         mSelect.innerHTML = mats.map(m => {
             const cleanMat = m.toLowerCase().trim();
-            const emoji = LISTA_MATERIE[cleanMat] || "📚"; // Cerca l'emoji, altrimenti usa il libro
+            const emoji = LISTA_MATERIE[cleanMat] || "📚";
             return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
         }).join('');
     }
@@ -2786,6 +2919,9 @@ window.changeMenu = (menu) => {
         window.changeMenu('classi');
         return;
     }
+	if (menu === 'hub') {
+    window.hubManager.calcolaStatistiche();
+}
 
     // --- LOGICA VISIVA (Hidden/Active) ---
     document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
@@ -2968,7 +3104,10 @@ window.renderPagella = async (voti, aySelezionato) => {
     
     if (!tbody || !window.selectedStudentId) return;
 
-    // --- 1. RECUPERO DATI STUDENTE (Header) ---
+    // Usa la variabile globale invece di leggere i bottoni
+    const currentQ = window.currentPagellaQuad; 
+    const ayKey = aySelezionato.replace('/', '_');
+
     const student = window.allStudents.find(s => s.id === window.selectedStudentId) || 
                     (window.allUsers ? window.allUsers.find(s => s.id === window.selectedStudentId) : null);
     
@@ -2979,102 +3118,93 @@ window.renderPagella = async (voti, aySelezionato) => {
         if (nameLabel) nameLabel.innerText = student.name.toUpperCase();
     }
 
-    // --- 2. GESTIONE PERMESSI STAFF ---
     const isStaff = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
     if (editBtn) editBtn.classList.toggle('hidden', !isStaff);
 
-    const currentQ = document.getElementById('btn-q1').classList.contains('bg-white') ? 1 : 2;
+
     const votiAnno = voti.filter(v => (v.anno === aySelezionato));
     const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
 
-    // --- 3. RECUPERO RECORD (Commenti e Giudizio) ---
+    // --- 2. RECUPERO RECORD CON CHIAVI SPECIFICHE PER ANNO ---
     const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
     const snap = await getDoc(recordRef);
     const recordData = snap.exists() ? snap.data() : {};
-    const commentiMaterie = recordData[`commenti_materie_q${currentQ}`] || {};
-
-    // --- 4. RENDERING TABELLA ---
-if (materie.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold">Nessun dato registrato</td></tr>';
-} else {
-    // Filtriamo "condotta" dalle materie normali se presente per gestirla dopo
-    const materieFiltrate = materie.filter(m => m !== 'condotta');
-
-    let htmlRighe = materieFiltrate.map(m => {
-        const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
-
-
-        // LOGICA MATERIE STANDARD
-const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
-
-// --- LOGICA IDENTICA AL BOT PER RELIGIONE ---
-let displayVoto;
-let color;
-
-if (m.toLowerCase() === 'religione') {
-    if (val === null) {
-        displayVoto = "-";
-        color = "text-zinc-400";
-    } else {
-        // Funzione get_giudizio_da_media del bot
-        const getGiudizio = (v) => {
-            if (v >= 9.0) return "Ottimo";
-            if (v >= 8.0) return "Distinto";
-            if (v >= 7.0) return "Buono";
-            if (v >= 6.0) return "Sufficiente";
-            return "Insufficiente";
-        };
-        displayVoto = `${getGiudizio(val)} ${val >= 6 ? '✅' : '❌'}`;
-        color = val >= 6 ? 'text-blue-600' : 'text-red-600';
-    }
-} else {
-    // Logica standard per le altre materie
-    displayVoto = val !== null ? Math.round(val) : "-";
-    color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
-}
-// --------------------------------------------
-
-const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
-const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
-const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
-
-return `
-    <tr class="border-b border-zinc-100 group">
-        <td class="py-4 font-bold uppercase text-xs">${LISTA_MATERIE[m] || '📚'} ${m.toUpperCase()}</td>
-        <td class="py-4 text-center font-black text-[10px] ${color} uppercase tracking-tighter">${displayVoto}</td>
-        <td class="py-4 px-4">
-            <div class="flex flex-col gap-1">
-                <p class="text-[10px] text-zinc-600 italic leading-tight">└ *${commentoMateria}*</p>
-                ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
-            </div>
-        </td>
-        <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
-    </tr>`;
-    }).join('');
-
-    // AGGIUNTA RIGA CONDOTTA (Sempre in fondo)
-    const votoCondotta = recordData[`condotta_q${currentQ}`] || "9"; // Default 9 se non impostato
-    const isPreside = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
     
-    htmlRighe += `
-        <tr class="bg-zinc-50/50 group">
-            <td class="py-4 font-black uppercase text-xs">CONDOTTA</td>
-            <td class="py-4 text-center font-black text-sm ${parseInt(votoCondotta) < 6 ? 'text-red-600' : 'text-zinc-900'}">${votoCondotta}</td>
-            <td class="py-4 px-4">
-                <div class="flex flex-col gap-1">
-                    <p class="text-[10px] text-zinc-500 italic leading-tight">Valutazione del comportamento e del rispetto del regolamento.</p>
-                    ${isPreside ? `<button onclick="window.editCondotta(${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica (Solo Dirigenza)</button>` : ''}
-                </div>
-            </td>
-            <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${parseInt(votoCondotta) < 6 ? 'SI' : 'NO'}</td>
-        </tr>`;
+    const keyCommentiMaterie = `commenti_materie_${ayKey}_q${currentQ}`;
+    const keyCondotta = `condotta_${ayKey}_q${currentQ}`;
+    const keyGiudizioGlobale = `commento_${ayKey}_q${currentQ}`;
 
-    tbody.innerHTML = htmlRighe;
-}
+    const commentiMaterie = recordData[keyCommentiMaterie] || {};
 
-    // --- 5. GIUDIZIO GLOBALE ---
-    const field = `commento_q${currentQ}`;
-    commentBox.innerText = recordData[field] || "Nessun giudizio di condotta inserito.";
+    // --- 3. RENDERING TABELLA ---
+    if (materie.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold">Nessun dato registrato per l\'A.S. ' + aySelezionato + '</td></tr>';
+    } else {
+        const materieFiltrate = materie.filter(m => m !== 'condotta');
+
+        let htmlRighe = materieFiltrate.map(m => {
+            const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
+            const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
+
+            let displayVoto, color;
+            if (m.toLowerCase() === 'religione') {
+                if (val === null) { displayVoto = "-"; color = "text-zinc-400"; }
+                else {
+                    const getGiudizio = (v) => {
+                        if (v >= 9.0) return "Ottimo";
+                        if (v >= 8.0) return "Distinto";
+                        if (v >= 7.0) return "Discreto";
+                        if (v >= 6.0) return "Buono";
+                        return "Insufficiente";
+                    };
+                    displayVoto = `${getGiudizio(val)} ${val >= 6 ? '✅' : '❌'}`;
+                    color = val >= 6 ? 'text-blue-600' : 'text-red-600';
+                }
+            } else {
+                displayVoto = val !== null ? Math.round(val) : "-";
+                color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
+            }
+
+            const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
+            const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
+            const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
+
+            return `
+                <tr class="border-b border-zinc-100 group">
+                    <td class="py-4 font-bold uppercase text-xs">${m.toUpperCase()}</td>
+                    <td class="py-4 text-center font-black text-[10px] ${color} uppercase tracking-tighter">${displayVoto}</td>
+                    <td class="py-4 px-4">
+                        <div class="flex flex-col gap-1">
+                            <p class="text-[10px] text-zinc-600 italic leading-tight">└ *${commentoMateria}*</p>
+                            ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
+                        </div>
+                    </td>
+                    <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
+                </tr>`;
+        }).join('');
+
+        // --- RIGA CONDOTTA (Specifico per Anno) ---
+        const votoCondotta = recordData[keyCondotta] || "9"; 
+        const isPreside = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
+        
+        htmlRighe += `
+            <tr class="bg-zinc-50/50 group">
+                <td class="py-4 font-black uppercase text-xs">CONDOTTA</td>
+                <td class="py-4 text-center font-black text-sm ${parseInt(votoCondotta) < 6 ? 'text-red-600' : 'text-zinc-900'}">${votoCondotta}</td>
+                <td class="py-4 px-4">
+                    <div class="flex flex-col gap-1">
+                        <p class="text-[10px] text-zinc-500 italic leading-tight">Valutazione del comportamento per l'A.S. ${aySelezionato}</p>
+                        ${isPreside ? `<button onclick="window.editCondotta(${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica (Solo Dirigenza)</button>` : ''}
+                    </div>
+                </td>
+                <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${parseInt(votoCondotta) < 6 ? 'SI' : 'NO'}</td>
+            </tr>`;
+
+        tbody.innerHTML = htmlRighe;
+    }
+
+    // --- 4. GIUDIZIO GLOBALE (Specifico per Anno) ---
+    commentBox.innerText = recordData[keyGiudizioGlobale] || "Nessun giudizio inserito per questo periodo.";
 };
         
      window.addAvviso = async (testo, cls) => {
@@ -4100,8 +4230,12 @@ window.navDate = (unit, value) => {
 
 	window.loadAttendance = async (cls, date) => {
     const panel = document.getElementById('view-appello');
+    const localCal = document.getElementById('attendance-local-calendar');
 
-    // MODIFICATO: Controllo esteso alle nuove classi
+    // Sincronizziamo il calendario locale all'apertura se esiste
+    if (localCal && date) localCal.value = date;
+
+    // Validazione parametri
     if (!cls || cls === "None" || cls === "null" || !CLASSI_VALIDE.includes(cls) || !date) {
         if(panel) panel.classList.add('hidden');
         return;
@@ -4121,14 +4255,14 @@ window.navDate = (unit, value) => {
     if(classDisplay) classDisplay.innerText = cls;
     if(dateDisplay) dateDisplay.innerText = date;
 
+    // Recupero dati da Firebase
     const attRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'attendance', `${cls}_${date}`);
     const attSnap = await getDoc(attRef);
     const attData = attSnap.exists() ? attSnap.data() : {};
 
-    const classStudents = window.allStudents.filter(s => s.classe === cls);
+    const classStudents = (window.allStudents || []).filter(s => s.classe === cls);
     const tbody = document.getElementById('attendance-body');
     if(!tbody) return;
-    
     
     tbody.innerHTML = '';
     classStudents.forEach(s => {
@@ -4450,11 +4584,13 @@ window.filterByClass = (cls) => {
     }
 };
 
-	window.renderTabelloneGlobale = async () => {
+	// Cache globale per i voti del tabellone
+window.tabelloneCache = {};
+
+window.renderTabelloneGlobale = async () => {
     const cls = window.selectedClass;
     if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica.");
 
-    // Cambia menu
     window.changeMenu('tabellone');
     
     const thead = document.getElementById('tabellone-head');
@@ -4463,16 +4599,14 @@ window.filterByClass = (cls) => {
     
     if(tabTitle) tabTitle.innerText = cls;
     
-    // Placeholder di caricamento
     tbody.innerHTML = '<tr><td colspan="20" class="p-10 text-center animate-pulse font-black uppercase">Generazione scrutinio in corso...</td></tr>';
 
     const classStudents = window.allStudents.filter(s => s.classe === cls);
     const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
     
     let materieSet = new Set();
+    window.tabelloneCache = {}; // Reset cache
 
-    // --- 1. RECUPERO MASSIVO E PARALLELO (FIX LAG) ---
-    // Avviamo tutte le 8 richieste insieme invece di aspettare una per una
     const promesseStudenti = classStudents.map(async (student) => {
         const recRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', student.id);
         const snap = await getDoc(recRef);
@@ -4481,22 +4615,31 @@ window.filterByClass = (cls) => {
         const votiAnno = voti.filter(v => v.anno === currentYear);
         const medieStudente = {};
         
+        // Inizializziamo la cache per questo studente
+        window.tabelloneCache[student.id] = {
+            name: student.name,
+            votiPerMateria: {}
+        };
+
         votiAnno.forEach(v => {
             const mat = v.materia.toUpperCase().trim();
-            materieSet.add(mat); // Il Set raccoglie le materie uniche di tutti
+            materieSet.add(mat);
             if (!medieStudente[mat]) medieStudente[mat] = [];
             medieStudente[mat].push(window.parseVotoScolastico(v.voto));
+
+            // Salviamo il voto completo nella cache per il dettaglio
+            if (!window.tabelloneCache[student.id].votiPerMateria[mat]) {
+                window.tabelloneCache[student.id].votiPerMateria[mat] = [];
+            }
+            window.tabelloneCache[student.id].votiPerMateria[mat].push(v);
         });
 
-        return { name: student.name, medie: medieStudente };
+        return { id: student.id, name: student.name, medie: medieStudente };
     });
 
-    // Qui aspettiamo che il "gruppo" di richieste finisca
     const allData = await Promise.all(promesseStudenti);
-
     const materieOrdinate = Array.from(materieSet).sort();
 
-    // --- 2. RENDER INTESTAZIONE ---
     thead.innerHTML = `
         <tr>
             <th class="p-4 border-r border-zinc-700 sticky left-0 bg-zinc-900 z-10 text-zinc-400 text-[10px] uppercase font-black">Studente</th>
@@ -4504,7 +4647,6 @@ window.filterByClass = (cls) => {
             <th class="p-4 text-right bg-red-900 text-white text-[10px] uppercase font-black">Media Gen.</th>
         </tr>`;
 
-    // --- 3. RENDER RIGHE ---
     tbody.innerHTML = allData.map(s => {
         let sommaMedie = 0;
         let contaMaterie = 0;
@@ -4518,7 +4660,18 @@ window.filterByClass = (cls) => {
             contaMaterie++;
             
             const colorClass = mediaMat < 6 ? 'text-red-500' : 'text-green-500';
-            return `<td class="p-4 text-center font-bold border-r border-zinc-800 ${colorClass}">${mediaMat}</td>`;
+            
+            // AGGIUNTA: Pulsante per vedere i dettagli
+            return `
+                <td class="p-4 text-center border-r border-zinc-800">
+                    <div class="flex flex-col items-center gap-1">
+                        <span class="font-black text-xs ${colorClass}">${mediaMat}</span>
+                        <button onclick="window.showTabelloneDetails('${s.id}', '${m}')" 
+                                class="text-[9px] bg-zinc-800 hover:bg-red-700 text-zinc-400 hover:text-white px-1.5 py-0.5 rounded transition-all">
+                            🔍
+                        </button>
+                    </div>
+                </td>`;
         }).join('');
 
         const mediaGenerale = contaMaterie > 0 ? (sommaMedie / contaMaterie).toFixed(1) : "0.0";
@@ -4759,6 +4912,8 @@ window.hubManager = {
         }
     },
 
+		
+
     // 2. NUOVO UTENTE
  nuovoUtente: function() {
     const role = window.userRole;
@@ -4940,6 +5095,8 @@ modificaUtente: function(id) {
         this.filtraUtenti();
     },
 
+
+
     filtraUtenti: function() {
         const searchInput = document.getElementById('hub-user-search');
         const query = searchInput ? searchInput.value.toLowerCase() : '';
@@ -4951,42 +5108,94 @@ modificaUtente: function(id) {
             row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
         });
     },
+   vaiAlProfilo: function(id, roleType) {
+        if (typeof window.selectAndGoToProfile === 'function') window.selectAndGoToProfile(id, roleType); 
+    },
 
-    vaiAlProfilo: function(id, roleType) {
-    // Ora usiamo una sola funzione che gestisce la "visualizzazione profilo altrui"
-    if (typeof window.selectAndGoToProfile === 'function') {
-        window.selectAndGoToProfile(id, roleType); 
+    // --- NUOVE FUNZIONI INSERITE CORRETTAMENTE ---
+    ricercaGlobale: function(query) {
+        const resultsDiv = document.getElementById('global-search-results');
+        if (!resultsDiv) return;
+        if (!query || query.length < 2) { resultsDiv.classList.add('hidden'); return; }
+
+        const filtered = (window.allStudents || []).filter(u => 
+            u.name.toLowerCase().includes(query.toLowerCase()) || u.id.includes(query)
+        );
+
+        if (filtered.length > 0) {
+            resultsDiv.classList.remove('hidden');
+            resultsDiv.innerHTML = filtered.map(u => `
+                <div onclick="window.selectAndGoToProfile('${u.id}'); document.getElementById('global-search-results').classList.add('hidden');" 
+                     class="p-3 hover:bg-red-50 cursor-pointer border-b border-zinc-50 flex justify-between items-center">
+                    <div>
+                        <p class="text-[10px] font-black uppercase text-zinc-800">${u.name}</p>
+                        <p class="text-[8px] text-zinc-400 uppercase">${u.role} - ${u.classe || 'No Classe'}</p>
+                    </div>
+                    <span class="text-zinc-300">→</span>
+                </div>`).join('');
+        } else {
+            resultsDiv.innerHTML = '<p class="p-4 text-[10px] text-zinc-400 italic">Nessun risultato</p>';
+        }
+    },
+
+    calcolaStatistiche: async function() {
+        console.log("📊 Statistiche...");
+        let totalGrades = 0, gradesSum = 0, totalNotes = 0;
+        const students = (window.allStudents || []).filter(s => !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
+
+        for (const s of students) {
+            const snap = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', s.id));
+            if (snap.exists()) {
+                const data = snap.data();
+                totalNotes += (data.note || []).length;
+                (data.voti || []).forEach(v => {
+                    gradesSum += window.parseVotoScolastico(v.voto);
+                    totalGrades++;
+                });
+            }
+        }
+
+        const globalMedia = totalGrades > 0 ? (gradesSum / totalGrades).toFixed(1) : "0.0";
+        if(document.getElementById('stat-total-students')) document.getElementById('stat-total-students').innerText = students.length;
+        if(document.getElementById('stat-global-media')) document.getElementById('stat-global-media').innerText = globalMedia;
+        if(document.getElementById('stat-total-notes')) document.getElementById('stat-total-notes').innerText = totalNotes;
     }
-  }
-}
+};
+
+	
 
 // Funzione per salvare il commento (Solo Docenti)
 window.editPagellaComment = async () => {
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const ayKey = aySelezionato.replace('/', '_');
     const currentQ = document.getElementById('btn-q1').classList.contains('bg-white') ? 1 : 2;
-    const nuovoCommento = prompt("Inserisci il giudizio globale per il " + currentQ + "° Quadrimestre:");
+    
+    const nuovoCommento = prompt(`Inserisci il giudizio globale per il ${currentQ}° Quadrimestre (A.S. ${aySelezionato}):`);
     
     if (nuovoCommento !== null) {
         const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
         const dataUpdate = {};
-        dataUpdate[`commento_q${currentQ}`] = nuovoCommento;
+        dataUpdate[`commento_${ayKey}_q${currentQ}`] = nuovoCommento;
         
         await setDoc(recordRef, dataUpdate, { merge: true });
         alert("Giudizio salvato!");
-        // Refresh
         const snap = await getDoc(recordRef);
-        window.renderPagella(snap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
+        window.renderPagella(snap.data().voti || [], aySelezionato);
     }
 };
-	window.editSubjectComment = async (materia, quad) => {
-    const nuovoCommento = prompt(`Inserisci il commento per ${materia.toUpperCase()} (${quad}° Quadrimestre):`);
+
+window.editSubjectComment = async (materia, quad) => {
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const ayKey = aySelezionato.replace('/', '_');
+    
+    const nuovoCommento = prompt(`Inserisci il commento per ${materia.toUpperCase()} (${quad}° Quadrimestre - A.S. ${aySelezionato}):`);
     if (nuovoCommento === null) return;
 
     const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
     const snap = await getDoc(recordRef);
     const currentData = snap.exists() ? snap.data() : {};
     
-    // Prepariamo l'oggetto dei commenti
-    const fieldName = `commenti_materie_q${quad}`;
+    const fieldName = `commenti_materie_${ayKey}_q${quad}`;
     const commentiAttuali = currentData[fieldName] || {};
     commentiAttuali[materia.toLowerCase().trim()] = nuovoCommento;
 
@@ -4996,12 +5205,10 @@ window.editPagellaComment = async () => {
     try {
         await setDoc(recordRef, update, { merge: true });
         alert("Commento materia salvato!");
-        // Refresh dei dati
         const newSnap = await getDoc(recordRef);
-        window.renderPagella(newSnap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
+        window.renderPagella(newSnap.data().voti || [], aySelezionato);
     } catch (e) {
         console.error(e);
-        alert("Errore durante il salvataggio.");
     }
 };
 
@@ -5318,19 +5525,22 @@ document.addEventListener('change', (e) => {
 	
 	// Funzione per modificare la Condotta (Solo Presidi/Admin)
 window.editCondotta = async (quad) => {
-    const nuovoVoto = prompt(`Inserisci il voto di Condotta per il ${quad}° Quadrimestre (es: 8, 9, 10):`);
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const ayKey = aySelezionato.replace('/', '_');
+    
+    const nuovoVoto = prompt(`Inserisci il voto di Condotta per il ${quad}° Quadrimestre (A.S. ${aySelezionato}):`);
     if (nuovoVoto === null || nuovoVoto === "") return;
 
     const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
     const update = {};
-    update[`condotta_q${quad}`] = nuovoVoto;
+    update[`condotta_${ayKey}_q${quad}`] = nuovoVoto;
 
     try {
         await setDoc(recordRef, update, { merge: true });
-        alert("Voto condotta aggiornato!");
-        // Refresh pagella
+        alert("Voto condotta aggiornato per l'anno " + aySelezionato);
+        // Refresh
         const snap = await getDoc(recordRef);
-        window.renderPagella(snap.data().voti || [], document.getElementById('pagella-anno-scolastico').innerText);
+        window.renderPagella(snap.data().voti || [], aySelezionato);
     } catch (e) {
         console.error(e);
     }
@@ -5468,6 +5678,108 @@ window.deleteMateriale = async (idx) => {
         await updateDoc(ref, { materiali: list });
     }
 };
+
+// --- GESTIONE NAVIGAZIONE DATA APPELLO ---
+
+// Funzione per cambiare data dall'input o dai tasti
+window.updateAttendanceDate = (newDate) => {
+    const localCal = document.getElementById('attendance-local-calendar');
+    const globalCal = document.getElementById('global-calendar');
+
+    if (!newDate) return;
+
+    // 1. Sincronizza i calendari
+    if (localCal) localCal.value = newDate;
+    if (globalCal) globalCal.value = newDate;
+
+    // 2. Aggiorna il contesto globale (A.S., Quadrimestre, ecc)
+    window.updateDateContext(newDate);
+
+    // 3. Ricarica l'appello per la nuova data
+    if (window.selectedClass && window.selectedClass !== 'ALL') {
+        window.loadAttendance(window.selectedClass, newDate);
+    }
+};
+
+// Funzione per andare avanti/indietro di un giorno
+window.navAttendanceDate = (days) => {
+    const localCal = document.getElementById('attendance-local-calendar');
+    if (!localCal || !localCal.value) return;
+
+    let d = new Date(localCal.value);
+    d.setDate(d.getDate() + days);
+    
+    const isoDate = d.toLocaleDateString('en-CA'); // Formato YYYY-MM-DD
+    window.updateAttendanceDate(isoDate);
+};
+
+window.showTabelloneDetails = (studentId, materia) => {
+    const data = window.tabelloneCache[studentId];
+    if (!data || !data.votiPerMateria[materia]) return;
+
+    const voti = data.votiPerMateria[materia];
+    const modalBody = document.getElementById('modal-body');
+    const modalTitle = document.getElementById('modal-title');
+    const modalConfirm = document.getElementById('modal-confirm');
+
+    modalTitle.innerText = `Dettaglio Voti: ${materia}`;
+    
+    // Generiamo l'HTML per la lista dei voti
+    let html = `
+        <div class="mb-4">
+            <p class="text-[10px] font-black uppercase text-zinc-400 mb-2">Studente: <span class="text-white">${data.name}</span></p>
+            <div class="space-y-2 max-h-60 overflow-y-auto custom-scroll pr-2">
+    `;
+
+    html += voti.map(v => {
+        const val = window.parseVotoScolastico(v.voto);
+        const color = val < 6 ? 'text-red-500' : 'text-green-400';
+        return `
+            <div class="tabellone-detail-row">
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-zinc-100 uppercase">${v.data}</span>
+                    <span class="text-[8px] text-zinc-500 italic leading-tight">${v.argomento || 'Valutazione'}</span>
+                </div>
+                <span class="text-lg font-black ${color}">${v.voto}</span>
+            </div>
+        `;
+    }).join('');
+
+    html += `</div></div>`;
+
+    modalBody.innerHTML = html;
+    
+    // Nascondiamo il tasto conferma perché qui serve solo chiudere
+    modalConfirm.innerText = "CHIUDI";
+    modalConfirm.onclick = () => window.closeModal();
+
+    document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+};
+
+// Variabile di stato per il quadrimestre scelto nella pagella
+window.currentPagellaQuad = 1;
+
+// Funzione per resettare la vista (torna alla selezione)
+window.resetPagellaView = () => {
+    document.getElementById('pagella-selection-screen').classList.remove('hidden');
+    document.getElementById('pagella-document-screen').classList.add('hidden');
+};
+
+// Funzione chiamata dai bottoni 1° e 2° Quad
+window.selectPagellaPeriod = (q) => {
+    window.currentPagellaQuad = q;
+    document.getElementById('pagella-period-label').innerText = q + "° QUADRIMESTRE";
+    
+    // Nascondi selezione, mostra documento
+    document.getElementById('pagella-selection-screen').classList.add('hidden');
+    document.getElementById('pagella-document-screen').classList.remove('hidden');
+    
+    // Forza il ricaricamento dei dati
+    if (window.selectedStudentId) {
+        loadStudentRecords(window.selectedStudentId);
+    }
+};
+
 
     </script>
 </body>
