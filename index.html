@@ -1947,27 +1947,35 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
 
         // Rendering Firme
         const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
-const firmeHtml = (data.firme || []).sort((a,b) => a.ora - b.ora).map((f, idx) => `
-    <div class="agenda-card group flex gap-5 p-4 rounded-2xl border border-zinc-800 hover:border-red-900 transition-all mb-4">
-        <div class="flex flex-col items-center justify-center w-14 h-14 bg-zinc-900 border-2 border-zinc-800 rounded-2xl shadow-sm shrink-0">
-            <span class="text-lg font-black text-white leading-none">${f.ora}°</span>
-            <span class="text-[7px] font-black uppercase text-zinc-500">Ora</span>
-        </div>
-        <div class="flex-1">
-            <div class="flex justify-between items-start mb-1">
-                <h4 class="text-xs font-black uppercase text-red-600 tracking-tight">${f.materia}</h4>
-                <span class="text-[9px] font-bold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-md">${f.prof}</span>
-            ${isAdmin ? `
-                    <button onclick="deleteFirma(${idx}, '${cls}')" class="text-zinc-300 hover:text-red-600 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                    </button>
-                    ` : ''}
+const firmeHtml = (data.firme || [])
+    .sort((a, b) => String(a.ora).localeCompare(String(b.ora), undefined, { numeric: true, sensitivity: 'base' }))
+    .map((f, idx) => {
+        // Gestione grafica: se l'ora è un numero mostra "1° Ora", se è "Extra" mostra solo "Extra"
+        const visualizzaOra = isNaN(f.ora) ? f.ora : `${f.ora}°`;
+        const sottoScritta = isNaN(f.ora) ? "" : `<span class="text-[7px] font-black uppercase text-zinc-500">Ora</span>`;
+
+        return `
+        <div class="agenda-card group flex gap-5 p-4 rounded-2xl border border-zinc-800 hover:border-red-900 transition-all mb-4">
+            <div class="flex flex-col items-center justify-center w-14 h-14 bg-zinc-900 border-2 border-zinc-800 rounded-2xl shadow-sm shrink-0">
+                <span class="${isNaN(f.ora) ? 'text-[11px]' : 'text-lg'} font-black text-white leading-none">${visualizzaOra}</span>
+                ${sottoScritta}
             </div>
-            <p class="text-sm text-zinc-300 font-medium leading-snug">
-                <span class="font-black text-white">${f.tipo || 'Lezione'}:</span> ${f.argomento || "Nessun argomento"}
-            </p>
-        </div>
-    </div>`).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Nessuna lezione registrata</div>';
+            <div class="flex-1">
+                <div class="flex justify-between items-start mb-1">
+                    <h4 class="text-xs font-black uppercase text-red-600 tracking-tight">${f.materia}</h4>
+                    <span class="text-[9px] font-bold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-md">${f.prof}</span>
+                ${isAdmin ? `
+                        <button onclick="deleteFirma(${idx}, '${cls}')" class="text-zinc-300 hover:text-red-600 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                        </button>
+                        ` : ''}
+                </div>
+                <p class="text-sm text-zinc-300 font-medium leading-snug">
+                    <span class="font-black text-white">${f.tipo || 'Lezione'}:</span> ${f.argomento || "Nessun argomento"}
+                </p>
+            </div>
+        </div>`;
+    }).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Nessuna lezione registrata</div>';
 
         // Iniezione nella lista (senza il box di input)
         document.getElementById('agenda-firme-list').innerHTML = avvisiHtml + firmeHtml;
