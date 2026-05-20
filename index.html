@@ -1467,13 +1467,13 @@ main {
     'AN', 'BN', 'CN'
 ];
 
-  const GIUDIZI_RELIGIONE = {
-    10: "Ottimo",
-    9: "Ottimo",
-    8: "Distinto",
-    7: "Buono",
-    6: "Sufficiente",
-    4: "Insufficiente"
+  const MAP_RELIGIONE = {
+    "O": "Ottimo",
+    "D": "Distinto",
+    "B": "Buono",
+    "d": "Discreto",
+    "S": "Sufficiente",
+    "NS": "Non Sufficiente"
 };
 
         const app = initializeApp(firebaseConfig);
@@ -1705,8 +1705,13 @@ toggle('home-btn-pagella', isStudente);
     toggle('btn-add-note', canEmitNotes);
     toggle('note-date-container', canEmitNotes);
 
-    // Voti: RIGOROSAMENTE solo Staff Didattico
-    toggle('prof-grade-panel', isStaffDidattico);
+    // --- MOSTRA PANNELLO VOTI E POPOLA MATERIE ---
+    if (isStaffDidattico) {
+        toggle('prof-grade-panel', true);
+        window.configuraPannelloVotiDocente(); // <--- NUOVA FUNZIONE
+    } else {
+        toggle('prof-grade-panel', false);
+    }
     
     // Bacheca: Admin, Presidi, Segreteria, Tecnici e Bidelli possono scrivere circolari
     toggle('bacheca-admin-panel', isManagement || type === ROLES.BIDELLO);
@@ -2172,9 +2177,10 @@ if (role === 'ospite') {
             return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
         });
 
-        // 3. Calcolo Media Globale
-        const sommaG = votiTuttoAnno.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0);
-const mediaG = votiTuttoAnno.length > 0 ? (sommaG / votiTuttoAnno.length).toFixed(1) : "0.0";
+        // 3. Calcolo Media Globale (ESCLUDENDO RELIGIONE)
+const votiPerMediaG = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() !== 'religione');
+const sommaG = votiPerMediaG.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0);
+const mediaG = votiPerMediaG.length > 0 ? (sommaG / votiPerMediaG.length).toFixed(1) : "0.0";
 
 const resMediaElem = document.getElementById('res-student-media');
 if (resMediaElem) { 
@@ -2878,16 +2884,26 @@ window.toggleNotifPanel = () => {
     const mSelect = document.getElementById('input-grade-subject');
     if (mSelect) {
         let mats = window.currentUserData?.materie || [];
-        // Se Admin o Preside, permetti di scegliere tra TUTTE le materie del sistema
+        
+        // Se Admin o Preside, carichiamo tutte le materie
         if (window.userRole === ROLES.ADMIN || window.userRole === ROLES.PRESIDE) {
             mats = Object.keys(LISTA_MATERIE);
         }
         
+        // Popoliamo il selettore materie
         mSelect.innerHTML = mats.map(m => {
             const cleanMat = m.toLowerCase().trim();
             const emoji = LISTA_MATERIE[cleanMat] || "📚";
             return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
         }).join('');
+
+        // Colleghiamo l'evento: quando cambi materia, cambiano i voti disponibili
+        mSelect.onchange = (e) => window.aggiornaOpzioniVoto(e.target.value);
+        
+        // FORZIAMO il primo caricamento dei voti in base alla prima materia in lista
+        setTimeout(() => {
+            window.aggiornaOpzioniVoto(mSelect.value);
+        }, 500);
     }
 }
         } else {
@@ -3156,18 +3172,20 @@ window.renderPagella = async (voti, aySelezionato) => {
 
             let displayVoto, color;
             if (m.toLowerCase() === 'religione') {
-                if (val === null) { displayVoto = "-"; color = "text-zinc-400"; }
-                else {
-                    const getGiudizio = (v) => {
-                        if (v >= 9.0) return "Ottimo";
-                        if (v >= 8.0) return "Distinto";
-                        if (v >= 7.0) return "Discreto";
-                        if (v >= 6.0) return "Buono";
-                        return "Insufficiente";
-                    };
-                    displayVoto = `${getGiudizio(val)} ${val >= 6 ? '✅' : '❌'}`;
-                    color = val >= 6 ? 'text-blue-600' : 'text-red-600';
-                }
+    // Recuperiamo l'ultimo voto inserito per il quadrimestre corrente
+    const ultimoVotoRel = m_voti.length ? m_voti[m_voti.length - 1].voto : null;
+    
+    if (!ultimoVotoRel) {
+        displayVoto = "-";
+        color = "text-zinc-400";
+    } else {
+        // Converte l'iniziale (O, D, d...) nel nome completo usando la mappa
+        const giudizioCompleto = MAP_RELIGIONE[ultimoVotoRel] || ultimoVotoRel;
+        displayVoto = giudizioCompleto.toUpperCase();
+        
+        // Colore: Rosso solo per Non Sufficiente (NS)
+        color = (ultimoVotoRel === 'NS') ? 'text-red-600' : 'text-blue-600';
+    }
             } else {
                 displayVoto = val !== null ? Math.round(val) : "-";
                 color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
@@ -3552,9 +3570,10 @@ if (isStaff) {
         if (barraEl) barraEl.style.width = "0%";
     }
 } else {
-    // Calcolo Media Studente
-    const media = votiFiltrati.length > 0 
-        ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
+    // Calcolo Media Studente (ESCLUDENDO RELIGIONE)
+    const votiValidiPerMedia = votiFiltrati.filter(v => v.materia.toLowerCase().trim() !== 'religione');
+    const media = votiValidiPerMedia.length > 0 
+        ? (votiValidiPerMedia.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiValidiPerMedia.length).toFixed(1) 
         : "0.0";
 
     if (mediaEl) {
@@ -4329,9 +4348,12 @@ window.saveAttendance = async () => {
 	window.parseVotoScolastico = (votoStr) => {
     if (!votoStr) return 0;
     let v = votoStr.toString().trim();
-    if (v === "10L") return 10.5;
     
-    // Estrae la parte numerica iniziale
+    // Se è un giudizio di religione (lettera), restituiamo 0 
+    // perché la religione non fa media numerica
+    if (["O", "D", "B", "d", "S", "NS"].includes(v)) return 0;
+
+    if (v === "10L") return 10.5;
     let base = parseFloat(v);
     if (isNaN(base)) return 0;
 
@@ -4341,29 +4363,37 @@ window.saveAttendance = async () => {
     return base;
 };
 
-	function inizializzaGradiVoti() {
+	// Funzione dinamica per popolare i voti in base alla materia
+// Funzione dinamica per i voti (Numeri o Giudizi Religione)
+window.aggiornaOpzioniVoto = (materia) => {
     const select = document.getElementById('input-grade-val');
     if (!select) return;
     
-    const voti = [];
-    for (let i = 1; i <= 10; i++) {
-        if (i < 10) {
-            voti.push(`${i}`);
-            voti.push(`${i}+`);
-            voti.push(`${i}½`);
-            voti.push(`${i+1}-`);
-        } else {
-            voti.push("10");
-            voti.push("10L");
-        }
-    }
-    
-    select.innerHTML = voti.map(v => `<option value="${v}">${v}</option>`).join('');
-    select.value = "6"; // Default
-}
+    const matPulita = materia ? materia.toLowerCase().trim() : "";
 
-// Chiama la funzione dopo il caricamento
-inizializzaGradiVoti();
+    if (matPulita === 'religione') {
+        const giudizi = [
+            { v: "O", t: "Ottimo" },
+            { v: "D", t: "Distinto" },
+            { v: "B", t: "Buono" },
+            { v: "d", t: "Discreto" },
+            { v: "S", t: "Sufficiente" },
+            { v: "NS", t: "Non Sufficiente" }
+        ];
+        select.innerHTML = giudizi.map(g => `<option value="${g.v}">${g.t} (${g.v})</option>`).join('');
+    } else {
+        const voti = [];
+        for (let i = 1; i <= 10; i++) {
+            if (i < 10) {
+                voti.push(`${i}`, `${i}+`, `${i}½`, `${i+1}-`);
+            } else {
+                voti.push("10", "10L");
+            }
+        }
+        select.innerHTML = voti.map(v => `<option value="${v}">${v}</option>`).join('');
+        select.value = "6"; 
+    }
+};
 
 window.deleteBacheca = async (idx) => {
     if (!confirm("Vuoi eliminare definitivamente questo avviso dalla bacheca?")) return;
@@ -4659,28 +4689,32 @@ window.renderTabelloneGlobale = async () => {
         let sommaMedie = 0;
         let contaMaterie = 0;
 
-        const celleMaterie = materieOrdinate.map(m => {
-            const votiMat = s.medie[m];
-            if (!votiMat) return `<td class="p-4 text-center text-zinc-600 border-r border-zinc-800">-</td>`;
-            
-            const mediaMat = (votiMat.reduce((a, b) => a + b, 0) / votiMat.length).toFixed(1);
-            sommaMedie += parseFloat(mediaMat);
-            contaMaterie++;
-            
-            const colorClass = mediaMat < 6 ? 'text-red-500' : 'text-green-500';
-            
-            // AGGIUNTA: Pulsante per vedere i dettagli
-            return `
-                <td class="p-4 text-center border-r border-zinc-800">
-                    <div class="flex flex-col items-center gap-1">
-                        <span class="font-black text-xs ${colorClass}">${mediaMat}</span>
-                        <button onclick="window.showTabelloneDetails('${s.id}', '${m}')" 
-                                class="text-[9px] bg-zinc-800 hover:bg-red-700 text-zinc-400 hover:text-white px-1.5 py-0.5 rounded transition-all">
-                            🔍
-                        </button>
-                    </div>
-                </td>`;
-        }).join('');
+        
+const celleMaterie = materieOrdinate.map(m => {
+    const votiMat = s.medie[m];
+    if (!votiMat) return `<td class="p-4 text-center text-zinc-600 border-r border-zinc-800">-</td>`;
+    
+    const mediaMat = (votiMat.reduce((a, b) => a + b, 0) / votiMat.length).toFixed(1);
+    
+    // AGGIUNTA: Aggiungi alla media generale SOLO se NON è religione
+    if (m.toLowerCase() !== 'religione') {
+        sommaMedie += parseFloat(mediaMat);
+        contaMaterie++;
+    }
+    
+    const colorClass = mediaMat < 6 ? 'text-red-500' : 'text-green-500';
+    
+    return `
+        <td class="p-4 text-center border-r border-zinc-800">
+            <div class="flex flex-col items-center gap-1">
+                <span class="font-black text-xs ${colorClass}">${mediaMat}</span>
+                <button onclick="window.showTabelloneDetails('${s.id}', '${m}')" 
+                        class="text-[9px] bg-zinc-800 hover:bg-red-700 text-zinc-400 hover:text-white px-1.5 py-0.5 rounded transition-all">
+                    🔍
+                </button>
+            </div>
+        </td>`;
+}).join('');
 
         const mediaGenerale = contaMaterie > 0 ? (sommaMedie / contaMaterie).toFixed(1) : "0.0";
         const colorMediaGen = mediaGenerale < 6 ? 'text-red-500' : 'text-blue-400';
@@ -5788,7 +5822,35 @@ window.selectPagellaPeriod = (q) => {
     }
 };
 
+ window.configuraPannelloVotiDocente = () => {
+    const mSelect = document.getElementById('input-grade-subject');
+    if (!mSelect) return;
 
+    let mats = window.currentUserData?.materie || [];
+    
+    // Se Admin o Preside, carichiamo tutte le materie dal sistema
+    if (window.userRole === ROLES.ADMIN || window.userRole === ROLES.PRESIDE) {
+        mats = Object.keys(LISTA_MATERIE);
+    }
+
+    if (mats.length === 0) {
+        mSelect.innerHTML = '<option value="">Nessuna materia</option>';
+        return;
+    }
+
+    // Popoliamo il selettore materie
+    mSelect.innerHTML = mats.map(m => {
+        const cleanMat = m.toLowerCase().trim();
+        const emoji = LISTA_MATERIE[cleanMat] || "📚";
+        return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
+    }).join('');
+
+    // Impostiamo l'evento: quando cambi materia, cambiano i voti
+    mSelect.onchange = (e) => window.aggiornaOpzioniVoto(e.target.value);
+    
+    // Popoliamo subito i voti per la prima materia selezionata
+    window.aggiornaOpzioniVoto(mSelect.value);
+};
     </script>
 </body>
 </html>
