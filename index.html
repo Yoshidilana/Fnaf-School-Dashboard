@@ -13,7 +13,7 @@
     /* --- NUOVA PALETTE FNAF BROWN --- */
 body { 
     font-family: 'Plus Jakarta Sans', sans-serif; 
-    background: #1a120b; /* Marrone scurissimo (quasi nero) */
+    background: #0f0d0c; /* Sfondo principale: Nero Cioccolato */
     color: #e7e5e4; 
     min-height: 100vh;
     display: flex; 
@@ -23,35 +23,95 @@ body {
 
 /* Sfondo principale del contenuto */
 main {
-    background-color: #1a120b !important;
+    background-color: #0f0d0c !important;
 }
 
-/* Sidebar e Header: Marrone leggermente più caldo per staccare */
+/* Sidebar e Header: Leggermente più chiari per dare profondità */
 #main-sidebar, header {
-    background-color: #241a11 !important;
-    border-color: #3d2b1f !important;
+    background-color: #161311 !important;
+    border-color: #26211e !important;
 }
 
-/* Glassmorphism con tinta marrone */
+/* Glassmorphism con tinta più scura */
 .glass-light {
-    background: rgba(45, 30, 18, 0.9) !important; /* Marrone cioccolato trasparente */
+    background: rgba(22, 19, 17, 0.9) !important;
     backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(120, 80, 50, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
 }
 
-/* Cards (Bacheca, Note, ecc.) */
-.bacheca-card, .note-card, .staff-card, .agenda-card, 
-    background: #2d1e12 !important; /* Marrone "Freddy" */
-    border: 1px solid #3d2b1f !important;
-    box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+/* Trasforma i contenitori bianchi in marrone scuro */
+#view-agenda .bg-white {
+    background-color: #161311 !important;
+    border-color: #26211e !important;
 }
 
-/* Hover delle card: un marrone più acceso invece del rosso puro */
+/* Rende scuri gli header delle sezioni (Lezioni, Compiti, ecc.) */
+#view-agenda .bg-zinc-50\/50, #view-agenda .bg-zinc-50 {
+    background-color: #1a1714 !important;
+    border-color: #26211e !important;
+}
+
+/* Testi dei titoli in chiaro */
+#view-agenda h3, #view-agenda label {
+    color: #e7e5e4 !important;
+}
+
+/* Modifica i box dei compiti (Blue scuro trasparente) */
+#agenda-compiti-list .bg-blue-50\/50 {
+    background-color: rgba(30, 58, 138, 0.2) !important;
+    border-color: #1e40af !important;
+}
+
+/* Modifica i box dei voti e presenze nel riepilogo laterale */
+#agenda-attendance-info .bg-zinc-50,
+#agenda-daily-info .bg-white,
+#agenda-daily-info .bg-green-50,
+#agenda-daily-info .bg-red-50 {
+    background-color: #2a2420 !important;
+    border-color: #3f352f !important;
+}
+
+/* Forza il testo bianco per le scritte nere residue */
+#view-agenda .text-zinc-800, #view-agenda .text-zinc-900 {
+    color: #e7e5e4 !important;
+}
+
+/* Stile migliorato per le card delle lezioni */
+.firme-card {
+    background: #1a1714 !important;
+    border-left: 4px solid #dc2626 !important; /* Barretta rossa laterale */
+    transition: all 0.3s ease;
+}
+
+.firme-card:hover {
+    transform: translateX(5px);
+    background: #221f1c !important;
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.1);
+}
+
+.hour-badge {
+    background: #0f0d0c;
+    border: 1px solid #3f352f;
+    color: #ef4444;
+    text-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Cards (Bacheca, Note, Agenda, Staff) - COLORI AGGIORNATI */
+.bacheca-card, .note-card, .staff-card, .agenda-card, .glass-light {
+    background: #2a2420 !important; /* Marrone più chiaro e visibile */
+    border: 1px solid #3f352f !important; /* Bordo più definito */
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important; /* Ombra più forte */
+}
+
+/* Hover delle card: un tocco di rosso invece del marrone */
 .bacheca-card:hover, .note-card:hover, .agenda-card:hover {
-    border-color: #854d0e !important; /* Marrone dorato/ruggine */
-    transform: translateY(-4px);
-    box-shadow: 0 10px 30px rgba(133, 77, 14, 0.2);
+    background: #13110f !important; /* Si schiarisce solo un minimo quando ci passi sopra */
+    border-color: #dc2626 !important; /* Mantiene il tocco rosso Fazbear sul bordo */
+}
+
+.bg-white, .bg-zinc-900 {
+    background-color: #1b1816 !important;
 }
 
 /* Input e Select */
@@ -61,18 +121,18 @@ main {
     color: #f5f5f4 !important;
 }
 
-/* Override per le classi Tailwind residue */
-.bg-zinc-900, .bg-[#18181b] { background-color: #241a11 !important; }
-.bg-[#121214], .bg-zinc-700 { background-color: #1a120b !important; }
-.border-zinc-800 { border-color: #3d2b1f !important; }
+/* Override per le classi di sistema */
+.bg-zinc-900, .bg-[#18181b] { background-color: #161311 !important; }
+.bg-[#121214], .bg-zinc-700 { background-color: #0f0d0c !important; }
+.border-zinc-800 { border-color: #26211e !important; }
 
 /* --- REGISTRO VOTI RIMODERNATO --- */
 
 /* Contenitore esterno della tabella */
 .registry-container {
-    background: #241a11 !important; /* Marrone scuro uniforme */
-    border: 1px solid #3d2b1f !important;
-    border-radius: 24px !important; /* Arrotondamento forte */
+    background: #0f0d0c !important; /* Uguale allo sfondo principale */
+    border: 1px solid #26211e !important;
+    border-radius: 24px !important;
     overflow: hidden; /* Taglia gli angoli della tabella interna */
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
@@ -84,22 +144,22 @@ main {
     width: 100%;
 }
 
-/* Intestazione */
+/* Intestazione Tabella */
 .registry-table thead th {
-    background: #1a120b !important;
-    color: #a8a29e;
+    background: #161311 !important; /* Leggermente più chiaro per l'header */
+    color: #a1a1aa;
+    border-bottom: 1px solid #26211e;
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.65rem;
     letter-spacing: 0.1em;
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #3d2b1f;
 }
 
 /* Celle della tabella */
 .registry-table td {
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(61, 43, 31, 0.5);
+    border-bottom: 1px solid #1c1816;
     vertical-align: middle;
 }
 
@@ -116,7 +176,7 @@ main {
 /* Colonna Materia (Stile speciale) */
 .subject-column {
     font-weight: 800;
-    color: #f5f5f4;
+    color: #ffffff;
     font-size: 0.8rem;
 }
 
@@ -1953,34 +2013,41 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
         // Rendering Firme
         const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
 const firmeHtml = (data.firme || [])
-    .sort((a, b) => String(a.ora).localeCompare(String(b.ora), undefined, { numeric: true, sensitivity: 'base' }))
+    .sort((a, b) => String(a.ora).localeCompare(String(b.ora), undefined, { numeric: true }))
     .map((f, idx) => {
-        // Gestione grafica: se l'ora è un numero mostra "1° Ora", se è "Extra" mostra solo "Extra"
         const visualizzaOra = isNaN(f.ora) ? f.ora : `${f.ora}°`;
-        const sottoScritta = isNaN(f.ora) ? "" : `<span class="text-[7px] font-black uppercase text-zinc-500">Ora</span>`;
-
+        
         return `
-        <div class="agenda-card group flex gap-5 p-4 rounded-2xl border border-zinc-800 hover:border-red-900 transition-all mb-4">
-            <div class="flex flex-col items-center justify-center w-14 h-14 bg-zinc-900 border-2 border-zinc-800 rounded-2xl shadow-sm shrink-0">
-                <span class="${isNaN(f.ora) ? 'text-[11px]' : 'text-lg'} font-black text-white leading-none">${visualizzaOra}</span>
-                ${sottoScritta}
+        <div class="firme-card flex items-center gap-4 p-4 rounded-xl mb-3">
+            <!-- Cerchio con l'ora -->
+            <div class="hour-badge w-12 h-12 rounded-full flex flex-col items-center justify-center shrink-0 font-black">
+                <span class="text-xs leading-none">${visualizzaOra}</span>
+                <span class="text-[7px] uppercase opacity-50">Ora</span>
             </div>
+
+            <!-- Contenuto della lezione -->
             <div class="flex-1">
-                <div class="flex justify-between items-start mb-1">
-                    <h4 class="text-xs font-black uppercase text-red-600 tracking-tight">${f.materia}</h4>
-                    <span class="text-[9px] font-bold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-md">${f.prof}</span>
-                ${isAdmin ? `
-                        <button onclick="deleteFirma(${idx}, '${cls}')" class="text-zinc-300 hover:text-red-600 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                        </button>
-                        ` : ''}
+                <div class="flex justify-between items-center mb-1">
+                    <h4 class="text-[11px] font-black uppercase tracking-tighter text-white">
+                        ${f.materia} <span class="text-zinc-500 mx-1">|</span> <span class="text-red-500/80">${f.tipo || 'Lezione'}</span>
+                    </h4>
+                    <span class="text-[9px] font-bold bg-zinc-900 px-2 py-0.5 rounded text-zinc-400 border border-zinc-800">
+                        Prof. ${f.prof}
+                    </span>
                 </div>
-                <p class="text-sm text-zinc-300 font-medium leading-snug">
-                    <span class="font-black text-white">${f.tipo || 'Lezione'}:</span> ${f.argomento || "Nessun argomento"}
+                <p class="text-xs text-zinc-400 italic leading-snug">
+                    ${f.argomento || "Nessun argomento registrato"}
                 </p>
             </div>
+
+            <!-- Tasto elimina (solo admin) -->
+            ${isAdmin ? `
+                <button onclick="deleteFirma(${idx}, '${cls}')" class="text-zinc-600 hover:text-red-500 p-2 transition-colors">
+                    🗑️
+                </button>
+            ` : ''}
         </div>`;
-    }).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Nessuna lezione registrata</div>';
+    }).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-[10px]">Nessuna lezione registrata</div>';
 
         // Iniezione nella lista (senza il box di input)
         document.getElementById('agenda-firme-list').innerHTML = avvisiHtml + firmeHtml;
@@ -1998,13 +2065,7 @@ const firmeHtml = (data.firme || [])
         const voti = (data.daily_voti || []);
 
 	
-if (role === 'ospite') {
-            infoHtml = `
-                <div class="p-6 text-center">
-                    <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Area Riservata</p>
-                    <p class="text-[9px] text-zinc-500 italic mt-1">Effettua il login per vedere i dettagli</p>
-                </div>`;
-} else if (role === 'studente') {
+if (role === 'studente') {
             const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
             const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
 
@@ -5822,14 +5883,14 @@ window.selectPagellaPeriod = (q) => {
     }
 };
 
- window.configuraPannelloVotiDocente = () => {
+window.configuraPannelloVotiDocente = () => {
     const mSelect = document.getElementById('input-grade-subject');
     if (!mSelect) return;
 
     let mats = window.currentUserData?.materie || [];
     
-    // Se Admin o Preside, carichiamo tutte le materie dal sistema
-    if (window.userRole === ROLES.ADMIN || window.userRole === ROLES.PRESIDE) {
+    // Se Admin o Preside, carichiamo tutte le materie
+    if (window.userRole === ROLES.ADMIN) {
         mats = Object.keys(LISTA_MATERIE);
     }
 
@@ -5838,17 +5899,14 @@ window.selectPagellaPeriod = (q) => {
         return;
     }
 
-    // Popoliamo il selettore materie
+    // Qui usiamo 'm' correttamente per ogni materia
     mSelect.innerHTML = mats.map(m => {
         const cleanMat = m.toLowerCase().trim();
         const emoji = LISTA_MATERIE[cleanMat] || "📚";
         return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
     }).join('');
 
-    // Impostiamo l'evento: quando cambi materia, cambiano i voti
     mSelect.onchange = (e) => window.aggiornaOpzioniVoto(e.target.value);
-    
-    // Popoliamo subito i voti per la prima materia selezionata
     window.aggiornaOpzioniVoto(mSelect.value);
 };
     </script>
