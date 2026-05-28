@@ -2309,7 +2309,7 @@ if (resMediaElem) {
                     const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m);
                     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
                     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-                    const avg = (m_voti.reduce((a,b)=>a+parseFloat(b.voto),0)/m_voti.length).toFixed(1);
+                    const avg = (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1);
 
                     vHtml += `<tr class="bg-zinc-900">
                         <td class="p-2 pl-4 font-bold uppercase text-blue-800">${m}</td>
@@ -4134,19 +4134,23 @@ if (notesList) {
         }
     }
 
-        // [F] CALCOLO MEDIA E RENDER (Solo se Studente)
+               // [F] CALCOLO MEDIA E RENDER (Solo se Studente)
         if (isTargetStudente) {
             const votiFiltrati = (data.voti || []).filter(v => v.anno === as);
             const noteFiltrate = (data.note || []).filter(n => n.anno === as);
             
+            // FILTRO: Escludiamo Religione per far corrispondere la media a quella del Registro
+            const votiPerMedia = votiFiltrati.filter(v => v.materia.toLowerCase().trim() !== 'religione');
+            
             const mediaEl = document.getElementById('target-profile-media');
-            media = votiFiltrati.length > 0 
-                ? (votiFiltrati.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiFiltrati.length).toFixed(1) 
+            media = votiPerMedia.length > 0 
+                ? (votiPerMedia.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiPerMedia.length).toFixed(1) 
                 : "0.0";
             
             if (mediaEl) {
                 mediaEl.innerText = media;
-                mediaEl.className = `text-5xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+                const valoreMedia = parseFloat(media);
+                mediaEl.className = `text-5xl font-black ${valoreMedia < 6 ? 'text-red-600' : 'text-zinc-900'}`;
             }
 
             if (typeof renderListaProfilo === 'function') {
