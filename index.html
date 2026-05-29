@@ -377,7 +377,7 @@ main {
             <div id="freddy-nose" class="absolute w-4 h-4 bg-transparent rounded-full top-[58%] left-[51%] -translate-x-1/2 -translate-y-1/2 z-10"></div>
         </div>
         <div class="flex flex-col -space-y-1">
-            <h1 class="font-black text-white uppercase italic text-xl tracking-tighter">Faz-<span class="text-red-600">Portal</span></h1>
+            <h1 class="font-black text-white uppercase italic text-xl tracking-tighter">Fazbear-<span class="text-red-600">Portal</span></h1>
             <p id="current-academic-year" class="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em]">A.S. 2025/2026</p>
         </div>
     </div>
@@ -1872,14 +1872,15 @@ window.renderStudentList = function() {
         const role = getRoleType(s.role); // Usa la funzione di mappatura
         const isStaff = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.ADMIN].includes(role);
         const isNotStaff = !isStaff
+        const isStudente = (role === ROLES.STUDENTE);
 
-        // 1. Se la classe è "ALL" o vuota, mostriamo tutti i NON-STAFF
+        // Se non c'è classe selezionata, mostra tutti gli studenti. 
+        // Se c'è, mostra solo quelli di quella classe.
         if (!window.selectedClass || window.selectedClass === 'ALL') {
-            return isNotStaff;
+            return isStudente;
         }
-        
-        // 2. Altrimenti, mostriamo solo quelli della classe scelta che NON sono STAFF
-        return s.classe === window.selectedClass && isNotStaff;
+
+        return s.classe === window.selectedClass && isStudente;
     });
 
     if (filtered.length === 0) {
@@ -3252,7 +3253,7 @@ window.renderPagella = async (voti, aySelezionato) => {
                 color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
             }
 
-            const esito = val === null ? "" : (Math.round(val) >= 6 ? "No" : "Si");
+            const esito = (val === null || m.toLowerCase().trim() === 'religione') ? "" : (Math.round(val) >= 6 ? "👍" : "Debito >:(");
             const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
             const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
 
