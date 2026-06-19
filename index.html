@@ -259,6 +259,29 @@ main {
     .note-accent-disciplinare { border-left: 5px solid #dc2626 !important; }
     .note-accent-mandato { border-left: 5px solid #fbbf24 !important; background: #1e1b1e !important; }
 
+/* Badge Maturità */
+.badge-maturita {
+    background: linear-gradient(45deg, #dc2626, #991b1b);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+
     /* Sidebar */
     .sidebar-item { 
     transition: all 0.3s; 
@@ -380,7 +403,7 @@ main {
 <header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-800 bg-[#18181b] z-50">
     <div class="flex items-center gap-4">
 
-	<button onclick="document.body.classList.toggle('sidebar-hidden')" class="p-2 mr-2 bg-zinc-800 hover:bg-red-700 text-white rounded-lg transition-all">
+<button onclick="window.toggleSidebarManual()" class="p-2 mr-2 bg-zinc-800 hover:bg-red-700 text-white rounded-lg transition-all">
     ☰
 </button>
 
@@ -492,6 +515,10 @@ main {
         <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">🎓</span> Pagella
         </button>
+
+	<button onclick="window.changeMenu('esami')" id="menu-esami" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
+    <span class="text-lg">🎓</span> ESAMI DI STATO
+</button>
         
         <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">⚠️</span> NOTE
@@ -637,21 +664,31 @@ main {
         <button onclick="window.resetClassSelection()" class="text-[10px] font-black uppercase text-zinc-500 hover:text-red-600">🔄 Cambia Classe</button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div id="container-start-year" class="flex flex-col gap-0.5">
+    <div class="flex items-center gap-3">
+        <div class="flex flex-col gap-0.5">
+            <span class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Anno Inizio Ciclo</span>
+            <input type="number" id="class-start-year-input" placeholder="es: 2021" 
+                class="bg-black border border-zinc-700 text-white text-[10px] p-1.5 rounded w-20 outline-none focus:border-red-600"
+                onchange="window.updateClassStartYear(this.value)">
+        </div>
 
-<!-- Sotto il titolo dell'Hub Classe -->
-<div id="exam-status-container" class="mt-4 flex items-center gap-3 bg-zinc-900 p-4 rounded-2xl border border-zinc-800">
-    <div class="flex flex-col">
-        <span class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Status Maturità</span>
-        <span id="exam-badge-display" class="hidden text-[10px] font-black text-red-600 uppercase">⚠️ Classe d'Esame</span>
+        <div class="flex flex-col gap-0.5">
+            <span class="text-[9px] font-black uppercase text-zinc-500 tracking-widest">Identità Attuale</span>
+            <div class="flex items-center gap-2">
+                <span id="display-calculated-name" class="text-[10px] font-black text-red-600 uppercase bg-red-900/20 px-3 py-1.5 rounded inline-block text-center min-w-[40px]">--</span>
+                <!-- Il badge apparirà automaticamente -->
+                <div id="exam-status-badge" class="hidden">
+                    <span class="badge-maturita">🎓 Maturità</span>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <!-- Leva visibile solo allo Staff -->
-    <label id="staff-exam-toggle" class="hidden relative inline-flex items-center cursor-pointer ml-auto">
-        <input type="checkbox" id="exam-class-toggle" class="sr-only peer" onchange="window.toggleExamStatus(this.checked)">
-        <div class="w-10 h-5 bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
-    </label>
+    <div class="text-[8px] font-bold text-zinc-600 uppercase max-w-[150px] text-right">
+    </div>
 </div>
+	
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6"> 
 
         <!-- Elenco Studenti -->
         <button onclick="window.changeMenu('studenti')" class="p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
@@ -693,6 +730,11 @@ main {
 <button id="hub-btn-didattica" onclick="window.changeMenu('didattica')" class="hidden p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
     <span class="text-4xl group-hover:scale-110 transition-transform">📚</span>
     <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Didattica e Materiali</span>
+</button>
+
+<button id="hub-btn-esami" onclick="window.changeMenu('esami')" class="hidden p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+    <span class="text-4xl group-hover:scale-110 transition-transform">🎓</span>
+    <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Esami di Stato</span>
 </button>
 
         <!-- Tabellone Scrutinio -->
@@ -1208,6 +1250,8 @@ main {
     </div>
 </div>
 
+
+
 		<div id="view-presenze-studente" class="tab-content hidden p-6">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-2xl font-black italic uppercase text-zinc-800">Il Mio Registro Presenze</h2>
@@ -1337,6 +1381,32 @@ main {
                 <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=..." class="w-96">
             </div>
 
+<div id="pagella-credits-box" class="hidden mt-8 p-6 bg-zinc-900 border border-red-900/30 rounded-xl shadow-inner">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="text-center md:text-left">
+            <h4 class="text-[10px] font-black uppercase text-red-500 tracking-widest">Crediti Scolastici</h4>
+            <p class="text-xs text-zinc-400 italic">Attribuiti in base alla media dei voti (Triennio).</p>
+        </div>
+        <div class="flex items-center gap-6">
+            <div class="text-center">
+                <p class="text-[8px] font-bold text-zinc-500 uppercase">Anno Corrente</p>
+                <!-- INPUT MODIFICABILE -->
+                <input type="number" id="pagella-credits-current-input" 
+                    class="w-16 bg-black border border-zinc-800 rounded text-center text-xl font-black text-white outline-none focus:border-red-600">
+            </div>
+            <div class="text-center border-l border-zinc-800 pl-6">
+                <p class="text-[8px] font-bold text-zinc-500 uppercase">Totale Triennio</p>
+                <p id="pagella-credits-total" class="text-2xl font-black text-amber-500">0</p>
+            </div>
+            <div id="admin-credits-action" class="hidden border-l border-zinc-800 pl-6">
+                <button id="btn-confirm-credits" class="bg-red-700 hover:bg-red-600 text-white text-[9px] font-black uppercase px-4 py-2 rounded-lg transition-all">
+                    Registra
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
             <!-- Header Documento -->
             <div class="flex flex-col md:flex-row justify-between items-start border-b-2 border-zinc-800 pb-8 mb-8 gap-6">
                 <div class="space-y-1">
@@ -1390,6 +1460,42 @@ main {
         </div>
     </div>
 </div>
+
+		<!-- VIEW: ESAMI DI STATO -->
+<div id="view-esami" class="tab-content hidden p-6 max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-8 bg-zinc-900 p-6 rounded-3xl border border-zinc-800 shadow-xl">
+        <div>
+            <h2 class="text-3xl font-black uppercase italic text-white tracking-tighter">Commissione <span class="text-red-600">Esami di Stato</span></h2>
+            <p id="exam-class-info" class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Gestione prove d'esame e scrutini finali</p>
+        </div>
+        <div class="flex gap-2">
+            <button id="btn-config-esami" onclick="window.toggleExamConfig()" class="hidden bg-zinc-800 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase hover:bg-zinc-700 transition-all">⚙️ Configura Materie</button>
+            <button onclick="window.changeMenu('classi')" class="bg-zinc-800 text-zinc-400 text-[9px] font-black px-4 py-2 rounded-xl uppercase">Indietro</button>
+        </div>
+    </div>
+
+    <!-- Pannello Configurazione Materie -->
+    <div id="exam-config-panel" class="hidden bg-zinc-900 p-6 rounded-3xl border border-red-900/30 mb-6">
+        <h3 class="text-white font-black uppercase text-xs mb-4">Seleziona Materie d'Esame per questa classe</h3>
+        <div id="exam-subjects-checklist" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
+        <button onclick="window.saveExamSubjects()" class="bg-red-700 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase">Salva Configurazione</button>
+    </div>
+
+    <!-- Tabellone Esami Dinamico -->
+    <div class="registry-container border-zinc-800 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-[11px]">
+                <thead id="exam-thead" class="bg-black text-zinc-400 font-black uppercase">
+                    <!-- Generato Dinamicamente -->
+                </thead>
+                <tbody id="exam-grades-body" class="divide-y divide-zinc-800 bg-zinc-900/50">
+                    <!-- Righe studenti -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 		<!-- VIEW: ARCHIVIO NOTIFICHE COMPLETO -->
 <div id="view-notifiche-full" class="tab-content hidden p-6 max-w-5xl mx-auto">
     <div class="flex justify-between items-center mb-8">
@@ -1769,6 +1875,10 @@ function applyRoleUI() {
     const isOperativo = [ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.COUNSELOR].includes(type) || isAdmin;
     const isStaffGenerale = isStaffDidattico || isOperativo || type === ROLES.ADMIN;
     const isStudente = type === ROLES.STUDENTE;
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const config = window.classConfigsCache[window.selectedClass] || { startYear: null };
+    const grade = window.calculateClassGrade(ay, config.startYear);
+    const isMaturita = grade === 5;
     
 
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
@@ -1808,7 +1918,6 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('hub-btn-registro-globale', isStaffDidattico);
     toggle('menu-hub', [ROLES.ADMIN, ROLES.TECNICO].includes(type));
 
-// --- AGGIUNGI QUESTE RIGHE MANCANTI ---
 // Gestione Filtri in alto
 toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
 toggle('home-btn-hub', isAdmin || type === ROLES.TECNICO);
@@ -1848,6 +1957,18 @@ toggle('home-btn-pagella', isStudente);
     // Hub: Visibile a tutto lo staff, ma le azioni interne saranno filtrate
     toggle('hub-btn-registro-globale', isStaffDidattico);
     toggle('hub-btn-didattica', type !== ROLES.OSPITE);
+
+    // --- PROTEZIONE CONFIGURAZIONE CLASSE ---
+    // Solo l'amministrazione può vedere e cambiare l'anno di inizio ciclo
+    toggle('container-start-year', isManagement);
+
+
+   // --- LOGICA ESAMI ---
+    // Sidebar: Solo gli studenti vedono il tasto Esami (se in 5ª)
+    toggle('menu-esami', isMaturita && isStudente);
+
+    // Hub Classe: Solo lo Staff vede il tasto Esami (se la classe è in 5ª)
+    toggle('hub-btn-esami', isMaturita && isStaffGenerale);
 
    // --- EXTRA ---
     toggle('notif-bell', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
@@ -1902,7 +2023,7 @@ if (isStudente) {
 }
 
         // --- GESTIONE CLASSI E STUDENTI ---
-        window.handleClassChange = (classeForzata) => {
+        window.handleClassChange = async (classeForzata) => { // Aggiunto async per supportare il caricamento
     const cls = classeForzata || window.selectedClass;
 
     // MODIFICATO: Ora controlla contro la lista CLASSI_VALIDE
@@ -1923,7 +2044,11 @@ if (isStudente) {
     const isStaff = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
     if (isStaff && typeof window.loadAttendance === 'function') {
         window.loadAttendance(cls, document.getElementById('global-calendar').value);
-window.loadExamStatus();
+    }
+
+    // ESTRATTO: Ora viene eseguito sempre al cambio classe, indipendente dalle presenze
+    if (typeof window.loadExamStatus === 'function') {
+        await window.loadExamStatus();
     }
 };
 
@@ -2123,13 +2248,28 @@ const firmeHtml = (data.firme || [])
         // Iniezione nella lista (senza il box di input)
         document.getElementById('agenda-firme-list').innerHTML = avvisiHtml + firmeHtml;
         
-        document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map(c => `
-    <div class="p-4 bg-blue-50/50 border-l-4 border-blue-500 rounded-2xl shadow-sm">
-        <div class="flex items-center gap-2 mb-2">
+        document.getElementById('agenda-compiti-list').innerHTML = (data.compiti || []).map((c, idx) => {
+    // Verifichiamo se l'utente può eliminare (Admin o il Prof che ha creato il compito)
+    const canDeleteCompito = isStaff || isAdmin;
+
+    return `
+    <div class="p-4 bg-blue-50/50 border-l-4 border-blue-500 rounded-2xl shadow-sm relative group">
+        <div class="flex items-center justify-between mb-2">
             <span class="text-[9px] font-black uppercase text-blue-700 bg-blue-100 px-2 py-0.5 rounded">${c.materia}</span>
+            
+            ${canDeleteCompito ? `
+                <button onclick="window.deleteCompito(${idx}, '${cls}')" 
+                        class="opacity-0 group-hover:opacity-100 text-blue-400 hover:text-red-600 transition-all p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            ` : ''}
         </div>
         <p class="text-xs font-bold text-zinc-800 leading-relaxed">${c.testo}</p>
-    </div>`).join('') || '<p class="col-span-full text-center py-6 text-zinc-300 italic text-[10px] font-black uppercase">Nessun compito assegnato</p>';
+        <p class="text-[7px] mt-2 uppercase font-black text-zinc-400">Assegnato da: ${c.prof || 'Docente'}</p>
+    </div>`;
+}).join('') || '<p class="col-span-full text-center py-6 text-zinc-300 italic text-[10px] font-black uppercase">Nessun compito assegnato</p>';
         
         let infoHtml = "";
         const note = (data.note || []);
@@ -3049,7 +3189,11 @@ window.toggleNotifPanel = () => {
     }
 }       
 
+
 window.changeMenu = (menu) => {
+    if (['registro', 'note', 'pagella'].includes(menu) && !window.selectedStudentId) {
+        window.clearStudentViews();
+    }
     // --- PEZZO AGGIUNTO (Blocco 5) ---
     if (menu === 'studenti') {
         if (typeof window.renderStudentList === 'function') window.renderStudentList();
@@ -3061,13 +3205,20 @@ window.changeMenu = (menu) => {
     window.loadStaffChat();
 }
 
-    // --- LOGICA SIDEBAR ---
-    if (menu === 'home') {
+    // --- LOGICA SIDEBAR AGGIORNATA ---
+if (menu === 'home') {
+    // Nella Home la sidebar è sempre nascosta per design
+    document.body.classList.add('sidebar-hidden');
+} else {
+    // Nelle altre view, decidiamo in base alla preferenza salvata
+    if (window.sidebarManuallyHidden) {
         document.body.classList.add('sidebar-hidden');
     } else {
         document.body.classList.remove('sidebar-hidden');
-        if(typeof applyRoleUI === 'function') applyRoleUI();
     }
+    
+    if(typeof applyRoleUI === 'function') applyRoleUI();
+}
 
     // --- CONTROLLO AGENDA ---
     if (menu === 'agenda' && (!window.selectedClass || window.selectedClass === 'ALL')) {
@@ -3098,20 +3249,30 @@ window.changeMenu = (menu) => {
     window.loadDidattica();
 }
 
+// Aggiungi il caso per caricare i dati degli esami
+if (menu === 'esami') {
+    window.loadExamManager();
+}
+
     // --- LOGICA HUB CLASSI ---
-    if (menu === 'classi') {
-        const selectionScreen = document.getElementById('class-selection-screen');
-        const hubScreen = document.getElementById('class-hub-screen');
-        if (!window.selectedClass || window.selectedClass === 'ALL') {
-            selectionScreen?.classList.remove('hidden');
-            hubScreen?.classList.add('hidden');
-        } else {
-            selectionScreen?.classList.add('hidden');
-            hubScreen?.classList.remove('hidden');
-            const hubTitle = document.getElementById('hub-class-name');
-            if(hubTitle) hubTitle.innerText = window.selectedClass;
-        }
+if (menu === 'classi') {
+    const selectionScreen = document.getElementById('class-selection-screen');
+    const hubScreen = document.getElementById('class-hub-screen');
+    if (!window.selectedClass || window.selectedClass === 'ALL') {
+        selectionScreen?.classList.remove('hidden');
+        hubScreen?.classList.add('hidden');
+    } else {
+        selectionScreen?.classList.add('hidden');
+        hubScreen?.classList.remove('hidden');
+        
+        // MODIFICATO: Usa getDisplayClassName invece dell'ID tecnico
+        const hubTitle = document.getElementById('hub-class-name');
+        if(hubTitle) hubTitle.innerText = window.getDisplayClassName(window.selectedClass, true);
+
+        // Forza un ricaricamento dei metadati per sicurezza
+        window.loadExamStatus();
     }
+   }
 };
 
         window.closeModal = () => document.getElementById('modal-overlay').classList.replace('flex', 'hidden');
@@ -3361,8 +3522,57 @@ window.renderPagella = async (voti, aySelezionato) => {
         tbody.innerHTML = htmlRighe;
     }
 
-    // --- 4. GIUDIZIO GLOBALE (Specifico per Anno) ---
-    commentBox.innerText = recordData[keyGiudizioGlobale] || "Nessun giudizio inserito per questo periodo.";
+   // 4. GESTIONE CREDITI (Solo se 2° Quadrimestre e classe del triennio)
+const creditsBox = document.getElementById('pagella-credits-box');
+const creditsInput = document.getElementById('pagella-credits-current-input');
+const creditsTotalEl = document.getElementById('pagella-credits-total');
+const adminAction = document.getElementById('admin-credits-action');
+const btnConfirm = document.getElementById('btn-confirm-credits');
+
+const techClass = student?.classe || "A";
+const classConfig = window.classConfigsCache[techClass] || { startYear: null };
+const grade = window.calculateClassGrade(aySelezionato, classConfig.startYear);
+
+// Mostriamo il box solo nel triennio (3, 4, 5) e al 2° Quadrimestre
+if (grade >= 3 && currentQ === 2) {
+    creditsBox.classList.remove('hidden');
+    
+    // 1. Calcolo suggerito (automatico)
+    const votiValidi = votiAnno.filter(v => v.materia.toLowerCase().trim() !== 'religione');
+    const mediaAnno = votiValidi.length > 0 
+        ? (votiValidi.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiValidi.length) 
+        : 0;
+    const creditiSuggeriti = window.getCreditsFromMedia(mediaAnno, grade);
+
+    // 2. Caricamento valore già salvato (se esiste) o suggerito
+    const ayKey = aySelezionato.replace('/', '_');
+    const savedCredits = recordData.credits_history?.[ayKey]?.value;
+    creditsInput.value = savedCredits !== undefined ? savedCredits : creditiSuggeriti;
+
+    // 3. Permessi Staff
+    if (isStaff) {
+        adminAction.classList.remove('hidden');
+        creditsInput.disabled = false;
+        btnConfirm.onclick = async () => {
+            const manualVal = parseInt(creditsInput.value) || 0;
+            await window.saveManualCredits(window.selectedStudentId, aySelezionato, manualVal);
+            // Aggiorna il totale dopo il salvataggio
+            const nuovoTotale = await window.getTrienniumCredits(window.selectedStudentId, classConfig.startYear);
+            creditsTotalEl.innerText = nuovoTotale;
+        };
+    } else {
+        adminAction.classList.add('hidden');
+        creditsInput.disabled = true;
+    }
+
+    // 4. Calcolo e visualizzazione Totale Triennio
+    const totaleTriennio = await window.getTrienniumCredits(window.selectedStudentId, classConfig.startYear);
+    creditsTotalEl.innerText = totaleTriennio;
+} else {
+    creditsBox.classList.add('hidden');
+}
+
+commentBox.innerText = recordData[keyGiudizioGlobale] || "Nessun giudizio inserito per questo periodo.";
 };
         
      window.addAvviso = async (testo, cls) => {
@@ -4287,10 +4497,9 @@ if (notesList) {
  	window.filterByClass = (classeCliccata) => {
     if (!classeCliccata || classeCliccata === 'ALL') return;
 
-    // 1. Aggiornamento Stato Globale
     window.selectedClass = classeCliccata;
+    window.selectedStudentId = null; // <--- RESETTA LO STUDENTE QUI
 
-    // 2. Sincronizzazione con l'Hub Classi (Mostra Hub, Nasconde Selezione)
     const selectionScreen = document.getElementById('class-selection-screen');
     const hubScreen = document.getElementById('class-hub-screen');
     const hubTitle = document.getElementById('hub-class-name');
@@ -4298,21 +4507,18 @@ if (notesList) {
     if (selectionScreen && hubScreen) {
         selectionScreen.classList.add('hidden');
         hubScreen.classList.remove('hidden');
-        if (hubTitle) hubTitle.innerText = classeCliccata;
+        if (hubTitle) hubTitle.innerText = window.getDisplayClassName(classeCliccata, true);
     }
 
-    // 3. Forza l'aggiornamento dei dati per la nuova classe
+    // Puliamo le viste perché abbiamo cambiato classe
+    window.clearStudentViews();
+
     if (typeof window.handleClassChange === 'function') {
         window.handleClassChange(classeCliccata);
     }
 
-    // 4. Aggiorna i selettori rapidi nelle pagine dati
     window.updateQuickStudentSwitchers();
-    
-    // 5. Porta l'utente alla vista Hub
     window.changeMenu('classi');
-    
-    console.log(`📂 Classe selezionata: ${classeCliccata}`);
 };
 
 	window.deleteVoto = async (idRicevuto, studentId) => {
@@ -4606,7 +4812,9 @@ window.filterByClass = (cls) => {
     }
 
     const profSubject = subjectOverride || subjectSelect.value || materieDisponibili[0] || "Materia non definita";
-    info.innerText = `Classe ${cls} - Visualizzazione: ${profSubject}`;
+
+const displaySimple = window.getDisplayClassName(cls, false); // <--- Aggiungi questa
+info.innerText = `Classe ${displaySimple} - Visualizzazione: ${profSubject}`; // <--- Modifica questa
 
     tbody.innerHTML = '<tr><td colspan="10" class="p-10 text-center animate-pulse uppercase font-black">Sincronizzazione dati classe...</td></tr>';
 
@@ -4665,10 +4873,12 @@ window.filterByClass = (cls) => {
     const agendaFirme = document.getElementById('agenda-firme-list');
     if (agendaFirme) agendaFirme.innerHTML = '<div class="text-center py-10 opacity-20 font-black uppercase text-xs">Seleziona una classe</div>';
 
-    // 4. Torna alla vista classi (che ora mostrerà la selezione A-B-C)
+    // --- NUOVO: Pulizia Registri Studente ---
+    window.clearStudentViews();
+
+    // 4. Torna alla vista classi
     window.changeMenu('classi');
     
-    console.log("🔄 Selezione classe resettata.");
 };
 
 	window.loadStudentAttendanceHistory = async () => {
@@ -5346,7 +5556,9 @@ modificaUtente: function(id) {
 window.editPagellaComment = async () => {
     const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
     const ayKey = aySelezionato.replace('/', '_');
-    const currentQ = document.getElementById('btn-q1').classList.contains('bg-white') ? 1 : 2;
+    
+    // FIX: Usiamo la variabile globale invece di cercare il vecchio pulsante btn-q1
+    const currentQ = window.currentPagellaQuad || 1; 
     
     const nuovoCommento = prompt(`Inserisci il giudizio globale per il ${currentQ}° Quadrimestre (A.S. ${aySelezionato}):`);
     
@@ -5355,10 +5567,17 @@ window.editPagellaComment = async () => {
         const dataUpdate = {};
         dataUpdate[`commento_${ayKey}_q${currentQ}`] = nuovoCommento;
         
-        await setDoc(recordRef, dataUpdate, { merge: true });
-        alert("Giudizio salvato!");
-        const snap = await getDoc(recordRef);
-        window.renderPagella(snap.data().voti || [], aySelezionato);
+        try {
+            await setDoc(recordRef, dataUpdate, { merge: true });
+            alert("✅ Giudizio salvato con successo!");
+            
+            // Ricarichiamo i dati per aggiornare la vista
+            const snap = await getDoc(recordRef);
+            window.renderPagella(snap.data().voti || [], aySelezionato);
+        } catch (e) {
+            console.error("Errore salvataggio giudizio:", e);
+            alert("Errore durante il salvataggio.");
+        }
     }
 };
 
@@ -6002,38 +6221,437 @@ window.configuraPannelloVotiDocente = () => {
     window.aggiornaOpzioniVoto(mSelect.value);
 };
 
-	window.toggleExamStatus = async (isExam) => {
+// Assicurati che la cache sia inizializzata globalmente
+window.classConfigsCache = window.classConfigsCache || {};
+
+window.loadExamStatus = async () => {
     const cls = window.selectedClass;
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').replace('/', '_');
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    
     if (!cls || cls === 'ALL') return;
 
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', `${cls}_${ay}`);
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+    const snap = await getDoc(ref);
+    
+    let startYear = null;
+    if (snap.exists()) {
+        startYear = snap.data().startYear || null;
+    }
+
+    // Salviamo solo l'anno di inizio nella cache
+    window.classConfigsCache[cls] = { startYear: startYear };
+
+    // Calcoliamo se è anno d'esame per la UI
+    const grade = window.calculateClassGrade(ay, startYear);
+    const isExam = grade === 5;
+
+    // 1. Mostra/Nasconde il badge "Maturità" nell'Hub
+    const statusBadge = document.getElementById('exam-status-badge');
+    if (statusBadge) statusBadge.classList.toggle('hidden', !isExam);
+
+    // 2. Aggiorna l'input dell'anno di inizio
+    const startInput = document.getElementById('class-start-year-input');
+    if (startInput) startInput.value = startYear || "";
+
+    // 3. Aggiorna i nomi ovunque
+    const displayFull = window.getDisplayClassName(cls, true);
+    const displaySimple = window.getDisplayClassName(cls, false);
+
+    const elementsToUpdate = {
+        'hub-class-name': displayFull,
+        'display-calculated-name': displayFull,
+        'agenda-class-title': displaySimple,
+        'att-class-display': displaySimple,
+        'tab-class-name': displaySimple
+    };
+
+    for (let [id, val] of Object.entries(elementsToUpdate)) {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+    }
+};
+
+window.toggleExamStatus = async (isExam) => {
+    const cls = window.selectedClass;
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const ayKey = ay.replace('/', '_');
+    const currentYearStart = parseInt(ay.split('/')[0]);
+
+    if (!cls) return;
+
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+    
+    // Prepariamo l'oggetto di aggiornamento
+    const updates = {};
+    // Usiamo la notazione col punto per aggiornare solo quella specifica chiave nella mappa exams
+    updates[`exams.${ayKey}`] = isExam;
+
+    // Se attiviamo la maturità, forziamo l'anno di inizio a (AnnoCorrente - 4)
+    if (isExam) {
+        updates['startYear'] = currentYearStart - 4;
+    }
+
     try {
-        await setDoc(ref, { isExam: isExam }, { merge: true });
-        alert(isExam ? "🎓 Classe segnata come d'Esame per questo anno!" : "✅ Status d'Esame rimosso.");
+        // Salvataggio su Firebase
+        await setDoc(ref, updates, { merge: true });
+        
+        // Forza il ricaricamento immediato della UI per confermare lo stato
+        await window.loadExamStatus();
+        
+        console.log(`[DATABASE] Classe ${cls} - Anno ${ay}: Maturità impostata a ${isExam}`);
+    } catch (e) { 
+        console.error("Errore salvataggio maturità:", e);
+        // Se fallisce, riportiamo la levetta allo stato precedente
+        document.getElementById('exam-class-toggle').checked = !isExam;
+    }
+};
+
+window.updateClassStartYear = async (year) => {
+    const cls = window.selectedClass;
+    if (!cls || !year) return;
+
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+    try {
+        await setDoc(ref, { startYear: parseInt(year) }, { merge: true });
+        window.loadExamStatus(); // Refresh
     } catch (e) { console.error(e); }
 };
 
-// Funzione per caricare lo status (da inserire dentro handleClassChange)
-window.loadExamStatus = async () => {
+window.deleteCompito = async (idx, cls) => {
+    if (!confirm("Vuoi eliminare definitivamente questo compito?")) return;
+
+    const cal = document.getElementById('global-calendar');
+    const dateKey = cal ? cal.value : null;
+    
+    if (!dateKey || !cls) return;
+
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`);
+
+    try {
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+            const data = snap.data();
+            let compiti = [...(data.compiti || [])];
+
+            // Rimuoviamo il compito all'indice selezionato
+            compiti.splice(idx, 1);
+
+            // Aggiorniamo il documento su Firebase
+            await updateDoc(ref, { compiti: compiti });
+            
+            // Non serve alert, onSnapshot aggiornerà la grafica automaticamente
+            console.log("✅ Compito eliminato con successo");
+        }
+    } catch (e) {
+        console.error("Errore durante l'eliminazione del compito:", e);
+        alert("Errore tecnico durante l'eliminazione.");
+    }
+};
+
+window.getSection = (techId) => techId ? techId.charAt(0).toUpperCase() : "?";
+
+// Funzione core per determinare l'anno di corso (1, 2, 5, 6...)
+window.calculateClassGrade = (currentAS, startYear) => {
+    if (!startYear) return "?";
+    const currentYearStart = parseInt(currentAS.split('/')[0]);
+    const grade = currentYearStart - parseInt(startYear) + 1;
+    return grade > 0 ? grade : 1; // Evita anni negativi se l'input è errato
+};
+
+// Funzione per ottenere il nome "Umano" (es: "1A (AW)", "6A (A)")
+window.getDisplayClassName = (techId, showTechId = true) => {
+    if (!techId || techId === 'ALL') return techId;
+    
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const config = window.classConfigsCache[techId] || { startYear: null };
+    
+    const grade = window.calculateClassGrade(ay, config.startYear);
+    const section = window.getSection(techId);
+    
+    // AUTOMATISMO: Se è il 5° anno, è anno d'esame
+    const isExam = grade === 5;
+    const examIcon = isExam ? "🎓 " : "";
+    
+    return showTechId ? `${examIcon}${grade}${section} (${techId})` : `${examIcon}${grade}${section}`;
+};
+
+// Stato globale della sidebar (false = visibile, true = nascosta)
+window.sidebarManuallyHidden = false;
+
+window.toggleSidebarManual = () => {
+    // Invertiamo lo stato della preferenza
+    window.sidebarManuallyHidden = !window.sidebarManuallyHidden;
+    
+    // Applichiamo la classe al body
+    document.body.classList.toggle('sidebar-hidden', window.sidebarManuallyHidden);
+};
+
+window.clearStudentViews = () => {
+    // Nasconde l'header del registro
+    const header = document.getElementById('student-header');
+    if (header) {
+        header.classList.add('hidden');
+        header.classList.remove('flex');
+    }
+
+    // Messaggio di placeholder per le tabelle
+    const emptyMsg = '<tr><td colspan="10" class="p-12 text-center text-zinc-500 italic uppercase font-black text-xs">Seleziona uno studente dalla lista</td></tr>';
+    
+    const registroBody = document.getElementById('registro-voti-body');
+    const pagellaBody = document.getElementById('pagella-table-body');
+    const notesList = document.getElementById('notes-list-global');
+
+    if (registroBody) registroBody.innerHTML = emptyMsg;
+    if (pagellaBody) pagellaBody.innerHTML = emptyMsg;
+    if (notesList) {
+        notesList.innerHTML = '<div class="p-20 text-center opacity-20 font-black uppercase text-xs">Nessuno studente selezionato</div>';
+    }
+    
+    // Reset media e nomi
+    if (document.getElementById('res-student-name')) document.getElementById('res-student-name').innerText = "Dati Studente";
+    if (document.getElementById('res-student-media')) document.getElementById('res-student-media').innerText = "0.0";
+};
+
+// --- SISTEMA ESAMI DI STATO ---
+
+window.toggleExamConfig = () => {
+    const panel = document.getElementById('exam-config-panel');
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) {
+        const container = document.getElementById('exam-subjects-checklist');
+        // Usiamo la lista globale delle materie definita nel tuo codice
+        container.innerHTML = Object.keys(LISTA_MATERIE).map(m => `
+            <label class="flex items-center gap-2 bg-black/40 p-2 rounded-lg cursor-pointer hover:bg-black/60 transition-all">
+                <input type="checkbox" value="${m}" class="exam-sub-check w-4 h-4 accent-red-600">
+                <span class="text-[10px] font-bold uppercase text-zinc-300">${m}</span>
+            </label>
+        `).join('');
+        
+        // Pre-seleziona quelle già salvate
+        const currentSubs = window.classConfigsCache[window.selectedClass]?.examSubjects || [];
+        document.querySelectorAll('.exam-sub-check').forEach(ck => {
+            if(currentSubs.includes(ck.value)) ck.checked = true;
+        });
+    }
+};
+
+window.saveExamSubjects = async () => {
     const cls = window.selectedClass;
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').replace('/', '_');
-    const badge = document.getElementById('exam-badge-display');
-    const toggleInput = document.getElementById('exam-class-toggle');
-    const toggleLabel = document.getElementById('staff-exam-toggle');
+    const selected = Array.from(document.querySelectorAll('.exam-sub-check:checked')).map(ck => ck.value);
+    
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+    await setDoc(ref, { examSubjects: selected }, { merge: true });
+    
+    alert("✅ Materie d'esame configurate!");
+    document.getElementById('exam-config-panel').classList.add('hidden');
+    window.loadExamManager(); // Refresh
+};
 
-    if (!cls || cls === 'ALL') return;
+window.loadExamManager = async () => {
+    const cls = window.selectedClass;
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const thead = document.getElementById('exam-thead');
+    const tbody = document.getElementById('exam-grades-body');
+    if (!cls || !tbody || !thead) return;
 
-    // Mostra la leva solo allo staff (Prof, Preside, Admin)
-    const isStaff = [ROLES.PROF, ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(window.userRole);
-    if(toggleLabel) toggleLabel.classList.toggle('hidden', !isStaff);
+    // 1. Recupero metadati classe (Materie d'esame e Anno Inizio)
+    const classRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+    const classSnap = await getDoc(classRef);
+    const classData = classSnap.exists() ? classSnap.data() : {};
+    const startYear = classData.startYear || null;
+    const examSubjects = classData.examSubjects || []; // Array di materie scelte
 
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', `${cls}_${ay}`);
+    const isStaff = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
+    document.getElementById('btn-config-esami').classList.toggle('hidden', !isStaff);
+
+    // 2. Generazione Header Dinamico
+    let headerHtml = `
+        <tr>
+            <th class="p-4 sticky left-0 bg-black z-10">Candidato</th>
+            <th class="p-4 text-center">Crediti</th>
+            ${examSubjects.map(sub => `<th class="p-4 text-center">${sub.toUpperCase()}</th>`).join('')}
+            <th class="p-4 text-center">ORALE</th>
+            <th class="p-4 text-right bg-red-900/20 text-red-500">TOTALE /100</th>
+        </tr>`;
+    thead.innerHTML = headerHtml;
+
+    const classStudents = window.allStudents.filter(s => s.classe === cls);
+    tbody.innerHTML = '<tr><td colspan="20" class="p-10 text-center animate-pulse uppercase font-black text-zinc-500">Caricamento prove...</td></tr>';
+
+    let rowsHtml = "";
+    for (const s of classStudents) {
+        const recRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', s.id);
+        const snap = await getDoc(recRef);
+        const data = snap.exists() ? snap.data() : {};
+        
+        const triennioCredits = await window.getTrienniumCredits(s.id, startYear);
+        const ayKey = `exam_grades_${ay.replace('/','_')}`;
+        const examData = data[ayKey] || {}; // Contiene i voti per ogni materia
+        
+        // Calcolo Totale Dinamico
+        let sumProve = 0;
+        examSubjects.forEach(sub => {
+            sumProve += (parseFloat(examData[sub]) || 0);
+        });
+        const oralGrade = parseFloat(examData.oral) || 0;
+        const total = triennioCredits + sumProve + oralGrade;
+
+        rowsHtml += `
+            <tr class="hover:bg-zinc-800/30 transition-colors border-b border-zinc-800/50">
+                <td class="p-4 font-black uppercase sticky left-0 bg-[#0f0d0c] z-10 border-r border-zinc-800">
+                    ${s.name}
+                </td>
+                <td class="p-2 text-center">
+                    <span class="text-lg font-black text-amber-500">${triennioCredits}</span>
+                </td>
+                
+                <!-- Colonne Materie Dinamiche -->
+                ${examSubjects.map(sub => `
+                    <td class="p-2 text-center">
+                        <input type="number" value="${examData[sub] || 0}" 
+                            onchange="window.updateExamGrade('${s.id}', '${sub}', this.value)" 
+                            ${!isStaff ? 'disabled' : ''} 
+                            class="w-14 bg-black/30 border border-zinc-800 rounded p-1 text-center font-bold text-white focus:border-red-600 outline-none">
+                    </td>
+                `).join('')}
+
+                <!-- Colonna Orale -->
+                <td class="p-2 text-center">
+                    <input type="number" value="${examData.oral || 0}" 
+                        onchange="window.updateExamGrade('${s.id}', 'oral', this.value)" 
+                        ${!isStaff ? 'disabled' : ''} 
+                        class="w-14 bg-black/30 border border-zinc-800 rounded p-1 text-center font-bold text-white focus:border-red-600 outline-none">
+                </td>
+
+                <td class="p-4 text-right bg-red-900/10">
+                    <div class="flex flex-col items-end">
+                        <span class="text-xl font-black ${total >= 60 ? 'text-green-500' : 'text-red-600'}">${Math.round(total)}</span>
+                        <span class="text-[8px] font-bold text-zinc-500 uppercase">Punti</span>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+    tbody.innerHTML = rowsHtml || '<tr><td colspan="20" class="p-10 text-center text-zinc-500">Nessuno studente trovato.</td></tr>';
+};
+
+window.updateExamGrade = async (studentId, field, value) => {
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const ayKey = `exam_grades_${ay.replace('/','_')}`;
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+    
+    try {
+        const snap = await getDoc(ref);
+        const currentData = snap.exists() ? snap.data() : {};
+        const currentExamGrades = currentData[ayKey] || {};
+        
+        // Aggiorna il campo specifico (che sia 'oral' o il nome di una materia)
+        currentExamGrades[field] = parseFloat(value) || 0;
+
+        const update = {};
+        update[ayKey] = currentExamGrades;
+
+        await setDoc(ref, update, { merge: true });
+        
+        // Ricarica la tabella per aggiornare i totali
+        window.loadExamManager(); 
+    } catch (e) {
+        console.error("Errore salvataggio voto esame:", e);
+    }
+};
+
+// --- SISTEMA CREDITI SCOLASTICI ---
+
+// Tabella standard ministeriale (semplificata per il sistema)
+window.getCreditsFromMedia = (media, grade) => {
+    const m = parseFloat(media);
+    if (isNaN(m) || m < 6) return 0; 
+
+    // Tabella proporzionale semplificata basata sull'anno (Grade)
+    if (grade === 3) { // Terzo Anno (Max 12)
+        if (m === 6) return 7;
+        if (m <= 7) return 8;
+        if (m <= 8) return 9;
+        if (m <= 9) return 11;
+        return 12;
+    } 
+    else if (grade === 4) { // Quarto Anno (Max 13)
+        if (m === 6) return 8;
+        if (m <= 7) return 9;
+        if (m <= 8) return 11;
+        if (m <= 9) return 12;
+        return 13;
+    } 
+    else if (grade >= 5) { // Quinto Anno (Max 15)
+        if (m === 6) return 9;
+        if (m <= 7) return 11;
+        if (m <= 8) return 12;
+        if (m <= 9) return 14;
+        return 15;
+    }
+    return 0;
+};
+
+window.saveManualCredits = async (studentId, ay, value) => {
+    const ayKey = ay.replace('/', '_');
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+    
+    const update = {};
+    update[`credits_history.${ayKey}`] = {
+        value: parseInt(value),
+        manual: true,
+        timestamp: Date.now()
+    };
+
+    await setDoc(ref, update, { merge: true });
+    alert("✅ Crediti aggiornati per l'A.S. " + ay);
+    
+    // Refresh della vista attuale
+    if (document.getElementById('view-pagella').classList.contains('active-view')) {
+        loadStudentRecords(studentId);
+    }
+};
+
+// Funzione per recuperare il totale dei crediti accumulati nel triennio
+window.getTrienniumCredits = async (studentId, startYear) => {
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
     const snap = await getDoc(ref);
-    const isExam = snap.exists() ? snap.data().isExam : false;
+    if (!snap.exists()) return 0;
 
-    if(badge) badge.classList.toggle('hidden', !isExam);
-    if(toggleInput) toggleInput.checked = isExam;
+    const data = snap.data();
+    const history = data.credits_history || {};
+    const allVoti = data.voti || [];
+    let total = 0;
+
+    if (!startYear) {
+        console.warn(`[CREDITI] Manca startYear per studente ${studentId}, sommo tutto lo storico.`);
+        Object.values(history).forEach(entry => total += parseInt(entry.value || 0));
+        return total;
+    }
+
+    // Ciclo per 3°, 4° e 5° anno
+    for (let i = 2; i <= 4; i++) {
+        const yearStart = parseInt(startYear) + i;
+        const ayKey = `${yearStart}_${yearStart + 1}`;
+        
+        if (history[ayKey]) {
+            // Se esiste il dato salvato ufficialmente, usa quello
+            total += parseInt(history[ayKey].value || 0);
+        } else {
+            // FALLBACK: Se non è registrato, calcolalo al volo dai voti di quell'anno
+            const asString = `${yearStart}/${yearStart + 1}`;
+            const votiAnno = allVoti.filter(v => v.anno === asString && v.materia.toLowerCase() !== 'religione');
+            
+            if (votiAnno.length > 0) {
+                const media = votiAnno.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiAnno.length;
+                const gradeAnno = i + 1; // Determina se era 3°, 4° o 5° anno
+                const calcolato = window.getCreditsFromMedia(media, gradeAnno);
+                total += calcolato;
+                console.log(`[CREDITI] Fallback per ${asString}: Media ${media.toFixed(1)} -> +${calcolato}pt`);
+            }
+        }
+    }
+    return total;
 };
 
     </script>
