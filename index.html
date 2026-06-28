@@ -1230,6 +1230,13 @@ main {
         <button onclick="window.submitGrade()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md">Registra</button>
     </div>
 
+<!-- Pulsante per attivare/nascondere le medie dei quadrimestri -->
+<div class="flex justify-end px-4">
+    <button onclick="window.toggleMedieQuad()" class="bg-zinc-800 text-zinc-400 text-[9px] font-black uppercase px-3 py-1 rounded-lg hover:text-white transition-all border border-zinc-700">
+        📊 <span id="btn-text-medie">Mostra Medie Quadrimestri</span>
+    </button>
+</div>
+
     <!-- Tabella Registro -->
     <div class="registry-container">
         <div class="overflow-x-auto">
@@ -2473,39 +2480,32 @@ if (resMediaElem) {
     const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-    const emoji = LISTA_MATERIE[m.toLowerCase().trim()] || "📚";
     
-    // Sostituisci il calcolo della media di materia (avg) con questo:
-    const avg = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
-            
-            vHtml += `
-<tr class="group">
-    <td class="subject-column">
-        <div class="flex flex-col">
-            <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">
-                ${m.toUpperCase()} 
-            </span>
-            <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">
-                Docente: ${m_voti[0]?.prof || 'N.D.'}
-            </span>
-        </div>
-    </td>
-    <td class="text-center">
-        <div class="flex flex-wrap justify-center gap-1.5">
-            ${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[8px] text-zinc-200 font-black">---</span>'}
-        </div>
-    </td>
-    <td class="text-center">
-        <div class="flex flex-wrap justify-center gap-1.5">
-            ${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-[8px] text-zinc-200 font-black">---</span>'}
-        </div>
-    </td>
-    <td class="text-right">
-        <span class="media-badge-large ${parseFloat(avg) < 6 ? 'text-red-600' : 'text-green-600'}">
-            ${avg}
-        </span>
-    </td>
-</tr>`;
+    // Calcolo medie separate
+    const avgQ1 = q1.length ? (q1.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q1.length).toFixed(1) : "-";
+    const avgQ2 = q2.length ? (q2.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q2.length).toFixed(1) : "-";
+    const avgTotal = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
+
+    vHtml += `
+    <tr class="group">
+        <td class="subject-column">
+            <div class="flex flex-col">
+                <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
+                <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${m_voti[0]?.prof || 'N.D.'}</span>
+            </div>
+        </td>
+        <td class="text-center p-2">
+            <div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
+            <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ1}</div>
+        </td>
+        <td class="text-center p-2">
+            <div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
+            <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ2}</div>
+        </td>
+        <td class="text-right">
+            <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-green-600'}">${avgTotal}</span>
+        </td>
+    </tr>`;
 });
 
         // 6. Sezione "Altre Materie" (per Prof/Preside)
@@ -6652,6 +6652,19 @@ window.getTrienniumCredits = async (studentId, startYear) => {
         }
     }
     return total;
+};
+
+window.toggleMedieQuad = () => {
+    const boxes = document.querySelectorAll('.media-quad-box');
+    const btnText = document.getElementById('btn-text-medie');
+    
+    window.showMedieQuad = !window.showMedieQuad; // Inverte lo stato
+
+    boxes.forEach(box => {
+        box.classList.toggle('hidden', !window.showMedieQuad);
+    });
+
+    btnText.innerText = window.showMedieQuad ? "Nascondi Medie Quadrimestri" : "Mostra Medie Quadrimestri";
 };
 
     </script>
