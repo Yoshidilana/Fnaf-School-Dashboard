@@ -432,6 +432,14 @@ main {
             <button onclick="window.vaiADataRapida()" class="bg-red-700 text-white text-[8px] px-2 py-1 rounded-lg font-black hover:bg-red-600 transition-colors">GO</button>
         </div>
 
+<!-- Selettore Classi Docente (Appare solo se il prof ha più classi) -->
+<div id="prof-class-switcher-container" class="hidden filter-container flex items-center gap-2 px-3">
+    <span class="text-[9px] font-black text-red-500 uppercase">Classe:</span>
+    <select id="prof-class-select" onchange="window.filterByClass(this.value)" class="text-[10px] bg-transparent outline-none font-bold text-white">
+        <!-- Popolato via JS -->
+    </select>
+</div>
+
         <!-- Current Date Display -->
         <div class="filter-container flex items-center gap-2 px-4 py-2">
             <span class="text-xs">📅</span>
@@ -1894,7 +1902,8 @@ function applyRoleUI() {
     const config = window.classConfigsCache[window.selectedClass] || { startYear: null };
     const grade = window.calculateClassGrade(ay, config.startYear);
     const isMaturita = grade === 5;
-    
+    const isProf = type === ROLES.PROF;
+    const classiAssegnate = window.currentUserData?.classe; // Può essere stringa o array
 
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
     let miaClasse = window.currentUserData?.classe;
@@ -2015,6 +2024,26 @@ toggle('btn-add-didattica', isStaffDidattico || type === ROLES.ADMIN);
     document.querySelectorAll('.student-nav-bar').forEach(nav => {
         nav.classList.toggle('hidden', isStudente);
     });
+
+if (isProf && Array.isArray(classiAssegnate) && classiAssegnate.length > 0) {
+    const switcher = document.getElementById('prof-class-switcher-container');
+    const select = document.getElementById('prof-class-select');
+    
+    if (switcher && select) {
+        switcher.classList.remove('hidden');
+        select.innerHTML = classiAssegnate.map(c => 
+            `<option value="${c}" ${window.selectedClass === c ? 'selected' : ''}>${c}</option>`
+        ).join('');
+        
+        // Se il prof non ha ancora selezionato una classe, impostiamo la prima
+        if (!window.selectedClass) {
+            window.selectedClass = classiAssegnate[0];
+            window.handleClassChange(classiAssegnate[0]);
+        }
+    }
+} else {
+    document.getElementById('prof-class-switcher-container')?.classList.add('hidden');
+}
 
 // --- INIZIALIZZAZIONE AUTOMATICA ---
 if (isStudente) {
@@ -5349,29 +5378,18 @@ window.hubManager = {
 		    <option value="Counselor">Counselor scolastico</option>
                 </select>
 
-                <select id="new-u-class" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white">
-    <option value="None">Nessuna Classe</option>
-    <optgroup label="Originali">
-        <option value="A">Classe A</option>
-        <option value="B">Classe B</option>
-        <option value="C">Classe C</option>
-    </optgroup>
-    <optgroup label="Withered">
-        <option value="AW">Classe AW</option>
-        <option value="BW">Classe BW</option>
-        <option value="CW">Classe CW</option>
-    </optgroup>
-    <optgroup label="Phantom">
-        <option value="AP">Classe AP</option>
-        <option value="BP">Classe BP</option>
-        <option value="CP">Classe CP</option>
-    </optgroup>
-    <optgroup label="Nightmare">
-        <option value="AN">Classe AN</option>
-        <option value="BN">Classe BN</option>
-        <option value="CN">Classe CN</option>
-    </optgroup>
-</select>
+                <div id="class-selection-group" class="col-span-full bg-[#09090b] p-4 rounded-xl border border-[#3f3f46]">
+    <label class="block text-[10px] font-black uppercase text-zinc-400 mb-2">Classi Assegnate</label>
+    <div id="classes-checkbox-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        ${CLASSI_VALIDE.map(cls => `
+            <label class="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg border border-zinc-800 cursor-pointer hover:border-red-600 transition-all">
+                <input type="checkbox" value="${cls}" class="prof-class-check w-4 h-4 accent-red-600">
+                <span class="text-[10px] font-bold text-white">${cls}</span>
+            </label>
+        `).join('')}
+    </div>
+    <p id="student-class-hint" class="text-[8px] text-zinc-500 mt-2 uppercase font-bold">Nota: Per gli studenti, seleziona una sola classe.</p>
+</div>
 
 		<div class="mb-4">
     <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">URL Foto Profilo (Opzionale)</label>
@@ -5393,15 +5411,23 @@ window.hubManager = {
     const id = document.getElementById('new-u-id').value.trim();
     const name = document.getElementById('new-u-name').value.trim();
     const role = document.getElementById('new-u-role').value;
-    const classe = document.getElementById('new-u-class').value;
     const materieRaw = document.getElementById('new-u-materie').value;
+    const avatar = document.getElementById('reg-avatar').value.trim();
+
+    // Raccoglie le classi selezionate dai checkbox
+    const selectedClasses = Array.from(document.querySelectorAll('.prof-class-check:checked')).map(cb => cb.value);
 
     if(!id || !name) return alert("⚠️ ID e Nome sono obbligatori!");
+    
+    const roleType = getRoleType(role);
 
-    // Gestione array materie
+    // Validazione: Studente deve avere esattamente una classe
+    if (roleType === ROLES.STUDENTE && selectedClasses.length !== 1) {
+        return alert("⚠️ Uno studente deve essere assegnato a esattamente UNA classe.");
+    }
+
     let arrayMaterie = null;
-    if (role === 'Prof' && materieRaw) {
-        // Converte "Matematica, ITALIANO" in ["matematica", "italiano"]
+    if ((roleType === ROLES.PROF || roleType === ROLES.ADMIN) && materieRaw) {
         arrayMaterie = materieRaw.split(',').map(m => m.trim().toLowerCase()).filter(m => m !== "");
     }
 
@@ -5409,11 +5435,13 @@ window.hubManager = {
         await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), {
             name: name,
             role: role,
-            classe: classe === 'None' ? null : classe,
+            // Se è prof salviamo l'array, se è studente salviamo la stringa singola
+            classe: roleType === ROLES.STUDENTE ? selectedClasses[0] : selectedClasses,
             materie: arrayMaterie,
-	    avatar: document.getElementById('reg-avatar').value.trim() || "https://ui-avatars.com/api/?name=" + name
-        });
-        alert("✅ Utente registrato correttamente!");
+            avatar: avatar || "https://ui-avatars.com/api/?name=" + name
+        }, { merge: true });
+        
+        alert("✅ Utente salvato con successo!");
         this.mostraListaUtenti();
     } catch (e) {
         console.error(e);
@@ -5425,26 +5453,26 @@ modificaUtente: function(id) {
     const u = window.allUsers.find(user => user.id === id);
     if(!u) return;
 
-    // Apriamo il modulo di inserimento
     this.nuovoUtente();
     
-    // Cambiamo il titolo e blocchiamo l'ID (non si può cambiare l'ID di un utente esistente)
     document.querySelector('#hub-dynamic-content h3').innerText = "Modifica Utente";
     const idInput = document.getElementById('new-u-id');
     idInput.value = id;
     idInput.disabled = true;
-    idInput.style.opacity = "0.5";
 
-    // Riempiamo i campi con i dati attuali
     document.getElementById('new-u-name').value = u.name || '';
     document.getElementById('new-u-role').value = u.role || 'Studente';
-    document.getElementById('new-u-class').value = u.classe || 'None';
     document.getElementById('reg-avatar').value = u.avatar || u.avatar_npc || '';
     
-    if(u.role === 'Prof' || u.role === 'prof') {
+    // Gestione Checkbox Classi
+    const classiUtente = Array.isArray(u.classe) ? u.classe : (u.classe ? [u.classe] : []);
+    document.querySelectorAll('.prof-class-check').forEach(cb => {
+        cb.checked = classiUtente.includes(cb.value);
+    });
+
+    if(getRoleType(u.role) === ROLES.PROF) {
         const matInput = document.getElementById('new-u-materie');
-        const matGroup = document.getElementById('materia-input-group');
-        matGroup.classList.remove('hidden');
+        document.getElementById('materia-input-group').classList.remove('hidden');
         matInput.value = Array.isArray(u.materie) ? u.materie.join(', ') : (u.materie || '');
     }
 },
