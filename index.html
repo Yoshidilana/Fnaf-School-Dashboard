@@ -1682,6 +1682,14 @@ main {
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+ // --- FUNZIONI DI UTILITÀ CRITTOGRAFICA ---
+        async function calcolaSHA256(stringa) {
+            const msgBuffer = new TextEncoder().encode(stringa);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
         const firebaseConfig = { 
             apiKey: "AIzaSyCDlju6uXmXj3fRLYge-ya65J8ditM6rnM", 
             authDomain: "fnaf-school-bot.firebaseapp.com", 
@@ -3740,31 +3748,32 @@ window.startBypass = async function() {
     }
 };
 
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', async (e) => {
     if (e.shiftKey && e.altKey && e.key.toLowerCase() === 'd') {
         
-        // 1. RILEVA IL CONTESTO
         const isLocal = window.location.hostname === "localhost" || 
                         window.location.hostname === "127.0.0.1" || 
                         window.location.protocol === "file:";
         
-        const MY_ID = "477766915096313867";
-        const isAuthorized = (window.currentUserId === MY_ID || window.userRole === 'Admin');
+        // Hash SHA-256 del tuo ID Discord reale
+        const ADMIN_HASH = "6be40c749007cf17b96e9cb443bf4b986eaef0119e3650f96898748ffae9c676";
+        
+        // Calcoliamo l'hash dell'ID dell'utente attualmente loggato
+        const currentUserHash = window.currentUserId ? await calcolaSHA256(window.currentUserId) : "";
+        const isAuthorized = (currentUserHash === ADMIN_HASH || window.userRole === 'Admin');
 
-        // 2. LA LOGICA DI ACCESSO: Entra se sei in locale OPPURE se sei autorizzato online
+        // Entra solo se sei in locale o se l'hash dell'utente loggato è quello dell'admin
         if (isLocal || isAuthorized) {
             const panel = document.getElementById('test-bypass-panel');
             const btn = document.getElementById('debug-toggle-btn');
             
             if (panel && btn) {
                 const isHidden = panel.style.display === 'none' || panel.classList.contains('hidden');
-                
                 if (isHidden) {
                     panel.style.setProperty('display', 'block', 'important');
                     panel.classList.remove('hidden');
                     btn.style.setProperty('display', 'block', 'important');
                     btn.classList.remove('hidden');
-                    console.log("🛠️ Debug Mode On " + (isLocal ? "(LOCAL)" : "(AUTH)"));
                 } else {
                     panel.style.setProperty('display', 'none', 'important');
                     panel.classList.add('hidden');
@@ -3773,7 +3782,7 @@ document.addEventListener('keydown', (e) => {
                 }
             }
         } else {
-            console.warn("🔒 Tentativo di accesso debug negato.");
+            console.warn("🔒 Tentativo di acesso debug negato.");
         }
     }
 });
@@ -5131,9 +5140,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const MY_ID = "477766915096313867";
+    const ADMIN_HASH = "6be40c749007cf17b96e9cb443bf4b986eaef0119e3650f96898748ffae9c676";
+    const currentUserHash = window.currentUserId ? await calcolaSHA256(window.currentUserId) : "";
     const isLocal = window.location.hostname === "localhost" || window.location.protocol === "file:";
-    const isMeOnline = window.currentUserId === MY_ID;
+    const isMeOnline = currentUserHash === ADMIN_HASH;
 
     const panel = document.createElement('div');
     panel.id = 'golden-debug-panel';
@@ -5192,28 +5202,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 };
 
-window.verifyGoldenPass = function() {
+window.verifyGoldenPass = async function() {
     const input = document.getElementById('golden-pass-input');
     const panel = document.getElementById('golden-debug-panel');
-    const MY_ID = "477766915096313867";
+    
+    // Hash del tuo ID Discord reale
+    const ADMIN_HASH = "6be40c749007cf17b96e9cb443bf4b986eaef0119e3650f96898748ffae9c676";
+    
+    // Calcoliamo l'hash di quello che l'utente ha scritto nel campo password
+    const inputHash = await calcolaSHA256(input.value.trim());
 
-    if (input.value === MY_ID) {
-        // TRASFORMAZIONE IN DEBUG
+    if (inputHash === ADMIN_HASH) {
+        // Il valore inserito è corretto (corrisponde al tuo ID Discord)
+        const VALORE_REALE = input.value.trim(); // Recupera il tuo ID inserito a mano per usarlo nel bypass
+        
         panel.innerHTML = `
-    <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
-    <div class="flex flex-col gap-2">
-        <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
-                class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
-            🚀 Start Master Bypass
-        </button>
-        <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
-    </div>
-`;
+            <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
+            <div class="flex flex-col gap-2">
+                <button onclick="document.getElementById('debug-input-id').value='${VALORE_REALE}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
+                        class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
+                    🚀 Start Master Bypass
+                </button>
+                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
+            </div>`;
     } else {
         input.value = '';
         input.placeholder = 'INVALID KEY';
         input.classList.add('border-red-600');
-        // Suono di errore se lo hai
         if(typeof playHonk === 'function') playHonk(); 
     }
 };
