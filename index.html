@@ -1744,6 +1744,18 @@ main {
         window.getDoc = getDoc;
         window.deleteField = deleteField;
 
+        // --- NUOVA LOGICA PERCORSI AGENDA (v2) ---
+        window.getAgendaDocRef = (cls, dateKey) => {
+            if(!cls || !dateKey || cls === 'ALL' || cls === 'None') return null;
+            // dateKey è nel formato YYYY-MM-DD
+            const parts = dateKey.split('-');
+            const y = parseInt(parts[0]);
+            const m = parseInt(parts[1]);
+            const ay = (m >= 9) ? `${y}_${y+1}` : `${y-1}_${y}`;
+            // Percorso: agendas_v2 (coll) -> CLASSE (doc) -> ANNO (coll) -> DATA (doc)
+            return doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas_v2', cls, ay, dateKey);
+        };
+
         // --- STATO ---
         window.userRole = 'ospite'; 
         window.currentUserData = null;
@@ -2234,7 +2246,10 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
     }
 
     // 2. Listener Real-time Agenda (Firme, Compiti, Comunicazioni)
-    agendaListener = onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`), d => {
+    const newRef = window.getAgendaDocRef(cls, dateKey);
+    if(!newRef) return;
+
+    agendaListener = onSnapshot(newRef, d => {
         const data = d.exists() ? d.data() : { firme: [], compiti: [], note: [], daily_voti: [], comunicazioni: [] };
         
         const currentUser = (window.currentUserData?.name || "").trim();
@@ -2719,8 +2734,7 @@ if (resMediaElem) {
             await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
             
             // Log Agenda
-            const agendaId = `${window.selectedClass}_${inputCal.value}`;
-            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+            const agendaRef = window.getAgendaDocRef(window.selectedClass, inputCal.value);
             const studentName = window.allStudents.find(s => s.id === window.selectedStudentId)?.name || "Studente Ignoto";
 
 await setDoc(agendaRef, { 
@@ -2795,7 +2809,7 @@ await setDoc(agendaRef, {
             const mat = document.getElementById('m-mat').value;
             const arg = document.getElementById('m-arg').value;
             
-            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${window.selectedClass}_${inputCal.value}`);
+            const ref = window.getAgendaDocRef(window.selectedClass, inputCal.value);
             await setDoc(ref, { 
                 firme: arrayUnion({ 
                     ora: ora, 
@@ -2830,8 +2844,7 @@ await setDoc(agendaRef, {
             const txt = document.getElementById('m-compiti-txt').value;
             if(!txt) return;
 
-            const agendaId = `${window.selectedClass}_${inputCal.value}`;
-            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+            const ref = window.getAgendaDocRef(window.selectedClass, inputCal.value);
             
             await setDoc(ref, { 
                 compiti: arrayUnion({ 
@@ -2897,8 +2910,7 @@ await setDoc(agendaRef, {
         await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
         
         // 2. Salva nell'agenda di classe (così i prof vedono perché manca l'alunno)
-        const agendaId = `${window.selectedClass}_${inputCal.value}`;
-        const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+        const agendaRef = window.getAgendaDocRef(window.selectedClass, inputCal.value);
         await setDoc(agendaRef, { 
             note: arrayUnion({
                 ...note, 
@@ -3343,8 +3355,8 @@ window.editNote = async (idx, studentId) => {
 
             // 2. Aggiorna Agenda Globale
             const dParts = vecchiaNota.data.split('/');
-            const agendaId = `${window.selectedClass}_${dParts[2]}-${dParts[1]}-${dParts[0]}`;
-            const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+            const dateKey = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
+            const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
             
             const aSnap = await getDoc(agendaRef);
             if(aSnap.exists()) {
@@ -3361,7 +3373,7 @@ window.editNote = async (idx, studentId) => {
     }
 };
 
-       window.editVoto = async (idRicevuto, studentId) => {
+ window.editVoto = async (idRicevuto, studentId) => {
     console.log("Tentativo modifica voto ID:", idRicevuto, "per studente:", studentId);
     const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
     const d = await getDoc(recordRef);
@@ -3414,38 +3426,52 @@ window.editNote = async (idx, studentId) => {
         
         await updateDoc(recordRef, { voti: listaVoti });
 
-        // 3. GESTIONE AGENDAS (Sincronizzazione e rimozione vecchi dati)
-        const targetClass = window.selectedClass; // Utilizza la classe attuale isolata
+        // 3. GESTIONE AGENDAS CON STRUTTURA V2 (Utilizzo Helper)
+        const targetClass = window.selectedClass; 
 
-        // Vecchio riferimento Agenda
+        // Convertiamo la vecchia data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
         const vParts = vecchioVoto.data.split('/');
-        const vecchioAgendaId = `${targetClass}_${vParts[2]}-${vParts[1]}-${vParts[0]}`;
-        const vecchioAgendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', vecchioAgendaId);
+        const vecchioDateKey = `${vParts[2]}-${vParts[1]}-${vParts[0]}`;
+        // Otteniamo il vecchio DocumentReference tramite l'helper v2
+        const vecchioAgendaRef = window.getAgendaDocRef(targetClass, vecchioDateKey);
 
-        // Nuovo riferimento Agenda
+        // Convertiamo la nuova data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
         const nParts = nuovaData.split('/');
-        const nuovoAgendaId = `${targetClass}_${nParts[2]}-${nParts[1]}-${nParts[0]}`;
-        const nuovoAgendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', nuovoAgendaId);
+        const nuovaDateKey = `${nParts[2]}-${nParts[1]}-${nParts[0]}`;
+        // Otteniamo il nuovo DocumentReference tramite l'helper v2
+        const nuovoAgendaRef = window.getAgendaDocRef(targetClass, nuovaDateKey);
 
-        // --- RIMOZIONE DAL VECCHIO DOCUMENTO AGENDA ---
-        const vSnap = await getDoc(vecchioAgendaRef);
-        if (vSnap.exists()) {
-            let daily = vSnap.data().daily_voti || [];
-            
-            // Filtra via l'elemento vecchio basandosi sull'ID studente, sulla materia e sul valore del vecchio voto
-            daily = daily.filter(v => 
-                !(v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto)
-            );
+        // --- RIMOZIONE DAL VECCHIO DOCUMENTO AGENDA V2 ---
+        if (vecchioAgendaRef) {
+            const vSnap = await getDoc(vecchioAgendaRef);
+            if (vSnap.exists()) {
+                let daily = vSnap.data().daily_voti || [];
+                
+                // Filtra via l'elemento vecchio
+                daily = daily.filter(v => 
+                    !(v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto)
+                );
 
-            if (daily.length === 0) {
-                // Se il documento è vuoto, lo eliminiamo completamente per non lasciare rimasugli
-                await deleteDoc(vecchioAgendaRef);
-            } else {
-                await updateDoc(vecchioAgendaRef, { daily_voti: daily });
+                if (daily.length === 0) {
+                    // Controlliamo se ci sono altri campi attivi (firme, compiti, note) prima di eliminare del tutto
+                    const vecchioDataObj = vSnap.data();
+                    const hasAltro = (vecchioDataObj.firme?.length > 0) || 
+                                     (vecchioDataObj.compiti?.length > 0) || 
+                                     (vecchioDataObj.note?.length > 0) ||
+                                     (vecchioDataObj.comunicazioni?.length > 0);
+                    
+                    if (!hasAltro) {
+                        await deleteDoc(vecchioAgendaRef);
+                    } else {
+                        await updateDoc(vecchioAgendaRef, { daily_voti: daily });
+                    }
+                } else {
+                    await updateDoc(vecchioAgendaRef, { daily_voti: daily });
+                }
             }
         }
 
-        // --- INSERIMENTO O AGGIORNAMENTO NEL NUOVO DOCUMENTO AGENDA ---
+        // --- INSERIMENTO O AGGIORNAMENTO NEL NUOVO DOCUMENTO AGENDA V2 ---
         const entryNuovaAgenda = {
             studente: document.getElementById('res-student-name')?.innerText || vecchioVoto.studente || "Studente",
             studenteId: studentId,
@@ -3454,21 +3480,25 @@ window.editNote = async (idx, studentId) => {
             argomento: nuovoArgomento
         };
 
-        if (vecchioAgendaId === nuovoAgendaId) {
-            // Se la data è la stessa ma è cambiato solo il voto o l'argomento, riscriviamo nello stesso documento
-            const aSnap = await getDoc(vecchioAgendaRef);
-            let daily = aSnap.exists() ? (aSnap.data().daily_voti || []) : [];
-            daily.push(entryNuovaAgenda);
-            await setDoc(vecchioAgendaRef, { daily_voti: daily }, { merge: true });
+        if (vecchioDateKey === nuovaDateKey) {
+            // Stessa data: aggiorna il documento corrente ottenuto dall'helper
+            if (vecchioAgendaRef) {
+                const aSnap = await getDoc(vecchioAgendaRef);
+                let daily = aSnap.exists() ? (aSnap.data().daily_voti || []) : [];
+                daily.push(entryNuovaAgenda);
+                await setDoc(vecchioAgendaRef, { daily_voti: daily }, { merge: true });
+            }
         } else {
-            // Se la data è cambiata, carichiamo il nuovo documento (o lo creiamo) e appendiamo il record
-            const nSnap = await getDoc(nuovoAgendaRef);
-            let dailyNuovo = nSnap.exists() ? (nSnap.data().daily_voti || []) : [];
-            dailyNuovo.push(entryNuovaAgenda);
-            await setDoc(nuovoAgendaRef, { daily_voti: dailyNuovo }, { merge: true });
+            // Nuova data: scrive nel nuovo percorso generato dall'helper
+            if (nuovoAgendaRef) {
+                const nSnap = await getDoc(nuovoAgendaRef);
+                let dailyNuovo = nSnap.exists() ? (nSnap.data().daily_voti || []) : [];
+                dailyNuovo.push(entryNuovaAgenda);
+                await setDoc(nuovoAgendaRef, { daily_voti: dailyNuovo }, { merge: true });
+            }
         }
 
-        alert("Voto e agenda aggiornati con successo!");
+        alert("Voto e agenda v2 aggiornati con successo!");
         loadStudentRecords(studentId);
     }
 };
@@ -3487,8 +3517,8 @@ window.editNote = async (idx, studentId) => {
 
         // 2. Rimuovi dall'Agenda Globale
         const dParts = notaDaEliminare.data.split('/');
-        const agendaId = `${window.selectedClass}_${dParts[2]}-${dParts[1]}-${dParts[0]}`;
-        const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+        const dateKey = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
+        const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
         
         const aSnap = await getDoc(agendaRef);
         if(aSnap.exists()) {
@@ -3698,7 +3728,7 @@ commentBox.innerText = recordData[keyGiudizioGlobale] || "Nessun giudizio inseri
         return;
     }
 
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`);
+    const ref = window.getAgendaDocRef(cls, dateKey);
     const autore = window.currentUserData.name;
 
     try {
@@ -3737,7 +3767,7 @@ commentBox.innerText = recordData[keyGiudizioGlobale] || "Nessun giudizio inseri
     
     const cal = document.getElementById('global-calendar');
     const dateKey = cal ? cal.value : null;
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`);
+    const ref = window.getAgendaDocRef(cls, dateKey);
     
     try {
         const snap = await getDoc(ref);
@@ -4656,8 +4686,8 @@ if (notesList) {
             const sClass = student?.classe || window.selectedClass;
             
             if (sClass && sClass !== 'ALL') {
-                const agendaId = `${sClass}_${aaaa}-${mm}-${gg}`;
-                const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+                const dateKey = `${aaaa}-${mm}-${gg}`;
+                const agendaRef = window.getAgendaDocRef(sClass, dateKey);
                 const aSnap = await getDoc(agendaRef);
 
                 if (aSnap.exists()) {
@@ -5754,7 +5784,7 @@ window.editSubjectComment = async (materia, quad) => {
 	window.deleteFirma = async (idx, cls) => {
     if(!confirm("Vuoi davvero eliminare questa firma? L'azione è irreversibile.")) return;
     
-        const dateKey = document.getElementById('global-calendar').value; // Prende la data selezionata
+    const dateKey = document.getElementById('global-calendar').value; // Prende la data selezionata
     const docRef = window.getAgendaDocRef(cls, dateKey);
     
     try {
@@ -6929,7 +6959,8 @@ window.adminGenerateRandomGrade = async () => {
         };
 
         await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', sId), { voti: arrayUnion(entry) }, { merge: true });
-        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${targetClass}_${dateKey}`), { 
+        const agendaRef = window.getAgendaDocRef(targetClass, dateKey);
+        await setDoc(agendaRef, { 
             daily_voti: arrayUnion({ studente: sName, studenteId: sId, voto: val, materia: selectedMateria, argomento: arg }) 
         }, { merge: true });
     };
@@ -7043,6 +7074,54 @@ window.adminGenerateRandomGrade = async () => {
 
     if (typeof loadStudentRecords === 'function') {
         loadStudentRecords(window.selectedStudentId);
+    }
+};
+
+window.eseguiMigrazioneAgendas = async () => {
+    if (!confirm("Vuoi avviare la migrazione di tutti i vecchi dati dell'agenda sulla nuova struttura v2?")) return;
+
+    console.log("Inizio migrazione dati agenda...");
+    
+    // Riferimento alla vecchia collezione piatta
+    const vecchiaCollezioneRef = collection(db, 'artifacts', APP_ID, 'public', 'data', 'agendas');
+    
+    try {
+        const snapshot = await getDocs(vecchiaCollezioneRef);
+        let contatoreSpostati = 0;
+
+        for (const vecchioDoc of snapshot.docs) {
+            const vecchioId = vecchioDoc.id; // Es: "B_2021-03-29" o "A_2026-05-29"
+            
+            // Filtriamo solo i vecchi ID che contengono la classe e la data divise da un trattino basso
+            if (vecchioId.includes('_')) {
+                const parti = vecchioId.split('_');
+                const classeLetta = parti[0];      // "B" o "A"
+                const dataCompleta = parti[1];     // "2021-03-29"
+                
+                const vecchiDati = vecchioDoc.data();
+                
+                // Generiamo il NUOVO percorso esatto usando l'helper v2 che hai nel codice
+                const nuovoRef = window.getAgendaDocRef(classeLetta, dataCompleta);
+                
+                if (nuovoRef) {
+                    // Scriviamo i dati pari pari nella nuova posizione (firme, compiti, daily_voti, avvisi...)
+                    await setDoc(nuovoRef, vecchiDati, { merge: true });
+                    
+                    // Opzionale: cancella il vecchio documento per non lasciare spazzatura
+                    await deleteDoc(vecchioDoc.ref);
+                    
+                    console.log(`Spostato con successo: ${vecchioId} -> Struttura v2`);
+                    contatoreSpostati++;
+                }
+            }
+        }
+
+        alert(`Migrazione completata! Spostati con successo ${contatoreSpostati} documenti in agendas_v2.`);
+        console.log(`Migrazione terminata. Documenti elaborati: ${contatoreSpostati}`);
+
+    } catch (error) {
+        console.error("Errore durante la migrazione dei dati:", error);
+        alert("Si è verificato un errore durante la migrazione. Controlla la console.");
     }
 };
 
