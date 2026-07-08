@@ -1236,6 +1236,7 @@ main {
             <select id="input-grade-val" class="modal-input !py-2"></select>
         </div>
         <button onclick="window.submitGrade()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md">Registra</button>
+        <button id="admin-random-grade-btn" onclick="window.adminGenerateRandomGrade()" class="hidden bg-zinc-900 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md border border-zinc-700">🎲 Admin Tool</button>
     </div>
 
 <!-- Pulsante per attivare/nascondere le medie dei quadrimestri -->
@@ -1688,7 +1689,7 @@ main {
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, getDoc, updateDoc, arrayUnion, arrayRemove, deleteDoc, getDocs, deleteField } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
  // --- FUNZIONI DI UTILITÀ CRITTOGRAFICA ---
         async function calcolaSHA256(stringa) {
@@ -1741,6 +1742,7 @@ main {
     window.getDocs = getDocs;
         window.doc = doc;
         window.getDoc = getDoc;
+        window.deleteField = deleteField;
 
         // --- STATO ---
         window.userRole = 'ospite'; 
@@ -1968,9 +1970,10 @@ toggle('home-btn-pagella', isStudente);
     toggle('note-date-container', canEmitNotes);
 
     // --- MOSTRA PANNELLO VOTI E POPOLA MATERIE ---
-    if (isStaffDidattico) {
+        if (isStaffDidattico) {
         toggle('prof-grade-panel', true);
-        window.configuraPannelloVotiDocente(); // <--- NUOVA FUNZIONE
+        window.configuraPannelloVotiDocente();
+        toggle('admin-random-grade-btn', isAdmin);
     } else {
         toggle('prof-grade-panel', false);
     }
@@ -2025,7 +2028,8 @@ toggle('btn-add-didattica', isStaffDidattico || type === ROLES.ADMIN);
         nav.classList.toggle('hidden', isStudente);
     });
 
-if (isProf && Array.isArray(classiAssegnate) && classiAssegnate.length > 0) {
+if (isProf && window.currentUserData?.classi_docente && window.currentUserData.classi_docente.length > 0) {
+    const classiAssegnate = window.currentUserData.classi_docente; // Legge dal nuovo campo
     const switcher = document.getElementById('prof-class-switcher-container');
     const select = document.getElementById('prof-class-select');
     
@@ -2035,7 +2039,6 @@ if (isProf && Array.isArray(classiAssegnate) && classiAssegnate.length > 0) {
             `<option value="${c}" ${window.selectedClass === c ? 'selected' : ''}>${c}</option>`
         ).join('');
         
-        // Se il prof non ha ancora selezionato una classe, impostiamo la prima
         if (!window.selectedClass) {
             window.selectedClass = classiAssegnate[0];
             window.handleClassChange(classiAssegnate[0]);
@@ -4837,13 +4840,30 @@ window.filterByClass = (cls) => {
     const filterContainer = document.getElementById('reg-subject-filter-container');
     const subjectSelect = document.getElementById('reg-global-subject-select');
     
-    const materieDisponibili = window.currentUserData?.materie || [];
-    
-    // Gestione Filtro Materie (se > 1)
-    if (materieDisponibili.length > 1) {
+    // --- NUOVA LOGICA PERMESSI MATERIE ---
+    let materieDisponibili = [];
+    const isAdmin = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
+
+    if (isAdmin) {
+        // Se è Admin/Preside, carica tutte le materie esistenti nel sistema
+        materieDisponibili = Object.keys(LISTA_MATERIE);
+    } else {
+        // Altrimenti carica solo le materie assegnate al docente
+        materieDisponibili = window.currentUserData?.materie || [];
+    }
+    // -------------------------------------
+
+    // Gestione Filtro Materie
+    // Se l'utente è Admin o ha più di una materia, mostriamo il selettore
+    if (isAdmin || materieDisponibili.length > 1) {
         filterContainer.classList.remove('hidden');
-        if (subjectSelect.options.length === 0) {
-            subjectSelect.innerHTML = materieDisponibili.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+        
+        // Popoliamo il selettore se è vuoto o se l'utente è Admin (per garantire la lista completa)
+        if (subjectSelect.options.length === 0 || isAdmin) {
+            const currentSelection = subjectSelect.value; // Salviamo la selezione attuale
+            subjectSelect.innerHTML = materieDisponibili.map(m => 
+                `<option value="${m}" ${currentSelection === m ? 'selected' : ''}>${m.toUpperCase()}</option>`
+            ).join('');
         }
     } else {
         filterContainer.classList.add('hidden');
@@ -4851,8 +4871,8 @@ window.filterByClass = (cls) => {
 
     const profSubject = subjectOverride || subjectSelect.value || materieDisponibili[0] || "Materia non definita";
 
-const displaySimple = window.getDisplayClassName(cls, false); // <--- Aggiungi questa
-info.innerText = `Classe ${displaySimple} - Visualizzazione: ${profSubject}`; // <--- Modifica questa
+    const displaySimple = window.getDisplayClassName(cls, false);
+    info.innerText = `Classe ${displaySimple} - Visualizzazione: ${profSubject.toUpperCase()}`;
 
     tbody.innerHTML = '<tr><td colspan="10" class="p-10 text-center animate-pulse uppercase font-black">Sincronizzazione dati classe...</td></tr>';
 
@@ -5305,6 +5325,7 @@ window.hubManager = {
                 const id = docSnap.id;
                 const role = u.role || 'ospite';
                 const roleType = getRoleType(role);
+const displayClasse = (roleType === ROLES.STUDENTE) ? (u.classe || '-') : (u.classi_docente ? u.classi_docente.join(', ') : '-');
 
                 if (roleType === ROLES.OSPITE) return;
 
@@ -5329,7 +5350,7 @@ window.hubManager = {
                                 ${role}
                             </span>
                         </td>
-                        <td class="p-3 font-bold text-zinc-500">${u.classe || '-'}</td>
+                        <td class="p-3 font-bold text-zinc-500">${displayClasse}</td>
                         <td class="p-3 text-right" onclick="event.stopPropagation()">
     <button onclick="window.hubManager.modificaUtente('${id}')" class="text-zinc-300 hover:text-blue-500 p-2 transition-colors">✏️</button>
     <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-zinc-300 hover:text-red-600 p-2 transition-colors">🗑️</button>
@@ -5366,7 +5387,7 @@ window.hubManager = {
                 <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
                 
                 <select id="new-u-role" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white" 
-                    onchange="document.getElementById('materia-input-group').classList.toggle('hidden', this.value !== 'Prof')">
+                    onchange="const show = ['Prof', 'Preside', 'Vice Preside'].includes(this.value); document.getElementById('materia-input-group').classList.toggle('hidden', !show)">
                     <option value="Studente">Studente</option>
 		    <option value="Studente">Studentessa</option>
                     <option value="Prof">Prof</option>
@@ -5407,14 +5428,14 @@ window.hubManager = {
 },
 
     // 3. SALVA E ELIMINA
-    salvaNuovoUtente: async function() {
+    // Cerca la funzione salvaNuovoUtente e sostituiscila con questa:
+salvaNuovoUtente: async function() {
     const id = document.getElementById('new-u-id').value.trim();
     const name = document.getElementById('new-u-name').value.trim();
     const role = document.getElementById('new-u-role').value;
     const materieRaw = document.getElementById('new-u-materie').value;
     const avatar = document.getElementById('reg-avatar').value.trim();
 
-    // Raccoglie le classi selezionate dai checkbox
     const selectedClasses = Array.from(document.querySelectorAll('.prof-class-check:checked')).map(cb => cb.value);
 
     if(!id || !name) return alert("⚠️ ID e Nome sono obbligatori!");
@@ -5427,19 +5448,28 @@ window.hubManager = {
     }
 
     let arrayMaterie = null;
-    if ((roleType === ROLES.PROF || roleType === ROLES.ADMIN) && materieRaw) {
+    if (materieRaw) {
         arrayMaterie = materieRaw.split(',').map(m => m.trim().toLowerCase()).filter(m => m !== "");
     }
 
     try {
-        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), {
+        const dataToSave = {
             name: name,
             role: role,
-            // Se è prof salviamo l'array, se è studente salviamo la stringa singola
-            classe: roleType === ROLES.STUDENTE ? selectedClasses[0] : selectedClasses,
             materie: arrayMaterie,
             avatar: avatar || "https://ui-avatars.com/api/?name=" + name
-        }, { merge: true });
+        };
+
+    // --- LOGICA DISTINTA CAMPI ---
+        if (roleType === ROLES.STUDENTE) {
+            dataToSave.classe = selectedClasses[0]; // Campo per studenti (stringa)
+            dataToSave.classi_docente = window.deleteField(); // Rimuove il campo docente
+        } else {
+            dataToSave.classi_docente = selectedClasses; // Campo per docenti (array)
+            dataToSave.classe = window.deleteField();    // Rimuove definitivamente il campo studente per lo Staff
+        }
+
+        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), dataToSave, { merge: true });
         
         alert("✅ Utente salvato con successo!");
         this.mostraListaUtenti();
@@ -5464,13 +5494,15 @@ modificaUtente: function(id) {
     document.getElementById('new-u-role').value = u.role || 'Studente';
     document.getElementById('reg-avatar').value = u.avatar || u.avatar_npc || '';
     
-    // Gestione Checkbox Classi
-    const classiUtente = Array.isArray(u.classe) ? u.classe : (u.classe ? [u.classe] : []);
+    // --- LOGICA LETTURA CLASSI ---
+    // Se è un docente legge da classi_docente, se è studente da classe
+    const classiUtente = Array.isArray(u.classi_docente) ? u.classi_docente : (u.classe ? [u.classe] : []);
+    
     document.querySelectorAll('.prof-class-check').forEach(cb => {
         cb.checked = classiUtente.includes(cb.value);
     });
 
-    if(getRoleType(u.role) === ROLES.PROF) {
+        if([ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(getRoleType(u.role))) {
         const matInput = document.getElementById('new-u-materie');
         document.getElementById('materia-input-group').classList.remove('hidden');
         matInput.value = Array.isArray(u.materie) ? u.materie.join(', ') : (u.materie || '');
@@ -6708,6 +6740,237 @@ window.toggleMedieQuad = () => {
     });
 
     btnText.innerText = window.showMedieQuad ? "Nascondi Medie Quadrimestri" : "Mostra Medie Quadrimestri";
+};
+
+     // Variabili globali per memorizzare l'ultima sessione di generazione admin
+window.lastAdminGenDate = null;
+window.lastAdminGenDateKey = null;
+window.lastAdminGenArg = null;
+
+window.adminGenerateRandomGrade = async () => {
+    if (window.userRole !== 'admin') return alert("Accesso negato.");
+    
+    const mSelect = document.getElementById('input-grade-subject');
+    const selectedMateria = mSelect.value.toLowerCase().trim();
+    if (!selectedMateria) return alert("⚠️ Seleziona una materia dal menu prima.");
+
+    const targetClass = window.selectedClass;
+    if (!targetClass || targetClass === 'ALL') return alert("⚠️ Seleziona una classe specifica.");
+
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+
+// --- HELPER: GENERATORE DATA CASUALE CON BLOCCO NATALE E PASQUA ---
+    const generateRandomDate = (periodo = 'full') => {
+        const [y1, y2] = ay.split('/').map(Number);
+        let start, end;
+        
+        if (periodo === 'q1') {
+            start = new Date(y1, 8, 15).getTime(); // 15 Settembre
+            end = new Date(y2, 0, 20).getTime();   // 31 Gennaio
+        } else if (periodo === 'q2') {
+            start = new Date(y2, 1, 1).getTime();  // 1 Febbraio
+            end = new Date(y2, 5, 1).getTime();   // 8 Giugno
+        } else {
+            start = new Date(y1, 8, 15).getTime();
+            end = new Date(y2, 5, 1).getTime();
+        }
+        
+        let d = new Date(start + Math.random() * (end - start));
+        const anno = d.getFullYear();
+        const mese = d.getMonth(); // 11 = Dicembre, 0 = Gennaio...
+        const giorno = d.getDate();
+
+        if (mese === 11 && giorno >= 23) {
+            d.setDate(18); // Forza a un giorno valido pre-vacanze (18 Dicembre)
+        } else if (mese === 0 && giorno <= 6) {
+            d.setDate(12); // Forza al rientro scolastico (12 Gennaio)
+        }
+        
+// 2. CALCOLO AUTOMATICO DOMENICA DI PASQUA (Algoritmo di Butcher-Meeus)
+        const a = anno % 19;
+        const b = Math.floor(anno / 100);
+        const c = anno % 100;
+        const d_calc = Math.floor(b / 4);
+        const e = b % 4;
+        const f = Math.floor((b + 8) / 25);
+        const g = Math.floor((b - f + 1) / 3);
+        const h = (19 * a + b - d_calc - g + 15) % 30;
+        const i = Math.floor(c / 4);
+        const k = c % 4;
+        const L = (32 + 2 * e + 2 * i - h - k) % 7;
+        const m_calc = Math.floor((a + 11 * h + 22 * L) / 451);
+        const mesePasqua = Math.floor((h + L - 7 * m_calc + 114) / 31) - 1; // Mese in formato JS (0-11)
+        const giornoPasqua = ((h + L - 7 * m_calc + 114) % 31) + 1;
+
+        // Creiamo gli oggetti Date per l'inizio e la fine delle vacanze di Pasqua
+        const inizioVacanzePasqua = new Date(anno, mesePasqua, giornoPasqua - 3); // Giovedì Santo
+        const fineVacanzePasqua = new Date(anno, mesePasqua, giornoPasqua + 2);   // Martedì dell'Angelo
+
+        // Se la data estratta cade nel range di Pasqua (da Giovedì a Martedì compresi)
+        if (d >= inizioVacanzePasqua && d <= fineVacanzePasqua) {
+            // Sposta la data al Mercoledì prima delle vacanze (6 giorni prima della domenica di Pasqua)
+            d = new Date(anno, mesePasqua, giornoPasqua - 4);
+}
+
+        // 3. PROTEZIONE DOMENICHE (0 = Domenica)
+        // Se capita di domenica, sposta automaticamente al Lunedì successivo
+        if (d.getDay() === 0) {
+            d.setDate(d.getDate() + 1);
+        }
+        
+        return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
+    };
+
+    // Trova il professore titolare cercando nell'array classi_docente (specifico per lo Staff)
+    const profTitolare = window.allStudents.find(u => {
+        const r = (u.role || '').toLowerCase();
+        const isDocente = r.includes('prof') || r.includes('docente');
+        const insegnaMateria = Array.isArray(u.materie) && u.materie.map(m => m.toLowerCase().trim()).includes(selectedMateria);
+        const classiAssegnate = Array.isArray(u.classi_docente) ? u.classi_docente : [];
+        return isDocente && insegnaMateria && classiAssegnate.includes(targetClass);
+    }) || { name: "Docente Automatico", id: "SYSTEM" };
+
+    const mode = prompt("Scegli modalità generazione:\n1. Voto Singolo (Studente attuale)\n2. Simulazione Anno (8 voti - Studente attuale)\n3. Verifica di Classe (Tutta la classe - Stessa data)");
+    if (!mode) return;
+
+    const getRange = () => {
+        const choice = prompt(`Fascia Voto:\n1. Alto (8-10)\n2. Sufficiente (6-7.5)\n3. Insufficiente (4-5.5)\n4. Grave (2-3.5)`);
+        switch(choice?.trim()) {
+            case '1': return ["8", "8+", "8½", "9-", "9", "9+", "9½", "10"];
+            case '2': return ["6", "6+", "6½", "7-", "7", "7+", "7½"];
+            case '3': return ["4", "4+", "4½", "5-", "5", "5½"];
+            case '4': return ["2", "2½", "3", "3-", "3+", "3½"];
+            default: return null;
+        }
+    };
+
+    const saveGrade = async (sId, sName, val, data, arg, tipo) => {
+        const [d, m, y] = data.split('/');
+        const dateKey = `${y}-${m}-${d}`;
+        const quad = (parseInt(m) >= 9 || parseInt(m) <= 1) ? 1 : 2;
+
+        const entry = { 
+            id: crypto.randomUUID(), voto: val, materia: selectedMateria, data, 
+            prof: profTitolare.name, profId: profTitolare.id, argomento: arg, 
+            quad, anno: ay, emoji: tipo === 'Scritto' ? "📝" : "🗣️" 
+        };
+
+        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', sId), { voti: arrayUnion(entry) }, { merge: true });
+        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${targetClass}_${dateKey}`), { 
+            daily_voti: arrayUnion({ studente: sName, studenteId: sId, voto: val, materia: selectedMateria, argomento: arg }) 
+        }, { merge: true });
+    };
+
+    // --- MODALITÀ 1: SINGOLO ---
+    if (mode === '1') {
+        const pool = getRange();
+        if (!pool) return;
+        let data = prompt("Data (GG/MM/AAAA) - Lascia vuoto per random:");
+        if (!data) data = generateRandomDate();
+        const arg = prompt("Argomento:", "Interrogazione");
+        const v = pool[Math.floor(Math.random() * pool.length)];
+        await saveGrade(window.selectedStudentId, document.getElementById('res-student-name').innerText, v, data, arg, "Orale");
+        alert(`✅ Voto generato per il ${data}`);
+    }
+
+    // --- MODALITÀ 2: SIMULAZIONE ANNO (8 VOTI O SOLO ORALI + ALLINEAMENTO CLASSE) ---
+    else if (mode === '2') {
+        const pool = getRange();
+        if (!pool) return;
+
+        // Chiede se generare l'anno completo o solo gli orali per evitare i duplicati degli scritti
+        const soloOrali = confirm("❓ Lo studente attuale ha già gli scritti sincronizzati con la classe?\n\n[OK] = Genera SOLO i 4 voti Orali\n[Annulla] = Genera l'anno COMPLETO (4 Orali + 4 Scritti)");
+
+        const sName = document.getElementById('res-student-name').innerText;
+        let syncClasse = false;
+
+        // Se si sceglie l'anno completo, chiede se sincronizzare gli scritti con la classe
+        if (!soloOrali) {
+            syncClasse = confirm("🔄 Vuoi generare i voti scritti nelle stesse date anche per il resto della classe?");
+        }
+
+        const dateScritteGenerates = [];
+
+        // --- 1. GENERAZIONE PRIMO QUADRIMESTRE (Studente Selezionato) ---
+        // Genera 2 Orali sempre
+        for(let i=0; i<2; i++) {
+            const d = generateRandomDate('q1');
+            const v = pool[Math.floor(Math.random() * pool.length)];
+            await saveGrade(window.selectedStudentId, sName, v, d, "Interrogazione", "Orale");
+        }
+        // Genera 2 Scritti SOLO SE non è stato chiesto di fare "Solo Orali"
+        if (!soloOrali) {
+            for(let i=0; i<2; i++) {
+                const d = generateRandomDate('q1');
+                const v = pool[Math.floor(Math.random() * pool.length)];
+                await saveGrade(window.selectedStudentId, sName, v, d, "Verifica Scritta", "Scritto");
+                if (syncClasse) dateScritteGenerates.push({ data: d, quad: 'q1' });
+            }
+        }
+        
+        // --- 2. GENERAZIONE SECONDO QUADRIMESTRE (Studente Selezionato) ---
+        // Genera 2 Orali sempre
+        for(let i=0; i<2; i++) {
+            const d = generateRandomDate('q2');
+            const v = pool[Math.floor(Math.random() * pool.length)];
+            await saveGrade(window.selectedStudentId, sName, v, d, "Interrogazione", "Orale");
+        }
+        // Genera 2 Scritti SOLO SE non è stato chiesto di fare "Solo Orali"
+        if (!soloOrali) {
+            for(let i=0; i<2; i++) {
+                const d = generateRandomDate('q2');
+                const v = pool[Math.floor(Math.random() * pool.length)];
+                await saveGrade(window.selectedStudentId, sName, v, d, "Verifica Scritta", "Scritto");
+                if (syncClasse) dateScritteGenerates.push({ data: d, quad: 'q2' });
+            }
+        }
+
+        // --- 3. SINCRONIZZAZIONE RESTO DELLA CLASSE (Escluso lo studente corrente) ---
+        if (syncClasse && dateScritteGenerates.length > 0) {
+            // FIX PROTEZIONE: Filtra escludendo tassativamente window.selectedStudentId dal ciclo della classe
+            const classStudents = window.allStudents.filter(s => s.classe === targetClass && s.id !== window.selectedStudentId);
+            for (let s of classStudents) {
+                for (let infoS of dateScritteGenerates) {
+                    const v = pool[Math.floor(Math.random() * pool.length)];
+                    await saveGrade(s.id, s.name, v, infoS.data, "Verifica Scritta", "Scritto");
+                }
+            }
+        }
+        
+        alert("✅ Simulazione completata con successo senza duplicati!");
+    }
+
+    // --- MODALITÀ 3: VERIFICA DI CLASSE (CON PROTEZIONE DUPLICATI) ---
+    else if (mode === '3') {
+        let data = prompt("Data della verifica (GG/MM/AAAA) - Lascia vuoto per random:");
+        if (!data) data = generateRandomDate();
+        
+        const arg = prompt("Argomento della verifica:", "Compito in Classe");
+        const pool = getRange();
+        if (!pool) return;
+
+        const includiSelezionato = confirm("📌 Vuoi includere nella verifica anche lo studente attualmente selezionato?");
+        
+        const classStudents = window.allStudents.filter(s => {
+            const appartieneClasse = s.classe === targetClass;
+            if (!includiSelezionato && s.id === window.selectedStudentId) {
+                return false;
+            }
+            return appartieneClasse;
+        });
+
+        if (!confirm(`Generazione voti per ${classStudents.length} studenti in data ${data}. Continuare?`)) return;
+
+        for (let s of classStudents) {
+            const v = pool[Math.floor(Math.random() * pool.length)];
+            await saveGrade(s.id, s.name, v, data, arg, "Scritto");
+        }
+        alert(`✅ Verifica di classe registrata per il ${data}!`);
+    }
+
+    if (typeof loadStudentRecords === 'function') {
+        loadStudentRecords(window.selectedStudentId);
+    }
 };
 
     </script>
