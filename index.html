@@ -3361,50 +3361,117 @@ window.editNote = async (idx, studentId) => {
     }
 };
 
-        window.editVoto = async (idRicevuto, studentId) => {
-            console.log("Tentativo modifica voto ID:", idRicevuto, "per studente:", studentId);
-            const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-            const d = await getDoc(recordRef);
-    
-            if(d.exists()) {
-                const listaVoti = d.data().voti || []; 
-                // Cerchiamo l'elemento che ha l'ID uguale a quello ricevuto
-                const indiceVoto = listaVoti.findIndex(v => v.id === idRicevuto);
-        
-                if (indiceVoto === -1) {
-                    console.error("Voto non trovato. ID ricevuto:", idRicevuto);
-                    console.log("Lista voti disponibile:", listaVoti);
-                    alert("Errore: Impossibile trovare questo voto nel database.");
-                    return;
-                }
+       window.editVoto = async (idRicevuto, studentId) => {
+    console.log("Tentativo modifica voto ID:", idRicevuto, "per studente:", studentId);
+    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+    const d = await getDoc(recordRef);
 
-                const vecchioVoto = { ...listaVoti[indiceVoto] };
-                const nuovoVoto = prompt("Modifica il valore del voto:", vecchioVoto.voto);
-        
-                if (nuovoVoto !== null && nuovoVoto !== "" && nuovoVoto !== vecchioVoto.voto) {
-                    listaVoti[indiceVoto].voto = nuovoVoto;
-                    await updateDoc(recordRef, { voti: listaVoti });
+    if (d.exists()) {
+        const listaVoti = d.data().voti || []; 
+        const indiceVoto = listaVoti.findIndex(v => v.id === idRicevuto);
 
-                    // Aggiornamento Agenda (Coerente con i tuoi Log)
-                    const dataParts = vecchioVoto.data.split('/');
-                    const agendaId = `${window.selectedClass}_${dataParts[2]}-${dataParts[1]}-${dataParts[0]}`;
-                    const agendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', agendaId);
+        if (indiceVoto === -1) {
+            console.error("Voto non trovato. ID ricevuto:", idRicevuto);
+            alert("Errore: Impossibile trovare questo voto nel database.");
+            return;
+        }
+
+        const vecchioVoto = { ...listaVoti[indiceVoto] };
+        
+        // 1. Prompt per la modifica dei campi
+        const nuovoVotoVal = prompt("Modifica il valore del voto:", vecchioVoto.voto);
+        if (nuovoVotoVal === null) return; // Annullato
+
+        const nuovaData = prompt("Modifica la data (GG/MM/AAAA):", vecchioVoto.data);
+        if (nuovaData === null) return; // Annullato
+
+        const nuovoArgomento = prompt("Modifica l'argomento:", vecchioVoto.argomento || "");
+        if (nuovoArgomento === null) return; // Annullato
+
+        // Controlliamo se è cambiato effettivamente qualcosa
+        const isVotoCambiato = nuovoVotoVal !== vecchioVoto.voto;
+        const isDataCambiata = nuovaData !== vecchioVoto.data;
+        const isArgomentoCambiato = nuovoArgomento !== vecchioVoto.argomento;
+
+        if (!isVotoCambiato && !isDataCambiata && !isArgomentoCambiato) {
+            alert("Nessuna modifica effettuata.");
+            return;
+        }
+
+        // Ricalcoliamo il quadrimestre nel caso in cui la data sia cambiata di mese
+        let nuovoQuad = vecchioVoto.quad;
+        if (isDataCambiata && nuovaData.includes('/')) {
+            const [,, mPart] = nuovaData.split('/');
+            const mInt = parseInt(mPart);
+            nuovoQuad = (mInt >= 9 || mInt <= 1) ? 1 : 2;
+        }
+
+        // 2. Aggiornamento dell'array principale nei Records dello studente
+        listaVoti[indiceVoto].voto = nuovoVotoVal;
+        listaVoti[indiceVoto].data = nuovaData;
+        listaVoti[indiceVoto].argomento = nuovoArgomento;
+        listaVoti[indiceVoto].quad = nuovoQuad;
+        
+        await updateDoc(recordRef, { voti: listaVoti });
+
+        // 3. GESTIONE AGENDAS (Sincronizzazione e rimozione vecchi dati)
+        const targetClass = window.selectedClass; // Utilizza la classe attuale isolata
+
+        // Vecchio riferimento Agenda
+        const vParts = vecchioVoto.data.split('/');
+        const vecchioAgendaId = `${targetClass}_${vParts[2]}-${vParts[1]}-${vParts[0]}`;
+        const vecchioAgendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', vecchioAgendaId);
+
+        // Nuovo riferimento Agenda
+        const nParts = nuovaData.split('/');
+        const nuovoAgendaId = `${targetClass}_${nParts[2]}-${nParts[1]}-${nParts[0]}`;
+        const nuovoAgendaRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', nuovoAgendaId);
+
+        // --- RIMOZIONE DAL VECCHIO DOCUMENTO AGENDA ---
+        const vSnap = await getDoc(vecchioAgendaRef);
+        if (vSnap.exists()) {
+            let daily = vSnap.data().daily_voti || [];
             
-                    const aSnap = await getDoc(agendaRef);
-                    if(aSnap.exists()) {
-                        let daily = aSnap.data().daily_voti || [];
-                        daily = daily.map(v => 
-                            (v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto) 
-                            ? { ...v, voto: nuovoVoto } : v
-                        );
-                        await updateDoc(agendaRef, { daily_voti: daily });
-                    }
-            
-                    alert("Voto aggiornato con successo!");
-                    loadStudentRecords(studentId);
-                }
+            // Filtra via l'elemento vecchio basandosi sull'ID studente, sulla materia e sul valore del vecchio voto
+            daily = daily.filter(v => 
+                !(v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto)
+            );
+
+            if (daily.length === 0) {
+                // Se il documento è vuoto, lo eliminiamo completamente per non lasciare rimasugli
+                await deleteDoc(vecchioAgendaRef);
+            } else {
+                await updateDoc(vecchioAgendaRef, { daily_voti: daily });
             }
+        }
+
+        // --- INSERIMENTO O AGGIORNAMENTO NEL NUOVO DOCUMENTO AGENDA ---
+        const entryNuovaAgenda = {
+            studente: document.getElementById('res-student-name')?.innerText || vecchioVoto.studente || "Studente",
+            studenteId: studentId,
+            voto: nuovoVotoVal,
+            materia: vecchioVoto.materia,
+            argomento: nuovoArgomento
         };
+
+        if (vecchioAgendaId === nuovoAgendaId) {
+            // Se la data è la stessa ma è cambiato solo il voto o l'argomento, riscriviamo nello stesso documento
+            const aSnap = await getDoc(vecchioAgendaRef);
+            let daily = aSnap.exists() ? (aSnap.data().daily_voti || []) : [];
+            daily.push(entryNuovaAgenda);
+            await setDoc(vecchioAgendaRef, { daily_voti: daily }, { merge: true });
+        } else {
+            // Se la data è cambiata, carichiamo il nuovo documento (o lo creiamo) e appendiamo il record
+            const nSnap = await getDoc(nuovoAgendaRef);
+            let dailyNuovo = nSnap.exists() ? (nSnap.data().daily_voti || []) : [];
+            dailyNuovo.push(entryNuovaAgenda);
+            await setDoc(nuovoAgendaRef, { daily_voti: dailyNuovo }, { merge: true });
+        }
+
+        alert("Voto e agenda aggiornati con successo!");
+        loadStudentRecords(studentId);
+    }
+};
             window.deleteNote = async (idx, studentId) => {
             if(!confirm("Eliminare definitivamente questa nota?")) return;
             const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
@@ -5687,8 +5754,8 @@ window.editSubjectComment = async (materia, quad) => {
 	window.deleteFirma = async (idx, cls) => {
     if(!confirm("Vuoi davvero eliminare questa firma? L'azione è irreversibile.")) return;
     
-    const dateKey = document.getElementById('global-calendar').value; // Prende la data selezionata
-    const docRef = doc(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'agendas', `${cls}_${dateKey}`);
+        const dateKey = document.getElementById('global-calendar').value; // Prende la data selezionata
+    const docRef = window.getAgendaDocRef(cls, dateKey);
     
     try {
         const snap = await getDoc(docRef);
@@ -6751,12 +6818,18 @@ window.adminGenerateRandomGrade = async () => {
     if (window.userRole !== 'admin') return alert("Accesso negato.");
     
     const mSelect = document.getElementById('input-grade-subject');
+    const uiMateria = mSelect.value.toLowerCase().trim();
     const selectedMateria = mSelect.value.toLowerCase().trim();
     if (!selectedMateria) return alert("⚠️ Seleziona una materia dal menu prima.");
 
     const targetClass = window.selectedClass;
     if (!targetClass || targetClass === 'ALL') return alert("⚠️ Seleziona una classe specifica.");
 
+    // --- NUOVO: SCELTA AMBITO MATERIE ---
+    const subChoice = prompt(`Scegli l'ambito delle materie:\n1. Solo ${uiMateria.toUpperCase()} (quella selezionata)\n2. TUTTE le materie del sistema (Generazione Massiva)`);
+    if (!subChoice) return;
+
+    const subjectsToProcess = (subChoice === '2') ? Object.keys(LISTA_MATERIE) : [uiMateria];
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
 
 // --- HELPER: GENERATORE DATA CASUALE CON BLOCCO NATALE E PASQUA ---
