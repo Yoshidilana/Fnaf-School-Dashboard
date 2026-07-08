@@ -418,6 +418,10 @@ main {
         </div>
     </div>
 
+<button id="btn-gestione-calendario" class="hidden items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-xs font-bold uppercase tracking-wider text-white rounded-lg border border-zinc-700 transition-all" onclick="window.openCalendarModal()">
+    📅 Calendario Scolastico
+</button>
+
     <!-- Central Filters -->
     <div class="flex items-center gap-3">
         <div class="filter-container flex items-center gap-1 px-2">
@@ -629,6 +633,60 @@ main {
         <span class="font-black uppercase text-[10px]">Pagella</span>
     </button>
 </div>
+    </div>
+</div>
+
+<div id="calendar-modal" class="hidden fixed inset-0 bg-black/70 z-[9999] justify-center items-center p-4">
+    <div class="bg-[#2c2f33] text-white p-6 rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-zinc-800">
+        
+        <div class="shrink-0">
+            <h3 class="text-lg font-black text-red-550 uppercase italic tracking-wide">📅 Gestione Vacanze e Blocchi</h3>
+            <p class="text-xs text-zinc-400 mt-1">Imposta i giorni di chiusura dell'A.S. corrente per bloccare voti, note e firme.</p>
+            <hr class="border-zinc-700 my-3">
+        </div>
+
+        <div class="overflow-y-auto pr-1 flex-1 space-y-4 custom-scrollbar">
+            
+            <div class="bg-[#23272a] p-3 rounded-lg border border-zinc-700/50">
+                <label class="text-[11px] font-black tracking-wider text-indigo-400 uppercase block mb-2">OPZIONE 1: Giorno Singolo (Ponti, Allerte, Imprevisti)</label>
+                <div class="flex gap-2">
+                    <input type="date" id="cal-input-date" class="flex-1 px-3 py-2 text-sm rounded bg-[#1c1e22] border border-zinc-700 text-white focus:outline-none focus:border-indigo-500">
+                    <button onclick="window.addSingleDate()" class="px-4 py-2 bg-emerald-650 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider rounded transition-all shrink-0">Aggiungi</button>
+                </div>
+            </div>
+
+            <div class="bg-[#23272a] p-3 rounded-lg border border-zinc-700/50">
+                <label class="text-[11px] font-black tracking-wider text-amber-500 uppercase block mb-2">OPZIONE 2: Periodo Multiplo (Vacanze lunghe)</label>
+                <div class="grid grid-cols-2 gap-2 items-center mb-2">
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] text-zinc-500 uppercase font-bold">Dal:</span>
+                        <input type="date" id="cal-input-start" class="w-full px-2 py-1.5 text-xs rounded bg-[#1c1e22] border border-zinc-700 text-white focus:outline-none">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] text-zinc-500 uppercase font-bold">Al:</span>
+                        <input type="date" id="cal-input-end" class="w-full px-2 py-1.5 text-xs rounded bg-[#1c1e22] border border-zinc-700 text-white focus:outline-none">
+                    </div>
+                </div>
+                <button onclick="window.addDateRange()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-[#2c2f33] font-black text-xs uppercase tracking-wider rounded transition-all">Aggiungi Intero Periodo</button>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Giorni Bloccati Attivi:</h4>
+                <div id="cal-blocked-list" class="max-h-[160px] overflow-y-auto bg-[#23272a] p-2 rounded border border-zinc-700 space-y-1 custom-scrollbar">
+                    </div>
+            </div>
+
+        </div>
+
+        <div class="shrink-0 pt-4 mt-2 border-t border-zinc-700 flex justify-between gap-4">
+            <button onclick="window.closeCalendarModal()" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-bold text-xs uppercase tracking-wider rounded transition-all">
+                Chiudi
+            </button>
+            <button onclick="window.saveCalendarToFirestore()" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider rounded shadow-lg shadow-red-900/20 transition-all">
+                Salva su Database
+            </button>
+        </div>
+
     </div>
 </div>
 
@@ -1236,8 +1294,115 @@ main {
             <select id="input-grade-val" class="modal-input !py-2"></select>
         </div>
         <button onclick="window.submitGrade()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md">Registra</button>
-        <button id="admin-random-grade-btn" onclick="window.adminGenerateRandomGrade()" class="hidden bg-zinc-900 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md border border-zinc-700">🎲 Admin Tool</button>
+<button id="admin-random-grade-btn" onclick="window.openAdminGradeModal()" class="hidden bg-zinc-900 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md border border-zinc-700 gap-1 items-center">
+    🎲 Voto Random
+</button>
     </div>
+
+<div id="admin-grade-modal" class="hidden fixed inset-0 bg-black/80 z-[10000] justify-center items-center p-4">
+    <div class="bg-[#1c1e22] text-zinc-200 p-6 rounded-2xl w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl border border-zinc-800">
+        
+        <div class="shrink-0 pb-3 border-b border-zinc-800">
+            <h3 class="text-base font-black text-amber-500 uppercase tracking-wider flex items-center gap-2">🎲 Strumento Generazione Voti Random</h3>
+            <p class="text-xs text-zinc-500 mt-0.5">Configura una simulazione o una verifica reale per la classe <span id="adm-mdl-class-label" class="text-white font-bold"></span>.</p>
+        </div>
+
+        <div class="overflow-y-auto pr-1 flex-1 py-4 space-y-5 custom-scrollbar text-sm">
+            
+            <!-- FASE 1: TARGET DESTINATARI -->
+            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800">
+                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block mb-2">Fase 1: Seleziona Destinatari</span>
+                <div class="flex gap-6">
+                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                        <input type="radio" name="adm-target-scope" value="singolo" checked onchange="window.handleAdminGradeTargetChange()"> 1. Studente Attuale
+                    </label>
+                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                        <input type="radio" name="adm-target-scope" value="classe" onchange="window.handleAdminGradeTargetChange()"> 2. Tutti gli studenti
+                    </label>
+                </div>
+            </div>
+
+            <!-- FASE 2: SELEZIONE MATERIE -->
+            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800">
+                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block mb-2">Fase 2: Seleziona Materie Attive</span>
+                <div class="flex gap-4 mb-3">
+                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                        <input type="radio" name="adm-materia-scope" value="singola" checked onchange="window.handleAdminGradeScopeChange()"> Solo materia corrente
+                    </label>
+                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                        <input type="radio" name="adm-materia-scope" value="tutte" onchange="window.handleAdminGradeScopeChange()"> Tutte le materie della classe
+                    </label>
+                </div>
+                <div id="adm-materie-checkboxes-container" class="grid grid-cols-1 gap-1.5 max-h-[120px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 text-xs custom-scrollbar">
+                </div>
+            </div>
+
+            <!-- FASE 3: TIPOLOGIA GENERAZIONE -->
+            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
+                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block">Fase 3: Tipologia di Generazione</span>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase">Modalità</label>
+                        <select id="adm-input-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                            <option value="1">1. Voto Singolo</option>
+                            <option id="opt-mode-all-year" value="2" disabled>2. Voti tutto l'anno</option>
+                        </select>
+                    </div>
+                    
+                    <div id="container-adm-tipo-voti" class="flex flex-col gap-1 opacity-40 pointer-events-none">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase">Opzioni Simulazione Anno</label>
+                        <select id="adm-input-sub-mode" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                            <option value="A">A. Solo Orali (Date casuali diverse per ognuno)</option>
+                            <option value="B">B. Solo Scritti (Stessa data per tutta la classe)</option>
+                            <option value="C">C. Tutti i Voti (2 scritti data uguale + 2 orali data diversa a quadrimestre)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="container-adm-data-singola" class="flex flex-col gap-1 max-w-xs">
+                    <label class="text-[10px] font-bold text-zinc-500 uppercase">Data Specifica (Lascia vuoto per data casuale)</label>
+                    <input type="date" id="adm-input-specific-date" class="px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white focus:outline-none">
+                </div>
+            </div>
+
+            <!-- FASE 4: SELEZIONE FASCE DI MERITO (DINAMICA ED INDIVIDUALE) -->
+            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
+                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block">Fase 4: Configurazione Fasce di Merito</span>
+                
+                <!-- Opzione Studente Singolo -->
+                <div id="container-adm-fascia-singolo" class="flex flex-col gap-1 max-w-xs">
+                    <label class="text-[10px] font-bold text-zinc-500 uppercase">Fascia Studente Selezionato</label>
+                    <select id="adm-input-pool-studente" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                        <option value="1">1. Alto (8 - 10)</option>
+                        <option value="2" selected>2. Sufficiente / Buono (6 - 7.5)</option>
+                        <option value="3">3. Insufficiente (4 - 6-)</option>
+                        <option value="4">4. Grave (3 - 4.5)</option>
+                        <option value="5">5. Penoso (0 - 2.5)</option>
+                    </select>
+                </div>
+
+                <!-- Opzione Tutta la Classe (Parte 2 Dinamica) -->
+                <div id="container-adm-fasce-classe" class="hidden flex flex-col gap-2">
+                    <label class="text-[10px] font-bold text-amber-500 uppercase block mb-1">Fascia Personalizzata per ciascun componente:</label>
+                    <div id="adm-studenti-fasce-container" class="space-y-2 max-h-[180px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 custom-scrollbar">
+                        <!-- Generato dinamicamente via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="shrink-0 pt-3 border-t border-zinc-800 flex justify-between gap-4">
+            <button onclick="window.closeAdminGradeModal()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all">
+                Annulla
+            </button>
+            <button onclick="window.executeAdminGradeGeneration()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-[#1c1e22] font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all">
+                Genera e Sincronizza
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Pulsante per attivare/nascondere le medie dei quadrimestri -->
 <div class="flex justify-end px-4">
@@ -2011,6 +2176,7 @@ toggle('home-btn-pagella', isStudente);
 
    // --- EXTRA ---
     toggle('notif-bell', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
+toggle('btn-gestione-calendario', [ROLES.ADMIN, ROLES.PRESIDE].includes(type));
 
 // --- GESTIONE PERSONALE (Solo Vertici) ---
 toggle('menu-gestione-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
@@ -2530,7 +2696,7 @@ if (resMediaElem) {
 
         let vHtml = "";
         
-        // 5. Render Materie Principali
+// 5. Render Materie Principali
         materie.forEach(m => {
     const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
@@ -2541,11 +2707,23 @@ if (resMediaElem) {
     const avgQ2 = q2.length ? (q2.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q2.length).toFixed(1) : "-";
     const avgTotal = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
 
+    // --- NUOVO: Controllo permessi per il tasto Reset ---
+    const canReset = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole) || 
+                     (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
+
     vHtml += `
     <tr class="group">
         <td class="subject-column">
             <div class="flex flex-col">
-                <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
+                <div class="flex items-center gap-2">
+                    <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
+                    ${canReset ? `
+                        <button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" 
+                                class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-600 transition-all text-[10px]" 
+                                title="Elimina tutti i voti di questa materia">
+                            🗑️
+                        </button>` : ''}
+                </div>
                 <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${m_voti[0]?.prof || 'N.D.'}</span>
             </div>
         </td>
@@ -6839,242 +7017,348 @@ window.toggleMedieQuad = () => {
     btnText.innerText = window.showMedieQuad ? "Nascondi Medie Quadrimestri" : "Mostra Medie Quadrimestri";
 };
 
-     // Variabili globali per memorizzare l'ultima sessione di generazione admin
-window.lastAdminGenDate = null;
-window.lastAdminGenDateKey = null;
-window.lastAdminGenArg = null;
+// Mappa globale temporanea per le materie della classe aperta nel modal
+let currentMappaMaterieProf = {};
 
-window.adminGenerateRandomGrade = async () => {
+// 1. Apri il Modal e scansiona docenti/materie attive per la classe selezionata
+window.openAdminGradeModal = () => {
     if (window.userRole !== 'admin') return alert("Accesso negato.");
     
-    const mSelect = document.getElementById('input-grade-subject');
-    const uiMateria = mSelect.value.toLowerCase().trim();
-    const selectedMateria = mSelect.value.toLowerCase().trim();
-    if (!selectedMateria) return alert("⚠️ Seleziona una materia dal menu prima.");
-
     const targetClass = window.selectedClass;
-    if (!targetClass || targetClass === 'ALL') return alert("⚠️ Seleziona una classe specifica.");
+    if (!targetClass || targetClass === 'ALL') {
+        return alert("⚠️ Seleziona una classe specifica prima di usare questo strumento.");
+    }
 
-    // --- NUOVO: SCELTA AMBITO MATERIE ---
-    const subChoice = prompt(`Scegli l'ambito delle materie:\n1. Solo ${uiMateria.toUpperCase()} (quella selezionata)\n2. TUTTE le materie del sistema (Generazione Massiva)`);
-    if (!subChoice) return;
-
-    const subjectsToProcess = (subChoice === '2') ? Object.keys(LISTA_MATERIE) : [uiMateria];
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-
-// --- HELPER: GENERATORE DATA CASUALE CON BLOCCO NATALE E PASQUA ---
-    const generateRandomDate = (periodo = 'full') => {
-        const [y1, y2] = ay.split('/').map(Number);
-        let start, end;
-        
-        if (periodo === 'q1') {
-            start = new Date(y1, 8, 15).getTime(); // 15 Settembre
-            end = new Date(y2, 0, 20).getTime();   // 31 Gennaio
-        } else if (periodo === 'q2') {
-            start = new Date(y2, 1, 1).getTime();  // 1 Febbraio
-            end = new Date(y2, 5, 1).getTime();   // 8 Giugno
-        } else {
-            start = new Date(y1, 8, 15).getTime();
-            end = new Date(y2, 5, 1).getTime();
-        }
-        
-        let d = new Date(start + Math.random() * (end - start));
-        const anno = d.getFullYear();
-        const mese = d.getMonth(); // 11 = Dicembre, 0 = Gennaio...
-        const giorno = d.getDate();
-
-        if (mese === 11 && giorno >= 23) {
-            d.setDate(18); // Forza a un giorno valido pre-vacanze (18 Dicembre)
-        } else if (mese === 0 && giorno <= 6) {
-            d.setDate(12); // Forza al rientro scolastico (12 Gennaio)
-        }
-        
-// 2. CALCOLO AUTOMATICO DOMENICA DI PASQUA (Algoritmo di Butcher-Meeus)
-        const a = anno % 19;
-        const b = Math.floor(anno / 100);
-        const c = anno % 100;
-        const d_calc = Math.floor(b / 4);
-        const e = b % 4;
-        const f = Math.floor((b + 8) / 25);
-        const g = Math.floor((b - f + 1) / 3);
-        const h = (19 * a + b - d_calc - g + 15) % 30;
-        const i = Math.floor(c / 4);
-        const k = c % 4;
-        const L = (32 + 2 * e + 2 * i - h - k) % 7;
-        const m_calc = Math.floor((a + 11 * h + 22 * L) / 451);
-        const mesePasqua = Math.floor((h + L - 7 * m_calc + 114) / 31) - 1; // Mese in formato JS (0-11)
-        const giornoPasqua = ((h + L - 7 * m_calc + 114) % 31) + 1;
-
-        // Creiamo gli oggetti Date per l'inizio e la fine delle vacanze di Pasqua
-        const inizioVacanzePasqua = new Date(anno, mesePasqua, giornoPasqua - 3); // Giovedì Santo
-        const fineVacanzePasqua = new Date(anno, mesePasqua, giornoPasqua + 2);   // Martedì dell'Angelo
-
-        // Se la data estratta cade nel range di Pasqua (da Giovedì a Martedì compresi)
-        if (d >= inizioVacanzePasqua && d <= fineVacanzePasqua) {
-            // Sposta la data al Mercoledì prima delle vacanze (6 giorni prima della domenica di Pasqua)
-            d = new Date(anno, mesePasqua, giornoPasqua - 4);
-}
-
-        // 3. PROTEZIONE DOMENICHE (0 = Domenica)
-        // Se capita di domenica, sposta automaticamente al Lunedì successivo
-        if (d.getDay() === 0) {
-            d.setDate(d.getDate() + 1);
-        }
-        
-        return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getFullYear()}`;
-    };
-
-    // Trova il professore titolare cercando nell'array classi_docente (specifico per lo Staff)
-    const profTitolare = window.allStudents.find(u => {
+    document.getElementById('adm-mdl-class-label').innerText = targetClass;
+    
+    // Scansione e mappatura docenti e materie attive
+    const staffDellaClasse = window.allStudents.filter(u => {
         const r = (u.role || '').toLowerCase();
-        const isDocente = r.includes('prof') || r.includes('docente');
-        const insegnaMateria = Array.isArray(u.materie) && u.materie.map(m => m.toLowerCase().trim()).includes(selectedMateria);
-        const classiAssegnate = Array.isArray(u.classi_docente) ? u.classi_docente : [];
-        return isDocente && insegnaMateria && classiAssegnate.includes(targetClass);
-    }) || { name: "Docente Automatico", id: "SYSTEM" };
+        const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice');
+        const assegnatoAClasse = Array.isArray(u.classi_docente) && u.classi_docente.includes(targetClass);
+        return isStaff && assegnatoAClasse;
+    });
 
-    const mode = prompt("Scegli modalità generazione:\n1. Voto Singolo (Studente attuale)\n2. Simulazione Anno (8 voti - Studente attuale)\n3. Verifica di Classe (Tutta la classe - Stessa data)");
-    if (!mode) return;
+    currentMappaMaterieProf = {};
+    staffDellaClasse.forEach(t => {
+        if (Array.isArray(t.materie)) {
+            t.materie.forEach(m => {
+                const matKey = m.toLowerCase().trim();
+                currentMappaMaterieProf[matKey] = { name: t.name, id: t.id, materiaOriginale: m };
+            });
+        }
+    });
 
-    const getRange = () => {
-        const choice = prompt(`Fascia Voto:\n1. Alto (8-10)\n2. Sufficiente (6-7.5)\n3. Insufficiente (4-5.5)\n4. Grave (2-3.5)`);
-        switch(choice?.trim()) {
+    // Popola la lista visiva delle checkbox
+    window.renderAdminMaterieCheckboxes();
+    
+    // Reset e allineamento campi del modal
+    document.getElementById('adm-input-mode').value = "1";
+    document.getElementById('adm-input-sub-mode').value = "A";
+    document.getElementById('adm-input-specific-date').value = "";
+    
+    window.handleAdminGradeScopeChange();
+    window.handleAdminGradeModeChange();
+
+    document.getElementById('admin-grade-modal').style.display = 'flex';
+};
+
+window.closeAdminGradeModal = () => {
+    document.getElementById('admin-grade-modal').style.display = 'none';
+};
+
+// Genera l'elenco delle checkbox con i professori associati
+window.renderAdminMaterieCheckboxes = () => {
+    const container = document.getElementById('adm-materie-checkboxes-container');
+    container.innerHTML = '';
+    
+    const uiMateria = document.getElementById('input-grade-subject').value.toLowerCase().trim();
+    const chiaviMaterie = Object.keys(currentMappaMaterieProf);
+
+    if (chiaviMaterie.length === 0) {
+        container.innerHTML = '<span class="text-zinc-500 p-2 italic">Nessun professore configurato per questa classe.</span>';
+        return;
+    }
+
+    chiaviMaterie.forEach(key => {
+        const info = currentMappaMaterieProf[key];
+        const wrapper = document.createElement('label');
+        wrapper.className = "flex items-center justify-between p-1.5 hover:bg-zinc-800 rounded cursor-pointer transition-colors";
+        
+        // Se l'ambito è impostato su "singola", viene pre-selezionata solo la materia della UI
+        const isChecked = (key === uiMateria) ? 'checked' : '';
+        
+        wrapper.innerHTML = `
+            <div class="flex items-center gap-2">
+                <input type="checkbox" class="adm-checkbox-materia" value="${key}" ${isChecked}>
+                <span class="font-bold text-zinc-200 uppercase">${info.materiaOriginale}</span>
+            </div>
+            <span class="text-[10px] text-zinc-500 font-semibold italic">Prof: ${info.name}</span>
+        `;
+        container.appendChild(wrapper);
+    });
+};
+
+// Sincronizza l'abilitazione dei campi visivi al cambio dei radio-button
+window.handleAdminGradeScopeChange = () => {
+    const scope = document.querySelector('input[name="adm-materia-scope"]:checked').value;
+    const checkboxes = document.querySelectorAll('.adm-checkbox-materia');
+    const uiMateria = document.getElementById('input-grade-subject').value.toLowerCase().trim();
+
+    checkboxes.forEach(cb => {
+        if (scope === 'singola') {
+            cb.checked = (cb.value === uiMateria);
+            cb.disabled = true;
+        } else {
+            cb.disabled = false;
+        }
+    });
+};
+
+window.handleAdminGradeTargetChange = () => {
+    const targetScope = document.querySelector('input[name="adm-target-scope"]:checked').value;
+    const optModeAllYear = document.getElementById('opt-mode-all-year');
+    const inputMode = document.getElementById('adm-input-mode');
+    
+    const containerSingolo = document.getElementById('container-adm-fascia-singolo');
+    const containerClasse = document.getElementById('container-adm-fasce-classe');
+
+    if (targetScope === 'singolo') {
+        inputMode.value = "1";
+        optModeAllYear.disabled = true;
+        
+        containerSingolo.classList.remove('hidden');
+        containerClasse.classList.add('hidden');
+        
+        window.handleAdminGradeModeChange();
+    } else {
+        optModeAllYear.disabled = false;
+        
+        containerSingolo.classList.add('hidden');
+        containerClasse.classList.remove('hidden');
+        
+        // Genera la lista dei ragazzi della classe con i selettori di fascia dedicati
+        window.renderStudentFasceList();
+    }
+};
+
+window.renderStudentFasceList = () => {
+    const targetClass = window.selectedClass;
+    const container = document.getElementById('adm-studenti-fasce-container');
+    container.innerHTML = "";
+
+    const classStudents = window.allStudents.filter(s => s.classe === targetClass && !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
+
+    classStudents.forEach(student => {
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between gap-4 bg-[#23272a] p-2 rounded border border-zinc-800 text-xs";
+        
+        // Impostiamo un valore predefinito intelligente (es. sufficiente) che l'utente può cambiare
+        row.innerHTML = `
+            <span class="font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap">${student.name}</span>
+            <select data-student-id="${student.id}" class="adm-student-pool-selector bg-[#1c1e22] border border-zinc-700 rounded px-2 py-1 text-zinc-300 focus:outline-none font-medium">
+                <option value="1">Alto (8 - 10)</option>
+                <option value="2" selected>Sufficiente / Buono (6 - 7.5)</option>
+                <option value="3">Insufficiente (4 - 6-)</option>
+                <option value="4">Grave (3 - 4.5)</option>
+                <option value="5">Penoso (0 - 2.5)</option>
+            </select>
+        `;
+        container.appendChild(row);
+    });
+};
+
+window.handleAdminGradeModeChange = () => {
+    const mode = document.getElementById('adm-input-mode').value;
+    const containerTipoVoti = document.getElementById('container-adm-tipo-voti');
+    const containerDataSingola = document.getElementById('container-adm-data-singola');
+
+    if (mode === '1') {
+        containerTipoVoti.classList.add('opacity-40', 'pointer-events-none');
+        containerDataSingola.classList.remove('opacity-40', 'pointer-events-none');
+    } else {
+        containerTipoVoti.classList.remove('opacity-40', 'pointer-events-none');
+        containerDataSingola.classList.add('opacity-40', 'pointer-events-none');
+    }
+};
+
+// --- MASTER: ESECUZIONE DELLA GENERAZIONE DEFINITIVA ---
+window.executeAdminGradeGeneration = async () => {
+    const targetClass = window.selectedClass;
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const currentYearDocId = ay.replace('/', '_');
+    
+    const targetScope = document.querySelector('input[name="adm-target-scope"]:checked').value; 
+    const mode = document.getElementById('adm-input-mode').value; 
+    const subMode = document.getElementById('adm-input-sub-mode').value; 
+    
+    const checkedBoxes = document.querySelectorAll('.adm-checkbox-materia:checked');
+    const subjectsToProcess = Array.from(checkedBoxes).map(cb => cb.value);
+
+    if (subjectsToProcess.length === 0) {
+        return alert("⚠️ Spunta almeno una materia dall'elenco prima di procedere.");
+    }
+
+    try {
+        const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', currentYearDocId);
+        const calSnap = await getDoc(calRef);
+        if (calSnap.exists()) {
+            const rawData = calSnap.data().blocked_dates || [];
+            window.blockedDates = Array.isArray(rawData) ? rawData : Object.values(rawData);
+        } else {
+            window.blockedDates = [];
+        }
+    } catch (err) {
+        console.error("[GEN-VOTI] Errore nel recupero delle date bloccate:", err);
+        window.blockedDates = [];
+    }
+
+    const getRangePool = (fasciaId) => {
+        switch(fasciaId) {
             case '1': return ["8", "8+", "8½", "9-", "9", "9+", "9½", "10"];
             case '2': return ["6", "6+", "6½", "7-", "7", "7+", "7½"];
             case '3': return ["4", "4+", "4½", "5-", "5", "5½"];
-            case '4': return ["2", "2½", "3", "3-", "3+", "3½"];
-            default: return null;
+            case '4': return ["3", "3+", "3½", "4-", "4", "4½"];
+            case '5': return ["0", "1", "1½", "2", "2+", "2½"];
+            default: return ["6"];
         }
     };
 
-    const saveGrade = async (sId, sName, val, data, arg, tipo) => {
-        const [d, m, y] = data.split('/');
-        const dateKey = `${y}-${m}-${d}`;
-        const quad = (parseInt(m) >= 9 || parseInt(m) <= 1) ? 1 : 2;
+    const classStudents = window.allStudents.filter(s => s.classe === targetClass && !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
+    const targetStudentName = document.getElementById('res-student-name').innerText;
+
+    // Mappa dinamica per raccogliere le fasce scelte per ciascuno studente
+    const mappaFasceStudenti = {};
+    if (targetScope === 'singolo') {
+        mappaFasceStudenti[window.selectedStudentId] = document.getElementById('adm-input-pool-studente').value;
+    } else {
+        const selectors = document.querySelectorAll('.adm-student-pool-selector');
+        selectors.forEach(sel => {
+            const sId = sel.getAttribute('data-student-id');
+            mappaFasceStudenti[sId] = sel.value;
+        });
+    }
+
+    const generateSafeDateForMonth = (year, monthIndex) => {
+        let tentativiTotali = 0;
+        while (tentativiTotali < 1000) {
+            const day = Math.floor(Math.random() * 28) + 1;
+            const d = new Date(year, monthIndex, day);
+            d.setHours(0, 0, 0, 0);
+            
+            if (d.getDay() === 0 || d.getDay() === 6 || window.isRegistrationBlocked(d)) {
+                tentativiTotali++;
+                continue;
+            }
+
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${dd}/${mm}/${yyyy}`;
+        }
+        return `10/${String(monthIndex + 1).padStart(2, '0')}/${year}`;
+    };
+
+    const saveGradeRecord = async (sId, sName, val, dataStr, arg, tipo, materiaKey) => {
+        const [gg, mm, aaaa] = dataStr.split('/');
+        const dateKey = `${aaaa}-${mm}-${gg}`;
+        const quad = (parseInt(mm) >= 10 || parseInt(mm) === 1) ? 1 : 2;
+        
+        const profInfo = currentMappaMaterieProf[materiaKey] || { name: "Docente Automatico", id: "SYSTEM", materiaOriginale: materiaKey };
 
         const entry = { 
-            id: crypto.randomUUID(), voto: val, materia: selectedMateria, data, 
-            prof: profTitolare.name, profId: profTitolare.id, argomento: arg, 
+            id: crypto.randomUUID(), voto: val, materia: profInfo.materiaOriginale, data: dataStr, 
+            prof: profInfo.name, profId: profInfo.id, argomento: arg, 
             quad, anno: ay, emoji: tipo === 'Scritto' ? "📝" : "🗣️" 
         };
 
         await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', sId), { voti: arrayUnion(entry) }, { merge: true });
         const agendaRef = window.getAgendaDocRef(targetClass, dateKey);
         await setDoc(agendaRef, { 
-            daily_voti: arrayUnion({ studente: sName, studenteId: sId, voto: val, materia: selectedMateria, argomento: arg }) 
+            daily_voti: arrayUnion({ studente: sName, studenteId: sId, voto: val, materia: profInfo.materiaOriginale, argomento: arg }) 
         }, { merge: true });
     };
 
-    // --- MODALITÀ 1: SINGOLO ---
-    if (mode === '1') {
-        const pool = getRange();
-        if (!pool) return;
-        let data = prompt("Data (GG/MM/AAAA) - Lascia vuoto per random:");
-        if (!data) data = generateRandomDate();
-        const arg = prompt("Argomento:", "Interrogazione");
-        const v = pool[Math.floor(Math.random() * pool.length)];
-        await saveGrade(window.selectedStudentId, document.getElementById('res-student-name').innerText, v, data, arg, "Orale");
-        alert(`✅ Voto generato per il ${data}`);
-    }
+    const [year1, year2] = ay.split('/').map(Number);
+    const mesiQ1 = [{ y: year1, m: 9 }, { y: year1, m: 10 }, { y: year1, m: 11 }, { y: year2, m: 0 }];
+    const mesiQ2 = [{ y: year2, m: 1 }, { y: year2, m: 2 }, { y: year2, m: 3 }, { y: year2, m: 4 }];
 
-    // --- MODALITÀ 2: SIMULAZIONE ANNO (8 VOTI O SOLO ORALI + ALLINEAMENTO CLASSE) ---
-    else if (mode === '2') {
-        const pool = getRange();
-        if (!pool) return;
+    const targetList = (targetScope === 'singolo') 
+        ? [{ id: window.selectedStudentId, name: targetStudentName }] 
+        : classStudents;
 
-        // Chiede se generare l'anno completo o solo gli orali per evitare i duplicati degli scritti
-        const soloOrali = confirm("❓ Lo studente attuale ha già gli scritti sincronizzati con la classe?\n\n[OK] = Genera SOLO i 4 voti Orali\n[Annulla] = Genera l'anno COMPLETO (4 Orali + 4 Scritti)");
-
-        const sName = document.getElementById('res-student-name').innerText;
-        let syncClasse = false;
-
-        // Se si sceglie l'anno completo, chiede se sincronizzare gli scritti con la classe
-        if (!soloOrali) {
-            syncClasse = confirm("🔄 Vuoi generare i voti scritti nelle stesse date anche per il resto della classe?");
-        }
-
-        const dateScritteGenerates = [];
-
-        // --- 1. GENERAZIONE PRIMO QUADRIMESTRE (Studente Selezionato) ---
-        // Genera 2 Orali sempre
-        for(let i=0; i<2; i++) {
-            const d = generateRandomDate('q1');
-            const v = pool[Math.floor(Math.random() * pool.length)];
-            await saveGrade(window.selectedStudentId, sName, v, d, "Interrogazione", "Orale");
-        }
-        // Genera 2 Scritti SOLO SE non è stato chiesto di fare "Solo Orali"
-        if (!soloOrali) {
-            for(let i=0; i<2; i++) {
-                const d = generateRandomDate('q1');
-                const v = pool[Math.floor(Math.random() * pool.length)];
-                await saveGrade(window.selectedStudentId, sName, v, d, "Verifica Scritta", "Scritto");
-                if (syncClasse) dateScritteGenerates.push({ data: d, quad: 'q1' });
-            }
-        }
+    for (const currentSub of subjectsToProcess) {
         
-        // --- 2. GENERAZIONE SECONDO QUADRIMESTRE (Studente Selezionato) ---
-        // Genera 2 Orali sempre
-        for(let i=0; i<2; i++) {
-            const d = generateRandomDate('q2');
-            const v = pool[Math.floor(Math.random() * pool.length)];
-            await saveGrade(window.selectedStudentId, sName, v, d, "Interrogazione", "Orale");
-        }
-        // Genera 2 Scritti SOLO SE non è stato chiesto di fare "Solo Orali"
-        if (!soloOrali) {
-            for(let i=0; i<2; i++) {
-                const d = generateRandomDate('q2');
-                const v = pool[Math.floor(Math.random() * pool.length)];
-                await saveGrade(window.selectedStudentId, sName, v, d, "Verifica Scritta", "Scritto");
-                if (syncClasse) dateScritteGenerates.push({ data: d, quad: 'q2' });
+        if (mode === '1') {
+            // --- VOTO SINGOLO ---
+            let dataScelta = document.getElementById('adm-input-specific-date').value;
+            if (dataScelta) {
+                const [yyyy, mm, dd] = dataScelta.split('-');
+                dataScelta = `${dd}/${mm}/${yyyy}`;
+            } else {
+                dataScelta = generateSafeDateForMonth(year1, 10); 
             }
-        }
 
-        // --- 3. SINCRONIZZAZIONE RESTO DELLA CLASSE (Escluso lo studente corrente) ---
-        if (syncClasse && dateScritteGenerates.length > 0) {
-            // FIX PROTEZIONE: Filtra escludendo tassativamente window.selectedStudentId dal ciclo della classe
-            const classStudents = window.allStudents.filter(s => s.classe === targetClass && s.id !== window.selectedStudentId);
-            for (let s of classStudents) {
-                for (let infoS of dateScritteGenerates) {
-                    const v = pool[Math.floor(Math.random() * pool.length)];
-                    await saveGrade(s.id, s.name, v, infoS.data, "Verifica Scritta", "Scritto");
+            for (const persona of targetList) {
+                const fasciaId = mappaFasceStudenti[persona.id] || '2';
+                const poolVoti = getRangePool(fasciaId);
+                const v = poolVoti[Math.floor(Math.random() * poolVoti.length)];
+                await saveGradeRecord(persona.id, persona.name, v, dataScelta, "Interrogazione", "Orale", currentSub);
+            }
+        } 
+        
+        else if (mode === '2' && targetScope === 'classe') {
+            // --- VOTI TUTTO L'ANNO ---
+            
+            // PRIMO QUADRIMESTRE
+            for (let i = 0; i < 4; i++) {
+                const dataScrittoCondivisa = generateSafeDateForMonth(mesiQ1[i].y, mesiQ1[i].m);
+                const IsMeseOrale = (i === 0 || i === 2);
+                const IsMeseScritto = (i === 1 || i === 3);
+
+                for (const persona of targetList) {
+                    const fasciaId = mappaFasceStudenti[persona.id] || '2';
+                    const poolVoti = getRangePool(fasciaId);
+                    const v = poolVoti[Math.floor(Math.random() * poolVoti.length)];
+                    
+                    if ((subMode === 'A' || subMode === 'C') && IsMeseOrale) {
+                        const dataOraleCasuale = generateSafeDateForMonth(mesiQ1[i].y, mesiQ1[i].m);
+                        await saveGradeRecord(persona.id, persona.name, v, dataOraleCasuale, "Interrogazione", "Orale", currentSub);
+                    }
+                    
+                    if ((subMode === 'B' || subMode === 'C') && IsMeseScritto) {
+                        await saveGradeRecord(persona.id, persona.name, v, dataScrittoCondivisa, "Verifica Scritta", "Scritto", currentSub);
+                    }
+                }
+            }
+
+            // SECONDO QUADRIMESTRE
+            for (let i = 0; i < 4; i++) {
+                const dataScrittoCondivisa = generateSafeDateForMonth(mesiQ2[i].y, mesiQ2[i].m);
+                const IsMeseOrale = (i === 0 || i === 2);
+                const IsMeseScritto = (i === 1 || i === 3);
+
+                for (const persona of targetList) {
+                    const fasciaId = mappaFasceStudenti[persona.id] || '2';
+                    const poolVoti = getRangePool(fasciaId);
+                    const v = poolVoti[Math.floor(Math.random() * poolVoti.length)];
+                    
+                    if ((subMode === 'A' || subMode === 'C') && IsMeseOrale) {
+                        const dataOraleCasuale = generateSafeDateForMonth(mesiQ2[i].y, mesiQ2[i].m);
+                        await saveGradeRecord(persona.id, persona.name, v, dataOraleCasuale, "Interrogazione", "Orale", currentSub);
+                    }
+                    
+                    if ((subMode === 'B' || subMode === 'C') && IsMeseScritto) {
+                        await saveGradeRecord(persona.id, persona.name, v, dataScrittoCondivisa, "Verifica Scritta", "Scritto", currentSub);
+                    }
                 }
             }
         }
-        
-        alert("✅ Simulazione completata con successo senza duplicati!");
     }
 
-    // --- MODALITÀ 3: VERIFICA DI CLASSE (CON PROTEZIONE DUPLICATI) ---
-    else if (mode === '3') {
-        let data = prompt("Data della verifica (GG/MM/AAAA) - Lascia vuoto per random:");
-        if (!data) data = generateRandomDate();
-        
-        const arg = prompt("Argomento della verifica:", "Compito in Classe");
-        const pool = getRange();
-        if (!pool) return;
-
-        const includiSelezionato = confirm("📌 Vuoi includere nella verifica anche lo studente attualmente selezionato?");
-        
-        const classStudents = window.allStudents.filter(s => {
-            const appartieneClasse = s.classe === targetClass;
-            if (!includiSelezionato && s.id === window.selectedStudentId) {
-                return false;
-            }
-            return appartieneClasse;
-        });
-
-        if (!confirm(`Generazione voti per ${classStudents.length} studenti in data ${data}. Continuare?`)) return;
-
-        for (let s of classStudents) {
-            const v = pool[Math.floor(Math.random() * pool.length)];
-            await saveGrade(s.id, s.name, v, data, arg, "Scritto");
-        }
-        alert(`✅ Verifica di classe registrata per il ${data}!`);
-    }
-
-    if (typeof loadStudentRecords === 'function') {
-        loadStudentRecords(window.selectedStudentId);
-    }
+    alert(`✅ Generazione completata con successo rispettando il rendimento individuale di ogni studente.`);
+    window.closeAdminGradeModal();
+    if (typeof loadStudentRecords === 'function') loadStudentRecords(window.selectedStudentId);
 };
 
 window.eseguiMigrazioneAgendas = async () => {
@@ -7125,6 +7409,399 @@ window.eseguiMigrazioneAgendas = async () => {
     }
 };
 
-    </script>
+window.deleteAllGradesBySubject = async (studentId, subject) => {
+    const subjectUpper = subject.toUpperCase();
+    
+    // Recuperiamo l'anno scolastico attivo nel portale (es. "2023/2024")
+    const currentAY = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+
+    if (!confirm(`⚠️ AZIONE IRREVERSIBILE\n\nSei sicuro di voler eliminare TUTTI i voti di ${subjectUpper} per l'A.S. ${currentAY}?\nVerranno rimossi anche dai registri di classe (Agende) di questo specifico anno.`)) return;
+
+    try {
+        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+        const snap = await getDoc(recordRef);
+        
+        if (!snap.exists()) return;
+
+        const allVoti = snap.data().voti || [];
+        
+        // Isoliamo i voti da eliminare: devono corrispondere SIA alla materia SIA all'anno scolastico attivo
+        const votiDaEliminare = allVoti.filter(v => 
+            v.materia.toLowerCase().trim() === subject.toLowerCase().trim() && 
+            (v.anno || '').trim() === currentAY
+        );
+        
+        // Manteniamo TUTTI gli altri voti (altre materie OPPURE stessa materia ma di altri anni scolastici)
+        const votiDaTenere = allVoti.filter(v => 
+            !(v.materia.toLowerCase().trim() === subject.toLowerCase().trim() && (v.anno || '').trim() === currentAY)
+        );
+
+        if (votiDaEliminare.length === 0) {
+            alert(`Nessun voto trovato per ${subjectUpper} nell'A.S. ${currentAY}.`);
+            return;
+        }
+
+        // 1. AGGIORNAMENTO RECORD STUDENTE (Salva solo i voti da tenere)
+        await updateDoc(recordRef, { voti: votiDaTenere });
+
+        // 2. PULIZIA AGEDE (v2)
+        const student = window.allStudents.find(s => s.id === studentId);
+        const sClass = student?.classe || window.selectedClass;
+
+        if (sClass && sClass !== 'ALL') {
+            console.log(`[CLEANUP] Inizio pulizia agende per ${votiDaEliminare.length} voti dell'A.S. ${currentAY}...`);
+            
+            for (const v of votiDaEliminare) {
+                try {
+                    const [gg, mm, aaaa] = v.data.split('/');
+                    const dateKey = `${aaaa}-${mm}-${gg}`;
+                    
+                    // getAgendaDocRef punterà automaticamente alla sotto-raccolta dell'anno corretto grazie a sClass e dateKey
+                    const agendaRef = window.getAgendaDocRef(sClass, dateKey);
+                    const aSnap = await getDoc(agendaRef);
+
+                    if (aSnap.exists()) {
+                        const daily = aSnap.data().daily_voti || [];
+                        
+                        // Rimuoviamo il record specifico dall'agenda del giorno
+                        const nuovoDaily = daily.filter(dv => 
+                            !(dv.studenteId === studentId && dv.materia.toLowerCase().trim() === subject.toLowerCase().trim() && dv.voto === v.voto)
+                        );
+
+                        if (nuovoDaily.length !== daily.length) {
+                            await updateDoc(agendaRef, { daily_voti: nuovoDaily });
+                        }
+                    }
+                } catch (err) {
+                    console.error(`Errore durante la pulizia dell'agenda in data ${v.data}:`, err);
+                }
+            }
+        }
+
+        alert(`✅ Pulizia completata: rimossi ${votiDaEliminare.length} voti di ${subjectUpper} relativi all'A.S. ${currentAY}.`);
+        
+        // Ricarica la vista dei record
+        if (typeof loadStudentRecords === 'function') {
+            loadStudentRecords(studentId);
+        }
+
+    } catch (error) {
+        console.error("Errore durante il reset della materia:", error);
+        alert("Si è verificato un errore tecnico durante l'eliminazione.");
+    }
+};
+
+// Array locale temporaneo che tiene traccia delle modifiche prima di salvare
+let tempBlockedDates = [];
+
+// --- 1. VERIFICA SE UNA DATA È BLOCCATA (Corretta contro i bug di fuso orario e orari casuali) ---
+window.isRegistrationBlocked = (dateParam) => {
+    let d;
+    if (dateParam instanceof Date) {
+        // Creiamo una copia per non modificare l'oggetto originale
+        d = new Date(dateParam.getTime());
+    } else if (typeof dateParam === 'string') {
+        if (dateParam.includes('/')) {
+            const [gg, mm, aaaa] = dateParam.split('/');
+            d = new Date(parseInt(aaaa), parseInt(mm) - 1, parseInt(gg));
+        } else if (dateParam.includes('-')) {
+            const [yyyy, mm, dd] = dateParam.split('-');
+            d = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+        } else {
+            return false;
+        }
+    } else {
+        return false;
+    }
+
+    // FORZATURA FONDAMENTALE: Azzera ore, minuti, secondi e millisecondi per evitare slittamenti
+    d.setHours(0, 0, 0, 0);
+
+    // 1. Blocco standard della Domenica (0 = Domenica)
+    if (d.getDay() === 0) return true;
+
+    // 2. Verifica se la data è presente tra quelle impostate dai superiori
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const dateKey = `${yyyy}-${mm}-${dd}`;
+
+    if (window.blockedDates && window.blockedDates.includes(dateKey)) {
+        console.log(`[BLOCCO-REG] Giorno intercettato e scartato con successo: ${dateKey}`);
+        return true;
+    }
+
+    return false;
+};
+
+// --- 2. SALVATAGGIO DIRETTO SUL DATABASE ---
+window.saveSchoolCalendar = async (schoolYear, arrayOfDates) => {
+    if (window.userRole !== 'admin' && window.userRole !== 'preside') {
+        return alert("Accesso negato.");
+    }
+
+    try {
+        const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', schoolYear);
+        
+        // USARE arrayUnion PER AGGIUNGERE I NUOVI ELEMENTI SENZA SOVRASCRIVERE QUELLI VECCHI
+        await setDoc(calRef, { 
+            blocked_dates: arrayUnion(...arrayOfDates) 
+        }, { merge: true });
+
+        alert(`📅 Calendario scolastico per l'A.S. ${schoolYear.replace('_', '/')} aggiornato con i nuovi giorni!`);
+        
+        // Uniamo le date anche localmente nella variabile globale per tenerla allineata
+        if (!window.blockedDates) window.blockedDates = [];
+        arrayOfDates.forEach(d => {
+            if (!window.blockedDates.includes(d)) window.blockedDates.push(d);
+        });
+        window.blockedDates.sort();
+
+    } catch (e) {
+        console.error("Errore salvataggio calendario:", e);
+        alert("❌ Errore durante il salvataggio del calendario.");
+    }
+};
+
+// --- 3. APERTURA MODAL INTERFACCIA ---
+window.openCalendarModal = () => {
+    // Copiamo le date globali attuelles nell'array temporaneo del pannello
+    tempBlockedDates = window.blockedDates ? [...window.blockedDates] : [];
+    
+    // Ordiniamo le date cronologicamente per renderle leggibili nella lista
+    tempBlockedDates.sort();
+
+    document.getElementById('calendar-modal').style.display = 'flex';
+    window.renderBlockedDatesList();
+};
+
+// --- 4. CHIUSURA MODAL ---
+window.closeCalendarModal = () => {
+    document.getElementById('calendar-modal').style.display = 'none';
+};
+
+// --- 5. RENDERING VISIVO DEI GIORNI BLOCCATI ---
+window.renderBlockedDatesList = () => {
+    const listContainer = document.getElementById('cal-blocked-list');
+    listContainer.innerHTML = '';
+
+    if (tempBlockedDates.length === 0) {
+        listContainer.innerHTML = '<span style="color: #72767d; fontSize: 13px;">Nessun giorno bloccato impostato.</span>';
+        return;
+    }
+
+    tempBlockedDates.forEach((dateStr) => {
+        // Formattiamo la visualizzazione da YYYY-MM-DD a GG/MM/AAAA
+        const [yyyy, mm, dd] = dateStr.split('-');
+        const visualDate = `${dd}/${mm}/${yyyy}`;
+
+        const item = document.createElement('div');
+        item.style = "display: flex; justify-content: space-between; align-items: center; background: #2c2f33; padding: 6px 10px; margin-bottom: 5px; border-radius: 4px; font-size: 14px;";
+        item.innerHTML = `
+            <span>📅 ${visualDate}</span>
+            <span onclick="window.removeDateFromBlockedList('${dateStr}')" style="color: #ff4757; cursor: pointer; font-weight: bold; font-size: 12px; padding: 2px 6px;">❌</span>
+        `;
+        listContainer.appendChild(item);
+    });
+};
+
+// Helper per estrarre gli anni validi dall'A.S. corrente (es. "2020/2021" -> [2020, 2021])
+const getValidCalendarYears = () => {
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    return ay.split('/').map(Number); // Restituisce un array di numeri, es: [2020, 2021]
+};
+
+// --- 6A. AGGIUNTA GIORNO SINGOLO (Con controllo anno) ---
+window.addSingleDate = () => {
+    const input = document.getElementById('cal-input-date');
+    const selectedDate = input.value; // Formato YYYY-MM-DD
+
+    if (!selectedDate) return alert("⚠️ Seleziona una data valida.");
+
+    // Controllo coerenza anno
+    const inputYear = parseInt(selectedDate.split('-')[0]);
+    const [startYear, endYear] = getValidCalendarYears();
+
+    if (inputYear !== startYear && inputYear !== endYear) {
+        return alert(`⚠️ Errore di distrazione!\nHai inserito una data del ${inputYear}, ma l'anno scolastico che stai visualizzando sul portale è il ${startYear}/${endYear}.\n\nModifica la data o cambia prima l'anno scolastico del portale.`);
+    }
+
+    if (tempBlockedDates.includes(selectedDate)) return alert("⚠️ Questo giorno è già presente.");
+
+    tempBlockedDates.push(selectedDate);
+    tempBlockedDates.sort();
+    window.renderBlockedDatesList();
+    input.value = '';
+};
+
+// --- 6B. AGGIUNTA GIORNI MULTIPLI (Con controllo anno) ---
+window.addDateRange = () => {
+    const startInput = document.getElementById('cal-input-start');
+    const endInput = document.getElementById('cal-input-end');
+    
+    if (!startInput.value || !endInput.value) {
+        return alert("⚠️ Inserisci sia la data di inizio che quella di fine periodo.");
+    }
+
+    const startYear = parseInt(startInput.value.split('-')[0]);
+    const endYear = parseInt(endInput.value.split('-')[0]);
+    const [validStart, validEnd] = getValidCalendarYears();
+
+    // Controlla se sia la data d'inizio che di fine rientrano nell'A.S. visualizzato
+    if ((startYear !== validStart && startYear !== validEnd) || (endYear !== validStart && endYear !== validEnd)) {
+        return alert(`⚠️ Errore di distrazione!\nIl periodo inserito (${startYear}-${endYear}) non corrisponde all'anno scolastico visualizzato sul portale (${validStart}/${validEnd}).\n\nSistemaci le date o cambia l'anno del portale.`);
+    }
+
+    let currentDate = new Date(startInput.value);
+    const endDate = new Date(endInput.value);
+
+    if (currentDate > endDate) {
+        return alert("⚠️ La data di inizio non può essere successiva alla data di fine.");
+    }
+
+    let conteggioNuoviGiorni = 0;
+
+    while (currentDate <= endDate) {
+        const yyyy = currentDate.getFullYear();
+        const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const dd = String(currentDate.getDate()).padStart(2, '0');
+        const dateKey = `${yyyy}-${mm}-${dd}`;
+
+        if (!tempBlockedDates.includes(dateKey)) {
+            tempBlockedDates.push(dateKey);
+            conteggioNuoviGiorni++;
+        }
+
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    if (conteggioNuoviGiorni > 0) {
+        tempBlockedDates.sort();
+        window.renderBlockedDatesList();
+        alert(`✅ Aggiunte con successo ${conteggioNuoviGiorni} giornate di vacanza.`);
+    } else {
+        alert("⚠️ I giorni selezionati erano già tutti presenti nella lista.");
+    }
+
+    startInput.value = '';
+    endInput.value = '';
+};
+
+// --- 7. RIMOZIONE TEMPORANEA DALLA LISTA ---
+window.removeDateFromBlockedList = (dateStr) => {
+    tempBlockedDates = tempBlockedDates.filter(d => d !== dateStr);
+    window.renderBlockedDatesList();
+};
+
+// --- 8. SALVATAGGIO FINALE DA INTERFACCIA MODAL ---
+window.saveCalendarToFirestore = async () => {
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const schoolYearDocId = ay.replace('/', '_');
+
+    if (!confirm(`Confirmi il salvataggio di ${tempBlockedDates.length} giorni bloccati per l'A.S. ${ay}?`)) return;
+
+    // Sfrutta la funzione master definita sopra per evitare codice duplicato
+    await window.saveSchoolCalendar(schoolYearDocId, tempBlockedDates);
+    window.closeCalendarModal();
+}; 
+
+// 1. CANCELLA TUTTI I VOTI DI TUTTE LE MATERIE (Solo per l'anno scolastico corrente)
+window.deleteAllGradesAllSubjects = async (studentId) => {
+    // Recupera l'anno scolastico attivo (es: "2023/2024")
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    
+    // Controllo permessi centralizzato (Admin e Preside possono tutto)
+    if (![ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole)) {
+        return alert("⚠️ Azione non autorizzata. Solo gli amministratori o il Preside possono azzerare l'intero anno.");
+    }
+
+    const conferma = confirm(`⚠️ ATTENZIONE: Sei sicuro di voler ELIMINARE DEFINITIVAMENTE TUTTI i voti di TUTTE le materie dello studente per l'Anno Scolastico ${ay}?\nQuesta azione non si può annullare.`);
+    if (!conferma) return;
+
+    try {
+        const studentRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+        const studentSnap = await getDoc(studentRef);
+
+        if (!studentSnap.exists()) return alert("Nessun record trovato per questo studente.");
+
+        const tuttiIVoti = studentSnap.data().voti || [];
+        
+        // Filtriamo tenendo SOLO i voti che NON appartengono all'anno scolastico corrente
+        const votiDaMantenere = tuttiIVoti.filter(v => v.anno !== ay);
+        // Isoliamo i voti cancellati per poterli ripulire dall'agenda giornaliera
+        const votiDaCancellare = tuttiIVoti.filter(v => v.anno === ay);
+
+        // 1. Aggiorna il documento dei voti dello studente
+        await setDoc(studentRef, { voti: votiDaMantenere }, { merge: true });
+
+        // 2. Ripulisci l'agenda giornaliera (daily_voti) per ciascun voto rimosso
+        for (const v of votiDaCancellare) {
+            if (v.data) {
+                const [gg, mm, aaaa] = v.data.split('/');
+                const dateKey = `${aaaa}-${mm}-${gg}`;
+                const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
+                
+                // Rimuove l'istanza specifica dall'array dell'agenda giornaliera
+                await setDoc(agendaRef, {
+                    daily_voti: arrayRemove({
+                        studente: document.getElementById('res-student-name').innerText,
+                        studenteId: studentId,
+                        voto: v.voto,
+                        materia: v.materia,
+                        argomento: v.argomento
+                    })
+                }, { merge: true });
+            }
+        }
+
+        alert(`🗑️ Piazza pulita completata! Tutti i voti dell'A.S. ${ay} sono stati rimossi.`);
+        
+        // Ricarica la tabella dei record graficamente
+        if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
+
+    } catch (error) {
+        console.error("Errore durante il reset totale dei voti:", error);
+        alert("❌ Errore durante l'azzeramento dei voti.");
+    }
+};
+
+// 2. CANCELLA TUTTI I VOTI DI TUTTE LE MATERIE *E* AZZERA LE MATERIE ASSEGNATE (Solo per l'anno corrente)
+window.hardResetYearRecords = async (studentId) => {
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    
+    if (![ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole)) {
+        return alert("⚠️ Azione non autorizzata.");
+    }
+
+    const conferma = confirm(`🚨 RESET TOTALE: Vuoi cancellare TUTTI i voti E TUTTE le materie registrate per questo studente nell'A.S. ${ay}?\nIl profilo tornerà vuoto per questo anno.`);
+    if (!conferma) return;
+
+    try {
+        // Prima svuotiamo tutti i voti usando la logica precedente
+        const studentRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+        const studentSnap = await getDoc(studentRef);
+
+        if (studentSnap.exists()) {
+            const tuttiIVoti = studentSnap.data().voti || [];
+            const votiDaMantenere = tuttiIVoti.filter(v => v.anno !== ay);
+            await setDoc(studentRef, { voti: votiDaMantenere }, { merge: true });
+        }
+
+        // Se nel tuo DB le materie per anno sono salvate dentro il documento dello studente (es. un oggetto o array per anno)
+        // puoi resettare il campo specifico qui. Ad esempio, se hai un campo 'materie_per_anno':
+        // const updateObj = {};
+        // updateObj[`materie_attive_${ay.replace('/', '_')}`] = [];
+        // await updateDoc(studentRef, updateObj);
+
+        alert(`🚨 Hard Reset completato per l'A.S. ${ay}. Voti e registri ripuliti.`);
+        if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
+
+    } catch (error) {
+        console.error("Errore nell'hard reset:", error);
+        alert("❌ Errore durante il reset completo.");
+    }
+};
+
+   </script>
 </body>
 </html>
