@@ -1338,34 +1338,45 @@ main {
             </div>
 
             <!-- FASE 3: TIPOLOGIA GENERAZIONE -->
-            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
-                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block">Fase 3: Tipologia di Generazione</span>
-                
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase">Modalità</label>
-                        <select id="adm-input-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
-                            <option value="1">1. Voto Singolo</option>
-                            <option id="opt-mode-all-year" value="2" disabled>2. Voti tutto l'anno</option>
-                        </select>
-                    </div>
-                    
-                    <div id="container-adm-tipo-voti" class="flex flex-col gap-1 opacity-40 pointer-events-none">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase">Opzioni Simulazione Anno</label>
-                        <select id="adm-input-sub-mode" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
-                            <option value="A">A. Solo Orali (Date casuali diverse per ognuno)</option>
-                            <option value="B">B. Solo Scritti (Stessa data per tutta la classe)</option>
-                            <option value="C">C. Tutti i Voti (2 scritti data uguale + 2 orali data diversa a quadrimestre)</option>
-                        </select>
-                    </div>
-                </div>
+<div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-4">
+    <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block">Fase 3: Tipologia di Generazione</span>
+    
+    <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] font-bold text-zinc-500 uppercase">Modalità</label>
+            <select id="adm-input-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                <option value="1">1. Voto Singolo</option>
+                <option id="opt-mode-all-year" value="2" disabled>2. Voti tutto l'anno</option>
+            </select>
+        </div>
+        
+        <div id="container-adm-tipo-voti" class="flex flex-col gap-1 opacity-40 pointer-events-none">
+            <label class="text-[10px] font-bold text-zinc-500 uppercase">Opzioni Simulazione Anno</label>
+            <select id="adm-input-sub-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                <option value="A">A. Solo Orali (Date casuali diverse per ognuno)</option>
+                <option value="B">B. Solo Scritti (Stessa data per tutta la classe)</option>
+                <option value="C">C. Tutti i Voti</option>
+            </select>
+        </div>
+    </div>
 
-                <div id="container-adm-data-singola" class="flex flex-col gap-1 max-w-xs">
-                    <label class="text-[10px] font-bold text-zinc-500 uppercase">Data Specifica (Lascia vuoto per data casuale)</label>
-                    <input type="date" id="adm-input-specific-date" class="px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white focus:outline-none">
-                </div>
-            </div>
+    <div id="container-adm-periodo" class="hidden bg-[#1c1e22] p-3 rounded-lg border border-zinc-800/80 space-y-2">
+        <label class="text-[10px] font-bold text-zinc-500 uppercase block">Seleziona Periodo</label>
+        <div class="flex gap-4">
+            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                <input type="checkbox" id="chk-primo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo Primo quadrimestre
+            </label>
+            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                <input type="checkbox" id="chk-secondo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo secondo quadrimestre
+            </label>
+        </div>
+    </div>
 
+    <div id="container-adm-data-singola" class="flex flex-col gap-1 max-w-xs">
+        <label class="text-[10px] font-bold text-zinc-500 uppercase">Data Specifica (Lascia vuoto per data casuale)</label>
+        <input type="date" id="adm-input-specific-date" class="px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white focus:outline-none">
+    </div>
+</div>
             <!-- FASE 4: SELEZIONE FASCE DI MERITO (DINAMICA ED INDIVIDUALE) -->
             <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
                 <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block">Fase 4: Configurazione Fasce di Merito</span>
@@ -2751,7 +2762,7 @@ if (isAdminOrPreside) {
             <button onclick="window.deleteAllGradesAllSubjects('${studentId}')" 
                     class="px-2 py-1 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/50 rounded transition-all text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5"
                     title="Svuota completamente il registro voti di questo studente per l'anno corrente">
-                🗑️ Elimina tutti i voti 
+                🗑️ 
             </button>
         </td>
     </tr>`;
@@ -7090,26 +7101,51 @@ window.renderAdminMaterieCheckboxes = () => {
     
     const uiMateria = document.getElementById('input-grade-subject').value.toLowerCase().trim();
     const chiaviMaterie = Object.keys(currentMappaMaterieProf);
+    const mode = document.getElementById('adm-input-mode').value;
+    const subMode = document.getElementById('adm-input-sub-mode').value;
 
     if (chiaviMaterie.length === 0) {
-        container.innerHTML = '<span class="text-zinc-500 p-2 italic">Nessun professore configurato per questa classe.</span>';
+        container.innerHTML = '<span class="text-zinc-500 p-2 italic">Nessun professore configurato.</span>';
         return;
     }
 
+    // Nascondiamo completamente il blocco se siamo in modalità voto singolo (1) o se abbiamo selezionato "Solo Orali" (A)
+    const nascondiInteroBloccoDate = (mode === '1' || subMode === 'A') ? 'hidden' : '';
+
     chiaviMaterie.forEach(key => {
         const info = currentMappaMaterieProf[key];
-        const wrapper = document.createElement('label');
-        wrapper.className = "flex items-center justify-between p-1.5 hover:bg-zinc-800 rounded cursor-pointer transition-colors";
-        
-        // Se l'ambito è impostato su "singola", viene pre-selezionata solo la materia della UI
         const isChecked = (key === uiMateria) ? 'checked' : '';
         
+        // Verifichiamo se i singoli quadrimestri sono abilitati
+        const q1Spuntato = document.getElementById('chk-primo-quad')?.checked;
+        const q2Spuntato = document.getElementById('chk-secondo-quad')?.checked;
+        
+        // Se il quadrimestre non è spuntato, usiamo 'hidden', altrimenti non mettiamo nessuna classe aggiuntiva
+        const q1Classe = q1Spuntato ? '' : 'hidden';
+        const q2Classe = q2Spuntato ? '' : 'hidden';
+        
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex flex-col gap-2 p-3 bg-[#1c1e22] border border-zinc-800 rounded-xl mb-2";
+        
         wrapper.innerHTML = `
-            <div class="flex items-center gap-2">
-                <input type="checkbox" class="adm-checkbox-materia" value="${key}" ${isChecked}>
-                <span class="font-bold text-zinc-200 uppercase">${info.materiaOriginale}</span>
+            <div class="flex items-center justify-between">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" class="adm-checkbox-materia w-4 h-4 accent-red-600" value="${key}" ${isChecked} 
+                           onchange="const datesDiv = this.closest('div.flex-col').querySelector('.adm-mat-dates'); if(datesDiv) datesDiv.classList.toggle('hidden', !this.checked || ${mode === '1' || subMode === 'A'})">
+                    <span class="font-black text-zinc-200 uppercase text-[11px]">${info.materiaOriginale}</span>
+                </label>
+                <span class="text-[9px] text-zinc-500 font-bold italic">Prof: ${info.name}</span>
             </div>
-            <span class="text-[10px] text-zinc-500 font-semibold italic">Prof: ${info.name}</span>
+            
+            <div class="adm-mat-dates ${(isChecked && !nascondiInteroBloccoDate) ? 'grid' : 'hidden'} grid-cols-2 gap-2 mt-2 pt-2 border-t border-zinc-800/50">
+                <div class="col-span-2 text-[8px] font-black text-red-500 uppercase tracking-widest mb-1">Date Verifiche Scritte</div>
+                
+                <input type="date" data-date-type="q1_1" data-mat="${key}" class="${q1Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="1° Scritto Q1">
+                <input type="date" data-date-type="q1_2" data-mat="${key}" class="${q1Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="2° Scritto Q1">
+                
+                <input type="date" data-date-type="q2_1" data-mat="${key}" class="${q2Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="1° Scritto Q2">
+                <input type="date" data-date-type="q2_2" data-mat="${key}" class="${q2Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="2° Scritto Q2">
+            </div>
         `;
         container.appendChild(wrapper);
     });
@@ -7161,24 +7197,66 @@ window.handleAdminGradeTargetChange = () => {
 window.renderStudentFasceList = () => {
     const targetClass = window.selectedClass;
     const container = document.getElementById('adm-studenti-fasce-container');
+    if (!container) return;
     container.innerHTML = "";
 
     const classStudents = window.allStudents.filter(s => s.classe === targetClass && !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
 
+    // Controlliamo lo stato attuale della Fase 3 per mostrare o nascondere le date degli orali
+    const mode = document.getElementById('adm-input-mode').value;
+    const subMode = document.getElementById('adm-input-sub-mode').value;
+    const q1Checked = document.getElementById('chk-primo-quad').checked;
+    const q2Checked = document.getElementById('chk-secondo-quad').checked;
+
+    // Gli orali individuali servono solo in modalità tutto l'anno (2) con opzione A o C
+    const mostraDateOrali = mode === '2' && (subMode === 'A' || subMode === 'C');
+
     classStudents.forEach(student => {
         const row = document.createElement('div');
-        row.className = "flex items-center justify-between gap-4 bg-[#23272a] p-2 rounded border border-zinc-800 text-xs";
+        row.className = "flex flex-col gap-2 bg-[#23272a] p-3 rounded-xl border border-zinc-800 text-xs";
         
-        // Impostiamo un valore predefinito intelligente (es. sufficiente) che l'utente può cambiare
+        let oraliHtml = "";
+
+        if (mostraDateOrali) {
+            oraliHtml = `
+                <div class="grid grid-cols-2 gap-2 mt-1 pt-2 border-t border-zinc-800/60">
+                    ${q1Checked ? `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[9px] text-amber-500/80 font-bold uppercase tracking-tight">1° Orale Q1</label>
+                            <input type="date" data-orale-q1-1="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[9px] text-amber-500/80 font-bold uppercase tracking-tight">2° Orale Q1</label>
+                            <input type="date" data-orale-q1-2="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
+                        </div>
+                    ` : ''}
+                    
+                    ${q2Checked ? `
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[9px] text-blue-400/80 font-bold uppercase tracking-tight">1° Orale Q2</label>
+                            <input type="date" data-orale-q2-1="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[9px] text-blue-400/80 font-bold uppercase tracking-tight">2° Orale Q2</label>
+                            <input type="date" data-orale-q2-2="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
         row.innerHTML = `
-            <span class="font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap">${student.name}</span>
-            <select data-student-id="${student.id}" class="adm-student-pool-selector bg-[#1c1e22] border border-zinc-700 rounded px-2 py-1 text-zinc-300 focus:outline-none font-medium">
-                <option value="1">Alto (8 - 10)</option>
-                <option value="2" selected>Sufficiente / Buono (6 - 7.5)</option>
-                <option value="3">Insufficiente (4 - 6-)</option>
-                <option value="4">Grave (3 - 4.5)</option>
-                <option value="5">Penoso (0 - 2.5)</option>
-            </select>
+            <div class="flex items-center justify-between gap-4">
+                <span class="font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap">${student.name}</span>
+                <select data-student-id="${student.id}" class="adm-student-pool-selector bg-[#1c1e22] border border-zinc-700 rounded px-2 py-1 text-zinc-300 focus:outline-none font-medium text-[11px]">
+                    <option value="1">Alto (8 - 10)</option>
+                    <option value="2" selected>Sufficiente / Buono (6 - 7.5)</option>
+                    <option value="3">Insufficiente (4 - 6-)</option>
+                    <option value="4">Grave (3 - 4.5)</option>
+                    <option value="5">Penoso (0 - 2.5)</option>
+                </select>
+            </div>
+            ${oraliHtml}
         `;
         container.appendChild(row);
     });
@@ -7186,19 +7264,37 @@ window.renderStudentFasceList = () => {
 
 window.handleAdminGradeModeChange = () => {
     const mode = document.getElementById('adm-input-mode').value;
+    const subMode = document.getElementById('adm-input-sub-mode').value;
+    
     const containerTipoVoti = document.getElementById('container-adm-tipo-voti');
     const containerDataSingola = document.getElementById('container-adm-data-singola');
+    const containerPeriodo = document.getElementById('container-adm-periodo');
 
     if (mode === '1') {
+        // --- MODALITÀ VOTO SINGOLO ---
         containerTipoVoti.classList.add('opacity-40', 'pointer-events-none');
-        containerDataSingola.classList.remove('opacity-40', 'pointer-events-none');
+        containerDataSingola.classList.remove('hidden');
+        containerPeriodo.classList.add('hidden');
     } else {
+        // --- MODALITÀ TUTTO L'ANNO ---
         containerTipoVoti.classList.remove('opacity-40', 'pointer-events-none');
-        containerDataSingola.classList.add('opacity-40', 'pointer-events-none');
+        containerDataSingola.classList.add('hidden');
+        containerPeriodo.classList.remove('hidden');
+    }
+
+    // AGGIORNAMENTO DINAMICO DELLE MATERIE
+    // Forza il ricalcolo della visibilità dei box data per ciascuna materia
+    if (typeof window.renderAdminMaterieCheckboxes === 'function') {
+        window.renderAdminMaterieCheckboxes();
+    }
+
+    // AGGIORNAMENTO DINAMICO DELLA LISTA FASCE/ORALI
+    if (typeof window.renderStudentFasceList === 'function') {
+        window.renderStudentFasceList();
     }
 };
 
-// --- MASTER: ESECUZIONE DELLA GENERAZIONE DEFINITIVA ---
+// --- MASTER: ESECUZIONE DELLA GENERAZIONE DEFINITIVA (CORRETTA) ---
 window.executeAdminGradeGeneration = async () => {
     const targetClass = window.selectedClass;
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
@@ -7208,26 +7304,27 @@ window.executeAdminGradeGeneration = async () => {
     const mode = document.getElementById('adm-input-mode').value; 
     const subMode = document.getElementById('adm-input-sub-mode').value; 
     
+    const q1Enabled = document.getElementById('chk-primo-quad').checked;
+    const q2Enabled = document.getElementById('chk-secondo-quad').checked;
+
     const checkedBoxes = document.querySelectorAll('.adm-checkbox-materia:checked');
     const subjectsToProcess = Array.from(checkedBoxes).map(cb => cb.value);
 
-    if (subjectsToProcess.length === 0) {
-        return alert("⚠️ Spunta almeno una materia dall'elenco prima di procedere.");
-    }
+    if (subjectsToProcess.length === 0) return alert("⚠️ Seleziona almeno una materia.");
 
+    // Helper per formattare la data da YYYY-MM-DD a GG/MM/AAAA
+    const formatInputDateFromValue = (val) => {
+        if (!val) return null;
+        const [y, m, d] = val.split('-');
+        return `${d}/${m}/${y}`;
+    };
+
+    // Caricamento date bloccate
     try {
         const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', currentYearDocId);
         const calSnap = await getDoc(calRef);
-        if (calSnap.exists()) {
-            const rawData = calSnap.data().blocked_dates || [];
-            window.blockedDates = Array.isArray(rawData) ? rawData : Object.values(rawData);
-        } else {
-            window.blockedDates = [];
-        }
-    } catch (err) {
-        console.error("[GEN-VOTI] Errore nel recupero delle date bloccate:", err);
-        window.blockedDates = [];
-    }
+        window.blockedDates = calSnap.exists() ? (calSnap.data().blocked_dates || []) : [];
+    } catch (err) { window.blockedDates = []; }
 
     const getRangePool = (fasciaId) => {
         switch(fasciaId) {
@@ -7240,141 +7337,116 @@ window.executeAdminGradeGeneration = async () => {
         }
     };
 
-    const classStudents = window.allStudents.filter(s => s.classe === targetClass && !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
-    const targetStudentName = document.getElementById('res-student-name').innerText;
-
-    // Mappa dinamica per raccogliere le fasce scelte per ciascuno studente
-    const mappaFasceStudenti = {};
-    if (targetScope === 'singolo') {
-        mappaFasceStudenti[window.selectedStudentId] = document.getElementById('adm-input-pool-studente').value;
-    } else {
-        const selectors = document.querySelectorAll('.adm-student-pool-selector');
-        selectors.forEach(sel => {
-            const sId = sel.getAttribute('data-student-id');
-            mappaFasceStudenti[sId] = sel.value;
-        });
-    }
-
-    const generateSafeDateForMonth = (year, monthIndex) => {
-        let tentativiTotali = 0;
-        while (tentativiTotali < 1000) {
+    const generateSafeDate = (year, monthIndex) => {
+        let t = 0;
+        while (t < 50) {
             const day = Math.floor(Math.random() * 28) + 1;
             const d = new Date(year, monthIndex, day);
-            d.setHours(0, 0, 0, 0);
-            
-            if (d.getDay() === 0 || d.getDay() === 6 || window.isRegistrationBlocked(d)) {
-                tentativiTotali++;
-                continue;
+            if (d.getDay() !== 0 && !window.isRegistrationBlocked(d)) {
+                return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
             }
-
-            const yyyy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            return `${dd}/${mm}/${yyyy}`;
+            t++;
         }
-        return `10/${String(monthIndex + 1).padStart(2, '0')}/${year}`;
+        return `15/${String(monthIndex + 1).padStart(2, '0')}/${year}`;
     };
 
-    const saveGradeRecord = async (sId, sName, val, dataStr, arg, tipo, materiaKey) => {
+    const saveGrade = async (sId, sName, val, dataStr, arg, tipo, matKey) => {
         const [gg, mm, aaaa] = dataStr.split('/');
         const dateKey = `${aaaa}-${mm}-${gg}`;
-        const quad = (parseInt(mm) >= 10 || parseInt(mm) === 1) ? 1 : 2;
-        
-        const profInfo = currentMappaMaterieProf[materiaKey] || { name: "Docente Automatico", id: "SYSTEM", materiaOriginale: materiaKey };
+        const quad = (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2;
+        const prof = currentMappaMaterieProf[matKey] || { name: "Sistema", id: "SYS", materiaOriginale: matKey };
 
         const entry = { 
-            id: crypto.randomUUID(), voto: val, materia: profInfo.materiaOriginale, data: dataStr, 
-            prof: profInfo.name, profId: profInfo.id, argomento: arg, 
-            quad, anno: ay, emoji: tipo === 'Scritto' ? "📝" : "🗣️" 
+            id: crypto.randomUUID(), voto: val, materia: prof.materiaOriginale, data: dataStr, 
+            prof: prof.name, profId: prof.id, argomento: arg, quad, anno: ay, emoji: tipo === 'Scritto' ? "📝" : "🗣️" 
         };
 
         await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', sId), { voti: arrayUnion(entry) }, { merge: true });
-        const agendaRef = window.getAgendaDocRef(targetClass, dateKey);
-        await setDoc(agendaRef, { 
-            daily_voti: arrayUnion({ studente: sName, studenteId: sId, voto: val, materia: profInfo.materiaOriginale, argomento: arg }) 
+        await setDoc(window.getAgendaDocRef(targetClass, dateKey), { 
+            daily_voti: arrayUnion({ studente: sName, studenteId: sId, voto: val, materia: prof.materiaOriginale, argomento: arg }) 
         }, { merge: true });
     };
 
-    const [year1, year2] = ay.split('/').map(Number);
-    const mesiQ1 = [{ y: year1, m: 9 }, { y: year1, m: 10 }, { y: year1, m: 11 }, { y: year2, m: 0 }];
-    const mesiQ2 = [{ y: year2, m: 1 }, { y: year2, m: 2 }, { y: year2, m: 3 }, { y: year2, m: 4 }];
+    const [y1, y2] = ay.split('/').map(Number);
+    const mesiQ1 = [{ y: y1, m: 9 }, { y: y1, m: 10 }, { y: y1, m: 11 }, { y: y2, m: 0 }];
+    const mesiQ2 = [{ y: y2, m: 1 }, { y: y2, m: 2 }, { y: y2, m: 3 }, { y: y2, m: 4 }];
 
     const targetList = (targetScope === 'singolo') 
-        ? [{ id: window.selectedStudentId, name: targetStudentName }] 
-        : classStudents;
+        ? [{ id: window.selectedStudentId, name: document.getElementById('res-student-name').innerText }] 
+        : window.allStudents.filter(s => s.classe === targetClass && !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
 
-    for (const currentSub of subjectsToProcess) {
-        
+    const mappaFasce = {};
+    if (targetScope === 'singolo') mappaFasce[window.selectedStudentId] = document.getElementById('adm-input-pool-studente').value;
+    else document.querySelectorAll('.adm-student-pool-selector').forEach(sel => mappaFasce[sel.dataset.studentId] = sel.value);
+
+   for (const matKey of subjectsToProcess) {
+        // Recuperiamo le date specifiche inserite per QUESTA materia nel modal
+        const getMatDate = (type) => {
+            const input = document.querySelector(`input[data-mat="${matKey}"][data-date-type="${type}"]`);
+            if (!input || !input.value) return null;
+            const [y, m, d] = input.value.split('-');
+            return `${d}/${m}/${y}`;
+        };
+
+        const matSpecificDates = {
+            q1_1: getMatDate('q1_1'),
+            q1_2: getMatDate('q1_2'),
+            q2_1: getMatDate('q2_1'),
+            q2_2: getMatDate('q2_2')
+        };
+
         if (mode === '1') {
             // --- VOTO SINGOLO ---
-            let dataScelta = document.getElementById('adm-input-specific-date').value;
-            if (dataScelta) {
-                const [yyyy, mm, dd] = dataScelta.split('-');
-                dataScelta = `${dd}/${mm}/${yyyy}`;
-            } else {
-                dataScelta = generateSafeDateForMonth(year1, 10); 
+            let dSel = formatInputDate('adm-input-specific-date') || generateSafeDate(y1, 10);
+            for (const p of targetList) {
+                const pool = getRangePool(mappaFasce[p.id]);
+                await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dSel, "Valutazione", "Orale", matKey);
             }
-
-            for (const persona of targetList) {
-                const fasciaId = mappaFasceStudenti[persona.id] || '2';
-                const poolVoti = getRangePool(fasciaId);
-                const v = poolVoti[Math.floor(Math.random() * poolVoti.length)];
-                await saveGradeRecord(persona.id, persona.name, v, dataScelta, "Interrogazione", "Orale", currentSub);
-            }
-        } 
-        
-        else if (mode === '2' && targetScope === 'classe') {
-            // --- VOTI TUTTO L'ANNO ---
-            
-            // PRIMO QUADRIMESTRE
-            for (let i = 0; i < 4; i++) {
-                const dataScrittoCondivisa = generateSafeDateForMonth(mesiQ1[i].y, mesiQ1[i].m);
-                const IsMeseOrale = (i === 0 || i === 2);
-                const IsMeseScritto = (i === 1 || i === 3);
-
-                for (const persona of targetList) {
-                    const fasciaId = mappaFasceStudenti[persona.id] || '2';
-                    const poolVoti = getRangePool(fasciaId);
-                    const v = poolVoti[Math.floor(Math.random() * poolVoti.length)];
-                    
-                    if ((subMode === 'A' || subMode === 'C') && IsMeseOrale) {
-                        const dataOraleCasuale = generateSafeDateForMonth(mesiQ1[i].y, mesiQ1[i].m);
-                        await saveGradeRecord(persona.id, persona.name, v, dataOraleCasuale, "Interrogazione", "Orale", currentSub);
-                    }
-                    
-                    if ((subMode === 'B' || subMode === 'C') && IsMeseScritto) {
-                        await saveGradeRecord(persona.id, persona.name, v, dataScrittoCondivisa, "Verifica Scritta", "Scritto", currentSub);
+        } else {
+            // --- TUTTO L'ANNO ---
+            if (q1Enabled) {
+                for (let i = 0; i < mesiQ1.length; i++) {
+                    for (const p of targetList) {
+                        const pool = getRangePool(mappaFasce[p.id]);
+                        
+                        // ORALI: Rigeneriamo la data per ogni materia (matKey) così non cadono tutte lo stesso giorno
+                        if ((subMode === 'A' || subMode === 'C') && (i === 1 || i === 3)) {
+                            const dOral = generateSafeDate(mesiQ1[i].y, mesiQ1[i].m);
+                            await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dOral, "Interrogazione", "Orale", matKey);
+                        }
+                        
+                        // SCRITTI: Usiamo la data specifica della materia se presente, altrimenti random
+                        if ((subMode === 'B' || subMode === 'C')) {
+                            if (i === 1) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q1_1 || generateSafeDate(mesiQ1[i].y, mesiQ1[i].m), "1° Verifica Scritta", "Scritto", matKey);
+                            if (i === 3) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q1_2 || generateSafeDate(mesiQ1[i].y, mesiQ1[i].m), "2° Verifica Scritta", "Scritto", matKey);
+                        }
                     }
                 }
             }
 
-            // SECONDO QUADRIMESTRE
-            for (let i = 0; i < 4; i++) {
-                const dataScrittoCondivisa = generateSafeDateForMonth(mesiQ2[i].y, mesiQ2[i].m);
-                const IsMeseOrale = (i === 0 || i === 2);
-                const IsMeseScritto = (i === 1 || i === 3);
+            if (q2Enabled) {
+                for (let i = 0; i < mesiQ2.length; i++) {
+                    for (const p of targetList) {
+                        const pool = getRangePool(mappaFasce[p.id]);
+                        
+                        // ORALI: Rigeneriamo la data per ogni materia
+                        if ((subMode === 'A' || subMode === 'C') && (i === 1 || i === 3)) {
+                            const dOral = generateSafeDate(mesiQ2[i].y, mesiQ2[i].m);
+                            await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dOral, "Interrogazione", "Orale", matKey);
+                        }
 
-                for (const persona of targetList) {
-                    const fasciaId = mappaFasceStudenti[persona.id] || '2';
-                    const poolVoti = getRangePool(fasciaId);
-                    const v = poolVoti[Math.floor(Math.random() * poolVoti.length)];
-                    
-                    if ((subMode === 'A' || subMode === 'C') && IsMeseOrale) {
-                        const dataOraleCasuale = generateSafeDateForMonth(mesiQ2[i].y, mesiQ2[i].m);
-                        await saveGradeRecord(persona.id, persona.name, v, dataOraleCasuale, "Interrogazione", "Orale", currentSub);
-                    }
-                    
-                    if ((subMode === 'B' || subMode === 'C') && IsMeseScritto) {
-                        await saveGradeRecord(persona.id, persona.name, v, dataScrittoCondivisa, "Verifica Scritta", "Scritto", currentSub);
+                        if ((subMode === 'B' || subMode === 'C')) {
+                            if (i === 1) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q2_1 || generateSafeDate(mesiQ2[i].y, mesiQ2[i].m), "1° Verifica Scritta", "Scritto", matKey);
+                            if (i === 3) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q2_2 || generateSafeDate(mesiQ2[i].y, mesiQ2[i].m), "2° Verifica Scritta", "Scritto", matKey);
+                        }
                     }
                 }
             }
         }
     }
-
-    alert(`✅ Generazione completata con successo rispettando il rendimento individuale di ogni studente.`);
+    alert("✅ Generazione completata con successo!");
     window.closeAdminGradeModal();
-    if (typeof loadStudentRecords === 'function') loadStudentRecords(window.selectedStudentId);
+    if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
 };
 
 window.eseguiMigrazioneAgendas = async () => {
