@@ -7729,7 +7729,7 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
         return alert("⚠️ Azione non autorizzata. Solo gli amministratori o il Preside possono azzerare i voti.");
     }
 
-    const conferma = confirm(`⚠️ ATTENZIONE: Sei sicuro di voler ELIMINARE DEFINITIVAMENTE TUTTI i voti di TUTTE le materie dello studente per l'Anno Scolastico ${ay}?\nQuesta azione non si può annullare.`);
+    const conferma = confirm(`⚠️ ATTENZIONE: Sei sicuro di voler ELIMINARE DEFINITIVAMENTE TUTTI i voti di TUTTE le materie dello studente per l'Anno Scolastico ${ay}?\nQuesta azione rimuoverà i dati anche dall'agenda giornaliera.`);
     if (!conferma) return;
 
     try {
@@ -7740,33 +7740,45 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
 
         const tuttiIVoti = studentSnap.data().voti || [];
         
-        // Filtriamo tenendo SOLO i voti che NON appartengono all'anno scolastico corrente
+        // Separiamo i voti dell'anno corrente da quelli da mantenere
         const votiDaMantenere = tuttiIVoti.filter(v => v.anno !== ay);
         const votiDaCancellare = tuttiIVoti.filter(v => v.anno === ay);
 
-        // 1. Aggiorna il documento dello studente rimuovendo i voti dell'anno selezionato
+        // 1. Aggiorna il documento dello studente con i soli voti rimasti
         await setDoc(studentRef, { voti: votiDaMantenere }, { merge: true });
 
-        // 2. Ripulisci l'agenda giornaliera (daily_voti) per ciascun voto rimosso
+        // 2. Ripuliamo l'agenda giornaliera in modo sicuro tramite filtraggio ID
         for (const v of votiDaCancellare) {
             if (v.data) {
                 const [gg, mm, aaaa] = v.data.split('/');
                 const dateKey = `${aaaa}-${mm}-${gg}`;
-                const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
                 
-                await setDoc(agendaRef, {
-                    daily_voti: arrayRemove({
-                        studente: document.getElementById('res-student-name')?.innerText || '',
-                        studenteId: studentId,
-                        voto: v.voto,
-                        materia: v.materia,
-                        argomento: v.argomento
-                    })
-                }, { merge: true });
+                // Usiamo la classe definita dentro l'oggetto del voto, oppure quella globale come fallback
+                const classeTarget = v.classe || window.selectedClass;
+                const agendaRef = window.getAgendaDocRef(classeTarget, dateKey);
+                
+                const agendaSnap = await getDoc(agendaRef);
+                
+                if (agendaSnap.exists()) {
+                    const dailyVoti = agendaSnap.data().daily_voti || [];
+                    
+                    // Filtriamo via i voti dell'agenda che appartengono a questo studente e a questa materia
+                    const dailyVotiAggiornati = dailyVoti.filter(dv => {
+                        const corrispondeStudente = String(dv.studenteId) === String(studentId);
+                        const corrispondeMateria = dv.materia?.toLowerCase() === v.materia?.toLowerCase();
+                        const corrispondeVoto = String(dv.voto) === String(v.voto);
+                        
+                        // Se coincidono tutti e tre, ritorna false per eliminarlo dall'array
+                        return !(corrispondeStudente && corrispondeMateria && corrispondeVoto);
+                    });
+                    
+                    // Sovrascriviamo l'array dell'agenda con la versione filtrata
+                    await setDoc(agendaRef, { daily_voti: dailyVotiAggiornati }, { merge: true });
+                }
             }
         }
 
-        alert(`🗑️ Piazza pulita completata! Tutti i voti dell'A.S. ${ay} sono stati rimossi.`);
+        alert(`🗑️ Piazza pulita completata! Tutti i voti dell'A.S. ${ay} sono stati rimossi sia dal registro che dall'agenda.`);
         
         if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
 
