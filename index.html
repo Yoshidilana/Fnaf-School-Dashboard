@@ -1303,121 +1303,133 @@ main {
 <div id="admin-grade-modal" class="hidden fixed inset-0 bg-black/80 z-[10000] justify-center items-center p-4">
     <div class="bg-[#1c1e22] text-zinc-200 p-6 rounded-2xl w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl border border-zinc-800">
         
-        <div class="shrink-0 pb-3 border-b border-zinc-800">
-            <h3 class="text-base font-black text-amber-500 uppercase tracking-wider flex items-center gap-2">🎲 Strumento Generazione Voti Random</h3>
-            <p class="text-xs text-zinc-500 mt-0.5">Configura una simulazione o una verifica reale per la classe <span id="adm-mdl-class-label" class="text-white font-bold"></span>.</p>
+        <div class="shrink-0 pb-3 border-b border-zinc-800 flex justify-between items-center">
+            <div>
+                <h3 class="text-base font-black text-amber-500 uppercase tracking-wider flex items-center gap-2">🎲 Strumento Generazione Voti Random</h3>
+                <p class="text-xs text-zinc-500 mt-0.5">Configura una simulazione per la classe <span id="adm-mdl-class-label" class="text-white font-bold"></span>.</p>
+            </div>
+            <span id="adm-wizard-step-indicator" class="text-[10px] font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2.5 py-1 rounded-full uppercase">Passo 1 di 4</span>
         </div>
 
-        <div class="overflow-y-auto pr-1 flex-1 py-4 space-y-5 custom-scrollbar text-sm">
+        <div class="flex-1 py-4 text-sm min-h-[280px] flex flex-col justify-center">
             
-            <!-- FASE 1: TARGET DESTINATARI -->
-            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800">
-                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block mb-2">Fase 1: Seleziona Destinatari</span>
-                <div class="flex gap-6">
-                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+            <div id="adm-step-1" class="adm-wizard-step block space-y-3">
+                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 1: Seleziona Destinatari</span>
+                <p class="text-xs text-zinc-400">Scegli se applicare la simulazione solo allo studente corrente o a tutto il gruppo classe.</p>
+                <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 flex flex-col gap-3">
+                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer p-2 rounded bg-[#1c1e22] border border-zinc-800/50 hover:border-zinc-700 transition-all">
                         <input type="radio" name="adm-target-scope" value="singolo" checked onchange="window.handleAdminGradeTargetChange()"> 1. Studente Attuale
                     </label>
-                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                        <input type="radio" name="adm-target-scope" value="classe" onchange="window.handleAdminGradeTargetChange()"> 2. Tutti gli studenti
+                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer p-2 rounded bg-[#1c1e22] border border-zinc-800/50 hover:border-zinc-700 transition-all">
+                        <input type="radio" name="adm-target-scope" value="classe" onchange="window.handleAdminGradeTargetChange()"> 2. Tutti gli studenti della classe
                     </label>
                 </div>
             </div>
 
-            <!-- FASE 2: SELEZIONE MATERIE -->
-            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800">
-                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block mb-2">Fase 2: Seleziona Materie Attive</span>
-                <div class="flex gap-4 mb-3">
-                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                        <input type="radio" name="adm-materia-scope" value="singola" checked onchange="window.handleAdminGradeScopeChange()"> Solo materia corrente
-                    </label>
-                    <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                        <input type="radio" name="adm-materia-scope" value="tutte" onchange="window.handleAdminGradeScopeChange()"> Tutte le materie della classe
-                    </label>
-                </div>
-                <div id="adm-materie-checkboxes-container" class="grid grid-cols-1 gap-1.5 max-h-[120px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 text-xs custom-scrollbar">
+            <div id="adm-step-2" class="adm-wizard-step hidden space-y-3">
+                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 2: Tipologia di Generazione</span>
+                <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase">Modalità</label>
+                            <select id="adm-input-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                                <option value="1">1. Voto Singolo</option>
+                                <option id="opt-mode-all-year" value="2" disabled>2. Voti tutto l'anno</option>
+                            </select>
+                        </div>
+                        <div id="container-adm-tipo-voti" class="flex flex-col gap-1 opacity-40 pointer-events-none">
+                            <label class="text-[10px] font-bold text-zinc-500 uppercase">Opzioni Simulazione Anno</label>
+                            <select id="adm-input-sub-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                                <option value="A">A. Solo Orali (Date diverse)</option>
+                                <option value="B">B. Solo Scritti (Stessa data)</option>
+                                <option value="C">C. Tutti i Voti</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="container-adm-periodo" class="hidden bg-[#1c1e22] p-3 rounded-lg border border-zinc-800/80 space-y-2">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase block">Seleziona Periodo</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                                <input type="checkbox" id="chk-primo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo Primo quadrimestre
+                            </label>
+                            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                                <input type="checkbox" id="chk-secondo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo secondo quadrimestre
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="container-adm-data-singola" class="flex flex-col gap-1 max-w-xs">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase">Data Specifica (Vuoto per casuale)</label>
+                        <input type="date" id="adm-input-specific-date" class="px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white focus:outline-none">
+                    </div>
                 </div>
             </div>
 
-            <!-- FASE 3: TIPOLOGIA GENERAZIONE -->
-<div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-4">
-    <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block">Fase 3: Tipologia di Generazione</span>
-    
-    <div class="grid grid-cols-2 gap-3">
-        <div class="flex flex-col gap-1">
-            <label class="text-[10px] font-bold text-zinc-500 uppercase">Modalità</label>
-            <select id="adm-input-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
-                <option value="1">1. Voto Singolo</option>
-                <option id="opt-mode-all-year" value="2" disabled>2. Voti tutto l'anno</option>
-            </select>
-        </div>
-        
-        <div id="container-adm-tipo-voti" class="flex flex-col gap-1 opacity-40 pointer-events-none">
-            <label class="text-[10px] font-bold text-zinc-500 uppercase">Opzioni Simulazione Anno</label>
-            <select id="adm-input-sub-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
-                <option value="A">A. Solo Orali (Date casuali diverse per ognuno)</option>
-                <option value="B">B. Solo Scritti (Stessa data per tutta la classe)</option>
-                <option value="C">C. Tutti i Voti</option>
-            </select>
-        </div>
-    </div>
-
-    <div id="container-adm-periodo" class="hidden bg-[#1c1e22] p-3 rounded-lg border border-zinc-800/80 space-y-2">
-        <label class="text-[10px] font-bold text-zinc-500 uppercase block">Seleziona Periodo</label>
-        <div class="flex gap-4">
-            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                <input type="checkbox" id="chk-primo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo Primo quadrimestre
-            </label>
-            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                <input type="checkbox" id="chk-secondo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo secondo quadrimestre
-            </label>
-        </div>
-    </div>
-
-    <div id="container-adm-data-singola" class="flex flex-col gap-1 max-w-xs">
-        <label class="text-[10px] font-bold text-zinc-500 uppercase">Data Specifica (Lascia vuoto per data casuale)</label>
-        <input type="date" id="adm-input-specific-date" class="px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white focus:outline-none">
-    </div>
-</div>
-            <!-- FASE 4: SELEZIONE FASCE DI MERITO (DINAMICA ED INDIVIDUALE) -->
-            <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
-                <span class="text-xs font-black uppercase text-zinc-400 tracking-wider block">Fase 4: Configurazione Fasce di Merito</span>
-                
-                <!-- Opzione Studente Singolo -->
-                <div id="container-adm-fascia-singolo" class="flex flex-col gap-1 max-w-xs">
-                    <label class="text-[10px] font-bold text-zinc-500 uppercase">Fascia Studente Selezionato</label>
-                    <select id="adm-input-pool-studente" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
-                        <option value="1">1. Alto (8 - 10)</option>
-                        <option value="2" selected>2. Sufficiente / Buono (6 - 7.5)</option>
-                        <option value="3">3. Insufficiente (4 - 6-)</option>
-                        <option value="4">4. Grave (3 - 4.5)</option>
-                        <option value="5">5. Penoso (0 - 2.5)</option>
-                    </select>
+            <div id="adm-step-3" class="adm-wizard-step hidden space-y-3">
+                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 3: Seleziona Materie Attive</span>
+                <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                            <input type="radio" name="adm-materia-scope" value="singola" checked onchange="window.handleAdminGradeScopeChange()"> Solo materia corrente
+                        </label>
+                        <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                            <input type="radio" name="adm-materia-scope" value="tutte" onchange="window.handleAdminGradeScopeChange()"> Tutte le materie della classe
+                        </label>
+                    </div>
+                    <div id="adm-materie-checkboxes-container" class="grid grid-cols-1 gap-1.5 max-h-[140px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 text-xs custom-scrollbar">
+                    </div>
                 </div>
+            </div>
 
-                <!-- Opzione Tutta la Classe (Parte 2 Dinamica) -->
-                <div id="container-adm-fasce-classe" class="hidden flex flex-col gap-2">
-                    <label class="text-[10px] font-bold text-amber-500 uppercase block mb-1">Fascia Personalizzata per ciascun componente:</label>
-                    <div id="adm-studenti-fasce-container" class="space-y-2 max-h-[180px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 custom-scrollbar">
-                        <!-- Generato dinamicamente via JS -->
+            <div id="adm-step-4" class="adm-wizard-step hidden space-y-3">
+                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 4: Configurazione Fasce di Merito</span>
+                <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
+                    <div id="container-adm-fascia-singolo" class="flex flex-col gap-1 max-w-xs">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase">Fascia Studente Selezionato</label>
+                        <select id="adm-input-pool-studente" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                            <option value="1">1. Alto (8 - 10)</option>
+                            <option value="2" selected>2. Sufficiente / Buono (6 - 7.5)</option>
+                            <option value="3">3. Insufficiente (4 - 6-)</option>
+                            <option value="4">4. Grave (3 - 4.5)</option>
+                            <option value="5">5. Penoso (0 - 2.5)</option>
+                        </select>
+                    </div>
+
+                    <div id="container-adm-fasce-classe" class="hidden flex flex-col gap-2">
+                        <label class="text-[10px] font-bold text-amber-500 uppercase block mb-1">Fascia Personalizzata per ciascun componente:</label>
+                        <div id="adm-studenti-fasce-container" class="space-y-2 max-h-[160px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 custom-scrollbar text-xs">
+                        </div>
                     </div>
                 </div>
             </div>
 
         </div>
 
-        <div class="shrink-0 pt-3 border-t border-zinc-800 flex justify-between gap-4">
-            <button onclick="window.closeAdminGradeModal()" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all">
+        <div class="shrink-0 pt-3 border-t border-zinc-800 flex justify-between gap-3">
+            <button id="btn-adm-wizard-back" onclick="window.navigateAdminWizard(-1)" class="hidden px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all">
+                Indietro
+            </button>
+            <button id="btn-adm-wizard-cancel" onclick="window.closeAdminGradeModal()" class="px-4 py-2 bg-zinc-800/60 hover:bg-zinc-800 text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all">
                 Annulla
             </button>
-            <button onclick="window.executeAdminGradeGeneration()" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-[#1c1e22] font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all">
+            <button id="btn-adm-wizard-next" onclick="window.navigateAdminWizard(1)" class="px-5 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all ml-auto">
+                Avanti
+            </button>
+            <button id="btn-adm-wizard-submit" onclick="window.executeAdminGradeGeneration()" class="hidden px-5 py-2 bg-amber-500 hover:bg-amber-600 text-[#1c1e22] font-black text-xs uppercase tracking-wider rounded-xl shadow-lg transition-all ml-auto">
                 Genera e Sincronizza
             </button>
         </div>
     </div>
 </div>
 
-<!-- Pulsante per attivare/nascondere le medie dei quadrimestri -->
-<div class="flex justify-end px-4">
+
+<!-- Barra dei controlli sopra la tabella -->
+<div class="flex justify-between items-center px-4 mb-2">
+    <!-- Qui verrà iniettato il tasto Reset solo per gli Admin -->
+    <div id="admin-reset-container"></div>
+
+    <!-- Pulsante Medie-->
     <button onclick="window.toggleMedieQuad()" class="bg-zinc-800 text-zinc-400 text-[9px] font-black uppercase px-3 py-1 rounded-lg hover:text-white transition-all border border-zinc-700">
         📊 <span id="btn-text-medie">Mostra Medie Quadrimestri</span>
     </button>
@@ -2656,12 +2668,13 @@ if (role === 'studente') {
   }
 };
 		
- async function loadStudentRecords(studentId) {
+async function loadStudentRecords(studentId) {
     const calElement = document.getElementById('global-calendar');
     if (!calElement || !studentId) return;
 
     onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId), d => {
         const tbody = document.getElementById('registro-voti-body');
+        const resetContainer = document.getElementById('admin-reset-container'); // <--- PRENDIAMO IL NUOVO DIV
         if (!tbody) return;
         
         tbody.innerHTML = "";
@@ -2701,6 +2714,23 @@ if (role === 'studente') {
             resMediaElem.style.color = valoreMedia === 0 ? "#71717a" : (valoreMedia < 6 ? "#dc2626" : "#16a34a");
         }
 
+       const isAdminOrPreside = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole);
+        
+        if (resetContainer) {
+            if (isAdminOrPreside) {
+                resetContainer.innerHTML = `
+                    <button onclick="window.deleteAllGradesAllSubjects('${studentId}')" 
+                            class="px-3 py-1.5 bg-red-900/20 hover:bg-red-600 text-red-500 hover:text-white border border-red-600/30 rounded-xl transition-all text-[9px] font-black uppercase flex items-center gap-2 shadow-sm">
+                        🗑️ Reset Totale Voti ${aySelezionato}
+                    </button>`;
+            } else {
+                resetContainer.innerHTML = ""; // Svuota se non è admin
+            }
+        }
+
+        // Inizializziamo vHtml vuoto (non serve più la riga resetRowHtml qui)
+        let vHtml = "";
+
         // 4. Identificazione Materie
         let materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) 
             ? (window.currentUserData?.materie || []) 
@@ -2708,8 +2738,6 @@ if (role === 'studente') {
 
         // --- STABILIZZAZIONE LAYOUT: Ordina alfabeticamente l'elenco delle materie ---
         materie.sort((a, b) => a.localeCompare(b));
-
-        let vHtml = "";
         
         // 5. Render Materie Principali
         materie.forEach(m => {
@@ -2764,21 +2792,7 @@ if (role === 'studente') {
             </tr>`;
         });
 
-        const isAdminOrPreside = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole);
 
-        // Se l'utente ha i permessi, generiamo una riga speciale in fondo alla tabella che fa da "Reset Globale"
-        if (isAdminOrPreside) {
-            vHtml += `
-            <tr class="bg-red-950/10 border-b border-zinc-800/50">
-                <td colspan="4" class="p-2 text-right">
-                    <button onclick="window.deleteAllGradesAllSubjects('${studentId}')" 
-                            class="px-2 py-1 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/50 rounded transition-all text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5"
-                            title="Svuota completamente il registro voti di questo stabile studente per l'anno corrente">
-                        🗑️ 
-                    </button>
-                </td>
-            </tr>`;
-        }
 
         // 6. Sezione "Altre Materie" (per Prof/Preside)
         if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
@@ -7897,6 +7911,65 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
     } catch (error) {
         console.error("Errore durante il reset totale dei voti:", error);
         alert("❌ Errore durante l'azzeramento dei voti.");
+    }
+};
+
+window.currentAdminStep = 1;
+
+window.navigateAdminWizard = (direction) => {
+    const totalSteps = 4;
+    
+    // Nascondi step precedente
+    document.getElementById(`adm-step-${window.currentAdminStep}`).classList.replace('block', 'hidden');
+    
+    // Aggiorna contatore
+    window.currentAdminStep += direction;
+    if (window.currentAdminStep < 1) window.currentAdminStep = 1;
+    if (window.currentAdminStep > totalSteps) window.currentAdminStep = totalSteps;
+    
+    // Mostra nuovo step
+    document.getElementById(`adm-step-${window.currentAdminStep}`).classList.replace('hidden', 'block');
+    
+    // Aggiorna badge dell'header
+    document.getElementById('adm-wizard-step-indicator').innerText = `Passo ${window.currentAdminStep} di ${totalSteps}`;
+    
+    // Gestione visibilità pulsanti nel footer
+    const btnBack = document.getElementById('btn-adm-wizard-back');
+    const btnCancel = document.getElementById('btn-adm-wizard-cancel');
+    const btnNext = document.getElementById('btn-adm-wizard-next');
+    const btnSubmit = document.getElementById('btn-adm-wizard-submit');
+    
+    if (window.currentAdminStep === 1) {
+        btnBack.classList.add('hidden');
+        btnCancel.classList.remove('hidden');
+    } else {
+        btnBack.classList.remove('hidden');
+        btnCancel.classList.add('hidden');
+    }
+    
+    if (window.currentAdminStep === totalSteps) {
+        btnNext.classList.add('hidden');
+        btnSubmit.classList.remove('hidden');
+    } else {
+        btnNext.classList.remove('hidden');
+        btnSubmit.classList.add('hidden');
+    }
+};
+
+// Reset dello step iniziale alla chiusura/riapertura del modale
+const originalCloseModal = window.closeAdminGradeModal;
+window.closeAdminGradeModal = () => {
+    if (typeof originalCloseModal === 'function') originalCloseModal();
+    // Riporta il wizard al passo 1 per la prossima apertura
+    if (window.currentAdminStep !== 1) {
+        document.getElementById(`adm-step-${window.currentAdminStep}`).classList.replace('block', 'hidden');
+        window.currentAdminStep = 1;
+        document.getElementById('adm-step-1').classList.replace('hidden', 'block');
+        document.getElementById('adm-wizard-step-indicator').innerText = `Passo 1 di 4`;
+        document.getElementById('btn-adm-wizard-back').classList.add('hidden');
+        document.getElementById('btn-adm-wizard-cancel').classList.remove('hidden');
+        document.getElementById('btn-adm-wizard-next').classList.remove('hidden');
+        document.getElementById('btn-adm-wizard-submit').classList.add('hidden');
     }
 };
 
