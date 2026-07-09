@@ -2741,6 +2741,22 @@ if (resMediaElem) {
     </tr>`;
 });
 
+const isAdminOrPreside = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole);
+
+// Se l'utente ha i permessi, generiamo una riga speciale in cima alla tabella che fa da "Reset Globale"
+if (isAdminOrPreside) {
+    vHtml += `
+    <tr class="bg-red-950/10 border-b border-zinc-800/50">
+        <td colspan="4" class="p-2 text-right">
+            <button onclick="window.deleteAllGradesAllSubjects('${studentId}')" 
+                    class="px-2 py-1 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/50 rounded transition-all text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5"
+                    title="Svuota completamente il registro voti di questo studente per l'anno corrente">
+                🗑️ Elimina tutti i voti 
+            </button>
+        </td>
+    </tr>`;
+}
+
         // 6. Sezione "Altre Materie" (per Prof/Preside)
         if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
             const materieNormalizzate = materie.map(m => m.toLowerCase().trim());
@@ -7705,14 +7721,12 @@ window.saveCalendarToFirestore = async () => {
     window.closeCalendarModal();
 }; 
 
-// 1. CANCELLA TUTTI I VOTI DI TUTTE LE MATERIE (Solo per l'anno scolastico corrente)
 window.deleteAllGradesAllSubjects = async (studentId) => {
-    // Recupera l'anno scolastico attivo (es: "2023/2024")
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // Recupera l'anno scolastico attivo (es: "2020/2021")
+    const ay = document.getElementById('current-academic-year')?.innerText.replace('A.S. ', '').trim() || "";
     
-    // Controllo permessi centralizzato (Admin e Preside possono tutto)
     if (![ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole)) {
-        return alert("⚠️ Azione non autorizzata. Solo gli amministratori o il Preside possono azzerare l'intero anno.");
+        return alert("⚠️ Azione non autorizzata. Solo gli amministratori o il Preside possono azzerare i voti.");
     }
 
     const conferma = confirm(`⚠️ ATTENZIONE: Sei sicuro di voler ELIMINARE DEFINITIVAMENTE TUTTI i voti di TUTTE le materie dello studente per l'Anno Scolastico ${ay}?\nQuesta azione non si può annullare.`);
@@ -7728,10 +7742,9 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
         
         // Filtriamo tenendo SOLO i voti che NON appartengono all'anno scolastico corrente
         const votiDaMantenere = tuttiIVoti.filter(v => v.anno !== ay);
-        // Isoliamo i voti cancellati per poterli ripulire dall'agenda giornaliera
         const votiDaCancellare = tuttiIVoti.filter(v => v.anno === ay);
 
-        // 1. Aggiorna il documento dei voti dello studente
+        // 1. Aggiorna il documento dello studente rimuovendo i voti dell'anno selezionato
         await setDoc(studentRef, { voti: votiDaMantenere }, { merge: true });
 
         // 2. Ripulisci l'agenda giornaliera (daily_voti) per ciascun voto rimosso
@@ -7741,10 +7754,9 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
                 const dateKey = `${aaaa}-${mm}-${gg}`;
                 const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
                 
-                // Rimuove l'istanza specifica dall'array dell'agenda giornaliera
                 await setDoc(agendaRef, {
                     daily_voti: arrayRemove({
-                        studente: document.getElementById('res-student-name').innerText,
+                        studente: document.getElementById('res-student-name')?.innerText || '',
                         studenteId: studentId,
                         voto: v.voto,
                         materia: v.materia,
@@ -7756,49 +7768,11 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
 
         alert(`🗑️ Piazza pulita completata! Tutti i voti dell'A.S. ${ay} sono stati rimossi.`);
         
-        // Ricarica la tabella dei record graficamente
         if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
 
     } catch (error) {
         console.error("Errore durante il reset totale dei voti:", error);
         alert("❌ Errore durante l'azzeramento dei voti.");
-    }
-};
-
-// 2. CANCELLA TUTTI I VOTI DI TUTTE LE MATERIE *E* AZZERA LE MATERIE ASSEGNATE (Solo per l'anno corrente)
-window.hardResetYearRecords = async (studentId) => {
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    
-    if (![ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole)) {
-        return alert("⚠️ Azione non autorizzata.");
-    }
-
-    const conferma = confirm(`🚨 RESET TOTALE: Vuoi cancellare TUTTI i voti E TUTTE le materie registrate per questo studente nell'A.S. ${ay}?\nIl profilo tornerà vuoto per questo anno.`);
-    if (!conferma) return;
-
-    try {
-        // Prima svuotiamo tutti i voti usando la logica precedente
-        const studentRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-        const studentSnap = await getDoc(studentRef);
-
-        if (studentSnap.exists()) {
-            const tuttiIVoti = studentSnap.data().voti || [];
-            const votiDaMantenere = tuttiIVoti.filter(v => v.anno !== ay);
-            await setDoc(studentRef, { voti: votiDaMantenere }, { merge: true });
-        }
-
-        // Se nel tuo DB le materie per anno sono salvate dentro il documento dello studente (es. un oggetto o array per anno)
-        // puoi resettare il campo specifico qui. Ad esempio, se hai un campo 'materie_per_anno':
-        // const updateObj = {};
-        // updateObj[`materie_attive_${ay.replace('/', '_')}`] = [];
-        // await updateDoc(studentRef, updateObj);
-
-        alert(`🚨 Hard Reset completato per l'A.S. ${ay}. Voti e registri ripuliti.`);
-        if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
-
-    } catch (error) {
-        console.error("Errore nell'hard reset:", error);
-        alert("❌ Errore durante il reset completo.");
     }
 };
 
