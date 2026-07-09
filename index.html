@@ -1265,6 +1265,7 @@ main {
 </select>
     </div>
 </div>
+
     <!-- Header Studente (Card) -->
     <div id="student-header" class="hidden bg-zinc-900 p-6 rounded-[24px] border border-zinc-800 shadow-sm flex justify-between items-center">
         <div class="flex items-center gap-4">
@@ -2655,7 +2656,7 @@ if (role === 'studente') {
   }
 };
 		
-        async function loadStudentRecords(studentId) {
+ async function loadStudentRecords(studentId) {
     const calElement = document.getElementById('global-calendar');
     if (!calElement || !studentId) return;
 
@@ -2668,7 +2669,7 @@ if (role === 'studente') {
         
         // 1. Filtro Anno Scolastico
         const voti = data.voti || [];
-        const dateVal = new Date(calElement.value); // <--- CORRETTO: calElement invece di inputCal
+        const dateVal = new Date(calElement.value);
         const yearVal = dateVal.getFullYear();
         const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
         
@@ -2681,7 +2682,7 @@ if (role === 'studente') {
             return vAy === aySelezionato;
         });
 
-        // 2. Ordinamento per data
+        // 2. Ordinamento GENERALE per data (utile come fallback di base)
         votiTuttoAnno.sort((a, b) => {
             const [dayA, monthA, yearA] = a.data.split('/').map(Number);
             const [dayB, monthB, yearB] = b.data.split('/').map(Number);
@@ -2689,84 +2690,95 @@ if (role === 'studente') {
         });
 
         // 3. Calcolo Media Globale (ESCLUDENDO RELIGIONE)
-const votiPerMediaG = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() !== 'religione');
-const sommaG = votiPerMediaG.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0);
-const mediaG = votiPerMediaG.length > 0 ? (sommaG / votiPerMediaG.length).toFixed(1) : "0.0";
+        const votiPerMediaG = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() !== 'religione');
+        const sommaG = votiPerMediaG.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0);
+        const mediaG = votiPerMediaG.length > 0 ? (sommaG / votiPerMediaG.length).toFixed(1) : "0.0";
 
-const resMediaElem = document.getElementById('res-student-media');
-if (resMediaElem) { 
-    resMediaElem.innerText = mediaG;
-    const valoreMedia = parseFloat(mediaG);
-    resMediaElem.style.color = valoreMedia === 0 ? "#71717a" : (valoreMedia < 6 ? "#dc2626" : "#16a34a");
-}
+        const resMediaElem = document.getElementById('res-student-media');
+        if (resMediaElem) { 
+            resMediaElem.innerText = mediaG;
+            const valoreMedia = parseFloat(mediaG);
+            resMediaElem.style.color = valoreMedia === 0 ? "#71717a" : (valoreMedia < 6 ? "#dc2626" : "#16a34a");
+        }
 
         // 4. Identificazione Materie
-        const materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) 
+        let materie = (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) 
             ? (window.currentUserData?.materie || []) 
             : [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))];
 
+        // --- STABILIZZAZIONE LAYOUT: Ordina alfabeticamente l'elenco delle materie ---
+        materie.sort((a, b) => a.localeCompare(b));
+
         let vHtml = "";
         
-// 5. Render Materie Principali
+        // 5. Render Materie Principali
         materie.forEach(m => {
-    const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
-    const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
-    const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-    
-    // Calcolo medie separate
-    const avgQ1 = q1.length ? (q1.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q1.length).toFixed(1) : "-";
-    const avgQ2 = q2.length ? (q2.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q2.length).toFixed(1) : "-";
-    const avgTotal = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
+            const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
+            
+            // Garantisce che i voti della riga siano in perfetto ordine cronologico dal più vecchio al più recente
+            m_voti.sort((a, b) => {
+                const [dayA, monthA, yearA] = a.data.split('/').map(Number);
+                const [dayB, monthB, yearB] = b.data.split('/').map(Number);
+                return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+            });
 
-    // --- NUOVO: Controllo permessi per il tasto Reset ---
-    const canReset = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole) || 
-                     (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
+            const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
+            const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
+            
+            // Calcolo medie separate
+            const avgQ1 = q1.length ? (q1.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q1.length).toFixed(1) : "-";
+            const avgQ2 = q2.length ? (q2.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q2.length).toFixed(1) : "-";
+            const avgTotal = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
 
-    vHtml += `
-    <tr class="group">
-        <td class="subject-column">
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
-                    ${canReset ? `
-                        <button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" 
-                                class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-600 transition-all text-[10px]" 
-                                title="Elimina tutti i voti di questa materia">
-                            🗑️
-                        </button>` : ''}
-                </div>
-                <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${m_voti[0]?.prof || 'N.D.'}</span>
-            </div>
-        </td>
-        <td class="text-center p-2">
-            <div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
-            <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ1}</div>
-        </td>
-        <td class="text-center p-2">
-            <div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
-            <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ2}</div>
-        </td>
-        <td class="text-right">
-            <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-green-600'}">${avgTotal}</span>
-        </td>
-    </tr>`;
-});
+            // Controllo permessi per il tasto Reset
+            const canReset = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole) || 
+                             (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
 
-const isAdminOrPreside = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole);
+            vHtml += `
+            <tr class="group">
+                <td class="subject-column">
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="font-black text-zinc-100 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
+                            ${canReset ? `
+                                <button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" 
+                                        class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-600 transition-all text-[10px]" 
+                                        title="Elimina tutti i voti di questa materia">
+                                    🗑️
+                                </button>` : ''}
+                        </div>
+                        <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${m_voti[0]?.prof || 'N.D.'}</span>
+                    </div>
+                </td>
+                <td class="text-center p-2">
+                    <div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
+                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ1}</div>
+                </td>
+                <td class="text-center p-2">
+                    <div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
+                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ2}</div>
+                </td>
+                <td class="text-right">
+                    <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-green-600'}">${avgTotal}</span>
+                </td>
+            </tr>`;
+        });
 
-// Se l'utente ha i permessi, generiamo una riga speciale in cima alla tabella che fa da "Reset Globale"
-if (isAdminOrPreside) {
-    vHtml += `
-    <tr class="bg-red-950/10 border-b border-zinc-800/50">
-        <td colspan="4" class="p-2 text-right">
-            <button onclick="window.deleteAllGradesAllSubjects('${studentId}')" 
-                    class="px-2 py-1 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/50 rounded transition-all text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5"
-                    title="Svuota completamente il registro voti di questo studente per l'anno corrente">
-                🗑️ 
-            </button>
-        </td>
-    </tr>`;
-}
+        const isAdminOrPreside = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole);
+
+        // Se l'utente ha i permessi, generiamo una riga speciale in fondo alla tabella che fa da "Reset Globale"
+        if (isAdminOrPreside) {
+            vHtml += `
+            <tr class="bg-red-950/10 border-b border-zinc-800/50">
+                <td colspan="4" class="p-2 text-right">
+                    <button onclick="window.deleteAllGradesAllSubjects('${studentId}')" 
+                            class="px-2 py-1 bg-red-950/40 hover:bg-red-900/60 text-red-400 border border-red-900/50 rounded transition-all text-[10px] font-bold uppercase tracking-wide inline-flex items-center gap-1.5"
+                            title="Svuota completamente il registro voti di questo stabile studente per l'anno corrente">
+                        🗑️ 
+                    </button>
+                </td>
+            </tr>`;
+        }
 
         // 6. Sezione "Altre Materie" (per Prof/Preside)
         if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
@@ -2774,10 +2786,21 @@ if (isAdminOrPreside) {
             const altreMaterie = [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))]
                 .filter(m => !materieNormalizzate.includes(m));
 
+            // --- STABILIZZAZIONE LAYOUT: Ordina alfabeticamente anche le altre materie ---
+            altreMaterie.sort((a, b) => a.localeCompare(b));
+
             if(altreMaterie.length > 0) {
                 vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[10px] font-black uppercase text-center text-zinc-500">Altre Materie</td></tr>`;
                 altreMaterie.forEach(m => {
                     const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m);
+                    
+                    // Ordina i voti delle altre materie in ordine cronologico
+                    m_voti.sort((a, b) => {
+                        const [dayA, monthA, yearA] = a.data.split('/').map(Number);
+                        const [dayB, monthB, yearB] = b.data.split('/').map(Number);
+                        return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
+                    });
+
                     const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
                     const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
                     const avg = (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1);
@@ -2792,79 +2815,80 @@ if (isAdminOrPreside) {
             }
         }
 
-                document.getElementById('registro-voti-body').innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
+        tbody.innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
 
-        // --- REINSERISCI QUESTO PEZZO QUI SOTTO ---
+        // 7. Render Elementi Esterni (Nome Pagella e Aggiornamento Pagella)
         if(document.getElementById('pagella-student-name')) {
             const student = window.allStudents.find(s => s.id === studentId);
             document.getElementById('pagella-student-name').innerText = student ? student.name : "Studente";
         }
         
-        // Questa è quella che ti serve per far apparire la pagella!
         if (typeof window.renderPagella === 'function') {
             window.renderPagella(voti, aySelezionato); 
         }
 
-                // Note (Gestione Modifica/Elimina)
-                const originalNotes = data.note || [];
-                const filteredNotes = originalNotes.filter(n => {
-                let nAy = n.anno;
-                if(!nAy && n.data) {
+        // 8. Sezione Note (Disciplinari, Mandati e Colloqui)
+        const originalNotes = data.note || [];
+        const filteredNotes = originalNotes.filter(n => {
+            let nAy = n.anno;
+            if(!nAy && n.data) {
                 const p = n.data.split('/');
                 nAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-                }
-                return nAy === aySelezionato;
-                });
-                const reversedNotes = [...filteredNotes].reverse();
-                document.getElementById('notes-list-global').innerHTML = reversedNotes.map((n) => {
-    const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
-    
-    // --- NUOVA LOGICA TIPOLOGIE ---
-    const isMandato = n.tipo === 'mandato';
-    const isColloquio = n.tipo === 'colloquio';
-    
-    // Definiamo classi e scritte in base al tipo
-    let cardClass = 'note-accent-disciplinare';
-    let badgeClass = 'badge-disciplinare';
-    let etichetta = '⚠️ Nota Disciplinare';
+            }
+            return nAy === aySelezionato;
+        });
+        
+        const reversedNotes = [...filteredNotes].reverse();
+        const notesContainer = document.getElementById('notes-list-global');
+        if (notesContainer) {
+            notesContainer.innerHTML = reversedNotes.map((n) => {
+                const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
+                
+                const isMandato = n.tipo === 'mandato';
+                const isColloquio = n.tipo === 'colloquio';
+                
+                let cardClass = 'note-accent-disciplinare';
+                let badgeClass = 'badge-disciplinare';
+                let etichetta = '⚠️ Nota Disciplinare';
 
-    if (isMandato) {
-        cardClass = 'note-accent-mandato';
-        badgeClass = 'badge-mandato';
-        etichetta = '⚡ Mandato Presidenziale';
-    } else if (isColloquio) {
-        cardClass = 'note-accent-counselor'; // Dovrai aggiungere questa classe CSS o usarne una esistente
-        badgeClass = 'badge-counselor';       // Dovrai aggiungere questa classe CSS
-        etichetta = '🧠 Colloquio di Supporto';
-    }
-    
-    return `
-    <div class="note-card ${cardClass} group">
-        <div class="flex justify-between items-start mb-3">
-            <div class="flex flex-col gap-1">
-                <span class="note-badge ${badgeClass} w-fit">
-                    ${etichetta}
-                </span>
-                <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">${n.data}</span>
-            </div>
-            ${renderNoteActions(n, realIdx, studentId)}
-        </div>
-        
-        <p id="note-text-${realIdx}" class="text-sm text-zinc-700 leading-relaxed font-medium italic">
-            "${n.testo}"
-        </p>
-        
-        <div class="mt-4 pt-3 border-t border-zinc-100 flex justify-between items-center">
-            <p class="text-[9px] font-black uppercase text-zinc-400">
-                Emesso da: <span class="text-zinc-900">${n.prof || n.autore}</span>
-            </p>
-        </div>
-    </div>`;
-}).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
-                    <p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p>
-                 </div>`;
-            });
+                if (isMandato) {
+                    cardClass = 'note-accent-mandato';
+                    badgeClass = 'badge-mandato';
+                    etichetta = '⚡ Mandato Presidenziale';
+                } else if (isColloquio) {
+                    cardClass = 'note-accent-counselor';
+                    badgeClass = 'badge-counselor';
+                    etichetta = '🧠 Colloquio di Supporto';
+                }
+                
+                return `
+                <div class="note-card ${cardClass} group">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex flex-col gap-1">
+                            <span class="note-badge ${badgeClass} w-fit">
+                                ${etichetta}
+                            </span>
+                            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">${n.data}</span>
+                        </div>
+                        ${renderNoteActions(n, realIdx, studentId)}
+                    </div>
+                    
+                    <p id="note-text-${realIdx}" class="text-sm text-zinc-700 leading-relaxed font-medium italic">
+                        "${n.testo}"
+                    </p>
+                    
+                    <div class="mt-4 pt-3 border-t border-zinc-100 flex justify-between items-center">
+                        <p class="text-[9px] font-black uppercase text-zinc-400">
+                            Emesso da: <span class="text-zinc-900">${n.prof || n.autore}</span>
+                        </p>
+                    </div>
+                </div>`;
+            }).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
+                                <p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p>
+                             </div>`;
         }
+    });
+}
 
         function renderVotoTag(v, studentId) {
     const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
@@ -7294,7 +7318,7 @@ window.handleAdminGradeModeChange = () => {
     }
 };
 
-// --- MASTER: ESECUZIONE DELLA GENERAZIONE DEFINITIVA (CORRETTA) ---
+// --- MASTER: ESECUZIONE DELLA GENERAZIONE DEFINITIVA (CON SWITCH VISIVO) ---
 window.executeAdminGradeGeneration = async () => {
     const targetClass = window.selectedClass;
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
@@ -7307,19 +7331,21 @@ window.executeAdminGradeGeneration = async () => {
     const q1Enabled = document.getElementById('chk-primo-quad').checked;
     const q2Enabled = document.getElementById('chk-secondo-quad').checked;
 
+    if (mode === '2' && !q1Enabled && !q2Enabled) {
+        return alert("⚠️ Errore: Seleziona almeno un quadrimestre per avviare la generazione!");
+    }
+
     const checkedBoxes = document.querySelectorAll('.adm-checkbox-materia:checked');
     const subjectsToProcess = Array.from(checkedBoxes).map(cb => cb.value);
 
     if (subjectsToProcess.length === 0) return alert("⚠️ Seleziona almeno una materia.");
 
-    // Helper per formattare la data da YYYY-MM-DD a GG/MM/AAAA
     const formatInputDateFromValue = (val) => {
         if (!val) return null;
         const [y, m, d] = val.split('-');
         return `${d}/${m}/${y}`;
     };
 
-    // Caricamento date bloccate
     try {
         const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', currentYearDocId);
         const calSnap = await getDoc(calRef);
@@ -7379,62 +7405,64 @@ window.executeAdminGradeGeneration = async () => {
     if (targetScope === 'singolo') mappaFasce[window.selectedStudentId] = document.getElementById('adm-input-pool-studente').value;
     else document.querySelectorAll('.adm-student-pool-selector').forEach(sel => mappaFasce[sel.dataset.studentId] = sel.value);
 
-   for (const matKey of subjectsToProcess) {
-        // Recuperiamo le date specifiche inserite per QUESTA materia nel modal
-        const getMatDate = (type) => {
-            const input = document.querySelector(`input[data-mat="${matKey}"][data-date-type="${type}"]`);
-            if (!input || !input.value) return null;
-            const [y, m, d] = input.value.split('-');
-            return `${d}/${m}/${y}`;
-        };
-
-        const matSpecificDates = {
-            q1_1: getMatDate('q1_1'),
-            q1_2: getMatDate('q1_2'),
-            q2_1: getMatDate('q2_1'),
-            q2_2: getMatDate('q2_2')
-        };
-
-        if (mode === '1') {
-            // --- VOTO SINGOLO ---
-            let dSel = formatInputDate('adm-input-specific-date') || generateSafeDate(y1, 10);
-            for (const p of targetList) {
-                const pool = getRangePool(mappaFasce[p.id]);
-                await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dSel, "Valutazione", "Orale", matKey);
-            }
+    // --- CICLO PRINCIPALE SUGLI STUDENTI ---
+    for (const p of targetList) {
+        
+        // Forza lo switch dello studente richiamando la logica nativa del "Passa a"
+        if (typeof window.quickSwitchStudent === 'function') {
+            await window.quickSwitchStudent(p.id);
         } else {
-            // --- TUTTO L'ANNO ---
-            if (q1Enabled) {
-                for (let i = 0; i < mesiQ1.length; i++) {
-                    for (const p of targetList) {
-                        const pool = getRangePool(mappaFasce[p.id]);
-                        
-                        // ORALI: Rigeneriamo la data per ogni materia (matKey) così non cadono tutte lo stesso giorno
+            window.selectedStudentId = p.id;
+            if (typeof loadStudentRecords === 'function') await loadStudentRecords(p.id);
+        }
+        
+        // Aggiorna visivamente la select del "Passa a" in alto a destra
+        const selectSwitcher = document.querySelector('.quick-student-switcher');
+        if (selectSwitcher) {
+            selectSwitcher.value = p.id;
+        }
+
+        // Ciclo interno sulle materie
+        for (const matKey of subjectsToProcess) {
+            const getMatDate = (type) => {
+                const input = document.querySelector(`input[data-mat="${matKey}"][data-date-type="${type}"]`);
+                if (!input || !input.value) return null;
+                const [y, m, d] = input.value.split('-');
+                return `${d}/${m}/${y}`;
+            };
+
+            const matSpecificDates = {
+                q1_1: getMatDate('q1_1'),
+                q1_2: getMatDate('q1_2'),
+                q2_1: getMatDate('q2_1'),
+                q2_2: getMatDate('q2_2')
+            };
+
+            const pool = getRangePool(mappaFasce[p.id]);
+
+            if (mode === '1') {
+                let dSel = formatInputDateFromValue(document.getElementById('adm-input-specific-date').value) || generateSafeDate(y1, 10);
+                await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dSel, "Valutazione", "Orale", matKey);
+            } else {
+                if (q1Enabled) {
+                    for (let i = 0; i < mesiQ1.length; i++) {
                         if ((subMode === 'A' || subMode === 'C') && (i === 1 || i === 3)) {
                             const dOral = generateSafeDate(mesiQ1[i].y, mesiQ1[i].m);
                             await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dOral, "Interrogazione", "Orale", matKey);
                         }
-                        
-                        // SCRITTI: Usiamo la data specifica della materia se presente, altrimenti random
                         if ((subMode === 'B' || subMode === 'C')) {
                             if (i === 1) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q1_1 || generateSafeDate(mesiQ1[i].y, mesiQ1[i].m), "1° Verifica Scritta", "Scritto", matKey);
                             if (i === 3) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q1_2 || generateSafeDate(mesiQ1[i].y, mesiQ1[i].m), "2° Verifica Scritta", "Scritto", matKey);
                         }
                     }
                 }
-            }
 
-            if (q2Enabled) {
-                for (let i = 0; i < mesiQ2.length; i++) {
-                    for (const p of targetList) {
-                        const pool = getRangePool(mappaFasce[p.id]);
-                        
-                        // ORALI: Rigeneriamo la data per ogni materia
+                if (q2Enabled) {
+                    for (let i = 0; i < mesiQ2.length; i++) {
                         if ((subMode === 'A' || subMode === 'C') && (i === 1 || i === 3)) {
                             const dOral = generateSafeDate(mesiQ2[i].y, mesiQ2[i].m);
                             await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dOral, "Interrogazione", "Orale", matKey);
                         }
-
                         if ((subMode === 'B' || subMode === 'C')) {
                             if (i === 1) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q2_1 || generateSafeDate(mesiQ2[i].y, mesiQ2[i].m), "1° Verifica Scritta", "Scritto", matKey);
                             if (i === 3) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q2_2 || generateSafeDate(mesiQ2[i].y, mesiQ2[i].m), "2° Verifica Scritta", "Scritto", matKey);
@@ -7443,10 +7471,22 @@ window.executeAdminGradeGeneration = async () => {
                 }
             }
         }
+
+        // Pausa di 300ms per riflettere i cambiamenti a schermo prima del prossimo alunno
+        if (targetScope !== 'singolo') {
+            await new Promise(resolve => setTimeout(resolve, 300));
+        }
     }
+
     alert("✅ Generazione completata con successo!");
     window.closeAdminGradeModal();
-    if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
+    if (window.selectedStudentId) {
+        if (typeof window.quickSwitchStudent === 'function') {
+            window.quickSwitchStudent(window.selectedStudentId);
+        } else if (typeof loadStudentRecords === 'function') {
+            loadStudentRecords(window.selectedStudentId);
+        }
+    }
 };
 
 window.eseguiMigrazioneAgendas = async () => {
