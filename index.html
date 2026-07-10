@@ -2770,10 +2770,24 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
         // --- STABILIZZAZIONE LAYOUT: Ordina alfabeticamente l'elenco delle materie ---
         materie.sort((a, b) => a.localeCompare(b));
         
-        // 5. Render Materie Principali
+	// 5. Render Materie Principali
         materie.forEach(m => {
             const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
             
+            /// Ricerca dinamica del docente assegnato a questa materia per questa classe
+const targetClass = window.selectedClass || (window.allStudents.find(s => s.id === studentId)?.classe);
+const profAssegnato = window.allStudents.find(u => {
+    const r = (u.role || '').toLowerCase();
+    
+    // AGGIORNATO: Ora include esplicitamente anche Preside e Vice Preside
+    const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice');
+    
+    const assegnatoAClasse = Array.isArray(u.classi_docente) && u.classi_docente.includes(targetClass);
+    const insegnaMateria = Array.isArray(u.materie) && u.materie.some(mat => mat.toLowerCase().trim() === m.toLowerCase().trim());
+    return isStaff && assegnatoAClasse && insegnaMateria;
+});
+const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.D.');
+
             // Garantisce che i voti della riga siano in perfetto ordine cronologico dal più vecchio al più recente
             m_voti.sort((a, b) => {
                 const [dayA, monthA, yearA] = a.data.split('/').map(Number);
@@ -2806,7 +2820,7 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
                                     🗑️
                                 </button>` : ''}
                         </div>
-                        <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${m_voti[0]?.prof || 'N.D.'}</span>
+                        <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${nomeDocente}</span>
                     </div>
                 </td>
                 <td class="text-center p-2">
@@ -3912,7 +3926,7 @@ let displayVoto, color;
                         </span>
                     </td>
                 </tr>`;
-        }).join('');s
+        }).join('');
 
         // --- RIGA CONDOTTA (Specifico per Anno) ---
         const votoCondotta = recordData[keyCondotta] || "9"; 
