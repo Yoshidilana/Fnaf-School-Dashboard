@@ -1597,10 +1597,10 @@ main {
             </div>
         </div>
 
-        <div class="bg-zinc-900 shadow-2xl rounded-sm border-t-[12px] border-red-700 p-6 md:p-12 text-zinc-100 relative overflow-hidden">
-            <!-- Filigrana -->
-            <div class="absolute inset-0 opacity-[0.03] pointer-events-none flex items-center justify-center">
-                <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=..." class="w-96">
+<div class="bg-[#161311] shadow-2xl rounded-xl border border-zinc-800 p-6 md:p-12 text-zinc-100 relative overflow-hidden">
+            <!-- Filigrana Fazbear -->
+            <div class="absolute inset-0 opacity-[0.07] pointer-events-none flex items-center justify-center">
+                <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/52671c08-c1d4-443a-871c-2bbc036d9dbe/des8iac-bb88b328-ed1d-4fe5-8bbb-41126ea76588.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi81MjY3MWMwOC1jMWQ0LTQ0M2EtODcxYy0yYmJjMDM2ZDlkYmUvZGVzOGlhYy1iYjg4YjMyOC1lZDFkLTRmZTUtOGJiYi00MTEyNmVhNzY1ODgucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.0my3We1aL2JpznPJEcEvlW15IsVrpslSViVtCuZBomM" class="w-[500px] grayscale brightness-200">
             </div>
 
 <div id="pagella-credits-box" class="hidden mt-8 p-6 bg-zinc-900 border border-red-900/30 rounded-xl shadow-inner">
@@ -2868,8 +2868,8 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
             document.getElementById('pagella-student-name').innerText = student ? student.name : "Studente";
         }
         
-        if (typeof window.renderPagella === 'function') {
-            window.renderPagella(voti, aySelezionato); 
+if (typeof window.renderPagella === 'function') {
+            window.renderPagella(voti, aySelezionato, data); 
         }
 
         // 8. Sezione Note (Disciplinari, Mandati e Colloqui)
@@ -3822,7 +3822,7 @@ window.switchQuad = (q) => {
     if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
 };
 
-window.renderPagella = async (voti, aySelezionato) => {
+window.renderPagella = async (voti, aySelezionato, recordData = null) => {
     const tbody = document.getElementById('pagella-table-body');
     const commentBox = document.getElementById('pagella-comment-box');
     const genderLabel = document.getElementById('pagella-gender-label');
@@ -3832,17 +3832,22 @@ window.renderPagella = async (voti, aySelezionato) => {
     
     if (!tbody || !window.selectedStudentId) return;
 
-    // Usa la variabile globale invece di leggere i bottoni
+    // Se recordData non è passato, lo recuperiamo (fallback)
+    if (!recordData) {
+        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+        const snap = await getDoc(recordRef);
+        recordData = snap.exists() ? snap.data() : {};
+    }
+
     const currentQ = window.currentPagellaQuad; 
     const ayKey = aySelezionato.replace('/', '_');
 
-const student = window.allStudents.find(s => s.id === window.selectedStudentId) || 
+    const student = window.allStudents.find(s => s.id === window.selectedStudentId) || 
                     (window.allUsers ? window.allUsers.find(s => s.id === window.selectedStudentId) : null);
     
     if (student) {
         const role = (student.role || "").toLowerCase();
         if (genderLabel) genderLabel.innerText = role.includes("studentessa") ? "STUDENTESSA" : "STUDENTE";
-        // Utilizziamo l'helper per mostrare il grado (es. 1A, 5A) invece del codice tecnico
         if (classLabel) classLabel.innerText = window.getDisplayClassName(student.classe, false) || "N/A";
         if (nameLabel) nameLabel.innerText = student.name.toUpperCase();
     }
@@ -3850,14 +3855,8 @@ const student = window.allStudents.find(s => s.id === window.selectedStudentId) 
     const isStaff = [ROLES.PRESIDE, ROLES.PROF, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
     if (editBtn) editBtn.classList.toggle('hidden', !isStaff);
 
-
     const votiAnno = voti.filter(v => (v.anno === aySelezionato));
     const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
-
-    // --- 2. RECUPERO RECORD CON CHIAVI SPECIFICHE PER ANNO ---
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
-    const snap = await getDoc(recordRef);
-    const recordData = snap.exists() ? snap.data() : {};
     
     const keyCommentiMaterie = `commenti_materie_${ayKey}_q${currentQ}`;
     const keyCondotta = `condotta_${ayKey}_q${currentQ}`;
@@ -3875,60 +3874,65 @@ const student = window.allStudents.find(s => s.id === window.selectedStudentId) 
             const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
             const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
 
-            let displayVoto, color;
+let displayVoto, color;
             if (m.toLowerCase() === 'religione') {
-    // Recuperiamo l'ultimo voto inserito per il quadrimestre corrente
-    const ultimoVotoRel = m_voti.length ? m_voti[m_voti.length - 1].voto : null;
-    
-    if (!ultimoVotoRel) {
-        displayVoto = "-";
-        color = "text-zinc-400";
-    } else {
-        // Converte l'iniziale (O, D, d...) nel nome completo usando la mappa
-        const giudizioCompleto = MAP_RELIGIONE[ultimoVotoRel] || ultimoVotoRel;
-        displayVoto = giudizioCompleto.toUpperCase();
-        
-        // Colore: Rosso solo per Non Sufficiente (NS)
-        color = (ultimoVotoRel === 'NS') ? 'text-red-600' : 'text-blue-600';
-    }
+                const ultimoVotoRel = m_voti.length ? m_voti[m_voti.length - 1].voto : null;
+                if (!ultimoVotoRel) {
+                    displayVoto = "-";
+                    color = "text-zinc-600";
+                } else {
+                    const giudizioCompleto = MAP_RELIGIONE[ultimoVotoRel] || ultimoVotoRel;
+                    displayVoto = giudizioCompleto.toUpperCase();
+                    color = (ultimoVotoRel === 'NS') ? 'text-red-500' : 'text-amber-500';
+                }
             } else {
                 displayVoto = val !== null ? Math.round(val) : "-";
-                color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-green-600';
+                color = val !== null && Math.round(val) < 6 ? 'text-red-600' : 'text-amber-500';
             }
 
-            const esito = (val === null || m.toLowerCase().trim() === 'religione') ? "" : (Math.round(val) >= 6 ? "👍" : "Debito >:(");
+            const esito = (val === null || m.toLowerCase().trim() === 'religione') ? "" : (Math.round(val) >= 6 ? "PROMOSSO" : "DEBITO");
             const commentoMateria = commentiMaterie[m] || "Nessun commento inserito.";
             const puòModificare = isStaff && (window.userRole !== 'prof' || (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m));
 
             return `
-                <tr class="border-b border-zinc-100 group">
-                    <td class="py-4 font-bold uppercase text-xs">${m.toUpperCase()}</td>
-                    <td class="py-4 text-center font-black text-[10px] ${color} uppercase tracking-tighter">${displayVoto}</td>
-                    <td class="py-4 px-4">
+                <tr class="border-b border-zinc-800/50 group hover:bg-white/5 transition-colors">
+                    <td class="py-6 font-black uppercase text-[11px] tracking-wider text-zinc-300">${m.toUpperCase()}</td>
+                    <td class="py-6 text-center">
+                        <span class="text-2xl font-black ${color} drop-shadow-md">${displayVoto}</span>
+                    </td>
+                    <td class="py-6 px-6">
                         <div class="flex flex-col gap-1">
-                            <p class="text-[10px] text-zinc-600 italic leading-tight">└ *${commentoMateria}*</p>
-                            ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica</button>` : ''}
+                            <p class="text-[11px] text-zinc-400 italic leading-relaxed font-medium">"${commentoMateria}"</p>
+                            ${puòModificare ? `<button onclick="window.editSubjectComment('${m}', ${currentQ})" class="text-[9px] font-black text-red-500 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left mt-1">✏️ Modifica Commento</button>` : ''}
                         </div>
                     </td>
-                    <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${esito}</td>
+                    <td class="py-6 text-right">
+                        <span class="text-[9px] font-black px-2 py-1 rounded border ${val >= 6 ? 'border-green-900/50 text-green-500' : 'border-red-900/50 text-red-500'} uppercase">
+                            ${esito}
+                        </span>
+                    </td>
                 </tr>`;
-        }).join('');
+        }).join('');s
 
         // --- RIGA CONDOTTA (Specifico per Anno) ---
         const votoCondotta = recordData[keyCondotta] || "9"; 
         const isPreside = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
         
-        htmlRighe += `
-            <tr class="bg-zinc-50/50 group">
-                <td class="py-4 font-black uppercase text-xs">CONDOTTA</td>
-                <td class="py-4 text-center font-black text-sm ${parseInt(votoCondotta) < 6 ? 'text-red-600' : 'text-zinc-900'}">${votoCondotta}</td>
-                <td class="py-4 px-4">
+htmlRighe += `
+            <tr class="bg-white/5 group">
+                <td class="py-6 font-black uppercase text-[11px] text-zinc-100">COMPORTAMENTO (CONDOTTA)</td>
+                <td class="py-6 text-center">
+                    <span class="text-2xl font-black ${parseInt(votoCondotta) < 6 ? 'text-red-600' : 'text-amber-500'}">${votoCondotta}</span>
+                </td>
+                <td class="py-6 px-6">
                     <div class="flex flex-col gap-1">
-                        <p class="text-[10px] text-zinc-500 italic leading-tight">Valutazione del comportamento per l'A.S. ${aySelezionato}</p>
-                        ${isPreside ? `<button onclick="window.editCondotta(${currentQ})" class="text-[8px] font-black text-red-600 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left">✏️ Modifica (Solo Dirigenza)</button>` : ''}
+                        <p class="text-[11px] text-zinc-400 italic leading-tight">Valutazione della condotta scolastica e disciplinare.</p>
+                        ${isPreside ? `<button onclick="window.editCondotta(${currentQ})" class="text-[9px] font-black text-red-500 uppercase opacity-0 group-hover:opacity-100 transition-opacity text-left mt-1">✏️ Modifica Condotta</button>` : ''}
                     </div>
                 </td>
-                <td class="py-4 text-right text-[10px] font-bold uppercase text-zinc-400">${parseInt(votoCondotta) < 6 ? 'SI' : 'NO'}</td>
+                <td class="py-6 text-right">
+                    <span class="text-[9px] font-black px-2 py-1 rounded border border-zinc-700 text-zinc-500 uppercase">D'UFFICIO</span>
+                </td>
             </tr>`;
 
         tbody.innerHTML = htmlRighe;
@@ -7126,8 +7130,13 @@ window.saveManualCredits = async (studentId, ay, value) => {
         timestamp: Date.now()
     };
 
-    await setDoc(ref, update, { merge: true });
-    alert("✅ Crediti aggiornati per l'A.S. " + ay);
+    try {
+        await updateDoc(ref, update);
+        alert("✅ Crediti aggiornati per l'A.S. " + ay);
+    } catch (e) {
+        console.error(e);
+        alert("❌ Errore durante il salvataggio dei crediti.");
+    }
     
     // Refresh della vista attuale
     if (document.getElementById('view-pagella').classList.contains('active-view')) {
