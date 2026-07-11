@@ -4170,39 +4170,36 @@ window.startBypass = async function() {
     }
 };
 
-document.addEventListener('keydown', async (e) => {
+document.addEventListener('keydown', (e) => {
     if (e.shiftKey && e.altKey && e.key.toLowerCase() === 'd') {
         
+        // 1. RILEVA IL CONTESTO
         const isLocal = window.location.hostname === "localhost" || 
                         window.location.hostname === "127.0.0.1" || 
                         window.location.protocol === "file:";
         
-        const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
-        const currentIdStr = window.currentUserId ? String(window.currentUserId).trim() : "";
-        const currentUserHash = currentIdStr ? await calcolaSHA256(currentIdStr) : "";
+        const MY_ID = "477766915096313867";
+        const isAuthorized = (window.currentUserId === MY_ID || window.userRole === 'Admin');
 
-        const isAuthorized = (currentUserHash === ADMIN_HASH || currentIdStr === "477766915096313867" || window.userRole === 'Admin');
-
-        // Se sei autorizzato, apriamo DIRETTAMENTE il Golden Debug
+        // 2. LA LOGICA DI ACCESSO: Entra se sei in locale OPPURE se sei autorizzato online
         if (isLocal || isAuthorized) {
-            // Cerca il pannello del Golden Debug centrale
-            const goldenPanel = document.getElementById('golden-debug-panel');
+            const panel = document.getElementById('test-bypass-panel');
+            const btn = document.getElementById('debug-toggle-btn');
             
-            if (goldenPanel) {
-                const isHidden = goldenPanel.style.display === 'none' || goldenPanel.classList.contains('hidden');
+            if (panel && btn) {
+                const isHidden = panel.style.display === 'none' || panel.classList.contains('hidden');
+                
                 if (isHidden) {
-                    goldenPanel.style.setProperty('display', 'block', 'important');
-                    goldenPanel.classList.remove('hidden');
+                    panel.style.setProperty('display', 'block', 'important');
+                    panel.classList.remove('hidden');
+                    btn.style.setProperty('display', 'block', 'important');
+                    btn.classList.remove('hidden');
+                    console.log("🛠️ Debug Mode On " + (isLocal ? "(LOCAL)" : "(AUTH)"));
                 } else {
-                    goldenPanel.style.setProperty('display', 'none', 'important');
-                    goldenPanel.classList.add('hidden');
-                }
-            } else {
-                // Se il pannello non esiste ancora nel DOM perché viene generato da una funzione,
-                // chiama direttamente la funzione che crea il pannello (es. window.mostraGoldenDebug() o simile)
-                if (typeof window.verifyGoldenPass === 'function') {
-                    // Forziamo l'apertura bypassando l'input se la funzione lo permette
-                    window.verifyGoldenPass();
+                    panel.style.setProperty('display', 'none', 'important');
+                    panel.classList.add('hidden');
+                    btn.style.setProperty('display', 'none', 'important');
+                    btn.classList.add('hidden');
                 }
             }
         } else {
@@ -4210,6 +4207,7 @@ document.addEventListener('keydown', async (e) => {
         }
     }
 });
+
 
 // Assicurati che la tua funzione toggleDebug() esistente funzioni ancora
 window.toggleDebug = () => {
@@ -5581,10 +5579,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
-    const currentUserHash = window.currentUserId ? await calcolaSHA256(window.currentUserId) : "";
+    const MY_ID = "477766915096313867";
     const isLocal = window.location.hostname === "localhost" || window.location.protocol === "file:";
-    const isMeOnline = currentUserHash === ADMIN_HASH;
+    const isMeOnline = window.currentUserId === MY_ID;
 
     const panel = document.createElement('div');
     panel.id = 'golden-debug-panel';
@@ -5643,40 +5640,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 };
 
-window.verifyGoldenPass = async function() {
+window.verifyGoldenPass = function() {
     const input = document.getElementById('golden-pass-input');
     const panel = document.getElementById('golden-debug-panel');
-    
-    const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
-    
-    const valoreInserito = input.value.trim();
-    const inputHash = await calcolaSHA256(valoreInserito);
+    const MY_ID = "477766915096313867";
 
-    const isEmergencyBypass = (valoreInserito === "477766915096313867");
-
-    if (inputHash === ADMIN_HASH || isEmergencyBypass) {
-        // 1. Salviamo l'ID così i controlli successivi sanno che sei l'Admin loggato
-        window.currentUserId = valoreInserito;
-        
-        // 2. Rimuoviamo il pannello temporaneo della password
-        if (panel) panel.remove();
-        
-        // 3. Richiamiamo subito la funzione principale. 
-        // Ora che window.currentUserId è impostato, isMeOnline sarà VERO,
-        // il codice salterà la password e caricherà la lista dal database!
-        window.triggerGoldenDebug();
+    if (input.value === MY_ID) {
+        // TRASFORMAZIONE IN DEBUG
+        panel.innerHTML = `
+    <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
+    <div class="flex flex-col gap-2">
+        <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
+                class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
+            🚀 Start Master Bypass
+        </button>
+        <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
+    </div>
+`;
     } else {
-        // Fallimento
         input.value = '';
         input.placeholder = 'INVALID KEY';
         input.classList.add('border-red-600');
-        
-        if (typeof honkSound !== 'undefined') {
-            honkSound.currentTime = 0;
-            honkSound.play().catch(() => {});
-        }
+        // Suono di errore se lo hai
+        if(typeof playHonk === 'function') playHonk(); 
     }
 };
+
 	// --- GESTORE AMMINISTRAZIONE (HUB) ---
 window.hubManager = {
     // 1. MOSTRA LISTA
