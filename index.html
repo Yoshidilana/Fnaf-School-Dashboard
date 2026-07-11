@@ -10,34 +10,59 @@
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
-    /* --- NUOVA PALETTE FNAF BROWN --- */
+/* Configurazione Temi Globale */
+:root {
+    /* TEMA SCURO (Fazbear Default) */
+    --bg-main: #0f0d0c;
+    --bg-surface: #161311;
+    --bg-card: #2a2420;
+    --bg-card-hover: #362e29;
+    --border-color: #3f352f;
+    --text-main: #e7e5e4;
+    --text-muted: #a1a1aa;
+    --text-inverse: #000000;
+    --shadow: rgba(0, 0, 0, 0.5);
+}
+
+body.light-theme {
+    /* TEMA CHIARO */
+    --bg-main: #f4f4f5;         /* Sfondo chiaro tipo YouTube */
+    --bg-surface: #ffffff;      /* Sidebar e Header bianchi */
+    --bg-card: #e4e4e7;         /* Card grigio chiaro per staccare */
+    --bg-card-hover: #d4d4d8;   /* Hover card leggermente più scuro */
+    --border-color: #e4e4e7;    /* Bordi chiari e puliti */
+    --text-main: #18181b;       /* Testo principale scuro/nero per non nascondersi */
+    --text-muted: #71717a;      /* Testi secondari grigi */
+    --text-inverse: #ffffff;    /* Per scritte dentro badge scuri */
+    --shadow: rgba(0, 0, 0, 0.05);
+}
+
+/* --- STRUTTURA GENERALE --- */
 body { 
     font-family: 'Plus Jakarta Sans', sans-serif; 
-    background: #0f0d0c; /* Sfondo principale: Nero Cioccolato */
-    color: #e7e5e4; 
+    background: var(--bg-main); 
+    color: var(--text-main); 
     min-height: 100vh;
     display: flex; 
     flex-direction: column;
     overflow-y: auto;
 }
 
-/* Sfondo principale del contenuto */
 main {
-    background-color: #0f0d0c !important;
+    background-color: var(--bg-main) !important;
 }
 
 /* Sidebar e Header: Leggermente più chiari per dare profondità */
 #main-sidebar, header {
-    background-color: #161311 !important;
-    border-color: #26211e !important;
+    background-color: var(--bg-surface) !important;
+    border-color: var(--border-color) !important;
 }
 
-/* Glassmorphism con tinta più scura */
+/* Glass-light isolato per mantenere lo stesso colore senza rompere il layout delle card */
 .glass-light {
-    background: rgba(22, 19, 17, 0.9) !important;
-    backdrop-filter: blur(12px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+    background: #2a2420 !important;
+    border: 1px solid #3f352f !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Trasforma i contenitori bianchi in marrone scuro */
@@ -52,9 +77,9 @@ main {
     border-color: #26211e !important;
 }
 
-/* Testi dei titoli in chiaro */
-#view-agenda h3, #view-agenda label {
-    color: #e7e5e4 !important;
+/* --- OVERRIDE DELLE SCRITTE DI SISTEMA --- */
+#view-agenda h3, #view-agenda label, .text-zinc-800, .text-zinc-900, .text-zinc-700 {
+    color: var(--text-main) !important;
 }
 
 /* Modifica i box dei compiti (Blue scuro trasparente) */
@@ -97,44 +122,52 @@ main {
     text-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
 }
 
-/* Cards (Bacheca, Note, Agenda, Staff) - COLORI AGGIORNATI */
-.bacheca-card, .note-card, .staff-card, .agenda-card, .glass-light {
-    background: #2a2420 !important; /* Marrone più chiaro e visibile */
-    border: 1px solid #3f352f !important; /* Bordo più definito */
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5) !important; /* Ombra più forte */
+/* --- CARDS ADATTIVE --- */
+.bacheca-card, .note-card, .staff-card, .agenda-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    border-radius: 24px !important;
+    padding: 2rem !important;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    box-shadow: 0 8px 25px var(--shadow) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hover delle card: un tocco di rosso invece del marrone */
 .bacheca-card:hover, .note-card:hover, .agenda-card:hover {
-    background: #13110f !important; /* Si schiarisce solo un minimo quando ci passi sopra */
-    border-color: #dc2626 !important; /* Mantiene il tocco rosso Fazbear sul bordo */
+    background: var(--bg-card-hover) !important;
+    transform: translateY(-4px);
+    border-color: #dc2626 !important; /* Mantiene il tocco rosso Fazbear */
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2) !important;
 }
 
-.bg-white, .bg-zinc-900 {
-    background-color: #1b1816 !important;
-}
-
-/* Input e Select */
-.modal-input, .filter-container, .quick-student-switcher, select option {
-    background-color: #1a120b !important;
-    border: 1px solid #443022 !important;
-    color: #f5f5f4 !important;
+/* --- INPUT E FILTRI --- */
+.modal-input, .filter-container, .quick-student-switcher, .quad-switch-container, select option {
+    background-color: var(--bg-surface) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-main) !important;
 }
 
 /* Override per le classi di sistema */
 .bg-zinc-900, .bg-[#18181b] { background-color: #161311 !important; }
 .bg-[#121214], .bg-zinc-700 { background-color: #0f0d0c !important; }
 .border-zinc-800 { border-color: #26211e !important; }
+.bg-white, .bg-zinc-900 {
+    background-color: #1b1816 !important;
+}
 
-/* --- REGISTRO VOTI RIMODERNATO --- */
+/* --- REGISTRO VOTI ADATTIVO --- */
 
-/* Contenitore esterno della tabella */
+/* Contenitore esterno (Gestisce l'arrotondamento degli angoli e l'ombra) */
 .registry-container {
-    background: #0f0d0c !important; /* Uguale allo sfondo principale */
-    border: 1px solid #26211e !important;
+    background: var(--bg-main) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 24px !important;
-    overflow: hidden; /* Taglia gli angoli della tabella interna */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden; /* Taglia gli angoli per mantenere l'arrotondamento */
+    box-shadow: 0 10px 30px var(--shadow);
 }
 
 /* Tabella */
@@ -144,11 +177,11 @@ main {
     width: 100%;
 }
 
-/* Intestazione Tabella */
+/* Intestazione Tabella (Mantiene font-weight, padding e trasformazione testo) */
 .registry-table thead th {
-    background: #161311 !important; /* Leggermente più chiaro per l'header */
-    color: #a1a1aa;
-    border-bottom: 1px solid #26211e;
+    background: var(--bg-surface) !important;
+    color: var(--text-muted) !important;
+    border-bottom: 1px solid var(--border-color);
     font-weight: 800;
     text-transform: uppercase;
     font-size: 0.65rem;
@@ -156,27 +189,29 @@ main {
     padding: 1.25rem 1.5rem;
 }
 
-/* Celle della tabella */
+/* Celle della tabella (Ripristina padding originale e allineamento) */
 .registry-table td {
     padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #1c1816;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
     vertical-align: middle;
 }
 
-/* Rimuove l'ultimo bordo per non rovinare l'arrotondamento */
+/* Rimuove l'ultimo bordo per non rovinare l'arrotondamento in basso */
 .registry-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* Effetto hover sulla riga */
+/* Effetto hover sulla riga (Adattivo: usa un'opacità leggera che funziona su entrambi i temi) */
 .registry-table tbody tr:hover {
-    background-color: rgba(133, 77, 14, 0.05) !important;
+    background-color: var(--bg-card-hover) !important;
+    opacity: 0.9;
 }
 
-/* Colonna Materia (Stile speciale) */
+/* Colonna Materia (Stile speciale adattivo) */
 .subject-column {
     font-weight: 800;
-    color: #ffffff;
+    color: var(--text-main) !important;
     font-size: 0.8rem;
 }
 
@@ -214,26 +249,6 @@ main {
     .grade-positive { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
     .grade-negative { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); }
     .grade-neutral { background: #3d2b1f; color: #d6d3d1; border: 1px solid #57534e; }
-
-    /* Cards (Bacheca, Note, Staff, Agenda) */
-    .bacheca-card, .note-card, .staff-card, .agenda-card {
-        background: #18181b !important;
-        border: 1px solid #27272a !important;
-        color: #f4f4f5 !important;
-        border-radius: 24px !important;
-        padding: 2rem !important;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-    }
-
-    .bacheca-card:hover, .note-card:hover, .agenda-card:hover {
-        transform: translateY(-4px);
-        border-color: #dc2626 !important;
-        box-shadow: 0 10px 30px rgba(220, 38, 38, 0.1);
-    }
 
     .note-accent-counselor {
     	border-left: 4px solid #a855f7 !important; /* Viola */
@@ -302,19 +317,8 @@ main {
     box-shadow: 0 4px 12px rgba(120, 53, 15, 0.4); 
 }
 
-/* 1. Stile base per i contenitori e gli input isolati */
-.modal-input, 
-.filter-container, 
-.quick-student-switcher, 
-.quad-switch-container {
-    background-color: #1c1c1f !important; /* Leggermente più chiaro per staccare dal fondo */
-    border: 1px solid #3f3f46 !important;
-    color: #ffffff !important;
-    outline: none;
-    transition: all 0.2s ease;
-}
 
-/* 2. RENDIAMO INVISIBILI GLI INPUT DENTRO IL FILTER (Fondamentale!) */
+/* RENDIAMO INVISIBILI GLI INPUT DENTRO IL FILTER (Fondamentale!) */
 /* Se non togliamo il bordo a questi, restano quadrati dentro la pillola */
 .filter-container input, 
 .filter-container select {
@@ -3478,18 +3482,20 @@ window.toggleNotifPanel = () => {
             
             applyRoleUI();
 
-            // --- LOGICA DEBUG (La tua originale) ---
-            const MY_ID = "477766915096313867";
-            const debugPanel = document.getElementById('debug-auth-panel');
-            if (window.currentUserId === MY_ID || window.userRole === 'Admin') {
-                if (debugPanel) {
-                    debugPanel.style.setProperty('display', 'block', 'important');
-                    debugPanel.classList.remove('hidden');
-                    console.log("🛠️ Modalità Creatore Attiva");
-                }
-            } else {
-                if (debugPanel) debugPanel.remove();
-            }
+// --- LOGICA DEBUG (La tua originale ottimizzata) ---
+const MY_ID = "477766915096313867";
+const debugPanel = document.getElementById('debug-auth-panel');
+const currentIdCheck = window.currentUserId ? String(window.currentUserId).trim() : "";
+
+if (currentIdCheck === MY_ID || window.userRole === 'Admin') {
+    if (debugPanel) {
+        debugPanel.style.setProperty('display', 'block', 'important');
+        debugPanel.classList.remove('hidden');
+        console.log("🛠️ Modalità Creatore Attiva");
+    }
+} else {
+    if (debugPanel) debugPanel.remove();
+}
 
             // --- MATERIE PER I PROF (La tua originale) ---
             if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.ADMIN) {
@@ -4180,9 +4186,11 @@ document.addEventListener('keydown', async (e) => {
         // Hash SHA-256 del tuo ID Discord reale
         const ADMIN_HASH = "6be40c749007cf17b96e9cb443bf4b986eaef0119e3650f96898748ffae9c676";
         
-        // Calcoliamo l'hash dell'ID dell'utente attualmente loggato
-        const currentUserHash = window.currentUserId ? await calcolaSHA256(window.currentUserId) : "";
-        const isAuthorized = (currentUserHash === ADMIN_HASH || window.userRole === 'Admin');
+        // Forza l'ID a essere una stringa pulita e controlla sia l'hash sia l'ID in chiaro
+const currentIdStr = window.currentUserId ? String(window.currentUserId).trim() : "";
+const currentUserHash = currentIdStr ? await calcolaSHA256(currentIdStr) : "";
+
+const isAuthorized = (currentUserHash === ADMIN_HASH || currentIdStr === "477766915096313867" || window.userRole === 'Admin');
 
         // Entra solo se sei in locale o se l'hash dell'utente loggato è quello dell'admin
         if (isLocal || isAuthorized) {
