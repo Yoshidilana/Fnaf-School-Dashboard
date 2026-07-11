@@ -3476,20 +3476,33 @@ window.toggleNotifPanel = () => {
             
             applyRoleUI();
 
-// --- LOGICA DEBUG (La tua originale ottimizzata) ---
-const MY_ID = "477766915096313867";
-const debugPanel = document.getElementById('debug-auth-panel');
-const currentIdCheck = window.currentUserId ? String(window.currentUserId).trim() : "";
-
-if (currentIdCheck === MY_ID || window.userRole === 'Admin') {
-    if (debugPanel) {
-        debugPanel.style.setProperty('display', 'block', 'important');
-        debugPanel.classList.remove('hidden');
-        console.log("🛠️ Modalità Creatore Attiva");
+// --- LOGICA DEBUG ---
+(async () => {
+    const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
+    const debugPanel = document.getElementById('debug-auth-panel');
+    
+    // Calcoliamo l'hash dell'utente attuale per verificare se è l'admin
+    let isMe = false;
+    if (window.currentUserId) {
+        const msgBuffer = new TextEncoder().encode(String(window.currentUserId).trim());
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const currentHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        
+        isMe = (currentHash === ADMIN_HASH);
     }
-} else {
-    if (debugPanel) debugPanel.remove();
-}
+
+    // Controllo finale
+    if (isMe || window.userRole === 'Admin') {
+        if (debugPanel) {
+            debugPanel.style.setProperty('display', 'block', 'important');
+            debugPanel.classList.remove('hidden');
+            console.log("🛠️ Modalità Creatore Attiva");
+        }
+    } else {
+        if (debugPanel) debugPanel.remove();
+    }
+})();
 
             // --- MATERIE PER I PROF (La tua originale) ---
             if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.ADMIN) {
@@ -4170,7 +4183,7 @@ window.startBypass = async function() {
     }
 };
 
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', async (e) => {
     if (e.shiftKey && e.altKey && e.key.toLowerCase() === 'd') {
         
         // 1. RILEVA IL CONTESTO
@@ -4178,10 +4191,21 @@ document.addEventListener('keydown', (e) => {
                         window.location.hostname === "127.0.0.1" || 
                         window.location.protocol === "file:";
         
-        const MY_ID = "477766915096313867";
-        const isAuthorized = (window.currentUserId === MY_ID || window.userRole === 'Admin');
+        // Hash segreto per l'autorizzazione (stesso del Golden Debug)
+        const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
+        
+        // Calcola hash dell'ID corrente se esiste
+        let isAuthorized = false;
+        if (window.currentUserId) {
+            const msgBuffer = new TextEncoder().encode(String(window.currentUserId).trim());
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const currentHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            
+            isAuthorized = (currentHash === ADMIN_HASH || window.userRole === 'Admin');
+        }
 
-        // 2. LA LOGICA DI ACCESSO: Entra se sei in locale OPPURE se sei autorizzato online
+        // 2. LA LOGICA DI ACCESSO
         if (isLocal || isAuthorized) {
             const panel = document.getElementById('test-bypass-panel');
             const btn = document.getElementById('debug-toggle-btn');
@@ -4207,7 +4231,6 @@ document.addEventListener('keydown', (e) => {
         }
     }
 });
-
 
 // Assicurati che la tua funzione toggleDebug() esistente funzioni ancora
 window.toggleDebug = () => {
@@ -5579,34 +5602,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const MY_ID = "477766915096313867";
+    // Hash segreto del tuo ID Discord (Nessun ID in chiaro qui!)
+    const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
+    
+    // Calcoliamo l'hash dell'utente corrente (se ha già fatto login)
+    const currentUserHash = window.currentUserId ? await calcolaSHA256(String(window.currentUserId).trim()) : "";
+    
     const isLocal = window.location.hostname === "localhost" || window.location.protocol === "file:";
-    const isMeOnline = window.currentUserId === MY_ID;
+    const isMeOnline = currentUserHash === ADMIN_HASH;
 
     const panel = document.createElement('div');
     panel.id = 'golden-debug-panel';
     panel.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[340px] p-4 z-[99999] border-2 border-red-700 shadow-2xl rounded-xl text-center flex flex-col';
     panel.style.cssText = 'background: rgba(5, 5, 5, 0.98); backdrop-filter: blur(15px); color: #fff; font-family: monospace; max-height: 80vh;';
 
-    // 1. Schermata di caricamento o Password
+    // 1. Schermata Password
     if (!isMeOnline && !isLocal) {
         panel.innerHTML = `
             <h2 class="text-lg font-black text-yellow-500 mb-2 uppercase">Easter Egg!</h2>
             <p class="text-[10px] text-zinc-400 mb-4 italic">"It's me." - Inserisci la chiave.</p>
-            <div class="flex flex-col gap-3">
+            <form onsubmit="event.preventDefault(); window.verifyGoldenPass();" class="flex flex-col gap-3">
                 <input type="password" id="golden-pass-input" placeholder="********" class="bg-zinc-900 border border-zinc-800 text-white p-2 rounded text-sm text-center outline-none focus:border-red-600 transition-all">
-                <button onclick="window.verifyGoldenPass()" class="bg-white text-black p-2 rounded text-xs font-bold uppercase hover:bg-red-600 hover:text-white transition-all">Verify</button>
-            </div>`;
+                <button type="submit" class="bg-white text-black p-2 rounded text-xs font-bold uppercase hover:bg-red-600 hover:text-white transition-all">Verify</button>
+            </form>`;
         document.body.appendChild(panel);
         return;
     }
 
-    // 2. Se autorizzato, carichiamo la lista utenti
+    // 2. Caricamento Database
     panel.innerHTML = `<h2 class="text-red-600 font-black animate-pulse text-xs">COLLEGAMENTO AL DATABASE...</h2>`;
     document.body.appendChild(panel);
 
     try {
-        // Percorso esatto: artifacts > fnaf-school-bot > public > data > assignments
         const collPath = window.collection(window.db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'assignments');
         const snapshot = await window.getDocs(collPath);
         
@@ -5640,29 +5667,41 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 };
 
-window.verifyGoldenPass = function() {
+window.verifyGoldenPass = async function() {
     const input = document.getElementById('golden-pass-input');
     const panel = document.getElementById('golden-debug-panel');
-    const MY_ID = "477766915096313867";
+    
+    if (!input) return;
+    const valoreInserito = input.value.trim();
 
-    if (input.value === MY_ID) {
-        // TRASFORMAZIONE IN DEBUG
-        panel.innerHTML = `
-    <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
-    <div class="flex flex-col gap-2">
-        <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
-                class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
-            🚀 Start Master Bypass
-        </button>
-        <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
-    </div>
-`;
-    } else {
-        input.value = '';
-        input.placeholder = 'INVALID KEY';
-        input.classList.add('border-red-600');
-        // Suono di errore se lo hai
-        if(typeof playHonk === 'function') playHonk(); 
+    if (valoreInserito) {
+        // Calcolo sicuro dell'hash al volo
+        const msgBuffer = new TextEncoder().encode(valoreInserito);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        
+        const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
+
+        if (inputHash === ADMIN_HASH) {
+            // L'hash coincide, quindi l'ID digitato è quello corretto
+            window.currentUserId = valoreInserito;
+            
+            if (panel) panel.remove();
+            if (typeof window.triggerGoldenDebug === 'function') {
+                await window.triggerGoldenDebug();
+            }
+            return;
+        }
+    }
+
+    // Fallimento
+    input.value = '';
+    input.placeholder = 'INVALID KEY';
+    input.classList.add('border-red-600');
+    if (typeof honkSound !== 'undefined') {
+        honkSound.currentTime = 0;
+        honkSound.play().catch(() => {});
     }
 };
 
