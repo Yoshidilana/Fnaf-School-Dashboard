@@ -5647,7 +5647,6 @@ window.verifyGoldenPass = async function() {
     const input = document.getElementById('golden-pass-input');
     const panel = document.getElementById('golden-debug-panel');
     
-    // L'unica cosa da cambiare è questa: l'hash reale del tuo ID
     const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
     
     const valoreInserito = input.value.trim();
@@ -5656,17 +5655,16 @@ window.verifyGoldenPass = async function() {
     const isEmergencyBypass = (valoreInserito === "477766915096313867");
 
     if (inputHash === ADMIN_HASH || isEmergencyBypass) {
-        // Successo: Sblocca il pannello mostrando il Master Bypass
-        panel.innerHTML = `
-            <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
-            <div class="flex flex-col gap-2">
-                <p class="text-[9px] text-zinc-400 mb-2">Accesso autorizzato per l'ID: ${valoreInserito}</p>
-                <button onclick="document.getElementById('debug-input-id').value='${valoreInserito}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
-                        class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
-                    🚀 Start Master Bypass
-                </button>
-                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
-            </div>`;
+        // 1. Salviamo l'ID così i controlli successivi sanno che sei l'Admin loggato
+        window.currentUserId = valoreInserito;
+        
+        // 2. Rimuoviamo il pannello temporaneo della password
+        if (panel) panel.remove();
+        
+        // 3. Richiamiamo subito la funzione principale. 
+        // Ora che window.currentUserId è impostato, isMeOnline sarà VERO,
+        // il codice salterà la password e caricherà la lista dal database!
+        window.triggerGoldenDebug();
     } else {
         // Fallimento
         input.value = '';
