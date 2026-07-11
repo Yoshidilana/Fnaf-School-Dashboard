@@ -5581,7 +5581,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const ADMIN_HASH = "6be40c749007cf17b96e9cb443bf4b986eaef0119e3650f96898748ffae9c676";
+    const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
     const currentUserHash = window.currentUserId ? await calcolaSHA256(window.currentUserId) : "";
     const isLocal = window.location.hostname === "localhost" || window.location.protocol === "file:";
     const isMeOnline = currentUserHash === ADMIN_HASH;
