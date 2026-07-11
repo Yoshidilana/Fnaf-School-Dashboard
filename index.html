@@ -4177,33 +4177,32 @@ document.addEventListener('keydown', async (e) => {
                         window.location.hostname === "127.0.0.1" || 
                         window.location.protocol === "file:";
         
-        // CORRETTO: Hash SHA-256 reale del tuo ID Discord (477766915096313867)
         const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
-        
-        // Forza l'ID a essere una stringa pulita
         const currentIdStr = window.currentUserId ? String(window.currentUserId).trim() : "";
         const currentUserHash = currentIdStr ? await calcolaSHA256(currentIdStr) : "";
 
-        // Doppia sicurezza: controlla l'hash corretto, l'ID in chiaro e il ruolo
         const isAuthorized = (currentUserHash === ADMIN_HASH || currentIdStr === "477766915096313867" || window.userRole === 'Admin');
 
-        // Entra se sei in locale o se sei autorizzato online
+        // Se sei autorizzato, apriamo DIRETTAMENTE il Golden Debug
         if (isLocal || isAuthorized) {
-            const panel = document.getElementById('test-bypass-panel');
-            const btn = document.getElementById('debug-toggle-btn');
+            // Cerca il pannello del Golden Debug centrale
+            const goldenPanel = document.getElementById('golden-debug-panel');
             
-            if (panel && btn) {
-                const isHidden = panel.style.display === 'none' || panel.classList.contains('hidden');
+            if (goldenPanel) {
+                const isHidden = goldenPanel.style.display === 'none' || goldenPanel.classList.contains('hidden');
                 if (isHidden) {
-                    panel.style.setProperty('display', 'block', 'important');
-                    panel.classList.remove('hidden');
-                    btn.style.setProperty('display', 'block', 'important');
-                    btn.classList.remove('hidden');
+                    goldenPanel.style.setProperty('display', 'block', 'important');
+                    goldenPanel.classList.remove('hidden');
                 } else {
-                    panel.style.setProperty('display', 'none', 'important');
-                    panel.classList.add('hidden');
-                    btn.style.setProperty('display', 'none', 'important');
-                    btn.classList.add('hidden');
+                    goldenPanel.style.setProperty('display', 'none', 'important');
+                    goldenPanel.classList.add('hidden');
+                }
+            } else {
+                // Se il pannello non esiste ancora nel DOM perché viene generato da una funzione,
+                // chiama direttamente la funzione che crea il pannello (es. window.mostraGoldenDebug() o simile)
+                if (typeof window.verifyGoldenPass === 'function') {
+                    // Forziamo l'apertura bypassando l'input se la funzione lo permette
+                    window.verifyGoldenPass();
                 }
             }
         } else {
@@ -5647,25 +5646,27 @@ document.addEventListener('DOMContentLoaded', () => {
 window.verifyGoldenPass = async function() {
     const input = document.getElementById('golden-pass-input');
     const panel = document.getElementById('golden-debug-panel');
-    const ADMIN_HASH = "6be40c749007cf17b96e9cb443bf4b986eaef0119e3650f96898748ffae9c676";
+    
+    // CORRETTO: Hash reale del tuo ID Discord
+    const ADMIN_HASH = "203cb8376997d838706346b0d918a2ea68cb018449c235bcfbc7e8251e39a376";
     
     const valoreInserito = input.value.trim();
     const inputHash = await calcolaSHA256(valoreInserito);
 
-    // Se l'hash è nullo (probabilmente sei in HTTP), usiamo un bypass di emergenza per te
     const isEmergencyBypass = (valoreInserito === "477766915096313867");
 
     if (inputHash === ADMIN_HASH || isEmergencyBypass) {
-        // Successo
+        // SUCCESSO: Generiamo la lista con i personaggi anziché il tasto Master Bypass singolo
         panel.innerHTML = `
-            <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
-            <div class="flex flex-col gap-2">
-                <p class="text-[9px] text-zinc-400 mb-2">Accesso autorizzato per l'ID: ${valoreInserito}</p>
-                <button onclick="document.getElementById('debug-input-id').value='${valoreInserito}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
-                        class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
-                    🚀 Start Master Bypass
-                </button>
-                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
+            <h2 class="text-sm font-black text-red-500 mb-2 uppercase tracking-widest text-center">Golden Debug</h2>
+            <p class="text-[9px] text-zinc-500 text-center uppercase mb-3">Seleziona identità per bypass</p>
+            
+            <div class="flex flex-col gap-1 overflow-y-auto max-h-[300px] pr-1" style="scrollbar-width: thin;">
+                ${generiListaPersonaggiDebug()}
+            </div>
+            
+            <div class="text-center mt-3">
+                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase">Abort x</button>
             </div>`;
     } else {
         // Fallimento
@@ -5673,14 +5674,12 @@ window.verifyGoldenPass = async function() {
         input.placeholder = 'INVALID KEY';
         input.classList.add('border-red-600');
         
-        // Feedback sonoro (se la funzione esiste)
         if (typeof honkSound !== 'undefined') {
             honkSound.currentTime = 0;
             honkSound.play().catch(() => {});
         }
     }
 };
-
 	// --- GESTORE AMMINISTRAZIONE (HUB) ---
 window.hubManager = {
     // 1. MOSTRA LISTA
