@@ -1707,16 +1707,13 @@ main {
         <button onclick="window.saveExamSubjects()" class="bg-red-700 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase">Salva Configurazione</button>
     </div>
 
-    <!-- Tabellone Esami Dinamico -->
-    <div class="registry-container border-zinc-800 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-[11px]">
+<div class="registry-container border-zinc-800 overflow-hidden">
+        <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left text-[11px] whitespace-nowrap min-w-[1300px]">
                 <thead id="exam-thead" class="bg-black text-zinc-400 font-black uppercase">
-                    <!-- Generato Dinamicamente -->
-                </thead>
+                    </thead>
                 <tbody id="exam-grades-body" class="divide-y divide-zinc-800 bg-zinc-900/50">
-                    <!-- Righe studenti -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
     </div>
@@ -3814,13 +3811,13 @@ window.editVoto = async (idRicevuto, studentId) => {
 alert("✅ Aggiornamento completato!");
     if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
 };
-
 window.deleteNote = async (idx, studentId) => {
     if (!confirm("Eliminare definitivamente questa nota?")) return;
     
-    // Recuperiamo l'anno scolastico attualmente attivo nell'interfaccia per la prima lettura
-    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    const annoCartellaIniziale = aySelezionato.replace('/', '-');
+    // Recuperiamo l'anno scolastico e puliamo gli spazi
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // Trasformiamo in formato con underscore per il database (es: "2025_2026")
+    const annoCartellaIniziale = aySelezionato.replace('/', '_');
     
     const recordRef = window.getRecordDocRef(studentId, annoCartellaIniziale, 'note');
     const d = await getDoc(recordRef);
@@ -3834,8 +3831,8 @@ window.deleteNote = async (idx, studentId) => {
             return;
         }
 
-        // Estraiamo il vero anno scolastico della nota (es: "2025/2026" -> "2025-2026")
-        const annoCartellaEffettivo = notaDaEliminare.anno ? notaDaEliminare.anno.replace('/', '-') : annoCartellaIniziale;
+        // Estraiamo il vero anno della nota usando l'underscore (es: "2025/2026" -> "2025_2026")
+        const annoCartellaEffettivo = notaDaEliminare.anno ? notaDaEliminare.anno.replace('/', '_') : annoCartellaIniziale;
         const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'note');
 
         // 1. Rimuovi dal Profilo Studente v2
@@ -3889,15 +3886,18 @@ window.renderPagella = async (voti, aySelezionato, recordData = null) => {
     
     if (!tbody || !window.selectedStudentId) return;
 
-    // Se recordData non è passato, lo recuperiamo (fallback)
-    if (!recordData) {
-        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
-        const snap = await getDoc(recordRef);
-        recordData = snap.exists() ? snap.data() : {};
-    }
-
     const currentQ = window.currentPagellaQuad; 
     const ayKey = aySelezionato.replace('/', '_');
+
+// 1. Recupero Sotto-documento 'pagella' (con _)
+    const pagellaRef = window.getRecordDocRef(window.selectedStudentId, ayKey, 'pagella');
+    const pagellaSnap = await getDoc(pagellaRef);
+    const pagellaData = pagellaSnap.exists() ? pagellaSnap.data() : {};
+
+// 2. CORREZIONE: Recupero Sotto-documento 'esame' (Definiamo esameData prima che venga usato sotto!)
+    const esameRef = window.getRecordDocRef(window.selectedStudentId, ayKey, 'esame');
+    const esameSnap = await getDoc(esameRef);
+    const esameData = esameSnap.exists() ? esameSnap.data() : {};
 
     const student = window.allStudents.find(s => s.id === window.selectedStudentId) || 
                     (window.allUsers ? window.allUsers.find(s => s.id === window.selectedStudentId) : null);
@@ -3915,13 +3915,18 @@ window.renderPagella = async (voti, aySelezionato, recordData = null) => {
     const votiAnno = voti.filter(v => (v.anno === aySelezionato));
     const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
     
-    const keyCommentiMaterie = `commenti_materie_${ayKey}_q${currentQ}`;
-    const keyCondotta = `condotta_${ayKey}_q${currentQ}`;
-    const keyGiudizioGlobale = `commento_${ayKey}_q${currentQ}`;
+    // CHIAVI PULITE: Ora leggiamo direttamente da pagellaData usando i campi semplificati senza l'anno nel nome del campo
+    const keyCommentiMaterie = `commenti_materie_q${currentQ}`;
+    const keyCondotta = `condotta_q${currentQ}`; 
+    const keyGiudizioGlobale = `commento_q${currentQ}`; 
 
-    const commentiMaterie = recordData[keyCommentiMaterie] || {};
+    const commentiMaterie = pagellaData[keyCommentiMaterie] || {};
+    
+    // Mettiamo i valori puliti a disposizione delle variabili che userai sotto nel rendering della tabella
+    const condottaAttuale = pagellaData[keyCondotta] || "";
+    const giudizioGlobaleAttuale = pagellaData[keyGiudizioGlobale] || "Nessun commento inserito.";
 
-    // --- 3. RENDERING TABELLA ---
+// --- 3. RENDERING TABELLA ---
     if (materie.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="p-12 text-center italic text-zinc-400 text-[9px] uppercase font-bold">Nessun dato registrato per l\'A.S. ' + aySelezionato + '</td></tr>';
     } else {
@@ -3931,7 +3936,7 @@ window.renderPagella = async (voti, aySelezionato, recordData = null) => {
             const m_voti = votiAnno.filter(v => v.materia.toLowerCase().trim() === m && isDateInQ(v.data, currentQ));
             const val = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length) : null;
 
-let displayVoto, color;
+            let displayVoto, color;
             if (m.toLowerCase() === 'religione') {
                 const ultimoVotoRel = m_voti.length ? m_voti[m_voti.length - 1].voto : null;
                 if (!ultimoVotoRel) {
@@ -3971,11 +3976,11 @@ let displayVoto, color;
                 </tr>`;
         }).join('');
 
-        // --- RIGA CONDOTTA (Specifico per Anno) ---
-        const votoCondotta = recordData[keyCondotta] || "9"; 
+        // --- RIGA CONDOTTA CORRETTA: Leggiamo da pagellaData o dalla variabile definita sopra ---
+        const votoCondotta = pagellaData[keyCondotta] || "9"; 
         const isPreside = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
         
-htmlRighe += `
+        htmlRighe += `
             <tr class="bg-white/5 group">
                 <td class="py-6 font-black uppercase text-[11px] text-zinc-100">COMPORTAMENTO (CONDOTTA)</td>
                 <td class="py-6 text-center">
@@ -3995,7 +4000,7 @@ htmlRighe += `
         tbody.innerHTML = htmlRighe;
     }
 
-   // 4. GESTIONE CREDITI (Solo se 2° Quadrimestre e classe del triennio)
+// --- 4. GESTIONE CREDITI (Solo se 2° Quadrimestre e classe del triennio) ---
 const creditsBox = document.getElementById('pagella-credits-box');
 const creditsInput = document.getElementById('pagella-credits-current-input');
 const creditsTotalEl = document.getElementById('pagella-credits-total');
@@ -4017,9 +4022,8 @@ if (grade >= 3 && currentQ === 2) {
         : 0;
     const creditiSuggeriti = window.getCreditsFromMedia(mediaAnno, grade);
 
-    // 2. Caricamento valore già salvato (se esiste) o suggerito
-    const ayKey = aySelezionato.replace('/', '_');
-    const savedCredits = recordData.credits_history?.[ayKey]?.value;
+    // 2. CORREZIONE: Carica il valore dal nuovo documento 'esame' (esameData) salvato con l'underscore
+    const savedCredits = esameData?.crediti_anno;
     creditsInput.value = savedCredits !== undefined ? savedCredits : creditiSuggeriti;
 
     // 3. Permessi Staff
@@ -4029,7 +4033,7 @@ if (grade >= 3 && currentQ === 2) {
         btnConfirm.onclick = async () => {
             const manualVal = parseInt(creditsInput.value) || 0;
             await window.saveManualCredits(window.selectedStudentId, aySelezionato, manualVal);
-            // Aggiorna il totale dopo il salvataggio
+            // Aggiorna il totale dopo il salvataggio usando la funzione triennio corretta
             const nuovoTotale = await window.getTrienniumCredits(window.selectedStudentId, classConfig.startYear);
             creditsTotalEl.innerText = nuovoTotale;
         };
@@ -4038,14 +4042,15 @@ if (grade >= 3 && currentQ === 2) {
         creditsInput.disabled = true;
     }
 
-    // 4. Calcolo e visualizzazione Totale Triennio
+    // 4. Calcolo e visualizzazione Totale Triennio (Usa la funzione interna corretta con _)
     const totaleTriennio = await window.getTrienniumCredits(window.selectedStudentId, classConfig.startYear);
     creditsTotalEl.innerText = totaleTriennio;
 } else {
     creditsBox.classList.add('hidden');
 }
 
-commentBox.innerText = recordData[keyGiudizioGlobale] || "Nessun giudizio inserito per questo periodo.";
+// CORREZIONE: Legge il giudizio globale aggiornato da pagellaData invece del vecchio recordData
+commentBox.innerText = pagellaData[keyGiudizioGlobale] || "Nessun giudizio inserito per questo periodo.";
 };
         
      window.addAvviso = async (testo, cls) => {
@@ -6068,63 +6073,62 @@ modificaUtente: function(id) {
     },
 
 calcolaStatistiche: async function() {
-        console.log("📊 Calcolo statistiche globali (Solo Studenti v2)...");
-        let totalGrades = 0, gradesSum = 0, totalNotes = 0;
-        
-        // Recuperiamo l'anno scolastico così come appare nella UI (es: "2025/2026")
-        const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-        
-        console.log("📅 Cerco i dati per l'anno:", aySelezionato);
+    console.log("📊 Calcolo statistiche globali (Ripristinato e corretto)...");
+    let totalGrades = 0, gradesSum = 0, totalNotes = 0;
+    
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const annoCartella = aySelezionato.replace('/', '_');
+    
+    // Filtriamo sia "studente" che "studentessa" per non escludere le ragazze
+    const students = (window.allStudents || []).filter(s => {
+        const ruolo = (s.role || '').toLowerCase().trim();
+        return ruolo === 'studente' || ruolo === 'studentessa';
+    });
 
-        // FILTRO PRECISO: Prendiamo solo ed esclusivamente gli utenti con ruolo 'studente'
-        const students = (window.allStudents || []).filter(s => (s.role || '').toLowerCase().trim() === 'studente');
+    for (const s of students) {
+        // ASSICURATI che l'ID dentro window.allStudents sia memorizzato nel campo .id
+        // Se nel tuo oggetto studente l'ID di Discord si chiama in un altro modo (es. s.uid), cambialo qui sotto
+        const studenteId = s.id; 
 
-        console.log(`👥 Filtrati ${students.length} studenti reali per le statistiche.`);
+        const votiRef = window.getRecordDocRef(studenteId, annoCartella, 'voti');
+        const noteRef = window.getRecordDocRef(studenteId, annoCartella, 'note');
 
-        for (const s of students) {
-            // Passiamo aySelezionato direttamente all'helper
-            const votiRef = window.getRecordDocRef(s.id, aySelezionato, 'voti');
-            const noteRef = window.getRecordDocRef(s.id, aySelezionato, 'note');
+        try {
+            const [votiSnap, noteSnap] = await Promise.all([getDoc(votiRef), getDoc(noteRef)]);
 
-            try {
-                const [votiSnap, noteSnap] = await Promise.all([
-                    getDoc(votiRef),
-                    getDoc(noteRef)
-                ]);
-
-                console.log(`Studente ${s.name || s.id} - Voti esiste? ${votiSnap.exists()} - Note esiste? ${noteSnap.exists()}`);
-
-                if (noteSnap.exists()) {
-                    totalNotes += (noteSnap.data().note || []).length;
-                }
-
-                if (votiSnap.exists()) {
-                    const listaVoti = votiSnap.data().voti || [];
-                    listaVoti.forEach(v => {
-                        gradesSum += window.parseVotoScolastico(v.voto);
-                        totalGrades++;
-                    });
-                }
-            } catch (e) {
-                console.error(`Errore nel calcolo statistiche per lo studente ${s.id}:`, e);
+            if (noteSnap.exists()) {
+                const listaNote = noteSnap.data().note || [];
+                totalNotes += listaNote.length;
             }
-        }
 
-        // Calcolo finale della media globale
-        const globalMedia = totalGrades > 0 ? (gradesSum / totalGrades).toFixed(1) : "0.0";
-        
-        // Aggiornamento del DOM
-        if(document.getElementById('stat-total-students')) document.getElementById('stat-total-students').innerText = students.length;
-        if(document.getElementById('stat-global-media')) document.getElementById('stat-global-media').innerText = globalMedia;
-        if(document.getElementById('stat-total-notes')) document.getElementById('stat-total-notes').innerText = totalNotes;
+            if (votiSnap.exists()) {
+                const listaVoti = votiSnap.data().voti || [];
+                listaVoti.forEach(v => {
+                    const valoreVoto = window.parseVotoScolastico(v.voto);
+                    if (valoreVoto > 0) {
+                        gradesSum += valoreVoto;
+                        totalGrades++;
+                    }
+                });
+            }
+        } catch (e) {
+            console.error(`Errore nel calcolo statistiche per lo studente ${studenteId}:`, e);
+        }
     }
-};	
+
+    const globalMedia = totalGrades > 0 ? (gradesSum / totalGrades).toFixed(1) : "0.0";
+    
+    if(document.getElementById('stat-total-students')) document.getElementById('stat-total-students').innerText = students.length;
+    if(document.getElementById('stat-global-media')) document.getElementById('stat-global-media').innerText = globalMedia;
+    if(document.getElementById('stat-total-notes')) document.getElementById('stat-total-notes').innerText = totalNotes;
+}
+};
 
 // Funzione per salvare il commento globale sulla pagella (Solo Docenti)
 window.editPagellaComment = async () => {
-    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    // Trasforma "2025/2026" in "2025-2026" per il percorso delle cartelle
-    const annoCartella = aySelezionato.replace('/', '-');
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // TRASFORMAZIONE CORRETTA: Usiamo l'underscore "_" per combaciare con Firestore (es. 2025_2026)
+    const annoCartella = aySelezionato.replace('/', '_');
     
     // Usiamo la variabile globale o il primo quadrimestre come fallback
     const currentQ = window.currentPagellaQuad || 1; 
@@ -6132,10 +6136,10 @@ window.editPagellaComment = async () => {
     const nuovoCommento = prompt(`Inserisci il giudizio globale per il ${currentQ}° Quadrimestre (A.S. ${aySelezionato}):`);
     
     if (nuovoCommento !== null) {
-        // NUOVO PERCORSO: puntiamo al documento 'pagella' dentro l'anno specifico dello studente
+        // PERCORSO CORRETTO: con l'underscore
         const recordRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'pagella');
         
-        // NUOVA CHIAVE: campo pulito senza l'anno nella stringa
+        // CHIAVE PULITA: campo senza l'anno nella stringa
         const dataUpdate = {};
         dataUpdate[`commento_q${currentQ}`] = nuovoCommento;
         
@@ -6143,12 +6147,8 @@ window.editPagellaComment = async () => {
             await setDoc(recordRef, dataUpdate, { merge: true });
             alert("✅ Giudizio salvato con successo!");
             
-            // Per il render, recuperiamo i voti dal loro documento specifico dell'anno corrente
-            const votiRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'voti');
-            const votiSnap = await getDoc(votiRef);
-            const listavoti = votiSnap.exists() ? (votiSnap.data().voti || []) : [];
-            
-            window.renderPagella(listavoti, aySelezionato);
+            // Ricarica tutti i record per aggiornare la vista a schermo (inclusi voti e condotta)
+            if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
         } catch (e) {
             console.error("Errore salvataggio giudizio:", e);
             alert("Errore durante il salvataggio.");
@@ -6158,19 +6158,19 @@ window.editPagellaComment = async () => {
 
 // Funzione per salvare il commento della singola materia (Solo Docenti)
 window.editSubjectComment = async (materia, quad) => {
-    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    // Trasforma "2025/2026" in "2025-2026" per il percorso delle cartelle
-    const annoCartella = aySelezionato.replace('/', '-');
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // TRASFORMAZIONE CORRETTA: Usiamo l'underscore "_" per combaciare con Firestore (es. 2025_2026)
+    const annoCartella = aySelezionato.replace('/', '_');
     
     const nuovoCommento = prompt(`Inserisci il commento per ${materia.toUpperCase()} (${quad}° Quadrimestre - A.S. ${aySelezionato}):`);
     if (nuovoCommento === null) return;
 
-    // NUOVO PERCORSO: puntiamo al documento 'pagella' dentro l'anno specifico dello studente
+    // PERCORSO CORRETTO: con l'underscore
     const recordRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'pagella');
     const snap = await getDoc(recordRef);
     const currentData = snap.exists() ? snap.data() : {};
     
-    // NUOVA CHIAVE: mappa pulita senza l'anno nella stringa
+    // CHIAVE PULITA: mappa senza l'anno nella stringa
     const fieldName = `commenti_materie_q${quad}`;
     const commentiAttuali = currentData[fieldName] || {};
     commentiAttuali[materia.toLowerCase().trim()] = nuovoCommento;
@@ -6180,20 +6180,15 @@ window.editSubjectComment = async (materia, quad) => {
 
     try {
         await setDoc(recordRef, update, { merge: true });
-        alert("Commento materia salvato!");
+        alert("✅ Commento materia salvato!");
         
-        // Per il render, recuperiamo i voti dal loro documento specifico dell'anno corrente
-        const votiRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'voti');
-        const votiSnap = await getDoc(votiRef);
-        const listavoti = votiSnap.exists() ? (votiSnap.data().voti || []) : [];
-        
-        window.renderPagella(listavoti, aySelezionato);
+        // Ricarica tutti i record per aggiornare la vista a schermo (inclusi voti e condotta)
+        if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
     } catch (e) {
         console.error("Errore salvataggio commento materia:", e);
         alert("Errore durante il salvataggio del commento della materia.");
     }
-};
-	window.deleteFirma = async (idx, cls) => {
+};	window.deleteFirma = async (idx, cls) => {
     if(!confirm("Vuoi davvero eliminare questa firma? L'azione è irreversibile.")) return;
     
     const dateKey = document.getElementById('global-calendar').value; // Prende la data selezionata
@@ -6523,36 +6518,30 @@ document.addEventListener('change', (e) => {
 	
 	// Funzione per modificare la Condotta (Solo Presidi/Admin)
 window.editCondotta = async (quad) => {
-    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    // Trasforma "2025/2026" in "2025-2026" per il percorso delle cartelle
-    const annoCartella = aySelezionato.replace('/', '-');
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // TRASFORMAZIONE CORRETTA: Usiamo l'underscore "_" per combaciare con Firestore (es. 2025_2026)
+    const annoCartella = aySelezionato.replace('/', '_');
     
     const nuovoVoto = prompt(`Inserisci il voto di Condotta per il ${quad}° Quadrimestre (A.S. ${aySelezionato}):`);
     if (nuovoVoto === null || nuovoVoto === "") return;
 
-    // NUOVO PERCORSO: puntiamo al documento 'pagella' dentro l'anno specifico dello studente
+    // Puntiamo al documento 'pagella' usando annoCartella (con l'underscore)
     const recordRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'pagella');
     
-    // NUOVA CHIAVE: campo pulito senza l'anno nella stringa
     const update = {};
-    update[`condotta_q${quad}`] = nuovoVoto;
+    update[`condotta_q${quad}`] = nuovoVoto; // Genera condotta_q1 o condotta_q2
 
     try {
         await setDoc(recordRef, update, { merge: true });
-        alert("Voto condotta aggiornato per l'anno " + aySelezionato);
+        alert("✅ Voto condotta aggiornato!");
         
-        // Per il render, recuperiamo i voti dal loro documento specifico dell'anno corrente
-        const votiRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'voti');
-        const votiSnap = await getDoc(votiRef);
-        const listavoti = votiSnap.exists() ? (votiSnap.data().voti || []) : [];
-        
-        window.renderPagella(listavoti, aySelezionato);
+        // Ricarica tutti i record del database per aggiornare sia la condotta che i commenti a schermo
+        if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
     } catch (e) {
         console.error("Errore salvataggio condotta:", e);
         alert("Errore durante il salvataggio del voto di condotta.");
     }
 };
-
 	// --- SISTEMA DIDATTICA ---
 let didatticaListener = null;
 
@@ -7118,7 +7107,7 @@ window.saveActiveSubjects = async () => {
 
 window.loadExamManager = async () => {
     const cls = window.selectedClass;
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const thead = document.getElementById('exam-thead');
     const tbody = document.getElementById('exam-grades-body');
     if (!cls || !tbody || !thead) return;
@@ -7149,23 +7138,46 @@ window.loadExamManager = async () => {
 
     let rowsHtml = "";
     for (const s of classStudents) {
-        const recRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', s.id);
-        const snap = await getDoc(recRef);
+        // CORREZIONE 1: Generiamo il percorso corretto dell'anno con l'underscore (_)
+        const annoCartella = ay.replace('/', '_');
+        
+        // CORREZIONE 2: Puntiamo al sotto-documento 'esame' effettivo della v2
+        const esameRef = window.getRecordDocRef(s.id, annoCartella, 'esame');
+        const snap = await getDoc(esameRef);
         const data = snap.exists() ? snap.data() : {};
         
+        // Riceve i crediti corretti dal triennio (ora con percorso aggiornato _)
         const triennioCredits = await window.getTrienniumCredits(s.id, startYear);
-        const ayKey = `exam_grades_${ay.replace('/','_')}`;
-        const examData = data[ayKey] || {}; // Contiene i voti per ogni materia
         
-        // Calcolo Totale Dinamico
+        // CORREZIONE 3: Estraiamo la mappa 'voti_esame' dal documento
+        const examGrades = data.voti_esame || {}; 
+        
+// Calcolo Totale Dinamico con proporzione
         let sumProve = 0;
         examSubjects.forEach(sub => {
-            sumProve += (parseFloat(examData[sub]) || 0);
+            // Leggiamo i voti scritti in minuscolo/ripuliti nella mappa voti_esame
+            sumProve += (parseFloat(examGrades[sub.toLowerCase().trim()]) || 0);
         });
-        const oralGrade = parseFloat(examData.oral) || 0;
-        const total = triennioCredits + sumProve + oralGrade;
+        
+        // L'orale è salvato anch'esso dentro voti_esame (es: examGrades.oral)
+        const oralGrade = parseFloat(examGrades.oral) || 0;
+        
+        // Calcoliamo il punteggio massimo teorico dell'esame in base alle materie configurate
+        // Ogni materia scritta vale max 20 + l'orale che vale max 20
+        const maxEsameTeorico = (examSubjects.length * 20) + 20; 
+        
+        // Somma reale ottenuta dallo studente (es: 210)
+        const sommaEsameReale = sumProve + oralGrade;
+        
+        // Proporzione: convertiamo il blocco esame in un massimo di 60 punti
+        const esameRapportatoSessantesimi = maxEsameTeorico > 0 
+            ? (sommaEsameReale * 60) / maxEsameTeorico 
+            : 0;
 
-        rowsHtml += `
+        // Il totale finale sarà: Crediti (max 40) + Esame proporzionato (max 60) = max 100
+        const total = triennioCredits + esameRapportatoSessantesimi;
+
+rowsHtml += `
             <tr class="hover:bg-zinc-800/30 transition-colors border-b border-zinc-800/50">
                 <td class="p-4 font-black uppercase sticky left-0 bg-[#0f0d0c] z-10 border-r border-zinc-800">
                     ${s.name}
@@ -7174,19 +7186,23 @@ window.loadExamManager = async () => {
                     <span class="text-lg font-black text-amber-500">${triennioCredits}</span>
                 </td>
                 
-                <!-- Colonne Materie Dinamiche -->
-                ${examSubjects.map(sub => `
-                    <td class="p-2 text-center">
-                        <input type="number" value="${examData[sub] || 0}" 
-                            onchange="window.updateExamGrade('${s.id}', '${sub}', this.value)" 
-                            ${!isStaff ? 'disabled' : ''} 
-                            class="w-14 bg-black/30 border border-zinc-800 rounded p-1 text-center font-bold text-white focus:border-red-600 outline-none">
-                    </td>
-                `).join('')}
+                ${examSubjects.map(sub => {
+                    // CORREZIONE: Recuperiamo la chiave normalizzata in minuscolo da examGrades
+                    const subKey = sub.toLowerCase().trim();
+                    const votoMateria = examGrades[subKey] || 0;
+                    
+                    return `
+                        <td class="p-2 text-center">
+                            <input type="number" value="${votoMateria}" 
+                                onchange="window.updateExamGrade('${s.id}', '${subKey}', this.value)" 
+                                ${!isStaff ? 'disabled' : ''} 
+                                class="w-14 bg-black/30 border border-zinc-800 rounded p-1 text-center font-bold text-white focus:border-red-600 outline-none">
+                        </td>
+                    `;
+                }).join('')}
 
-                <!-- Colonna Orale -->
                 <td class="p-2 text-center">
-                    <input type="number" value="${examData.oral || 0}" 
+                    <input type="number" value="${examGrades.oral || 0}" 
                         onchange="window.updateExamGrade('${s.id}', 'oral', this.value)" 
                         ${!isStaff ? 'disabled' : ''} 
                         class="w-14 bg-black/30 border border-zinc-800 rounded p-1 text-center font-bold text-white focus:border-red-600 outline-none">
@@ -7205,11 +7221,11 @@ window.loadExamManager = async () => {
 };
 
 window.updateExamGrade = async (studentId, field, value) => {
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    // Trasforma "2023/2024" in "2023-2024" per il percorso delle cartelle
-    const annoCartella = ay.replace('/', '-');
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // CORREZIONE: Trasforma "2023/2024" in "2023_2024" con l'underscore (_)
+    const annoCartella = ay.replace('/', '_');
     
-    // NUOVO PERCORSO: puntiamo al documento 'esame' dentro la cartella dell'anno specifico dello studente
+    // NUOVO PERCORSO: puntiamo al documento 'esame' dentro la cartella corretta
     const ref = window.getRecordDocRef(studentId, annoCartella, 'esame');
     
     try {
@@ -7269,10 +7285,10 @@ window.getCreditsFromMedia = (media, grade) => {
 };
 
 window.saveManualCredits = async (studentId, ay, value) => {
-    // Trasforma "2023/2024" in "2023-2024" per il percorso delle cartelle
-    const annoCartella = ay.replace('/', '-');
+    // CORREZIONE: Trasforma "2023/2024" in "2023_2024" con l'underscore (_)
+    const annoCartella = ay.replace('/', '_');
     
-    // NUOVO PERCORSO: puntiamo al documento 'esame' (o 'stato_finale') dentro l'anno specifico dello studente
+    // NUOVO PERCORSO: puntiamo al documento 'esame' dentro la cartella corretta
     const ref = window.getRecordDocRef(studentId, annoCartella, 'esame');
     
     // NUOVA STRUTTURA: salviamo i dati direttamente a livello di radice del documento esame
@@ -7310,7 +7326,8 @@ window.getTrienniumCredits = async (studentId, startYear) => {
     for (let i = 2; i <= 4; i++) {
         const yearStart = parseInt(startYear) + i;
         const asString = `${yearStart}/${yearStart + 1}`;          // Es: "2023/2024"
-        const annoCartella = asString.replace('/', '-');           // Es: "2023-2024"
+        // CORREZIONE: Usiamo l'underscore "_" per allinearci a Firestore (Es: "2023_2024")
+        const annoCartella = asString.replace('/', '_');            
         
         // 1. TENTATIVO: Cerchiamo se ci sono crediti salvati manualmente nel documento 'esame'
         const esameRef = window.getRecordDocRef(studentId, annoCartella, 'esame');
