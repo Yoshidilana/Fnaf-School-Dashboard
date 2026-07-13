@@ -1951,13 +1951,18 @@ main {
         // --- NUOVA LOGICA PERCORSI AGENDA (v2) ---
         window.getAgendaDocRef = (cls, dateKey) => {
             if(!cls || !dateKey || cls === 'ALL' || cls === 'None') return null;
-            // dateKey è nel formato YYYY-MM-DD
             const parts = dateKey.split('-');
             const y = parseInt(parts[0]);
             const m = parseInt(parts[1]);
             const ay = (m >= 9) ? `${y}_${y+1}` : `${y-1}_${y}`;
-            // Percorso: agendas_v2 (coll) -> CLASSE (doc) -> ANNO (coll) -> DATA (doc)
             return doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas_v2', cls, ay, dateKey);
+        };
+
+        // Helper per la nuova struttura Records
+        window.getRecordDocRef = (userId, year, type) => {
+            if(!userId || !year || !type) return null;
+            const ayKey = year.replace('/', '_');
+            return doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', userId, ayKey, type);
         };
 
         // --- STATO ---
@@ -2688,28 +2693,23 @@ async function loadStudentRecords(studentId) {
     const calElement = document.getElementById('global-calendar');
     if (!calElement || !studentId) return;
 
-    onSnapshot(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId), d => {
+    const dateVal = new Date(calElement.value);
+    const yearVal = dateVal.getFullYear();
+    const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
+
+    // Riferimenti ai nuovi documenti separati
+    const votiRef = window.getRecordDocRef(studentId, aySelezionato, 'voti');
+    const noteRef = window.getRecordDocRef(studentId, aySelezionato, 'note');
+    const pagellaRef = window.getRecordDocRef(studentId, aySelezionato, 'pagella');
+
+    // Listener per i Voti
+    onSnapshot(votiRef, dVoti => {
         const tbody = document.getElementById('registro-voti-body');
-        const resetContainer = document.getElementById('admin-reset-container'); // <--- PRENDIAMO IL NUOVO DIV
+        const resetContainer = document.getElementById('admin-reset-container');
         if (!tbody) return;
         
         tbody.innerHTML = "";
-        const data = d.exists() ? d.data() : { voti: [], note: [] };
-        
-        // 1. Filtro Anno Scolastico
-        const voti = data.voti || [];
-        const dateVal = new Date(calElement.value);
-        const yearVal = dateVal.getFullYear();
-        const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
-        
-        const votiTuttoAnno = voti.filter(v => {
-            let vAy = v.anno;
-            if(!vAy && v.data) {
-                const p = v.data.split('/');
-                vAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-            }
-            return vAy === aySelezionato;
-        });
+        const votiTuttoAnno = dVoti.exists() ? (dVoti.data().voti || []) : [];
 
         // 2. Ordinamento GENERALE per data (utile come fallback di base)
         votiTuttoAnno.sort((a, b) => {
@@ -2881,72 +2881,77 @@ const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.
         }
         
 if (typeof window.renderPagella === 'function') {
-            window.renderPagella(voti, aySelezionato, data); 
+            const data = dVoti.exists() ? dVoti.data() : {};
+            window.renderPagella(votiTuttoAnno, aySelezionato, data); 
         }
 
-        // 8. Sezione Note (Disciplinari, Mandati e Colloqui)
-        const originalNotes = data.note || [];
-        const filteredNotes = originalNotes.filter(n => {
-            let nAy = n.anno;
-            if(!nAy && n.data) {
-                const p = n.data.split('/');
-                nAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-            }
-            return nAy === aySelezionato;
-        });
-        
-        const reversedNotes = [...filteredNotes].reverse();
-        const notesContainer = document.getElementById('notes-list-global');
-        if (notesContainer) {
-            notesContainer.innerHTML = reversedNotes.map((n) => {
-                const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
-                
-                const isMandato = n.tipo === 'mandato';
-                const isColloquio = n.tipo === 'colloquio';
-                
-                let cardClass = 'note-accent-disciplinare';
-                let badgeClass = 'badge-disciplinare';
-                let etichetta = '⚠️ Nota Disciplinare';
 
-                if (isMandato) {
-                    cardClass = 'note-accent-mandato';
-                    badgeClass = 'badge-mandato';
-                    etichetta = '⚡ Mandato Presidenziale';
-                } else if (isColloquio) {
-                    cardClass = 'note-accent-counselor';
-                    badgeClass = 'badge-counselor';
-                    etichetta = '🧠 Colloquio di Supporto';
+// 8. Sezione Note (Disciplinari, Mandati e Colloqui) - VERSIONE CORRETTA
+        onSnapshot(noteRef, dNote => {
+            const dataNoteDoc = dNote.exists() ? dNote.data() : {};
+            const originalNotes = dataNoteDoc.note || [];
+            
+            const filteredNotes = originalNotes.filter(n => {
+                let nAy = n.anno;
+                if(!nAy && n.data) {
+                    const p = n.data.split('/');
+                    nAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
                 }
-                
-                return `
-                <div class="note-card ${cardClass} group">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="flex flex-col gap-1">
-                            <span class="note-badge ${badgeClass} w-fit">
-                                ${etichetta}
-                            </span>
-                            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">${n.data}</span>
-                        </div>
-                        ${renderNoteActions(n, realIdx, studentId)}
-                    </div>
+                return nAy === aySelezionato;
+            });
+            
+            const reversedNotes = [...filteredNotes].reverse();
+            const notesContainer = document.getElementById('notes-list-global');
+            if (notesContainer) {
+                notesContainer.innerHTML = reversedNotes.map((n) => {
+                    const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
                     
-                    <p id="note-text-${realIdx}" class="text-sm text-zinc-700 leading-relaxed font-medium italic">
-                        "${n.testo}"
-                    </p>
+                    const isMandato = n.tipo === 'mandato';
+                    const isColloquio = n.tipo === 'colloquio';
                     
-                    <div class="mt-4 pt-3 border-t border-zinc-100 flex justify-between items-center">
-                        <p class="text-[9px] font-black uppercase text-zinc-400">
-                            Emesso da: <span class="text-zinc-900">${n.prof || n.autore}</span>
-                        </p>
-                    </div>
-                </div>`;
-            }).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
-                                <p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p>
-                             </div>`;
-        }
-    });
-}
+                    let cardClass = 'note-accent-disciplinare';
+                    let badgeClass = 'badge-disciplinare';
+                    let etichetta = '⚠️ Nota Disciplinare';
 
+                    if (isMandato) {
+                        cardClass = 'note-accent-mandato';
+                        badgeClass = 'badge-mandato';
+                        etichetta = '⚡ Mandato Presidenziale';
+                    } else if (isColloquio) {
+                        cardClass = 'note-accent-counselor';
+                        badgeClass = 'badge-counselor';
+                        etichetta = '🧠 Colloquio di Supporto';
+                    }
+                    
+                    return `
+                    <div class="note-card ${cardClass} group">
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="flex flex-col gap-1">
+                                <span class="note-badge ${badgeClass} w-fit">
+                                    ${etichetta}
+                                </span>
+                                <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">${n.data}</span>
+                            </div>
+                            ${typeof renderNoteActions === 'function' ? renderNoteActions(n, realIdx, studentId) : ''}
+                        </div>
+                        
+                        <p id="note-text-${realIdx}" class="text-sm text-zinc-700 leading-relaxed font-medium italic">
+                            "${n.testo}"
+                        </p>
+                        
+                        <div class="mt-4 pt-3 border-t border-zinc-100 flex justify-between items-center">
+                            <p class="text-[9px] font-black uppercase text-zinc-400">
+                                Emesso da: <span class="text-zinc-900">${n.prof || n.autore}</span>
+                            </p>
+                        </div>
+                    </div>`;
+                }).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
+                                    <p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p>
+                                 </div>`;
+            }
+        });
+    }); // Questa chiude l'onSnapshot dei voti originario (se non l'avevi già chiusa sopra)
+} // Questa chiude definitivamente loadStudentRecords
         function renderVotoTag(v, studentId) {
     const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
     const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
@@ -3003,7 +3008,7 @@ if (typeof window.renderPagella === 'function') {
             const quadText = document.getElementById('period-indicator').innerText;
             const quadrimestre = quadText.includes("1°") ? 1 : 2;
             const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-            const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+            const ref = window.getRecordDocRef(window.selectedStudentId, annoScolastico, 'voti');
             const entry = { 
                 id: crypto.randomUUID(),
                 voto: v.toString(),
@@ -3192,8 +3197,9 @@ await setDoc(agendaRef, {
             timestamp: new Date().toISOString()
         };
         
-        // 1. Salva nel profilo dello studente
-        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId), { note: arrayUnion(note) }, { merge: true });
+        // 1. Salva nel profilo dello studente (Nuova struttura)
+        const noteRef = window.getRecordDocRef(window.selectedStudentId, annoScolastico, 'note');
+        await setDoc(noteRef, { note: arrayUnion(note) }, { merge: true });
         
         // 2. Salva nell'agenda di classe (così i prof vedono perché manca l'alunno)
         const agendaRef = window.getAgendaDocRef(window.selectedClass, inputCal.value);
@@ -3629,31 +3635,48 @@ if (menu === 'classi') {
 // --- FUNZIONI DI GESTIONE INTEGRATA (PROFILO + AGENDA) ---
 
 window.editNote = async (idx, studentId) => {
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+    // Recuperiamo l'anno scolastico attivo nell'interfaccia per la prima lettura di fallback
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const annoCartellaIniziale = aySelezionato.replace('/', '-');
+
+    const recordRef = window.getRecordDocRef(studentId, annoCartellaIniziale, 'note');
     const d = await getDoc(recordRef);
-    if(d.exists()) {
+    
+    if (d.exists()) {
         const notes = d.data().note || [];
         const vecchiaNota = { ...notes[idx] };
+        
+        if (!vecchiaNota) {
+            console.error("Nota non trovata all'indice:", idx);
+            return;
+        }
+
+        // Estraiamo il vero anno della nota per aggiornare la cartella corretta (es: "2025/2026" -> "2025-2026")
+        const annoCartellaEffettivo = vecchiaNota.anno ? vecchiaNota.anno.replace('/', '-') : annoCartellaIniziale;
+        const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'note');
+
         const nuovoTesto = prompt("Modifica la nota/mandato:", vecchiaNota.testo);
         
         if (nuovoTesto !== null && nuovoTesto !== "" && nuovoTesto !== vecchiaNota.testo) {
-            // 1. Aggiorna Profilo Studente
+            // 1. Aggiorna Profilo Studente nella struttura v2
             notes[idx].testo = nuovoTesto;
-            await updateDoc(recordRef, { note: notes });
+            await setDoc(veroRecordRef, { note: notes }, { merge: true });
 
-            // 2. Aggiorna Agenda Globale
+            // 2. Aggiorna Agenda Globale v2
             const dParts = vecchiaNota.data.split('/');
             const dateKey = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
             const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
             
-            const aSnap = await getDoc(agendaRef);
-            if(aSnap.exists()) {
-                let agendaNotes = aSnap.data().note || [];
-                // Sostituiamo il map errato con questo pulito
-                agendaNotes = agendaNotes.map(n => 
-                    (n.id === vecchiaNota.id) ? { ...n, testo: nuovoTesto } : n
-                );
-                await updateDoc(agendaRef, { note: agendaNotes });
+            if (agendaRef) {
+                const aSnap = await getDoc(agendaRef);
+                if (aSnap.exists()) {
+                    let agendaNotes = aSnap.data().note || [];
+                    // Aggiorna il testo mantenendo inalterati gli altri campi della nota in agenda
+                    agendaNotes = agendaNotes.map(n => 
+                        (n.id === vecchiaNota.id) ? { ...n, testo: nuovoTesto } : n
+                    );
+                    await updateDoc(agendaRef, { note: agendaNotes });
+                }
             }
             alert("Nota aggiornata!");
             loadStudentRecords(studentId);
@@ -3661,72 +3684,77 @@ window.editNote = async (idx, studentId) => {
     }
 };
 
- window.editVoto = async (idRicevuto, studentId) => {
-    console.log("Tentativo modifica voto ID:", idRicevuto, "per studente:", studentId);
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-    const d = await getDoc(recordRef);
+window.editVoto = async (idRicevuto, studentId) => {
+    // 1. Identifichiamo l'anno di riferimento DAL VOTO (non dalla UI)
+    // Se non conosciamo l'anno, dobbiamo cercarlo. Qui assumiamo che il voto sia in un array.
+    // Suggerimento: Se hai un modo per sapere l'anno, passalo come parametro.
+    // In mancanza, proviamo a recuperare l'anno di questo specifico voto:
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    
+    // Per sicurezza, cerchiamo prima nell'anno selezionato
+    const recordRef = window.getRecordDocRef(studentId, aySelezionato, 'voti');
+    let d = await getDoc(recordRef);
+    
+    // Se non esiste, il voto è in un altro anno (es. anno precedente)
+    // In questo caso dovresti implementare una ricerca negli anni disponibili 
+    // o passare l'anno del voto alla funzione editVoto.
+    if (!d.exists()) {
+        alert("Errore: Registro non trovato per l'anno selezionato. Controlla l'anno in alto.");
+        return;
+    }
 
-    if (d.exists()) {
-        const listaVoti = d.data().voti || []; 
-        const indiceVoto = listaVoti.findIndex(v => v.id === idRicevuto);
+    const listaVoti = d.data().voti || [];
+    const indiceVoto = listaVoti.findIndex(v => v.id === idRicevuto);
 
-        if (indiceVoto === -1) {
-            console.error("Voto non trovato. ID ricevuto:", idRicevuto);
-            alert("Errore: Impossibile trovare questo voto nel database.");
-            return;
-        }
+    if (indiceVoto === -1) {
+        alert("Errore: Voto non presente nel registro attuale.");
+        return;
+    }
 
-        const vecchioVoto = { ...listaVoti[indiceVoto] };
+    const vecchioVoto = { ...listaVoti[indiceVoto] };
         
-        // 1. Prompt per la modifica dei campi
-        const nuovoVotoVal = prompt("Modifica il valore del voto:", vecchioVoto.voto);
-        if (nuovoVotoVal === null) return; // Annullato
-
-        const nuovaData = prompt("Modifica la data (GG/MM/AAAA):", vecchioVoto.data);
-        if (nuovaData === null) return; // Annullato
-
-        const nuovoArgomento = prompt("Modifica l'argomento:", vecchioVoto.argomento || "");
-        if (nuovoArgomento === null) return; // Annullato
-
-        // Controlliamo se è cambiato effettivamente qualcosa
-        const isVotoCambiato = nuovoVotoVal !== vecchioVoto.voto;
-        const isDataCambiata = nuovaData !== vecchioVoto.data;
-        const isArgomentoCambiato = nuovoArgomento !== vecchioVoto.argomento;
-
-        if (!isVotoCambiato && !isDataCambiata && !isArgomentoCambiato) {
-            alert("Nessuna modifica effettuata.");
-            return;
-        }
-
-        // Ricalcoliamo il quadrimestre nel caso in cui la data sia cambiata di mese
-        let nuovoQuad = vecchioVoto.quad;
-        if (isDataCambiata && nuovaData.includes('/')) {
-            const [,, mPart] = nuovaData.split('/');
-            const mInt = parseInt(mPart);
-            nuovoQuad = (mInt >= 9 || mInt <= 1) ? 1 : 2;
-        }
-
-        // 2. Aggiornamento dell'array principale nei Records dello studente
-        listaVoti[indiceVoto].voto = nuovoVotoVal;
-        listaVoti[indiceVoto].data = nuovaData;
-        listaVoti[indiceVoto].argomento = nuovoArgomento;
-        listaVoti[indiceVoto].quad = nuovoQuad;
+        // Estraiamo l'anno scolastico effettivo memorizzato nel voto (es: "2025/2026" -> "2025-2026")
+        const annoCartellaEffettivo = vecchioVoto.anno ? vecchioVoto.anno.replace('/', '-') : annoCartellaIniziale;
+        // Riferimento preciso nel caso in cui differisca da quello della vista
+        const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'voti');
         
-        await updateDoc(recordRef, { voti: listaVoti });
+// --- PROMPT DI MODIFICA ---
+    const nuovoVotoVal = prompt("Modifica il valore del voto:", vecchioVoto.voto);
+    if (nuovoVotoVal === null) return;
 
-        // 3. GESTIONE AGENDAS CON STRUTTURA V2 (Utilizzo Helper)
-        const targetClass = window.selectedClass; 
+    const nuovaData = prompt("Modifica la data (GG/MM/AAAA):", vecchioVoto.data);
+    if (nuovaData === null) return;
+
+    const nuovoArgomento = prompt("Modifica l'argomento:", vecchioVoto.argomento || "");
+    if (nuovoArgomento === null) return;
+
+    // --- AGGIORNAMENTO LOCALE ---
+    listaVoti[indiceVoto].voto = nuovoVotoVal;
+    listaVoti[indiceVoto].data = nuovaData;
+    listaVoti[indiceVoto].argomento = nuovoArgomento;
+    
+    // Ricalcolo quadrimestre
+    if (nuovaData.includes('/')) {
+        const [, mPart] = nuovaData.split('/');
+        const mInt = parseInt(mPart);
+        listaVoti[indiceVoto].quad = (mInt >= 9 || mInt <= 1) ? 1 : 2;
+    }
+
+    // --- SALVATAGGIO ---
+    await setDoc(recordRef, { voti: listaVoti }, { merge: true });
+
+    // --- AGGIORNAMENTO AGENDA ---
+    // NOTA: Assicurati che targetClass sia definita correttamente
+    const targetClass = window.selectedClass || "ClasseGenerica";
 
         // Convertiamo la vecchia data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
         const vParts = vecchioVoto.data.split('/');
         const vecchioDateKey = `${vParts[2]}-${vParts[1]}-${vParts[0]}`;
-        // Otteniamo il vecchio DocumentReference tramite l'helper v2
         const vecchioAgendaRef = window.getAgendaDocRef(targetClass, vecchioDateKey);
 
         // Convertiamo la nuova data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
         const nParts = nuovaData.split('/');
         const nuovaDateKey = `${nParts[2]}-${nParts[1]}-${nParts[0]}`;
-        // Otteniamo il nuovo DocumentReference tramite l'helper v2
         const nuovoAgendaRef = window.getAgendaDocRef(targetClass, nuovaDateKey);
 
         // --- RIMOZIONE DAL VECCHIO DOCUMENTO AGENDA V2 ---
@@ -3741,7 +3769,6 @@ window.editNote = async (idx, studentId) => {
                 );
 
                 if (daily.length === 0) {
-                    // Controlliamo se ci sono altri campi attivi (firme, compiti, note) prima di eliminare del tutto
                     const vecchioDataObj = vSnap.data();
                     const hasAltro = (vecchioDataObj.firme?.length > 0) || 
                                      (vecchioDataObj.compiti?.length > 0) || 
@@ -3769,7 +3796,6 @@ window.editNote = async (idx, studentId) => {
         };
 
         if (vecchioDateKey === nuovaDateKey) {
-            // Stessa data: aggiorna il documento corrente ottenuto dall'helper
             if (vecchioAgendaRef) {
                 const aSnap = await getDoc(vecchioAgendaRef);
                 let daily = aSnap.exists() ? (aSnap.data().daily_voti || []) : [];
@@ -3777,7 +3803,6 @@ window.editNote = async (idx, studentId) => {
                 await setDoc(vecchioAgendaRef, { daily_voti: daily }, { merge: true });
             }
         } else {
-            // Nuova data: scrive nel nuovo percorso generato dall'helper
             if (nuovoAgendaRef) {
                 const nSnap = await getDoc(nuovoAgendaRef);
                 let dailyNuovo = nSnap.exists() ? (nSnap.data().daily_voti || []) : [];
@@ -3786,39 +3811,57 @@ window.editNote = async (idx, studentId) => {
             }
         }
 
-        alert("Voto e agenda v2 aggiornati con successo!");
-        loadStudentRecords(studentId);
-    }
+alert("✅ Aggiornamento completato!");
+    if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
 };
-            window.deleteNote = async (idx, studentId) => {
-            if(!confirm("Eliminare definitivamente questa nota?")) return;
-            const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-            const d = await getDoc(recordRef);
+
+window.deleteNote = async (idx, studentId) => {
+    if (!confirm("Eliminare definitivamente questa nota?")) return;
     
-        if(d.exists()) {
+    // Recuperiamo l'anno scolastico attualmente attivo nell'interfaccia per la prima lettura
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const annoCartellaIniziale = aySelezionato.replace('/', '-');
+    
+    const recordRef = window.getRecordDocRef(studentId, annoCartellaIniziale, 'note');
+    const d = await getDoc(recordRef);
+    
+    if (d.exists()) {
         const notes = d.data().note || [];
         const notaDaEliminare = notes[idx];
         
-        // 1. Rimuovi dal Profilo Studente
-        notes.splice(idx, 1);
-        await updateDoc(recordRef, { note: notes });
+        if (!notaDaEliminare) {
+            console.error("Nota non trovata all'indice:", idx);
+            return;
+        }
 
-        // 2. Rimuovi dall'Agenda Globale
+        // Estraiamo il vero anno scolastico della nota (es: "2025/2026" -> "2025-2026")
+        const annoCartellaEffettivo = notaDaEliminare.anno ? notaDaEliminare.anno.replace('/', '-') : annoCartellaIniziale;
+        const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'note');
+
+        // 1. Rimuovi dal Profilo Studente v2
+        notes.splice(idx, 1);
+        await setDoc(veroRecordRef, { note: notes }, { merge: true });
+
+        // 2. Rimuovi dall'Agenda Globale v2
         const dParts = notaDaEliminare.data.split('/');
         const dateKey = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
         const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
         
-        const aSnap = await getDoc(agendaRef);
-        if(aSnap.exists()) {
-            let agendaNotes = aSnap.data().note || [];
-            // Filtriamo via la nota usando l'ID
-            const nuoveNote = agendaNotes.filter(n => n.id !== notaDaEliminare.id);
-            await updateDoc(agendaRef, { note: nuoveNote });
+        if (agendaRef) {
+            const aSnap = await getDoc(agendaRef);
+            if (aSnap.exists()) {
+                let agendaNotes = aSnap.data().note || [];
+                // Filtriamo via la nota usando l'ID univoco
+                const nuoveNote = agendaNotes.filter(n => n.id !== notaDaEliminare.id);
+                await updateDoc(agendaRef, { note: nuoveNote });
+            }
         }
+        
         alert("Eliminata con successo!");
         loadStudentRecords(studentId);
     }
 };
+
  // Fix per lo switch quadrimestre
 window.switchQuad = (q) => {
     const b1 = document.getElementById('btn-q1');
@@ -4236,15 +4279,26 @@ window.toggleDebug = () => {
     let as = (meseScelto >= 9) ? `${annoScelto}/${annoScelto + 1}` : `${annoScelto - 1}/${annoScelto}`;
 
     try {
-        // 2. RECUPERO DATI (Assignments + Records come il Bot)
+        // 2. RECUPERO DATI (Assignments + Records v2 suddivisi)
         const assignRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', targetId);
-        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', targetId);
-        const [assignSnap, recordSnap] = await Promise.all([getDoc(assignRef), getDoc(recordRef)]);
+        const vRef = window.getRecordDocRef(targetId, as, 'voti');
+        const nRef = window.getRecordDocRef(targetId, as, 'note');
+        const pRef = window.getRecordDocRef(targetId, as, 'pagella');
+        const sRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', targetId, 'staff', 'valutazioni');
 
-        if (!assignSnap.exists() && !recordSnap.exists()) return;
+        const [assignSnap, vSnap, nSnap, pSnap, sSnap] = await Promise.all([
+            getDoc(assignRef), getDoc(vRef), getDoc(nRef), getDoc(pRef), getDoc(sRef)
+        ]);
 
-        const d = assignSnap.exists() ? assignSnap.data() : {};
-        const data = recordSnap.exists() ? recordSnap.data() : {};
+        if (!assignSnap.exists()) return;
+
+        const d = assignSnap.data();
+        const data = {
+            ...(vSnap.exists() ? vSnap.data() : {}),
+            ...(nSnap.exists() ? nSnap.data() : {}),
+            ...(pSnap.exists() ? pSnap.data() : {}),
+            ...(sSnap.exists() ? sSnap.data() : {})
+        };
 
         // 3. NAVIGAZIONE
         if (typeof window.changeMenu === 'function') window.changeMenu('profilo');
@@ -4710,10 +4764,22 @@ window.selectAndGoToProfile = async (id) => {
         ? `${dataScelta.getFullYear()}/${dataScelta.getFullYear() + 1}` 
         : `${dataScelta.getFullYear() - 1}/${dataScelta.getFullYear()}`;
 
-    // C. RECUPERO DATI DA FIREBASE (Fondamentale: qui ci sono le valutazioni!)
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', id);
-    const recordSnap = await getDoc(recordRef);
-    const data = recordSnap.exists() ? recordSnap.data() : { voti: [], note: [], valutazioni: [] };
+    // C. RECUPERO DATI DA FIREBASE (Struttura v2)
+    const vRef = window.getRecordDocRef(id, as, 'voti');
+    const nRef = window.getRecordDocRef(id, as, 'note');
+    const pRef = window.getRecordDocRef(id, as, 'pagella');
+    const sRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', id, 'staff', 'valutazioni');
+
+    const [vSnap, nSnap, pSnap, sSnap] = await Promise.all([
+        getDoc(vRef), getDoc(nRef), getDoc(pRef), getDoc(sRef)
+    ]);
+
+    const data = {
+        ...(vSnap.exists() ? vSnap.data() : { voti: [] }),
+        ...(nSnap.exists() ? nSnap.data() : { note: [] }),
+        ...(pSnap.exists() ? pSnap.data() : {}),
+        ...(sSnap.exists() ? sSnap.data() : { valutazioni: [] })
+    };
 
     // [D] AGGIORNAMENTO INTERFACCIA
     const u = targetUser; 
@@ -4952,24 +5018,39 @@ if (notesList) {
     window.changeMenu('classi');
 };
 
-	window.deleteVoto = async (idRicevuto, studentId) => {
+window.deleteVoto = async (idRicevuto, studentId) => {
     if (!confirm("⚠️ Sei sicuro di voler eliminare definitivamente questo voto?")) return;
 
     try {
-        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-        const d = await getDoc(recordRef);
+        const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+        // 1. TENTATIVO: cerchiamo nell'anno selezionato (caso più comune)
+        let recordRef = window.getRecordDocRef(studentId, aySelezionato, 'voti');
+        let d = await getDoc(recordRef);
 
-        if (!d.exists()) return;
+        // Se non esiste nell'anno corrente, il voto potrebbe essere dell'anno scorso.
+        // Qui dovresti logicamente conoscere l'anno del voto prima di cercare, 
+        // ma se non lo sappiamo, il fallimento è garantito.
+        if (!d.exists()) {
+            console.error("Documento voti non trovato per l'anno:", aySelezionato);
+            alert("Errore: Impossibile trovare il registro voti per questo anno.");
+            return;
+        }
 
         const listaVoti = d.data().voti || [];
         const votoDaEliminare = listaVoti.find(v => v.id === idRicevuto);
 
-        if (!votoDaEliminare) return;
+        if (!votoDaEliminare) {
+            alert("Errore: Voto non trovato in questo registro.");
+            return;
+        }
 
-        // 1. ELIMINAZIONE DAL REGISTRO PERSONALE
-        await updateDoc(recordRef, {
-            voti: arrayRemove(votoDaEliminare)
-        });
+        // --- ELIMINAZIONE ---
+        // Ora che abbiamo il voto, sappiamo con certezza in quale anno si trova
+        const annoVoto = votoDaEliminare.anno || aySelezionato;
+        const veroRecordRef = window.getRecordDocRef(studentId, annoVoto, 'voti');
+
+        const nuovaListaVoti = listaVoti.filter(v => v.id !== idRicevuto);
+        await setDoc(veroRecordRef, { voti: nuovaListaVoti }, { merge: true });
 
         // 2. ELIMINAZIONE DALL'AGENDA GIORNALIERA (Logica Rinforzata)
         try {
@@ -5011,6 +5092,7 @@ if (notesList) {
         console.error("Errore eliminazione:", error);
     }
 };
+
 window.navDate = (unit, value) => {
     const cal = document.getElementById('global-calendar');
     if (!cal || !cal.value) return;
@@ -5269,12 +5351,11 @@ window.filterByClass = (cls) => {
     const classStudents = window.allStudents.filter(s => s.classe === cls);
     let rowsHtml = "";
 
-    for (const student of classStudents) {
-        const recRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', student.id);
+ for (const student of classStudents) {
+        const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+        const recRef = window.getRecordDocRef(student.id, currentYear, 'voti');
         const snap = await getDoc(recRef);
         const data = snap.exists() ? snap.data() : { voti: [] };
-
-        const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
         const studentGrades = (data.voti || []).filter(v => 
             v.materia.toLowerCase() === profSubject.toLowerCase() && 
             v.anno === currentYear
@@ -5440,7 +5521,7 @@ window.renderTabelloneGlobale = async () => {
     window.tabelloneCache = {}; // Reset cache
 
     const promesseStudenti = classStudents.map(async (student) => {
-        const recRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', student.id);
+        const recRef = window.getRecordDocRef(student.id, currentYear, 'voti');
         const snap = await getDoc(recRef);
         const voti = snap.exists() ? (snap.data().voti || []) : [];
         
@@ -5986,54 +6067,88 @@ modificaUtente: function(id) {
         }
     },
 
-    calcolaStatistiche: async function() {
-        console.log("📊 Statistiche...");
+calcolaStatistiche: async function() {
+        console.log("📊 Calcolo statistiche globali (Solo Studenti v2)...");
         let totalGrades = 0, gradesSum = 0, totalNotes = 0;
-        const students = (window.allStudents || []).filter(s => !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
+        
+        // Recuperiamo l'anno scolastico così come appare nella UI (es: "2025/2026")
+        const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+        
+        console.log("📅 Cerco i dati per l'anno:", aySelezionato);
+
+        // FILTRO PRECISO: Prendiamo solo ed esclusivamente gli utenti con ruolo 'studente'
+        const students = (window.allStudents || []).filter(s => (s.role || '').toLowerCase().trim() === 'studente');
+
+        console.log(`👥 Filtrati ${students.length} studenti reali per le statistiche.`);
 
         for (const s of students) {
-            const snap = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', s.id));
-            if (snap.exists()) {
-                const data = snap.data();
-                totalNotes += (data.note || []).length;
-                (data.voti || []).forEach(v => {
-                    gradesSum += window.parseVotoScolastico(v.voto);
-                    totalGrades++;
-                });
+            // Passiamo aySelezionato direttamente all'helper
+            const votiRef = window.getRecordDocRef(s.id, aySelezionato, 'voti');
+            const noteRef = window.getRecordDocRef(s.id, aySelezionato, 'note');
+
+            try {
+                const [votiSnap, noteSnap] = await Promise.all([
+                    getDoc(votiRef),
+                    getDoc(noteRef)
+                ]);
+
+                console.log(`Studente ${s.name || s.id} - Voti esiste? ${votiSnap.exists()} - Note esiste? ${noteSnap.exists()}`);
+
+                if (noteSnap.exists()) {
+                    totalNotes += (noteSnap.data().note || []).length;
+                }
+
+                if (votiSnap.exists()) {
+                    const listaVoti = votiSnap.data().voti || [];
+                    listaVoti.forEach(v => {
+                        gradesSum += window.parseVotoScolastico(v.voto);
+                        totalGrades++;
+                    });
+                }
+            } catch (e) {
+                console.error(`Errore nel calcolo statistiche per lo studente ${s.id}:`, e);
             }
         }
 
+        // Calcolo finale della media globale
         const globalMedia = totalGrades > 0 ? (gradesSum / totalGrades).toFixed(1) : "0.0";
+        
+        // Aggiornamento del DOM
         if(document.getElementById('stat-total-students')) document.getElementById('stat-total-students').innerText = students.length;
         if(document.getElementById('stat-global-media')) document.getElementById('stat-global-media').innerText = globalMedia;
         if(document.getElementById('stat-total-notes')) document.getElementById('stat-total-notes').innerText = totalNotes;
     }
-};
+};	
 
-	
-
-// Funzione per salvare il commento (Solo Docenti)
+// Funzione per salvare il commento globale sulla pagella (Solo Docenti)
 window.editPagellaComment = async () => {
     const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    const ayKey = aySelezionato.replace('/', '_');
+    // Trasforma "2025/2026" in "2025-2026" per il percorso delle cartelle
+    const annoCartella = aySelezionato.replace('/', '-');
     
-    // FIX: Usiamo la variabile globale invece di cercare il vecchio pulsante btn-q1
+    // Usiamo la variabile globale o il primo quadrimestre come fallback
     const currentQ = window.currentPagellaQuad || 1; 
     
     const nuovoCommento = prompt(`Inserisci il giudizio globale per il ${currentQ}° Quadrimestre (A.S. ${aySelezionato}):`);
     
     if (nuovoCommento !== null) {
-        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+        // NUOVO PERCORSO: puntiamo al documento 'pagella' dentro l'anno specifico dello studente
+        const recordRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'pagella');
+        
+        // NUOVA CHIAVE: campo pulito senza l'anno nella stringa
         const dataUpdate = {};
-        dataUpdate[`commento_${ayKey}_q${currentQ}`] = nuovoCommento;
+        dataUpdate[`commento_q${currentQ}`] = nuovoCommento;
         
         try {
             await setDoc(recordRef, dataUpdate, { merge: true });
             alert("✅ Giudizio salvato con successo!");
             
-            // Ricarichiamo i dati per aggiornare la vista
-            const snap = await getDoc(recordRef);
-            window.renderPagella(snap.data().voti || [], aySelezionato);
+            // Per il render, recuperiamo i voti dal loro documento specifico dell'anno corrente
+            const votiRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'voti');
+            const votiSnap = await getDoc(votiRef);
+            const listavoti = votiSnap.exists() ? (votiSnap.data().voti || []) : [];
+            
+            window.renderPagella(listavoti, aySelezionato);
         } catch (e) {
             console.error("Errore salvataggio giudizio:", e);
             alert("Errore durante il salvataggio.");
@@ -6041,18 +6156,22 @@ window.editPagellaComment = async () => {
     }
 };
 
+// Funzione per salvare il commento della singola materia (Solo Docenti)
 window.editSubjectComment = async (materia, quad) => {
     const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    const ayKey = aySelezionato.replace('/', '_');
+    // Trasforma "2025/2026" in "2025-2026" per il percorso delle cartelle
+    const annoCartella = aySelezionato.replace('/', '-');
     
     const nuovoCommento = prompt(`Inserisci il commento per ${materia.toUpperCase()} (${quad}° Quadrimestre - A.S. ${aySelezionato}):`);
     if (nuovoCommento === null) return;
 
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+    // NUOVO PERCORSO: puntiamo al documento 'pagella' dentro l'anno specifico dello studente
+    const recordRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'pagella');
     const snap = await getDoc(recordRef);
     const currentData = snap.exists() ? snap.data() : {};
     
-    const fieldName = `commenti_materie_${ayKey}_q${quad}`;
+    // NUOVA CHIAVE: mappa pulita senza l'anno nella stringa
+    const fieldName = `commenti_materie_q${quad}`;
     const commentiAttuali = currentData[fieldName] || {};
     commentiAttuali[materia.toLowerCase().trim()] = nuovoCommento;
 
@@ -6062,13 +6181,18 @@ window.editSubjectComment = async (materia, quad) => {
     try {
         await setDoc(recordRef, update, { merge: true });
         alert("Commento materia salvato!");
-        const newSnap = await getDoc(recordRef);
-        window.renderPagella(newSnap.data().voti || [], aySelezionato);
+        
+        // Per il render, recuperiamo i voti dal loro documento specifico dell'anno corrente
+        const votiRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'voti');
+        const votiSnap = await getDoc(votiRef);
+        const listavoti = votiSnap.exists() ? (votiSnap.data().voti || []) : [];
+        
+        window.renderPagella(listavoti, aySelezionato);
     } catch (e) {
-        console.error(e);
+        console.error("Errore salvataggio commento materia:", e);
+        alert("Errore durante il salvataggio del commento della materia.");
     }
 };
-
 	window.deleteFirma = async (idx, cls) => {
     if(!confirm("Vuoi davvero eliminare questa firma? L'azione è irreversibile.")) return;
     
@@ -6128,17 +6252,17 @@ window.editSubjectComment = async (materia, quad) => {
 
         if(!motivo) return alert("Devi inserire una motivazione!");
 
-        const profRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', profId);
+        // Per lo staff usiamo una cartella speciale 'staff' invece dell'anno scolastico
+        const profRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', profId, 'staff', 'valutazioni');
         
         const nuovaValutazione = {
             tipo: tipo,
             motivo: motivo,
             da: window.userName || "Dirigenza",
-            date: new Date().toLocaleDateString('it-IT') // Produce lo stesso formato GG/MM/AAAA del bot
+            date: new Date().toLocaleDateString('it-IT')
         };
 
         try {
-            // Usiamo arrayUnion per essere identici al bot
             await setDoc(profRef, {
                 valutazioni: arrayUnion(nuovaValutazione)
             }, { merge: true });
@@ -6400,23 +6524,32 @@ document.addEventListener('change', (e) => {
 	// Funzione per modificare la Condotta (Solo Presidi/Admin)
 window.editCondotta = async (quad) => {
     const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    const ayKey = aySelezionato.replace('/', '_');
+    // Trasforma "2025/2026" in "2025-2026" per il percorso delle cartelle
+    const annoCartella = aySelezionato.replace('/', '-');
     
     const nuovoVoto = prompt(`Inserisci il voto di Condotta per il ${quad}° Quadrimestre (A.S. ${aySelezionato}):`);
     if (nuovoVoto === null || nuovoVoto === "") return;
 
-    const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', window.selectedStudentId);
+    // NUOVO PERCORSO: puntiamo al documento 'pagella' dentro l'anno specifico dello studente
+    const recordRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'pagella');
+    
+    // NUOVA CHIAVE: campo pulito senza l'anno nella stringa
     const update = {};
-    update[`condotta_${ayKey}_q${quad}`] = nuovoVoto;
+    update[`condotta_q${quad}`] = nuovoVoto;
 
     try {
         await setDoc(recordRef, update, { merge: true });
         alert("Voto condotta aggiornato per l'anno " + aySelezionato);
-        // Refresh
-        const snap = await getDoc(recordRef);
-        window.renderPagella(snap.data().voti || [], aySelezionato);
+        
+        // Per il render, recuperiamo i voti dal loro documento specifico dell'anno corrente
+        const votiRef = window.getRecordDocRef(window.selectedStudentId, annoCartella, 'voti');
+        const votiSnap = await getDoc(votiRef);
+        const listavoti = votiSnap.exists() ? (votiSnap.data().voti || []) : [];
+        
+        window.renderPagella(listavoti, aySelezionato);
     } catch (e) {
-        console.error(e);
+        console.error("Errore salvataggio condotta:", e);
+        alert("Errore durante il salvataggio del voto di condotta.");
     }
 };
 
@@ -7073,20 +7206,27 @@ window.loadExamManager = async () => {
 
 window.updateExamGrade = async (studentId, field, value) => {
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    const ayKey = `exam_grades_${ay.replace('/','_')}`;
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+    // Trasforma "2023/2024" in "2023-2024" per il percorso delle cartelle
+    const annoCartella = ay.replace('/', '-');
+    
+    // NUOVO PERCORSO: puntiamo al documento 'esame' dentro la cartella dell'anno specifico dello studente
+    const ref = window.getRecordDocRef(studentId, annoCartella, 'esame');
     
     try {
         const snap = await getDoc(ref);
         const currentData = snap.exists() ? snap.data() : {};
-        const currentExamGrades = currentData[ayKey] || {};
+        
+        // NUOVA CHIAVE: mappa pulita senza stringhe dell'anno nel nome del campo
+        const currentExamGrades = currentData.voti_esame || {};
         
         // Aggiorna il campo specifico (che sia 'oral' o il nome di una materia)
         currentExamGrades[field] = parseFloat(value) || 0;
 
-        const update = {};
-        update[ayKey] = currentExamGrades;
+        const update = {
+            voti_esame: currentExamGrades
+        };
 
+        // Salviamo con merge: true per non rischiare di sovrascrivere o cancellare i crediti_anno salvati nello stesso documento
         await setDoc(ref, update, { merge: true });
         
         // Ricarica la tabella per aggiornare i totali
@@ -7129,21 +7269,25 @@ window.getCreditsFromMedia = (media, grade) => {
 };
 
 window.saveManualCredits = async (studentId, ay, value) => {
-    const ayKey = ay.replace('/', '_');
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+    // Trasforma "2023/2024" in "2023-2024" per il percorso delle cartelle
+    const annoCartella = ay.replace('/', '-');
     
-    const update = {};
-    update[`credits_history.${ayKey}`] = {
-        value: parseInt(value),
+    // NUOVO PERCORSO: puntiamo al documento 'esame' (o 'stato_finale') dentro l'anno specifico dello studente
+    const ref = window.getRecordDocRef(studentId, annoCartella, 'esame');
+    
+    // NUOVA STRUTTURA: salviamo i dati direttamente a livello di radice del documento esame
+    const update = {
+        crediti_anno: parseInt(value),
         manual: true,
         timestamp: Date.now()
     };
 
     try {
-        await updateDoc(ref, update);
+        // Usiamo setDoc con merge: true nel caso in cui il documento 'esame' non esista ancora per quell'anno
+        await setDoc(ref, update, { merge: true });
         alert("✅ Crediti aggiornati per l'A.S. " + ay);
     } catch (e) {
-        console.error(e);
+        console.error("Errore salvataggio crediti:", e);
         alert("❌ Errore durante il salvataggio dei crediti.");
     }
     
@@ -7155,43 +7299,53 @@ window.saveManualCredits = async (studentId, ay, value) => {
 
 // Funzione per recuperare il totale dei crediti accumulati nel triennio
 window.getTrienniumCredits = async (studentId, startYear) => {
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return 0;
-
-    const data = snap.data();
-    const history = data.credits_history || {};
-    const allVoti = data.voti || [];
     let total = 0;
 
     if (!startYear) {
-        console.warn(`[CREDITI] Manca startYear per studente ${studentId}, sommo tutto lo storico.`);
-        Object.values(history).forEach(entry => total += parseInt(entry.value || 0));
-        return total;
+        console.warn(`[CREDITI] Manca startYear per studente ${studentId}. Impossibile calcolare il triennio senza anno di partenza.`);
+        return 0;
     }
 
-    // Ciclo per 3°, 4° e 5° anno
+    // Ciclo per 3°, 4° e 5° anno (i corrisponde agli incrementi rispetto allo startYear dell'immatricolazione)
     for (let i = 2; i <= 4; i++) {
         const yearStart = parseInt(startYear) + i;
-        const ayKey = `${yearStart}_${yearStart + 1}`;
+        const asString = `${yearStart}/${yearStart + 1}`;          // Es: "2023/2024"
+        const annoCartella = asString.replace('/', '-');           // Es: "2023-2024"
         
-        if (history[ayKey]) {
-            // Se esiste il dato salvato ufficialmente, usa quello
-            total += parseInt(history[ayKey].value || 0);
-        } else {
-            // FALLBACK: Se non è registrato, calcolalo al volo dai voti di quell'anno
-            const asString = `${yearStart}/${yearStart + 1}`;
-            const votiAnno = allVoti.filter(v => v.anno === asString && v.materia.toLowerCase() !== 'religione');
-            
-            if (votiAnno.length > 0) {
-                const media = votiAnno.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiAnno.length;
-                const gradeAnno = i + 1; // Determina se era 3°, 4° o 5° anno
-                const calcolato = window.getCreditsFromMedia(media, gradeAnno);
-                total += calcolato;
-                console.log(`[CREDITI] Fallback per ${asString}: Media ${media.toFixed(1)} -> +${calcolato}pt`);
+        // 1. TENTATIVO: Cerchiamo se ci sono crediti salvati manualmente nel documento 'esame'
+        const esameRef = window.getRecordDocRef(studentId, annoCartella, 'esame');
+        try {
+            const esameSnap = await getDoc(esameRef);
+            if (esameSnap.exists() && esameSnap.data().crediti_anno !== undefined) {
+                // Se esiste il dato salvato ufficialmente nella v2, usa quello
+                total += parseInt(esameSnap.data().crediti_anno || 0);
+                continue; // Passa all'anno successivo del ciclo
             }
+        } catch (e) {
+            console.error(`[CREDITI] Errore lettura documento esame per ${asString}:`, e);
+        }
+
+        // 2. FALLBACK: Se non è registrato il credito manuale, carichiamo i voti di quell'anno per calcolarlo al volo
+        const votiRef = window.getRecordDocRef(studentId, annoCartella, 'voti');
+        try {
+            const votiSnap = await getDoc(votiRef);
+            if (votiSnap.exists()) {
+                const allVoti = votiSnap.data().voti || [];
+                const votiAnno = allVoti.filter(v => v.anno === asString && v.materia.toLowerCase() !== 'religione');
+                
+                if (votiAnno.length > 0) {
+                    const media = votiAnno.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / votiAnno.length;
+                    const gradeAnno = i + 1; // Determina se era 3°, 4° o 5° anno (es: startYear + 2 = 3° anno)
+                    const calcolato = window.getCreditsFromMedia(media, gradeAnno);
+                    total += calcolato;
+                    console.log(`[CREDITI] Fallback per ${asString}: Media ${media.toFixed(1)} -> +${calcolato}pt`);
+                }
+            }
+        } catch (e) {
+            console.error(`[CREDITI] Errore lettura voti fallback per ${asString}:`, e);
         }
     }
+    
     return total;
 };
 
@@ -7516,7 +7670,7 @@ window.executeAdminGradeGeneration = async () => {
         return `15/${String(monthIndex + 1).padStart(2, '0')}/${year}`;
     };
 
-    const saveGrade = async (sId, sName, val, dataStr, arg, tipo, matKey) => {
+      const saveGrade = async (sId, sName, val, dataStr, arg, tipo, matKey) => {
         const [gg, mm, aaaa] = dataStr.split('/');
         const dateKey = `${aaaa}-${mm}-${gg}`;
         const quad = (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2;
@@ -7527,7 +7681,8 @@ window.executeAdminGradeGeneration = async () => {
             prof: prof.name, profId: prof.id, argomento: arg, quad, anno: ay, emoji: tipo === 'Scritto' ? "📝" : "🗣️" 
         };
 
-        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', sId), { voti: arrayUnion(entry) }, { merge: true });
+        const recordRef = window.getRecordDocRef(sId, ay, 'voti');
+        await setDoc(recordRef, { voti: arrayUnion(entry) }, { merge: true });
         await setDoc(window.getAgendaDocRef(targetClass, dateKey), { 
             daily_voti: arrayUnion({ studente: sName, studenteId: sId, voto: val, materia: prof.materiaOriginale, argomento: arg }) 
         }, { merge: true });
@@ -7679,61 +7834,52 @@ window.eseguiMigrazioneAgendas = async () => {
 
 window.deleteAllGradesBySubject = async (studentId, subject) => {
     const subjectUpper = subject.toUpperCase();
-    
-    // Recuperiamo l'anno scolastico attivo nel portale (es. "2023/2024")
     const currentAY = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
 
-    if (!confirm(`⚠️ AZIONE IRREVERSIBILE\n\nSei sicuro di voler eliminare TUTTI i voti di ${subjectUpper} per l'A.S. ${currentAY}?\nVerranno rimossi anche dai registri di classe (Agende) di questo specifico anno.`)) return;
+    if (!confirm(`⚠️ AZIONE IRREVERSIBILE\n\nSei sicuro di voler eliminare TUTTI i voti di ${subjectUpper} per l'A.S. ${currentAY}?`)) return;
 
     try {
-        const recordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
+        // 1. PUNTA AL DOCUMENTO SPECIFICO DELL'ANNO (v2)
+        const recordRef = window.getRecordDocRef(studentId, currentAY, 'voti');
         const snap = await getDoc(recordRef);
         
-        if (!snap.exists()) return;
+        if (!snap.exists()) {
+            alert(`Nessun registro voti trovato per l'A.S. ${currentAY}.`);
+            return;
+        }
 
         const allVoti = snap.data().voti || [];
         
-        // Isoliamo i voti da eliminare: devono corrispondere SIA alla materia SIA all'anno scolastico attivo
-        const votiDaEliminare = allVoti.filter(v => 
-            v.materia.toLowerCase().trim() === subject.toLowerCase().trim() && 
-            (v.anno || '').trim() === currentAY
-        );
-        
-        // Manteniamo TUTTI gli altri voti (altre materie OPPURE stessa materia ma di altri anni scolastici)
-        const votiDaTenere = allVoti.filter(v => 
-            !(v.materia.toLowerCase().trim() === subject.toLowerCase().trim() && (v.anno || '').trim() === currentAY)
-        );
+        // Isoliamo i voti da eliminare (solo materia specifica, poiché siamo già nel documento dell'anno)
+        const votiDaEliminare = allVoti.filter(v => v.materia.toLowerCase().trim() === subject.toLowerCase().trim());
+        const votiDaMantenere = allVoti.filter(v => v.materia.toLowerCase().trim() !== subject.toLowerCase().trim());
 
         if (votiDaEliminare.length === 0) {
             alert(`Nessun voto trovato per ${subjectUpper} nell'A.S. ${currentAY}.`);
             return;
         }
 
-        // 1. AGGIORNAMENTO RECORD STUDENTE (Salva solo i voti da tenere)
-        await updateDoc(recordRef, { voti: votiDaTenere });
+        // 2. AGGIORNAMENTO RECORD ANNUALE (v2)
+        await setDoc(recordRef, { voti: votiDaMantenere }, { merge: true });
 
-        // 2. PULIZIA AGEDE (v2)
+        // 3. PULIZIA AGENDE (v2)
         const student = window.allStudents.find(s => s.id === studentId);
         const sClass = student?.classe || window.selectedClass;
 
         if (sClass && sClass !== 'ALL') {
-            console.log(`[CLEANUP] Inizio pulizia agende per ${votiDaEliminare.length} voti dell'A.S. ${currentAY}...`);
-            
             for (const v of votiDaEliminare) {
                 try {
                     const [gg, mm, aaaa] = v.data.split('/');
                     const dateKey = `${aaaa}-${mm}-${gg}`;
-                    
-                    // getAgendaDocRef punterà automaticamente alla sotto-raccolta dell'anno corretto grazie a sClass e dateKey
                     const agendaRef = window.getAgendaDocRef(sClass, dateKey);
                     const aSnap = await getDoc(agendaRef);
 
                     if (aSnap.exists()) {
                         const daily = aSnap.data().daily_voti || [];
-                        
-                        // Rimuoviamo il record specifico dall'agenda del giorno
                         const nuovoDaily = daily.filter(dv => 
-                            !(dv.studenteId === studentId && dv.materia.toLowerCase().trim() === subject.toLowerCase().trim() && dv.voto === v.voto)
+                            !(String(dv.studenteId) === String(studentId) && 
+                              dv.materia.toLowerCase().trim() === subject.toLowerCase().trim() && 
+                              String(dv.voto) === String(v.voto))
                         );
 
                         if (nuovoDaily.length !== daily.length) {
@@ -7741,21 +7887,17 @@ window.deleteAllGradesBySubject = async (studentId, subject) => {
                         }
                     }
                 } catch (err) {
-                    console.error(`Errore durante la pulizia dell'agenda in data ${v.data}:`, err);
+                    console.error(`Errore pulizia agenda data ${v.data}:`, err);
                 }
             }
         }
 
-        alert(`✅ Pulizia completata: rimossi ${votiDaEliminare.length} voti di ${subjectUpper} relativi all'A.S. ${currentAY}.`);
-        
-        // Ricarica la vista dei record
-        if (typeof loadStudentRecords === 'function') {
-            loadStudentRecords(studentId);
-        }
+        alert(`✅ Pulizia completata: rimossi ${votiDaEliminare.length} voti di ${subjectUpper}.`);
+        if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
 
     } catch (error) {
         console.error("Errore durante il reset della materia:", error);
-        alert("Si è verificato un errore tecnico durante l'eliminazione.");
+        alert("Si è verificato un errore tecnico.");
     }
 };
 
@@ -7974,69 +8116,55 @@ window.saveCalendarToFirestore = async () => {
 }; 
 
 window.deleteAllGradesAllSubjects = async (studentId) => {
-    // Recupera l'anno scolastico attivo (es: "2020/2021")
+    // 1. Recupera l'anno (formatta come richiesto dal tuo helper)
     const ay = document.getElementById('current-academic-year')?.innerText.replace('A.S. ', '').trim() || "";
     
     if (![ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole)) {
-        return alert("⚠️ Azione non autorizzata. Solo gli amministratori o il Preside possono azzerare i voti.");
+        return alert("⚠️ Azione non autorizzata.");
     }
 
-    const conferma = confirm(`⚠️ ATTENZIONE: Sei sicuro di voler ELIMINARE DEFINITIVAMENTE TUTTI i voti di TUTTE le materie dello studente per l'Anno Scolastico ${ay}?\nQuesta azione rimuoverà i dati anche dall'agenda giornaliera.`);
-    if (!conferma) return;
+    if (!confirm(`⚠️ ATTENZIONE: Sei sicuro di voler ELIMINARE TUTTI i voti dell'A.S. ${ay}?`)) return;
 
     try {
-        const studentRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', studentId);
-        const studentSnap = await getDoc(studentRef);
+        // 2. PUNTA AL DOCUMENTO SPECIFICO DELL'ANNO (v2)
+        const recordRef = window.getRecordDocRef(studentId, ay, 'voti');
+        const snap = await getDoc(recordRef);
 
-        if (!studentSnap.exists()) return alert("Nessun record trovato per questo studente.");
+        if (!snap.exists()) return alert("Nessun voto trovato per questo anno.");
 
-        const tuttiIVoti = studentSnap.data().voti || [];
-        
-        // Separiamo i voti dell'anno corrente da quelli da mantenere
-        const votiDaMantenere = tuttiIVoti.filter(v => v.anno !== ay);
-        const votiDaCancellare = tuttiIVoti.filter(v => v.anno === ay);
+        const votiDaCancellare = snap.data().voti || [];
 
-        // 1. Aggiorna il documento dello studente con i soli voti rimasti
-        await setDoc(studentRef, { voti: votiDaMantenere }, { merge: true });
-
-        // 2. Ripuliamo l'agenda giornaliera in modo sicuro tramite filtraggio ID
+        // 3. RIPULISCI AGENDA (Logica invariata, ma ora più mirata)
         for (const v of votiDaCancellare) {
             if (v.data) {
                 const [gg, mm, aaaa] = v.data.split('/');
                 const dateKey = `${aaaa}-${mm}-${gg}`;
-                
-                // Usiamo la classe definita dentro l'oggetto del voto, oppure quella globale come fallback
                 const classeTarget = v.classe || window.selectedClass;
                 const agendaRef = window.getAgendaDocRef(classeTarget, dateKey);
                 
                 const agendaSnap = await getDoc(agendaRef);
-                
                 if (agendaSnap.exists()) {
                     const dailyVoti = agendaSnap.data().daily_voti || [];
-                    
-                    // Filtriamo via i voti dell'agenda che appartengono a questo studente e a questa materia
-                    const dailyVotiAggiornati = dailyVoti.filter(dv => {
-                        const corrispondeStudente = String(dv.studenteId) === String(studentId);
-                        const corrispondeMateria = dv.materia?.toLowerCase() === v.materia?.toLowerCase();
-                        const corrispondeVoto = String(dv.voto) === String(v.voto);
-                        
-                        // Se coincidono tutti e tre, ritorna false per eliminarlo dall'array
-                        return !(corrispondeStudente && corrispondeMateria && corrispondeVoto);
-                    });
-                    
-                    // Sovrascriviamo l'array dell'agenda con la versione filtrata
+                    const dailyVotiAggiornati = dailyVoti.filter(dv => 
+                        !(String(dv.studenteId) === String(studentId) && 
+                          dv.materia?.toLowerCase() === v.materia?.toLowerCase() && 
+                          String(dv.voto) === String(v.voto))
+                    );
                     await setDoc(agendaRef, { daily_voti: dailyVotiAggiornati }, { merge: true });
                 }
             }
         }
 
-        alert(`🗑️ Piazza pulita completata! Tutti i voti dell'A.S. ${ay} sono stati rimossi sia dal registro che dall'agenda.`);
-        
+        // 4. ELIMINA IL DOCUMENTO O AZZERA L'ARRAY
+        // Ora basta scrivere un array vuoto nel documento dell'anno specifico
+        await setDoc(recordRef, { voti: [] }, { merge: true });
+
+        alert(`🗑️ Voti dell'A.S. ${ay} eliminati correttamente.`);
         if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
 
     } catch (error) {
-        console.error("Errore durante il reset totale dei voti:", error);
-        alert("❌ Errore durante l'azzeramento dei voti.");
+        console.error("Errore:", error);
+        alert("❌ Errore durante l'azzeramento.");
     }
 };
 
@@ -8096,6 +8224,71 @@ window.closeAdminGradeModal = () => {
         document.getElementById('btn-adm-wizard-cancel').classList.remove('hidden');
         document.getElementById('btn-adm-wizard-next').classList.remove('hidden');
         document.getElementById('btn-adm-wizard-submit').classList.add('hidden');
+    }
+};
+
+window.eseguiMigrazioneRecords = async () => {
+    if (!confirm("Vuoi avviare la migrazione di tutti i vecchi record (voti e note) sulla nuova struttura per anno scolastico?")) return;
+
+    console.log("Inizio migrazione record studenti...");
+    
+    // Riferimento alla vecchia collezione piatta dei records
+    const vecchiaCollezioneRef = collection(db, 'artifacts', APP_ID, 'public', 'data', 'records');
+    
+    try {
+        const snapshot = await getDocs(vecchiaCollezioneRef);
+        let studentiElaborati = 0;
+
+        for (const vecchioDoc of snapshot.docs) {
+            const studentId = vecchioDoc.id; // L'ID dello studente o il nome dell'NPC (es: Glamrock Chica)
+            const datiVecchi = vecchioDoc.data();
+            
+            console.log(`Elaborazione vecchi dati per lo studente: ${studentId}...`);
+
+            // --- 1. MIGRAZIONE DEI VOTI ---
+            if (datiVecchi.voti && Array.isArray(datiVecchi.voti)) {
+                for (const voto of datiVecchi.voti) {
+                    const annoVoto = voto.anno || "2020/2021"; // Anno di fallback se manca il campo
+                    
+                    // Genera il NUOVO percorso esatto usando l'helper v2 funzionante nel tuo codice
+                    const nuovoVotiRef = window.getRecordDocRef(studentId, annoVoto, 'voti');
+                    
+                    if (nuovoVotiRef) {
+                        await setDoc(nuovoVotiRef, { 
+                            studenteId: studentId,
+                            voti: arrayUnion(voto) 
+                        }, { merge: true });
+                    }
+                }
+                console.log(`Voti migrati per lo studente ID: ${studentId}`);
+            }
+
+            // --- 2. MIGRAZIONE DELLE NOTE ---
+            if (datiVecchi.note && Array.isArray(datiVecchi.note)) {
+                for (const nota of datiVecchi.note) {
+                    const annoNota = nota.anno || "2020/2021";
+                    
+                    // Genera il NUOVO percorso per le note
+                    const nuoveNoteRef = window.getRecordDocRef(studentId, annoNota, 'note');
+                    
+                    if (nuoveNoteRef) {
+                        await setDoc(nuoveNoteRef, { 
+                            note: arrayUnion(nota) 
+                        }, { merge: true });
+                    }
+                }
+                console.log(`Note migrate per lo studente ID: ${studentId}`);
+            }
+
+            studentiElaborati++;
+        }
+
+        alert(`Migrazione completata! Elaborati i dati storici di ${studentiElaborati} studenti.`);
+        console.log(`Migrazione terminata con successo.`);
+
+    } catch (error) {
+        console.error("Errore durante la migrazione dei record:", error);
+        alert("Si è verificato un errore durante la migrazione. Controlla la console.");
     }
 };
 
