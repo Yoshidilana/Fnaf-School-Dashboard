@@ -1322,17 +1322,17 @@ main {
     </div>
 
 <div id="admin-grade-modal" class="hidden fixed inset-0 bg-black/80 z-[10000] justify-center items-center p-4">
-    <div class="bg-[#1c1e22] text-zinc-200 p-6 rounded-2xl w-full max-w-xl max-h-[92vh] flex flex-col shadow-2xl border border-zinc-800">
+    <div class="bg-[#1c1e22] text-zinc-200 p-6 rounded-2xl w-full max-w-3xl max-h-[92vh] flex flex-col shadow-2xl border border-zinc-800">
         
         <div class="shrink-0 pb-3 border-b border-zinc-800 flex justify-between items-center">
             <div>
                 <h3 class="text-base font-black text-amber-500 uppercase tracking-wider flex items-center gap-2">🎲 Strumento Generazione Voti Random</h3>
                 <p class="text-xs text-zinc-500 mt-0.5">Configura una simulazione per la classe <span id="adm-mdl-class-label" class="text-white font-bold"></span>.</p>
             </div>
-            <span id="adm-wizard-step-indicator" class="text-[10px] font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2.5 py-1 rounded-full uppercase">Passo 1 di 4</span>
+            <span id="adm-wizard-step-indicator" class="text-[10px] font-black bg-amber-500/10 text-amber-500 border border-amber-500/20 px-2.5 py-1 rounded-full uppercase">Passo 1 di 5</span>
         </div>
 
-        <div class="flex-1 py-4 text-sm min-h-[280px] flex flex-col justify-center">
+        <div class="flex-1 py-4 text-sm min-h-[400px] flex flex-col">
             
             <div id="adm-step-1" class="adm-wizard-step block space-y-3">
                 <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 1: Seleziona Destinatari</span>
@@ -1347,36 +1347,50 @@ main {
                 </div>
             </div>
 
-            <div id="adm-step-2" class="adm-wizard-step hidden space-y-3">
-                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 2: Tipologia di Generazione</span>
-                <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-4">
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[10px] font-bold text-zinc-500 uppercase">Modalità</label>
-                            <select id="adm-input-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
-                                <option value="1">1. Voto Singolo</option>
-                                <option id="opt-mode-all-year" value="2" disabled>2. Voti tutto l'anno</option>
-                            </select>
-                        </div>
-                        <div id="container-adm-tipo-voti" class="flex flex-col gap-1 opacity-40 pointer-events-none">
-                            <label class="text-[10px] font-bold text-zinc-500 uppercase">Opzioni Simulazione Anno</label>
-                            <select id="adm-input-sub-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
-                                <option value="A">A. Solo Orali (Date diverse)</option>
-                                <option value="B">B. Solo Scritti (Stessa data)</option>
-                                <option value="C">C. Tutti i Voti</option>
-                            </select>
-                        </div>
-                    </div>
+<!-- Fase 2: Tipologia di Generazione -->
+<div id="adm-step-2" class="adm-wizard-step hidden space-y-3">
+    <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 2: Tipologia di Generazione</span>
+    <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-bold text-zinc-500 uppercase">Modalità</label>
+                <select id="adm-input-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                    <option value="1">1. Voto Singolo</option>
+                    <!-- Rinominato da "Voti tutto l'anno" a "Multi Voto" -->
+                    <option id="opt-mode-all-year" value="2" disabled>2. Multi Voto</option>
+                </select>
+            </div>
+            <div id="container-adm-tipo-voti" class="flex flex-col gap-1 opacity-40 pointer-events-none">
+                <label class="text-[10px] font-bold text-zinc-500 uppercase">Opzioni Simulazione Anno</label>
+                <select id="adm-input-sub-mode" onchange="window.handleAdminGradeModeChange()" class="w-full px-3 py-2 bg-[#1c1e22] border border-zinc-800 rounded text-xs text-white font-semibold focus:outline-none">
+                    <option value="A">A. Solo Orali (Date diverse)</option>
+                    <option value="B">B. Solo Scritti (Stessa data)</option>
+                    <option value="C">C. Orale + Scritti (Misto)</option>
+                </select>
+            </div>
+        </div>
 
-                    <div id="container-adm-periodo" class="hidden bg-[#1c1e22] p-3 rounded-lg border border-zinc-800/80 space-y-2">
-                        <label class="text-[10px] font-bold text-zinc-500 uppercase block">Seleziona Periodo</label>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                                <input type="checkbox" id="chk-primo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo Primo quadrimestre
-                            </label>
-                            <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                                <input type="checkbox" id="chk-secondo-quad" checked onchange="window.handleAdminGradeModeChange()"> Solo secondo quadrimestre
-                            </label>
+                   <div id="container-adm-periodo" class="hidden bg-[#1c1e22] p-3 rounded-lg border border-zinc-800/80 space-y-3">
+                        <label class="text-[10px] font-bold text-zinc-500 uppercase block">Periodo e Quantità Voti</label>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center justify-between bg-black/20 p-2 rounded-lg">
+                                <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                                    <input type="checkbox" id="chk-primo-quad" checked onchange="window.handleAdminGradeModeChange()"> 1° Quadrimestre
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] text-zinc-500 uppercase font-black">Voti:</span>
+                                    <input type="number" id="adm-input-q1-count" value="3" min="1" max="15" class="w-12 bg-zinc-900 border border-zinc-700 rounded text-center text-xs text-white font-bold">
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-black/20 p-2 rounded-lg">
+                                <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                                    <input type="checkbox" id="chk-secondo-quad" checked onchange="window.handleAdminGradeModeChange()"> 2° Quadrimestre
+                                </label>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] text-zinc-500 uppercase font-black">Voti:</span>
+                                    <input type="number" id="adm-input-q2-count" value="4" min="1" max="15" class="w-12 bg-zinc-900 border border-zinc-700 rounded text-center text-xs text-white font-bold">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -1389,22 +1403,30 @@ main {
 
             <div id="adm-step-3" class="adm-wizard-step hidden space-y-3">
                 <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 3: Seleziona Materie Attive</span>
-                <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
-                    <div class="flex gap-4">
-                        <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
+                <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-4">
+                    <div class="flex gap-6 bg-black/20 p-3 rounded-lg">
+                        <label class="flex items-center gap-2 text-xs text-white font-bold cursor-pointer">
                             <input type="radio" name="adm-materia-scope" value="singola" checked onchange="window.handleAdminGradeScopeChange()"> Solo materia corrente
                         </label>
-                        <label class="flex items-center gap-2 text-xs text-white font-semibold cursor-pointer">
-                            <input type="radio" name="adm-materia-scope" value="tutte" onchange="window.handleAdminGradeScopeChange()"> Tutte le materie della classe
+                        <label class="flex items-center gap-2 text-xs text-white font-bold cursor-pointer">
+                            <input type="radio" name="adm-materia-scope" value="tutte" onchange="window.handleAdminGradeScopeChange()"> Tutte le materie
                         </label>
                     </div>
-                    <div id="adm-materie-checkboxes-container" class="grid grid-cols-1 gap-1.5 max-h-[140px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 text-xs custom-scrollbar">
+                    <div id="adm-materie-checkboxes-container" class="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[300px] overflow-y-auto p-2 custom-scrollbar">
                     </div>
                 </div>
             </div>
 
             <div id="adm-step-4" class="adm-wizard-step hidden space-y-3">
-                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 4: Configurazione Fasce di Merito</span>
+                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 4: Date Verifiche Scritte</span>
+                <p class="text-[10px] text-zinc-500 uppercase font-bold">Imposta le date per le materie selezionate (opzionale)</p>
+                <div id="adm-materie-dates-container" class="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto p-1 custom-scrollbar">
+                    <!-- Popolato dinamicamente -->
+                </div>
+            </div>
+
+            <div id="adm-step-5" class="adm-wizard-step hidden space-y-3">
+                <span class="text-xs font-black uppercase text-amber-500 tracking-wider block">Fase 5: Configurazione Fasce di Merito</span>
                 <div class="bg-[#23272a] p-4 rounded-xl border border-zinc-800 space-y-3">
                     <div id="container-adm-fascia-singolo" class="flex flex-col gap-1 max-w-xs">
                         <label class="text-[10px] font-bold text-zinc-500 uppercase">Fascia Studente Selezionato</label>
@@ -1419,7 +1441,7 @@ main {
 
                     <div id="container-adm-fasce-classe" class="hidden flex flex-col gap-2">
                         <label class="text-[10px] font-bold text-amber-500 uppercase block mb-1">Fascia Personalizzata per ciascun componente:</label>
-                        <div id="adm-studenti-fasce-container" class="space-y-2 max-h-[160px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 custom-scrollbar text-xs">
+                        <div id="adm-studenti-fasce-container" class="space-y-2 max-h-[300px] overflow-y-auto p-2 bg-[#1c1e22] rounded border border-zinc-800 custom-scrollbar text-xs">
                         </div>
                     </div>
                 </div>
@@ -5564,45 +5586,62 @@ window.renderTabelloneGlobale = async () => {
             <th class="p-4 text-right bg-red-900 text-white text-[10px] uppercase font-black">Media Gen.</th>
         </tr>`;
 
-    tbody.innerHTML = allData.map(s => {
+tbody.innerHTML = allData.map(s => {
         let sommaMedie = 0;
         let contaMaterie = 0;
 
-        
-const celleMaterie = materieOrdinate.map(m => {
-    const votiMat = s.medie[m];
-    if (!votiMat) return `<td class="p-4 text-center text-zinc-600 border-r border-zinc-800">-</td>`;
-    
-    const mediaMat = (votiMat.reduce((a, b) => a + b, 0) / votiMat.length).toFixed(1);
-    
-    // AGGIUNTA: Aggiungi alla media generale SOLO se NON è religione
-    if (m.toLowerCase() !== 'religione') {
-        sommaMedie += parseFloat(mediaMat);
-        contaMaterie++;
-    }
-    
-    const colorClass = mediaMat < 6 ? 'text-red-500' : 'text-green-500';
-    
-    return `
-        <td class="p-4 text-center border-r border-zinc-800">
-            <div class="flex flex-col items-center gap-1">
-                <span class="font-black text-xs ${colorClass}">${mediaMat}</span>
-                <button onclick="window.showTabelloneDetails('${s.id}', '${m}')" 
-                        class="text-[9px] bg-zinc-800 hover:bg-red-700 text-zinc-400 hover:text-white px-1.5 py-0.5 rounded transition-all">
-                    🔍
-                </button>
-            </div>
-        </td>`;
-}).join('');
+        const celleMaterie = materieOrdinate.map(m => {
+            // Recuperiamo la lista completa dei voti per questa materia dalla cache
+            const votiDettaglio = window.tabelloneCache[s.id].votiPerMateria[m] || [];
+            
+            if (votiDettaglio.length === 0) {
+                return `<td class="p-4 text-center text-zinc-600 border-r border-zinc-800">-</td>`;
+            }
+
+            // Calcolo della media per la colonna finale (Media Gen.)
+            const votiNumerici = votiDettaglio.map(v => window.parseVotoScolastico(v.voto));
+            const mediaMat = (votiNumerici.reduce((a, b) => a + b, 0) / votiDettaglio.length);
+            
+            if (m.toLowerCase() !== 'religione') {
+                sommaMedie += mediaMat;
+                contaMaterie++;
+            }
+
+            // Generazione HTML per tutti i voti nella casella
+            const votiHtml = votiDettaglio.map(v => {
+                const val = window.parseVotoScolastico(v.voto);
+                const colorClass = val < 6 ? 'text-red-500' : 'text-green-500';
+                // Prendiamo solo Giorno/Mese per non occupare troppo spazio
+                const dataBreve = v.data ? v.data.substring(0, 5) : '--/--';
+
+                return `
+                    <div class="flex flex-col items-center justify-center min-w-[28px] p-1 bg-black/20 rounded border border-white/5 shadow-inner">
+                        <span class="text-[6px] text-zinc-500 font-black leading-none mb-0.5">${dataBreve}</span>
+                        <span class="text-[10px] font-black ${colorClass} leading-none">${v.voto}</span>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <td class="p-2 border-r border-zinc-800">
+                    <div class="flex flex-wrap justify-center gap-1">
+                        ${votiHtml}
+                    </div>
+                </td>`;
+        }).join('');
 
         const mediaGenerale = contaMaterie > 0 ? (sommaMedie / contaMaterie).toFixed(1) : "0.0";
         const colorMediaGen = mediaGenerale < 6 ? 'text-red-500' : 'text-blue-400';
 
         return `
             <tr class="hover:bg-zinc-800/50 transition-colors border-b border-zinc-800">
-                <td class="p-4 font-black uppercase border-r border-zinc-800 sticky left-0 bg-zinc-900 z-10 text-zinc-200 text-xs">${s.name}</td>
+                <td class="p-4 font-black uppercase border-r border-zinc-800 sticky left-0 bg-zinc-900 z-10 text-zinc-200 text-xs">
+                    ${s.name}
+                </td>
                 ${celleMaterie}
-                <td class="p-4 text-right font-black text-sm bg-zinc-900/50 ${colorMediaGen}">${mediaGenerale}</td>
+                <td class="p-4 text-right font-black text-sm bg-zinc-900/50 ${colorMediaGen}">
+                    ${mediaGenerale}
+                </td>
             </tr>`;
     }).join('');
 };
@@ -7441,51 +7480,113 @@ window.renderAdminMaterieCheckboxes = () => {
     
     const uiMateria = document.getElementById('input-grade-subject').value.toLowerCase().trim();
     const chiaviMaterie = Object.keys(currentMappaMaterieProf);
-    const mode = document.getElementById('adm-input-mode').value;
-    const subMode = document.getElementById('adm-input-sub-mode').value;
 
     if (chiaviMaterie.length === 0) {
         container.innerHTML = '<span class="text-zinc-500 p-2 italic">Nessun professore configurato.</span>';
         return;
     }
 
-    // Nascondiamo completamente il blocco se siamo in modalità voto singolo (1) o se abbiamo selezionato "Solo Orali" (A)
-    const nascondiInteroBloccoDate = (mode === '1' || subMode === 'A') ? 'hidden' : '';
-
     chiaviMaterie.forEach(key => {
         const info = currentMappaMaterieProf[key];
         const isChecked = (key === uiMateria) ? 'checked' : '';
         
-        // Verifichiamo se i singoli quadrimestri sono abilitati
-        const q1Spuntato = document.getElementById('chk-primo-quad')?.checked;
-        const q2Spuntato = document.getElementById('chk-secondo-quad')?.checked;
-        
-        // Se il quadrimestre non è spuntato, usiamo 'hidden', altrimenti non mettiamo nessuna classe aggiuntiva
-        const q1Classe = q1Spuntato ? '' : 'hidden';
-        const q2Classe = q2Spuntato ? '' : 'hidden';
-        
         const wrapper = document.createElement('div');
-        wrapper.className = "flex flex-col gap-2 p-3 bg-[#1c1e22] border border-zinc-800 rounded-xl mb-2";
+        wrapper.className = "flex items-center justify-between p-3 bg-[#1c1e22] border border-zinc-800 rounded-xl mb-2";
         
         wrapper.innerHTML = `
-            <div class="flex items-center justify-between">
-                <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" class="adm-checkbox-materia w-4 h-4 accent-red-600" value="${key}" ${isChecked} 
-                           onchange="const datesDiv = this.closest('div.flex-col').querySelector('.adm-mat-dates'); if(datesDiv) datesDiv.classList.toggle('hidden', !this.checked || ${mode === '1' || subMode === 'A'})">
-                    <span class="font-black text-zinc-200 uppercase text-[11px]">${info.materiaOriginale}</span>
-                </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" class="adm-checkbox-materia w-4 h-4 accent-red-600" value="${key}" ${isChecked}>
+                <span class="font-black text-zinc-200 uppercase text-[11px]">${info.materiaOriginale}</span>
+            </label>
+            <span class="text-[9px] text-zinc-500 font-bold italic">Prof: ${info.name}</span>
+        `;
+        container.appendChild(wrapper);
+    });
+};
+
+window.renderAdminDatesStep = () => {
+    const container = document.getElementById('adm-materie-dates-container');
+    container.innerHTML = '';
+
+    const checkedBoxes = document.querySelectorAll('.adm-checkbox-materia:checked');
+    const selectedKeys = Array.from(checkedBoxes).map(cb => cb.value);
+
+    const mode = document.getElementById('adm-input-mode').value;
+    const subMode = document.getElementById('adm-input-sub-mode').value;
+    const q1Count = parseInt(document.getElementById('adm-input-q1-count')?.value) || 0;
+    const q2Count = parseInt(document.getElementById('adm-input-q2-count')?.value) || 0;
+    const q1Enabled = document.getElementById('chk-primo-quad').checked;
+    const q2Enabled = document.getElementById('chk-secondo-quad').checked;
+
+    if (mode === '1') {
+        container.innerHTML = `<div class="text-center py-8 text-zinc-500 text-xs uppercase font-bold bg-black/10 rounded-xl border border-zinc-800/50">
+            ℹ️ Modalità Voto Singolo: la data si imposta nel passo precedente.</div>`;
+        return;
+    }
+
+    selectedKeys.forEach(key => {
+        const info = currentMappaMaterieProf[key];
+        const wrapper = document.createElement('div');
+        wrapper.className = "flex flex-col gap-2 p-4 bg-[#1c1e22] border border-zinc-800 rounded-2xl mb-4";
+        
+        let inputsHtml = "";
+
+        const getTipoLabel = (idx) => {
+            if (subMode === 'A') return "Orale";
+            if (subMode === 'B') return "Scritto";
+            return (idx % 2 === 0) ? "Orale" : "Scritto"; // Pari=Orale, Dispari=Scritto
+        };
+
+        // Q1
+        if (q1Enabled && q1Count > 0) {
+            let q1Inputs = "";
+            for (let i = 0; i < q1Count; i++) {
+                const tipo = getTipoLabel(i);
+                // Genera l'input SOLO se il tipo è "Scritto"
+                if (tipo === "Scritto") {
+                    q1Inputs += `
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[7px] text-zinc-500 font-bold uppercase">${i+1}° Voto (Scritto)</span>
+                            <input type="date" data-date-type="q1_${i}" data-mat="${key}" 
+                                class="bg-black text-[10px] p-1.5 rounded border border-zinc-700 text-white focus:border-red-600 outline-none">
+                        </div>`;
+                }
+            }
+            // Mostra la sezione del Q1 solo se contiene effettivamente degli scritti
+            if (q1Inputs) {
+                inputsHtml += `<div class="text-[8px] font-black text-amber-500 uppercase tracking-widest mb-1">1° Quadrimestre</div>
+                               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-3">${q1Inputs}</div>`;
+            }
+        }
+
+        // Q2
+        if (q2Enabled && q2Count > 0) {
+            let q2Inputs = "";
+            for (let i = 0; i < q2Count; i++) {
+                const tipo = getTipoLabel(i);
+                // Genera l'input SOLO se il tipo è "Scritto"
+                if (tipo === "Scritto") {
+                    q2Inputs += `
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[7px] text-zinc-500 font-bold uppercase">${i+1}° Voto (Scritto)</span>
+                            <input type="date" data-date-type="q2_${i}" data-mat="${key}" 
+                                class="bg-black text-[10px] p-1.5 rounded border border-zinc-700 text-white focus:border-red-600 outline-none">
+                        </div>`;
+                }
+            }
+            // Mostra la sezione del Q2 solo se contiene effettivamente degli scritti
+            if (q2Inputs) {
+                inputsHtml += `<div class="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-1">2° Quadrimestre</div>
+                               <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">${q2Inputs}</div>`;
+            }
+        }
+
+        wrapper.innerHTML = `
+            <div class="flex items-center justify-between border-b border-zinc-800/50 pb-2 mb-2">
+                <span class="font-black text-zinc-200 uppercase text-[11px]">${info.materiaOriginale}</span>
                 <span class="text-[9px] text-zinc-500 font-bold italic">Prof: ${info.name}</span>
             </div>
-            
-            <div class="adm-mat-dates ${(isChecked && !nascondiInteroBloccoDate) ? 'grid' : 'hidden'} grid-cols-2 gap-2 mt-2 pt-2 border-t border-zinc-800/50">
-                <div class="col-span-2 text-[8px] font-black text-red-500 uppercase tracking-widest mb-1">Date Verifiche Scritte</div>
-                
-                <input type="date" data-date-type="q1_1" data-mat="${key}" class="${q1Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="1° Scritto Q1">
-                <input type="date" data-date-type="q1_2" data-mat="${key}" class="${q1Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="2° Scritto Q1">
-                
-                <input type="date" data-date-type="q2_1" data-mat="${key}" class="${q2Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="1° Scritto Q2">
-                <input type="date" data-date-type="q2_2" data-mat="${key}" class="${q2Classe} bg-black text-[10px] p-1 rounded border border-zinc-700 text-white" title="2° Scritto Q2">
-            </div>
+            ${inputsHtml || '<div class="text-[10px] text-zinc-500 italic">Nessuna prova scritta prevista per questa materia.</div>'}
         `;
         container.appendChild(wrapper);
     });
@@ -7541,59 +7642,56 @@ window.renderStudentFasceList = () => {
     container.innerHTML = "";
 
     const classStudents = window.allStudents.filter(s => s.classe === targetClass && !['prof', 'preside', 'admin'].includes((s.role || '').toLowerCase()));
-
-    // Controlliamo lo stato attuale della Fase 3 per mostrare o nascondere le date degli orali
     const mode = document.getElementById('adm-input-mode').value;
     const subMode = document.getElementById('adm-input-sub-mode').value;
+    const q1Count = parseInt(document.getElementById('adm-input-q1-count')?.value) || 0;
+    const q2Count = parseInt(document.getElementById('adm-input-q2-count')?.value) || 0;
     const q1Checked = document.getElementById('chk-primo-quad').checked;
     const q2Checked = document.getElementById('chk-secondo-quad').checked;
 
-    // Gli orali individuali servono solo in modalità tutto l'anno (2) con opzione A o C
-    const mostraDateOrali = mode === '2' && (subMode === 'A' || subMode === 'C');
-
     classStudents.forEach(student => {
         const row = document.createElement('div');
-        row.className = "flex flex-col gap-2 bg-[#23272a] p-3 rounded-xl border border-zinc-800 text-xs";
+        row.className = "flex flex-col gap-2 bg-[#23272a] p-3 rounded-xl border border-zinc-800 text-xs mb-2";
         
         let oraliHtml = "";
+        if (mode === '2' && subMode !== 'B') { // Se non è "Solo Scritti"
+// Q1 Orali
+if (q1Checked) {
+    let q1Orali = "";
+    for(let i=0; i<q1Count; i++) {
+        // La logica corretta per Misto (C) è: 0=Orale, 1=Scritto, 2=Orale, 3=Scritto...
+        // Quindi mostriamo l'input SOLO se l'indice i è PARI
+        if (subMode === 'A' || (subMode === 'C' && i % 2 === 0)) {
+            q1Orali += `<div class="flex flex-col gap-1">
+                <label class="text-[7px] text-amber-500/80 font-bold uppercase">Data Orale Q1 (Voto ${i+1})</label>
+                <input type="date" data-student-id="${student.id}" data-orale-type="q1_${i}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[10px]">
+            </div>`;
+        }
+    }
+    if(q1Orali) oraliHtml += `<div class="grid grid-cols-2 gap-2 mb-2">${q1Orali}</div>`;
+}
 
-        if (mostraDateOrali) {
-            oraliHtml = `
-                <div class="grid grid-cols-2 gap-2 mt-1 pt-2 border-t border-zinc-800/60">
-                    ${q1Checked ? `
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] text-amber-500/80 font-bold uppercase tracking-tight">1° Orale Q1</label>
-                            <input type="date" data-orale-q1-1="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] text-amber-500/80 font-bold uppercase tracking-tight">2° Orale Q1</label>
-                            <input type="date" data-orale-q1-2="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
-                        </div>
-                    ` : ''}
-                    
-                    ${q2Checked ? `
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] text-blue-400/80 font-bold uppercase tracking-tight">1° Orale Q2</label>
-                            <input type="date" data-orale-q2-1="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] text-blue-400/80 font-bold uppercase tracking-tight">2° Orale Q2</label>
-                            <input type="date" data-orale-q2-2="${student.id}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[11px] focus:outline-none">
-                        </div>
-                    ` : ''}
-                </div>
-            `;
+// Q2 Orali
+if (q2Checked) {
+    let q2Orali = "";
+    for(let i=0; i<q2Count; i++) {
+        if (subMode === 'A' || (subMode === 'C' && i % 2 === 0)) {
+            q2Orali += `<div class="flex flex-col gap-1">
+                <label class="text-[7px] text-blue-400/80 font-bold uppercase">Data Orale Q2 (Voto ${i+1})</label>
+                <input type="date" data-student-id="${student.id}" data-orale-type="q2_${i}" class="adm-student-orale-date bg-[#1c1e22] border border-zinc-700 rounded px-2 py-0.5 text-zinc-300 text-[10px]">
+            </div>`;
+        }
+    }
+    if(q2Orali) oraliHtml += `<div class="grid grid-cols-2 gap-2">${q2Orali}</div>`;
+}
         }
 
         row.innerHTML = `
-            <div class="flex items-center justify-between gap-4">
-                <span class="font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap">${student.name}</span>
-                <select data-student-id="${student.id}" class="adm-student-pool-selector bg-[#1c1e22] border border-zinc-700 rounded px-2 py-1 text-zinc-300 focus:outline-none font-medium text-[11px]">
-                    <option value="1">Alto (8 - 10)</option>
-                    <option value="2" selected>Sufficiente / Buono (6 - 7.5)</option>
-                    <option value="3">Insufficiente (4 - 6-)</option>
-                    <option value="4">Grave (3 - 4.5)</option>
-                    <option value="5">Penoso (0 - 2.5)</option>
+            <div class="flex items-center justify-between gap-4 border-b border-zinc-800/50 pb-2">
+                <span class="font-bold text-white">${student.name}</span>
+                <select data-student-id="${student.id}" class="adm-student-pool-selector bg-[#1c1e22] border border-zinc-700 rounded px-2 py-1 text-zinc-300 text-[10px]">
+                    <option value="1">Alto (8-10)</option><option value="2" selected>Sufficiente (6-7.5)</option>
+                    <option value="3">Insuff. (4-6)</option><option value="4">Grave (3-4.5)</option><option value="5">Penoso (0-2.5)</option>
                 </select>
             </div>
             ${oraliHtml}
@@ -7634,11 +7732,17 @@ window.handleAdminGradeModeChange = () => {
     }
 };
 
-// --- MASTER: ESECUZIONE DELLA GENERAZIONE DEFINITIVA (CON SWITCH VISIVO) ---
+window.getIndividualOralDate = (sId, type) => {
+    const input = document.querySelector(`input[data-student-id="${sId}"][data-orale-type="${type}"]`);
+    if (!input || !input.value) return null;
+    const [y, m, d] = input.value.split('-');
+    return `${d}/${m}/${y}`;
+};
+
+// --- MASTER: ESECUZIONE DELLA GENERAZIONE DEFINITIVA (CORRETTA PER DATE SCRITTE) ---
 window.executeAdminGradeGeneration = async () => {
     const targetClass = window.selectedClass;
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    const currentYearDocId = ay.replace('/', '_');
     
     const targetScope = document.querySelector('input[name="adm-target-scope"]:checked').value; 
     const mode = document.getElementById('adm-input-mode').value; 
@@ -7662,7 +7766,11 @@ window.executeAdminGradeGeneration = async () => {
         return `${d}/${m}/${y}`;
     };
 
+    // Recupero data specifica dallo Step 2 (se presente)
+    const globalSpecificDate = formatInputDateFromValue(document.getElementById('adm-input-specific-date').value);
+
     try {
+        const currentYearDocId = ay.replace('/', '_');
         const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', currentYearDocId);
         const calSnap = await getDoc(calRef);
         window.blockedDates = calSnap.exists() ? (calSnap.data().blocked_dates || []) : [];
@@ -7692,7 +7800,7 @@ window.executeAdminGradeGeneration = async () => {
         return `15/${String(monthIndex + 1).padStart(2, '0')}/${year}`;
     };
 
-      const saveGrade = async (sId, sName, val, dataStr, arg, tipo, matKey) => {
+    const saveGrade = async (sId, sName, val, dataStr, arg, tipo, matKey) => {
         const [gg, mm, aaaa] = dataStr.split('/');
         const dateKey = `${aaaa}-${mm}-${gg}`;
         const quad = (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2;
@@ -7712,7 +7820,10 @@ window.executeAdminGradeGeneration = async () => {
 
     const [y1, y2] = ay.split('/').map(Number);
     const mesiQ1 = [{ y: y1, m: 9 }, { y: y1, m: 10 }, { y: y1, m: 11 }, { y: y2, m: 0 }];
-    const mesiQ2 = [{ y: y2, m: 1 }, { y: y2, m: 2 }, { y: y2, m: 3 }, { y: y2, m: 4 }];
+    const mesiQ2 = [{ y: y2, m: 1 }, { y: y2, m: 2 }, { y: y2, m: 3 }, { y: y2, m: 4 }, { y: y2, m: 5 }];
+
+    const q1Count = parseInt(document.getElementById('adm-input-q1-count')?.value) || 3;
+    const q2Count = parseInt(document.getElementById('adm-input-q2-count')?.value) || 4;
 
     const targetList = (targetScope === 'singolo') 
         ? [{ id: window.selectedStudentId, name: document.getElementById('res-student-name').innerText }] 
@@ -7722,70 +7833,68 @@ window.executeAdminGradeGeneration = async () => {
     if (targetScope === 'singolo') mappaFasce[window.selectedStudentId] = document.getElementById('adm-input-pool-studente').value;
     else document.querySelectorAll('.adm-student-pool-selector').forEach(sel => mappaFasce[sel.dataset.studentId] = sel.value);
 
-    // --- CICLO PRINCIPALE SUGLI STUDENTI ---
     for (const p of targetList) {
+        if (typeof window.quickSwitchStudent === 'function') await window.quickSwitchStudent(p.id);
         
-        // Forza lo switch dello studente richiamando la logica nativa del "Passa a"
-        if (typeof window.quickSwitchStudent === 'function') {
-            await window.quickSwitchStudent(p.id);
-        } else {
-            window.selectedStudentId = p.id;
-            if (typeof loadStudentRecords === 'function') await loadStudentRecords(p.id);
-        }
-        
-        // Aggiorna visivamente la select del "Passa a" in alto a destra
-        const selectSwitcher = document.querySelector('.quick-student-switcher');
-        if (selectSwitcher) {
-            selectSwitcher.value = p.id;
-        }
-
-        // Ciclo interno sulle materie
         for (const matKey of subjectsToProcess) {
-            const getMatDate = (type) => {
-                const input = document.querySelector(`input[data-mat="${matKey}"][data-date-type="${type}"]`);
+            // Helper per recuperare la data specifica dal DOM (Fase 4)
+            const getMatDate = (quad, index) => {
+                const input = document.querySelector(`input[data-mat="${matKey}"][data-date-type="${quad}_${index}"]`);
                 if (!input || !input.value) return null;
                 const [y, m, d] = input.value.split('-');
                 return `${d}/${m}/${y}`;
             };
 
-            const matSpecificDates = {
-                q1_1: getMatDate('q1_1'),
-                q1_2: getMatDate('q1_2'),
-                q2_1: getMatDate('q2_1'),
-                q2_2: getMatDate('q2_2')
-            };
-
             const pool = getRangePool(mappaFasce[p.id]);
 
             if (mode === '1') {
+                // Modalità voto singolo (Multi Voto)
                 let dSel = formatInputDateFromValue(document.getElementById('adm-input-specific-date').value) || generateSafeDate(y1, 10);
                 await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dSel, "Valutazione", "Orale", matKey);
             } else {
-                if (q1Enabled) {
-                    for (let i = 0; i < mesiQ1.length; i++) {
-                        if ((subMode === 'A' || subMode === 'C') && (i === 1 || i === 3)) {
-                            const dOral = generateSafeDate(mesiQ1[i].y, mesiQ1[i].m);
-                            await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dOral, "Interrogazione", "Orale", matKey);
-                        }
-                        if ((subMode === 'B' || subMode === 'C')) {
-                            if (i === 1) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q1_1 || generateSafeDate(mesiQ1[i].y, mesiQ1[i].m), "1° Verifica Scritta", "Scritto", matKey);
-                            if (i === 3) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q1_2 || generateSafeDate(mesiQ1[i].y, mesiQ1[i].m), "2° Verifica Scritta", "Scritto", matKey);
-                        }
-                    }
-                }
+                // Modalità Generazione Automatica Programmata
 
-                if (q2Enabled) {
-                    for (let i = 0; i < mesiQ2.length; i++) {
-                        if ((subMode === 'A' || subMode === 'C') && (i === 1 || i === 3)) {
-                            const dOral = generateSafeDate(mesiQ2[i].y, mesiQ2[i].m);
-                            await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], dOral, "Interrogazione", "Orale", matKey);
-                        }
-                        if ((subMode === 'B' || subMode === 'C')) {
-                            if (i === 1) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q2_1 || generateSafeDate(mesiQ2[i].y, mesiQ2[i].m), "1° Verifica Scritta", "Scritto", matKey);
-                            if (i === 3) await saveGrade(p.id, p.name, pool[Math.floor(Math.random() * pool.length)], matSpecificDates.q2_2 || generateSafeDate(mesiQ2[i].y, mesiQ2[i].m), "2° Verifica Scritta", "Scritto", matKey);
-                        }
-                    }
-                }
+// --- GENERAZIONE PRIMO QUADRIMESTRE ---
+if (q1Enabled && q1Count > 0) {
+    for (let i = 0; i < q1Count; i++) {
+        const isScritto = (subMode === 'B') || (subMode === 'C' && i % 2 === 1);
+        const tipoVoto = isScritto ? "Scritto" : "Orale";
+        const desc = isScritto ? "Verifica Scritta" : "Interrogazione";
+        const meseSelezionato = mesiQ1[i % mesiQ1.length];
+        
+        let dataVoto;
+        if (isScritto) {
+            dataVoto = getMatDate('q1', i) || generateSafeDate(meseSelezionato.y, meseSelezionato.m);
+        } else {
+            // QUI IL CAMBIAMENTO: Prima cerca nella Fase 5, poi genera casuale
+            dataVoto = getIndividualOralDate(p.id, `q1_${i}`) || generateSafeDate(meseSelezionato.y, meseSelezionato.m);
+        }
+
+        const votoRandom = pool[Math.floor(Math.random() * pool.length)];
+        await saveGrade(p.id, p.name, votoRandom, dataVoto, desc, tipoVoto, matKey);
+    }
+}
+
+// --- GENERAZIONE SECONDO QUADRIMESTRE ---
+if (q2Enabled && q2Count > 0) {
+    for (let i = 0; i < q2Count; i++) {
+        const isScritto = (subMode === 'B') || (subMode === 'C' && i % 2 === 1);
+        const tipoVoto = isScritto ? "Scritto" : "Orale";
+        const desc = isScritto ? "Verifica Scritta" : "Interrogazione";
+        const meseSelezionato = mesiQ2[i % mesiQ2.length];
+        
+        let dataVoto;
+        if (isScritto) {
+            dataVoto = getMatDate('q2', i) || generateSafeDate(meseSelezionato.y, meseSelezionato.m);
+        } else {
+            // QUI IL CAMBIAMENTO: Prima cerca nella Fase 5, poi genera casuale
+            dataVoto = getIndividualOralDate(p.id, `q2_${i}`) || generateSafeDate(meseSelezionato.y, meseSelezionato.m);
+        }
+
+        const votoRandom = pool[Math.floor(Math.random() * pool.length)];
+        await saveGrade(p.id, p.name, votoRandom, dataVoto, desc, tipoVoto, matKey);
+    }
+}
             }
         }
 
@@ -7793,13 +7902,13 @@ window.executeAdminGradeGeneration = async () => {
         if (targetScope !== 'singolo') {
             await new Promise(resolve => setTimeout(resolve, 300));
         }
-    }
+    } // <--- 2. Chiude: for (const p of targetList)
 
     alert("✅ Generazione completata con successo!");
     window.closeAdminGradeModal();
     if (window.selectedStudentId) {
         if (typeof window.quickSwitchStudent === 'function') {
-            window.quickSwitchStudent(window.selectedStudentId);
+            await window.quickSwitchStudent(window.selectedStudentId);
         } else if (typeof loadStudentRecords === 'function') {
             loadStudentRecords(window.selectedStudentId);
         }
@@ -8193,8 +8302,13 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
 window.currentAdminStep = 1;
 
 window.navigateAdminWizard = (direction) => {
-    const totalSteps = 4;
+    const totalSteps = 5;
     
+    // Se stiamo andando avanti dallo step 3, popoliamo lo step 4 (date)
+    if (direction === 1 && window.currentAdminStep === 3) {
+        window.renderAdminDatesStep();
+    }
+
     // Nascondi step precedente
     document.getElementById(`adm-step-${window.currentAdminStep}`).classList.replace('block', 'hidden');
     
@@ -8313,6 +8427,13 @@ window.eseguiMigrazioneRecords = async () => {
         alert("Si è verificato un errore durante la migrazione. Controlla la console.");
     }
 };
+
+document.querySelectorAll('#chk-primo-quad, #chk-secondo-quad, #adm-input-q1-count, #adm-input-q2-count').forEach(el => {
+    el.addEventListener('change', () => {
+        // Ogni volta che cambi opzione, rigenera la lista nella Fase 5
+        window.renderStudentFasceList();
+    });
+});
 
    </script>
 </body>
