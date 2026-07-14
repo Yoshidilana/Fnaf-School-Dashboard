@@ -4257,7 +4257,6 @@ document.addEventListener('keydown', (e) => {
 });
 
 
-// Assicurati che la tua funzione toggleDebug() esistente funzioni ancora
 window.toggleDebug = () => {
     const panel = document.getElementById('test-bypass-panel');
     if (panel) {
@@ -5726,29 +5725,47 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 };
 
-window.verifyGoldenPass = function() {
+// Funzione per generare l'hash SHA-256 in JavaScript nativo
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);                    
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+window.verifyGoldenPass = async function() {
     const input = document.getElementById('golden-pass-input');
     const panel = document.getElementById('golden-debug-panel');
     const MY_ID = "477766915096313867";
 
-    if (input.value === MY_ID) {
+    // FIRMA SHA-256 della tua chiave segreta (es: se la password è "iltuoiddiscord" o una parola chiave)
+    // Generiamo l'hash della password inserita dall'utente
+    const hashedInput = await sha256(input.value.trim());
+
+    const SUPER_SECRET_HASH = "38f43a54613c72a2006031fba6fe60ace787bb7619a8974e0214c0e068e65e60";
+
+    if (hashedInput === SUPER_SECRET_HASH) {
         // TRASFORMAZIONE IN DEBUG
         panel.innerHTML = `
-    <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
-    <div class="flex flex-col gap-2">
-        <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
-                class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
-            🚀 Start Master Bypass
-        </button>
-        <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
-    </div>
-`;
+            <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
+            <div class="flex flex-col gap-2">
+                <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
+                        class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
+                    🚀 Start Master Bypass
+                </button>
+                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
+            </div>
+        `;
     } else {
         input.value = '';
         input.placeholder = 'INVALID KEY';
         input.classList.add('border-red-600');
-        // Suono di errore se lo hai
-        if(typeof playHonk === 'function') playHonk(); 
+        
+        // Riproduce l'honk se fallisce
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') context.resume();
+        honkSound.currentTime = 0;
+        honkSound.play().catch(e => console.log("Audio bloccato"));
     }
 };
 
@@ -6857,6 +6874,12 @@ window.loadExamStatus = async () => {
     for (let [id, val] of Object.entries(elementsToUpdate)) {
         const el = document.getElementById(id);
         if (el) el.innerText = val;
+    }
+
+    // --- AGGIUNTA FONDAMENTALE ---
+    // Ora che abbiamo i dati certi, rinfreschiamo l'interfaccia per mostrare i tasti Esami
+    if (typeof applyRoleUI === 'function') {
+        applyRoleUI();
     }
 };
 
