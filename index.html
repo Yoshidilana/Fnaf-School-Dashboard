@@ -829,6 +829,10 @@ main {
             <span class="text-4xl group-hover:scale-110 transition-transform">📋</span>
             <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Tabellone Scrutinio</span>
         </button>
+<button onclick="window.changeMenu('orario')" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
+    <span class="text-3xl block mb-2">🕒</span>
+    <span class="font-black uppercase text-[10px] text-zinc-200">Orario Lezioni</span>
+</button>
     </div>
 </div>
 </div>
@@ -901,6 +905,53 @@ main {
         </div>
     </div>
 </div>
+
+
+<!-- VIEW: ORARIO SETTIMANALE -->
+<div id="view-orario" class="tab-content hidden p-6 max-w-6xl mx-auto">
+    <div class="flex justify-between items-center mb-6 bg-zinc-900 p-6 rounded-3xl border border-zinc-800 shadow-xl">
+        <div>
+            <h2 class="text-3xl font-black uppercase italic text-white tracking-tighter">Orario <span class="text-red-600">Settimanale</span></h2>
+            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Distribuzione lezioni Classe <span id="orario-class-title" class="text-white">--</span></p>
+        </div>
+        
+        <!-- Zona Pulsanti Azione -->
+        <div class="flex gap-2">
+            <!-- Il tasto Sincronizza ora è qui, ordinato e protetto -->
+            <button id="btn-sync-orario" onclick="window.syncOrarioConFirme()" class="hidden bg-amber-600 hover:bg-amber-500 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all shadow-lg">
+                🔄 Sincronizza da Firme
+            </button>
+            <button onclick="window.changeMenu('classi')" class="bg-zinc-800 text-zinc-400 text-[9px] font-black px-4 py-2 rounded-xl uppercase hover:bg-red-700 hover:text-white transition-all">Indietro</button>
+        </div>
+    </div>
+
+    <!-- Contenitore Tabella -->
+    <div class="registry-container border-zinc-800 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-black text-zinc-400 text-[10px] font-black uppercase tracking-widest">
+                        <th class="p-4 border-r border-zinc-800 w-20">Ora</th>
+                        <th class="p-4 border-r border-zinc-800 text-center">Lunedì</th>
+                        <th class="p-4 border-r border-zinc-800 text-center">Martedì</th>
+                        <th class="p-4 border-r border-zinc-800 text-center">Mercoledì</th>
+                        <th class="p-4 border-r border-zinc-800 text-center">Giovedì</th>
+                        <th class="p-4 border-r border-zinc-800 text-center">Venerdì</th> 
+                        <th class="p-4 text-center">Sabato</th> 
+                    </tr>
+                </thead>
+                <tbody id="orario-table-body" class="bg-zinc-900/30">
+                    <!-- Generato via JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <p id="orario-admin-hint" class="hidden mt-4 text-[9px] text-zinc-500 font-bold uppercase text-center italic">
+        💡 Suggerimento: Clicca su una cella per assegnare o modificare la materia.
+    </p>
+</div>
+
+
 
 		<!-- VIEW: ELENCO STUDENTI -->
 <div id="view-studenti" class="tab-content hidden p-4 md:p-6">
@@ -1583,6 +1634,7 @@ main {
         </div>
     </div>
 
+
     <!-- Pannello Configurazione Materie -->
     <div id="exam-config-panel" class="hidden bg-zinc-900 p-6 rounded-3xl border border-red-900/30 mb-6">
         <h3 class="text-white font-black uppercase text-xs mb-4">Seleziona Materie d'Esame per questa classe</h3>
@@ -2102,6 +2154,9 @@ toggle('home-btn-pagella', isStudente);
    // --- EXTRA ---
     toggle('notif-bell', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 toggle('btn-gestione-calendario', [ROLES.ADMIN, ROLES.PRESIDE].includes(type));
+
+    // Sincronizza orario visibile solo a Admin, Preside e Vice Preside
+    toggle('btn-sync-orario', [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(type));
 
 // --- GESTIONE PERSONALE (Solo Vertici) ---
 toggle('menu-gestione-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
@@ -8040,6 +8095,230 @@ window.submitQuickMassGrades = async () => {
     else window.handleClassChange();
 };
 
+// --- SISTEMA ORARIO SETTIMANALE ---
+
+window.loadOrarioLezioni = async () => {
+    const cls = window.selectedClass;
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
+    const container = document.getElementById('orario-table-body');
+    const hint = document.getElementById('orario-admin-hint');
+    
+    if (!cls || cls === 'ALL' || !container) return;
+
+    document.getElementById('orario-class-title').innerText = cls;
+    const isStaff = [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(window.userRole);
+    if(hint) hint.classList.toggle('hidden', !isStaff);
+
+    // Carichiamo l'orario dai metadati della classe
+    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+    const snap = await getDoc(ref);
+    const data = snap.exists() ? snap.data() : {};
+    
+    // Struttura: orariPerAnno[ay][ora][giorno]
+    const orarioAttuale = (data.orariPerAnno && data.orariPerAnno[ay]) ? data.orariPerAnno[ay] : {};
+
+    let html = "";
+        const giorni = ["lun", "mar", "mer", "gio", "ven", "sab"];
+
+    for (let ora = 1; ora <= 8; ora++) {
+        html += `<tr class="border-b border-zinc-800/50">
+            <td class="p-4 bg-black/20 font-black text-red-600 text-center border-r border-zinc-800">${ora}°</td>`;
+        
+        giorni.forEach(giorno => {
+            const cellData = (orarioAttuale[ora] && orarioAttuale[ora][giorno]) ? orarioAttuale[ora][giorno] : null;
+            const materiaDisplay = cellData ? cellData.materia.toUpperCase() : "-";
+            const profDisplay = cellData ? cellData.prof : "";
+            const emoji = cellData ? (LISTA_MATERIE[cellData.materia.toLowerCase()] || "📚") : "";
+
+            html += `
+                <td class="p-2 border-r border-zinc-800 text-center transition-all ${isStaff ? 'hover:bg-red-600/10 cursor-pointer' : ''}" 
+                    onclick="${isStaff ? `window.openEditOrarioModal(${ora}, '${giorno}')` : ''}">
+                    <div class="flex flex-col items-center">
+                        <span class="text-[11px] font-black text-white">${emoji} ${materiaDisplay}</span>
+                        <span class="text-[8px] font-bold text-zinc-500 uppercase mt-1">${profDisplay}</span>
+                    </div>
+                </td>`;
+        });
+        html += `</tr>`;
+    }
+    container.innerHTML = html;
+};
+
+// Modal per assegnare il prof alla cella dell'orario
+window.openEditOrarioModal = async (ora, giorno) => {
+    const cls = window.selectedClass;
+    const body = document.getElementById('modal-body');
+    const confirm = document.getElementById('modal-confirm');
+    const title = document.getElementById('modal-title');
+    
+    title.innerText = `Assegna Lezione: ${ora}° Ora - ${giorno.toUpperCase()}`;
+    document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+
+    const docentiDellaClasse = window.allStudents.filter(u => {
+        const r = (u.role || '').toLowerCase();
+        const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside');
+        const haLaClasse = Array.isArray(u.classi_docente) && u.classi_docente.includes(cls);
+        return isStaff && haLaClasse;
+    });
+
+    if (docentiDellaClasse.length === 0) {
+        body.innerHTML = `<p class="text-xs text-red-500 font-bold uppercase italic">Nessun docente assegnato alla classe ${cls}.</p>`;
+        confirm.classList.add('hidden');
+        return;
+    }
+
+    confirm.classList.remove('hidden');
+    
+    // Funzione helper per generare le opzioni delle materie in base al prof
+    const getMaterieOptions = (prof) => {
+        const mats = Array.isArray(prof.materie) ? prof.materie : [prof.materie];
+        return mats.map(m => `<option value="${m.toLowerCase()}">${m.toUpperCase()}</option>`).join('');
+    };
+
+    body.innerHTML = `
+        <div class="space-y-4">
+            <div>
+                <label class="modal-label">1. Seleziona Docente</label>
+                <select id="select-orario-prof" class="modal-input" onchange="window.updateMateriaDropdown(this)">
+                    <option value="cancella">-- RIMUOVI LEZIONE --</option>
+                    ${docentiDellaClasse.map(p => `<option value="${p.id}" data-name="${p.name}">${p.name.toUpperCase()}</option>`).join('')}
+                </select>
+            </div>
+            <div id="materia-select-container" class="hidden">
+                <label class="modal-label">2. Quale materia insegnerà in quest'ora?</label>
+                <select id="select-orario-materia" class="modal-input">
+                    <!-- Popolato dinamicamente -->
+                </select>
+            </div>
+        </div>
+    `;
+
+    // Funzione globale temporanea per gestire il cambio prof nel modal
+    window.updateMateriaDropdown = (el) => {
+        const container = document.getElementById('materia-select-container');
+        const matSelect = document.getElementById('select-orario-materia');
+        if (el.value === 'cancella') {
+            container.classList.add('hidden');
+        } else {
+            const prof = docentiDellaClasse.find(p => p.id === el.value);
+            matSelect.innerHTML = getMaterieOptions(prof);
+            container.classList.remove('hidden');
+        }
+    };
+
+    confirm.onclick = async () => {
+        const profSelect = document.getElementById('select-orario-prof');
+        const matSelect = document.getElementById('select-orario-materia');
+        const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
+        const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+        
+        if (profSelect.value === 'cancella') {
+            await setDoc(ref, { orariPerAnno: { [ay]: { [ora]: { [giorno]: deleteField() } } } }, { merge: true });
+        } else {
+            const profOpt = profSelect.options[profSelect.selectedIndex];
+            const nuovaLezione = {
+                prof: profOpt.dataset.name,
+                profId: profSelect.value,
+                materia: matSelect.value // Salva la materia specifica scelta
+            };
+            await setDoc(ref, { orariPerAnno: { [ay]: { [ora]: { [giorno]: nuovaLezione } } } }, { merge: true });
+        }
+        
+        window.closeModal();
+        window.loadOrarioLezioni();
+    };
+};
+
+// Collega il caricamento alla funzione changeMenu esistente
+const oldChangeMenu = window.changeMenu;
+window.changeMenu = (menu) => {
+    oldChangeMenu(menu);
+    if (menu === 'orario') window.loadOrarioLezioni();
+};
+
+// --- LOGICA DI SINCRONIZZAZIONE INTELLIGENTE ORARIO/FIRME ---
+
+window.syncOrarioConFirme = async () => {
+    const cls = window.selectedClass;
+    if (!cls || cls === 'ALL') return;
+
+    if (!confirm("Il sistema analizzerà le firme degli ultimi 7 giorni per suggerire l'orario. Procedere?")) return;
+
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
+    const giorniSettimana = ["domenica", "lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato"];
+    const mappaFrequenza = {}; // Struttura: [ora][giorno] -> {materia, prof, conteggio}
+
+    // 1. Analizziamo gli ultimi 7 giorni di calendario
+    const oggi = new Date();
+    for (let i = 0; i < 7; i++) {
+        let dataAnalisi = new Date();
+        dataAnalisi.setDate(oggi.getDate() - i);
+        const dateKey = dataAnalisi.toISOString().split('T')[0];
+        const giornoNome = giorniSettimana[dataAnalisi.getDay()];
+
+        if (giornoNome === "domenica") continue; // Saltiamo la domenica
+
+        const agendaRef = window.getAgendaDocRef(cls, dateKey);
+        const snap = await getDoc(agendaRef);
+
+        if (snap.exists()) {
+            const firme = snap.data().firme || [];
+            firme.forEach(f => {
+                const ora = parseInt(f.ora);
+                if (isNaN(ora)) return;
+
+                if (!mappaFrequenza[ora]) mappaFrequenza[ora] = {};
+                if (!mappaFrequenza[ora][giornoNome]) mappaFrequenza[ora][giornoNome] = {};
+
+                const key = `${f.materia}|${f.prof}|${f.profId}`;
+                mappaFrequenza[ora][giornoNome][key] = (mappaFrequenza[ora][giornoNome][key] || 0) + 1;
+            });
+        }
+    }
+
+    // 2. Prepariamo l'aggiornamento per il Database
+    const orarioUpdate = {};
+    let cambiamenti = 0;
+
+    for (const ora in mappaFrequenza) {
+        for (const giorno in mappaFrequenza[ora]) {
+            // Troviamo la materia/prof più frequente per quella cella
+            const opzioni = mappaFrequenza[ora][giorno];
+            const migliore = Object.keys(opzioni).reduce((a, b) => opzioni[a] > opzioni[b] ? a : b);
+            
+            const [materia, prof, profId] = migliore.split('|');
+
+            if (!orarioUpdate[ora]) orarioUpdate[ora] = {};
+            orarioUpdate[ora][giorno] = {
+                materia: materia,
+                prof: prof,
+                profId: profId
+            };
+            cambiamenti++;
+        }
+    }
+
+    if (cambiamenti === 0) {
+        alert("Non ho trovato abbastanza firme recenti per generare un orario.");
+        return;
+    }
+
+    // 3. Salvataggio su Firestore
+    const classRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+    try {
+        await setDoc(classRef, {
+            orariPerAnno: {
+                [ay]: orarioUpdate
+            }
+        }, { merge: true });
+        
+        alert(`✅ Sincronizzazione completata! Ho generato ${cambiamenti} ore basandomi sulle firme recenti.`);
+        window.loadOrarioLezioni(); // Ricarica la tabella
+    } catch (e) {
+        console.error("Errore sync:", e);
+        alert("Errore durante il salvataggio dell'orario.");
+    }
+};
 
    </script>
 </body>
