@@ -8240,29 +8240,38 @@ window.changeMenu = (menu) => {
 
 window.syncOrarioConFirme = async () => {
     const cls = window.selectedClass;
-    if (!cls || cls === 'ALL') return;
+    if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica prima di sincronizzare.");
 
-    if (!confirm("Il sistema analizzerà le firme degli ultimi 7 giorni per suggerire l'orario. Procedere?")) return;
+    // Recuperiamo l'Anno Scolastico corrente (formato YYYY/YYYY)
+    const ayUI = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // Convertiamo nel formato usato nel database (formato YYYY_YYYY)
+    const ayDB = ayUI.replace('/', '_');
 
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
-    const giorniSettimana = ["domenica", "lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato"];
-    const mappaFrequenza = {}; // Struttura: [ora][giorno] -> {materia, prof, conteggio}
+    if (!confirm(`Il sistema analizzerà TUTTE le firme salvate per l'A.S. ${ayUI} per generare l'orario automatico. Procedere?`)) return;
 
-    // 1. Analizziamo gli ultimi 7 giorni di calendario
-    const oggi = new Date();
-    for (let i = 0; i < 7; i++) {
-        let dataAnalisi = new Date();
-        dataAnalisi.setDate(oggi.getDate() - i);
-        const dateKey = dataAnalisi.toISOString().split('T')[0];
-        const giornoNome = giorniSettimana[dataAnalisi.getDay()];
+    const giorniSettimana = ["dom", "lun", "mar", "mer", "gio", "ven", "sab"]; 
+    const mappaFrequenza = {}; 
 
-        if (giornoNome === "domenica") continue; // Saltiamo la domenica
+    try {
+        // 1. Puntiamo alla collezione che contiene tutti i giorni dell'anno per questa classe
+        // Percorso: agendas_v2 -> {classe} -> {anno_scolastico}
+        const annoCollRef = collection(db, 'artifacts', APP_ID, 'public', 'data', 'agendas_v2', cls, ayDB);
+        const snapshot = await getDocs(annoCollRef);
 
-        const agendaRef = window.getAgendaDocRef(cls, dateKey);
-        const snap = await getDoc(agendaRef);
+        if (snapshot.empty) {
+            alert(`Non ho trovato firme registrate per l'A.S. ${ayUI} nella classe ${cls}.`);
+            return;
+        }
 
-        if (snap.exists()) {
-            const firme = snap.data().firme || [];
+        // 2. Cicliamo su ogni documento (ogni giorno dell'anno in cui c'è stata attività)
+        snapshot.forEach(docSnap => {
+            const dateKey = docSnap.id; // Formato YYYY-MM-DD
+            const dataDoc = new Date(dateKey);
+            const giornoNome = giorniSettimana[dataDoc.getDay()];
+
+            if (giornoNome === "domenica") return; // Ignoriamo le domeniche
+
+            const firme = docSnap.data().firme || [];
             firme.forEach(f => {
                 const ora = parseInt(f.ora);
                 if (isNaN(ora)) return;
@@ -8270,53 +8279,52 @@ window.syncOrarioConFirme = async () => {
                 if (!mappaFrequenza[ora]) mappaFrequenza[ora] = {};
                 if (!mappaFrequenza[ora][giornoNome]) mappaFrequenza[ora][giornoNome] = {};
 
-                const key = `${f.materia}|${f.prof}|${f.profId}`;
+                // Creiamo una chiave univoca per la combinazione materia + professore
+                const key = `${f.materia.toLowerCase()}|${f.prof}|${f.profId}`;
                 mappaFrequenza[ora][giornoNome][key] = (mappaFrequenza[ora][giornoNome][key] || 0) + 1;
             });
+        });
+
+        // 3. Elaboriamo i risultati per trovare i "vincitori" (le materie più frequenti)
+        const orarioUpdate = {};
+        let cambiamenti = 0;
+
+        for (const ora in mappaFrequenza) {
+            for (const giorno in mappaFrequenza[ora]) {
+                const opzioni = mappaFrequenza[ora][giorno];
+                // Trova la chiave con il valore (conteggio) più alto
+                const migliore = Object.keys(opzioni).reduce((a, b) => opzioni[a] > opzioni[b] ? a : b);
+                
+                const [materia, prof, profId] = migliore.split('|');
+
+                if (!orarioUpdate[ora]) orarioUpdate[ora] = {};
+                orarioUpdate[ora][giorno] = {
+                    materia: materia,
+                    prof: prof,
+                    profId: profId
+                };
+                cambiamenti++;
+            }
         }
-    }
 
-    // 2. Prepariamo l'aggiornamento per il Database
-    const orarioUpdate = {};
-    let cambiamenti = 0;
+        // 4. Salvataggio finale nei metadati della classe
+        const classRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+        const ayKeySave = ayUI.replace('/', '-'); // Formato usato per salvare l'orario (es. 2025-2026)
 
-    for (const ora in mappaFrequenza) {
-        for (const giorno in mappaFrequenza[ora]) {
-            // Troviamo la materia/prof più frequente per quella cella
-            const opzioni = mappaFrequenza[ora][giorno];
-            const migliore = Object.keys(opzioni).reduce((a, b) => opzioni[a] > opzioni[b] ? a : b);
-            
-            const [materia, prof, profId] = migliore.split('|');
-
-            if (!orarioUpdate[ora]) orarioUpdate[ora] = {};
-            orarioUpdate[ora][giorno] = {
-                materia: materia,
-                prof: prof,
-                profId: profId
-            };
-            cambiamenti++;
-        }
-    }
-
-    if (cambiamenti === 0) {
-        alert("Non ho trovato abbastanza firme recenti per generare un orario.");
-        return;
-    }
-
-    // 3. Salvataggio su Firestore
-    const classRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
-    try {
         await setDoc(classRef, {
             orariPerAnno: {
-                [ay]: orarioUpdate
+                [ayKeySave]: orarioUpdate
             }
         }, { merge: true });
         
-        alert(`✅ Sincronizzazione completata! Ho generato ${cambiamenti} ore basandomi sulle firme recenti.`);
-        window.loadOrarioLezioni(); // Ricarica la tabella
+        alert(`✅ Sincronizzazione Annuale Completa!\nAnalizzati tutti i dati dell'A.S. ${ayUI}.\nGenerata la struttura per ${cambiamenti} ore settimanali.`);
+        
+        // Ricarichiamo la tabella dell'orario a schermo
+        window.loadOrarioLezioni();
+
     } catch (e) {
-        console.error("Errore sync:", e);
-        alert("Errore durante il salvataggio dell'orario.");
+        console.error("Errore durante la sincronizzazione annuale:", e);
+        alert("Errore tecnico durante la scansione dell'anno scolastico.");
     }
 };
 
