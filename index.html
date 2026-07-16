@@ -2460,12 +2460,16 @@ const firmeHtml = (data.firme || [])
                 </p>
             </div>
 
-            <!-- Tasto elimina (solo admin) -->
-            ${isAdmin ? `
-                <button onclick="deleteFirma(${idx}, '${cls}')" class="text-zinc-600 hover:text-red-500 p-2 transition-colors">
-                    🗑️
-                </button>
-            ` : ''}
+<!-- Tasto elimina e modifica (solo admin o autore) -->
+<div class="flex gap-1">
+    ${isAdmin || (role === 'prof' && f.profId === window.currentUserId) ? `
+        <button onclick="window.editFirma(${idx}, '${cls}')" class="text-zinc-600 hover:text-blue-500 p-2 transition-colors" title="Modifica">
+            ✏️
+        </button>
+        <button onclick="window.deleteFirma(${idx}, '${cls}')" class="text-zinc-600 hover:text-red-500 p-2 transition-colors" title="Elimina">
+            🗑️
+        </button>
+    ` : ''}
         </div>`;
     }).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-[10px]">Nessuna lezione registrata</div>';
 
@@ -7850,18 +7854,49 @@ window.openQuickMassGradesModal = () => {
                     <span class="text-xs font-black text-white w-4">9</span>
                 </div>
             </div>
+
+            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">3. Giorni Disponibili per Lezione</p>
+                <div class="grid grid-cols-3 gap-2">
+                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="1" checked class="accent-red-600">
+                        <span class="text-xs font-bold text-zinc-300">Lun</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="2" checked class="accent-red-600">
+                        <span class="text-xs font-bold text-zinc-300">Mar</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="3" checked class="accent-red-600">
+                        <span class="text-xs font-bold text-zinc-300">Mer</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="4" checked class="accent-red-600">
+                        <span class="text-xs font-bold text-zinc-300">Gio</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="5" checked class="accent-red-600">
+                        <span class="text-xs font-bold text-zinc-300">Ven</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="6" checked class="accent-red-600">
+                        <span class="text-xs font-bold text-zinc-300">Sab</span>
+                    </label>
+                </div>
+            </div>
+
             <button onclick="window.prepareMassGradesList()" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px]">Prepara Elenco Studenti →</button>
         </div>
         <div id="mass-step-2" class="hidden space-y-4">
             <div class="flex justify-between items-center">
-                <p class="text-[9px] text-zinc-500 font-black uppercase">3. Revisione Individuale</p>
+                <p class="text-[9px] text-zinc-500 font-black uppercase">4. Revisione Individuale</p>
                 <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-500 font-bold uppercase">Rigenera Casuali 🎲</button>
             </div>
             <div id="mass-students-list" class="max-h-[400px] overflow-y-auto space-y-2 pr-2 custom-scroll"></div>
         </div>
     `;
 
-    confirm.classList.add('hidden'); // Nascondiamo il tasto conferma finché non siamo allo step 2
+    confirm.classList.add('hidden');
 };
 
 window.getProfDaysForSubject = (profId, materia, cls) => {
@@ -7932,15 +7967,11 @@ window.prepareMassGradesList = () => {
         }
     }
     
-    // --- LOGICA ORARIO ---
-
-    const infoOrario = window.getProfDaysForSubject(teacherIdToSearch, sub, window.selectedClass);
-    
-    if (infoOrario.giorni.length === 0) {
-        console.warn("Orario non trovato per:", window.currentUserId, sub);
-        // Messaggio più chiaro per l'utente
-        // alert("Attenzione: Non sei stato trovato nell'orario di questa classe per " + sub.toUpperCase() + ". Verranno usate date casuali.");
-    }
+    // --- LOGICA ORARIO (GIORNI SELEZIONATI DA CHECKBOX) ---
+    const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
+    const giorniSelezionati = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+    // Fallback se nessun giorno è selezionato
+    const giorniValidi = giorniSelezionati.length > 0 ? giorniSelezionati : [1, 2, 3, 4, 5, 6];
     
     const listContainer = document.getElementById('mass-students-list');
     const step1 = document.getElementById('mass-step-1');
@@ -7953,15 +7984,12 @@ window.prepareMassGradesList = () => {
     confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
     confirmBtn.onclick = window.submitQuickMassGrades;
 
-    const commonDate = window.generateRandomValidDateString(); // Usata per Scritto/Pratico
+    // Genera la data comune basandosi sui giorni selezionati
+    const commonDate = window.generateRandomValidDateString(undefined, giorniValidi); 
     
     // --- NUOVA LOGICA: DETERMINAZIONE DEI DUE MESI CONSECUTIVI ---
-    // Mesi scolastici (0 = Gennaio, ..., 11 = Dicembre). Escludiamo Giugno(5), Luglio(6), Agosto(7).
-    // Scegliamo il primo mese escludendo Maggio(4) come partenza, così il mese successivo (Maggio) è comunque valido.
-    const startingMonths = [8, 9, 10, 11, 0, 1, 2, 3]; // Settembre, Ottobre, Novembre, Dicembre, Gennaio, Febbraio, Marzo, Aprile
+    const startingMonths = [8, 9, 10, 11, 0, 1, 2, 3]; 
     const firstMonth = startingMonths[Math.floor(Math.random() * startingMonths.length)];
-    
-    // Il mese successivo (se è Dicembre (11), il successivo sarà Gennaio (0))
     const secondMonth = (firstMonth === 11) ? 0 : firstMonth + 1;
 
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
@@ -7992,7 +8020,6 @@ window.prepareMassGradesList = () => {
         `;
     }
 
-    // Calcoliamo l'indice di metà classe per dividere gli studenti
     const halfIndex = Math.ceil(students.length / 2);
 
     listContainer.innerHTML = headerHtml + students.map((s, index) => {
@@ -8002,18 +8029,14 @@ window.prepareMassGradesList = () => {
         if (base === 10) mod = "";
         const finalGrade = base + mod;
 
-        // SE SCRITTO/PRATICO: usa la data comune. 
-        // SE ORALE: la prima metà degli studenti va nel primo mese, la seconda metà nel mese successivo.
-let studentDate;
-if (type === 'Scritto' || type === 'Pratico') {
-    // Per gli scritti usiamo la data scelta nel calendario del modal (o quella comune)
-    studentDate = document.getElementById('mass-common-date')?.value || commonDate;
-} else {
-    // PER GLI ORALI: usiamo i giorni dell'orario!
-    const chosenMonth = (index < halfIndex) ? firstMonth : secondMonth;
-    // Passiamo infoOrario.giorni per costringere il generatore a usare solo i tuoi giorni
-    studentDate = window.generateRandomValidDateString(chosenMonth, infoOrario.giorni);
-}
+        let studentDate;
+        if (type === 'Scritto' || type === 'Pratico') {
+            studentDate = document.getElementById('mass-common-date')?.value || commonDate;
+        } else {
+            const chosenMonth = (index < halfIndex) ? firstMonth : secondMonth;
+            // Usiamo i giorni scelti dai checkbox
+            studentDate = window.generateRandomValidDateString(chosenMonth, giorniValidi);
+        }
 
         return `
             <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3" data-sid="${s.id}">
@@ -8037,8 +8060,7 @@ window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = []
 
     if (!window.blockedDates) window.blockedDates = [];
 
-    // Se il docente ha dei giorni specifici in orario, usiamo solo quelli
-    // Altrimenti (es. per gli scritti) usiamo tutti i giorni tranne la domenica (1-6)
+    // Se il docente ha dei giorni specifici, usiamo solo quelli. Altrimenti da Lunedì (1) a Sabato (6)
     const validDays = (allowedWeekdays && allowedWeekdays.length > 0) ? allowedWeekdays : [1, 2, 3, 4, 5, 6];
 
     while (!found && attempts < 1000) {
@@ -8052,22 +8074,29 @@ window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = []
             end = new Date(yearStart + 1, 5, 10);
         }
 
-        // Generiamo una data a caso nel periodo
-        randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-        randomDate.setHours(0, 0, 0, 0);
+        // Generiamo un timestamp casuale tra i due limiti
+        const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+        randomDate = new Date(randomTimestamp);
+        randomDate.setHours(12, 0, 0, 0); // Impostiamo a mezzogiorno locale per evitare qualsiasi sfasamento di fuso orario
 
         const dayOfWeek = randomDate.getDay(); // 0 = Domenica, 1 = Lunedì...
         
         // CONDIZIONI DI VALIDITÀ:
         // 1. Non deve essere Domenica (0)
-        // 2. Il giorno deve essere nell'orario del prof (validDays)
-        // 3. Non deve essere una data bloccata (vacanza/festività)
+        // 2. Il giorno deve essere tra quelli consentiti dal docente (validDays)
+        // 3. Non deve essere una data bloccata
         if (dayOfWeek !== 0 && validDays.includes(dayOfWeek) && !window.isRegistrationBlocked(randomDate)) {
             found = true;
         }
         attempts++;
     }
-    return randomDate.toISOString().split('T')[0];
+
+    // FORMATTAZIONE LOCALE SICURA (Evita il bug di toISOString che torna indietro al giorno prima)
+    const yyyy = randomDate.getFullYear();
+    const mm = String(randomDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(randomDate.getDate()).padStart(2, '0');
+    
+    return `${yyyy}-${mm}-${dd}`;
 };
 
 window.setRandomValidDate = () => {
@@ -8083,16 +8112,24 @@ window.setRandomValidDate = () => {
         // Sceglie un giorno a caso tra Settembre e Giugno
         const start = new Date(yearStart, 8, 15);
         const end = new Date(yearStart + 1, 5, 10);
-        randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        
+        const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
+        randomDate = new Date(randomTimestamp);
+        randomDate.setHours(12, 0, 0, 0); // Fissiamo a mezzogiorno locale per neutralizzare il fuso orario
         
         // Verifica se la data è bloccata (Domenica o Festività)
-       if (randomDate.getDay() !== 0 && !window.isRegistrationBlocked(randomDate)) {
+        if (randomDate.getDay() !== 0 && !window.isRegistrationBlocked(randomDate)) {
             found = true;
         }
         attempts++;
     }
 
-    input.value = randomDate.toISOString().split('T')[0];
+    // Formattazione locale manuale per evitare lo sfasamento di toISOString()
+    const yyyy = randomDate.getFullYear();
+    const mm = String(randomDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(randomDate.getDate()).padStart(2, '0');
+
+    input.value = `${yyyy}-${mm}-${dd}`;
 };
 
 window.submitQuickMassGrades = async () => {
@@ -8100,6 +8137,8 @@ window.submitQuickMassGrades = async () => {
     const type = document.getElementById('quick-mass-type').value;
     const targetClass = window.selectedClass;
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    
+    // Recuperiamo l'orario come backup per le ore delle firme
     const infoOrario = window.getProfDaysForSubject(window.currentUserId, sub, targetClass);
     const rows = document.querySelectorAll('.mass-row');
     if (rows.length === 0) return;
@@ -8158,22 +8197,29 @@ window.submitQuickMassGrades = async () => {
         }, { merge: true });
 
         // Prepara la struttura di raggruppamento temporanea per l'agenda giornaliera
-if (!agendaUpdatesByDate[dateVal]) {
-    const dObj = new Date(dateVal);
-    const oraDaOrario = infoOrario.ore[dObj.getDay()] || "1"; // Prende l'ora esatta dall'orario
+        if (!agendaUpdatesByDate[dateVal]) {
+            // Calcolo locale e sicuro del giorno della settimana (0 = Domenica, 1 = Lunedì...)
+            // Evita totalmente lo sfasamento del fuso orario di "new Date(dateVal)"
+            const localDateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+            const localDayOfWeek = localDateObj.getDay();
 
-    agendaUpdatesByDate[dateVal] = {
-        firme: {
-            ora: oraDaOrario, // <--- ORA DINAMICA DALL'ORARIO
-            tipo: "Verifica", 
-            materia: sub.toUpperCase(), 
-            argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
-            prof: finalProfName, 
-            profId: finalProfId
-        },
-        votiGiornalieri: []
-    };
-}
+            // Estrae l'ora reale dall'orario. Se non esiste, mette come fallback la prima ora ("1")
+            const oraDaOrario = (infoOrario && infoOrario.ore && infoOrario.ore[localDayOfWeek]) 
+                ? infoOrario.ore[localDayOfWeek] 
+                : "1";
+
+            agendaUpdatesByDate[dateVal] = {
+                firme: {
+                    ora: oraDaOrario.toString(),
+                    tipo: "Verifica", 
+                    materia: sub.toUpperCase(), 
+                    argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
+                    prof: finalProfName, 
+                    profId: finalProfId
+                },
+                votiGiornalieri: []
+            };
+        }
 
         // Aggiungi il voto di questo specifico studente all'elenco giornaliero di questa data
         agendaUpdatesByDate[dateVal].votiGiornalieri.push({
@@ -8190,10 +8236,9 @@ if (!agendaUpdatesByDate[dateVal]) {
         const agendaRef = window.getAgendaDocRef(targetClass, d);
         const dataGiorno = agendaUpdatesByDate[d];
 
-        // Usiamo arrayUnion sia per le firme che per daily_voti, così non si sovrascrivono!
         await setDoc(agendaRef, {
             firme: arrayUnion(dataGiorno.firme),
-            daily_voti: arrayUnion(...dataGiorno.votiGiornalieri) // Lo spread operator (...) inserisce tutti i voti dell'elenco
+            daily_voti: arrayUnion(...dataGiorno.votiGiornalieri)
         }, { merge: true });
     }
 
@@ -8433,6 +8478,42 @@ window.syncOrarioConFirme = async () => {
     } catch (e) {
         console.error("Errore durante la sincronizzazione annuale:", e);
         alert("Errore tecnico durante la scansione dell'anno scolastico.");
+    }
+};
+
+window.editFirma = async (idx, cls) => {
+    const dateKey = document.getElementById('global-calendar').value;
+    const ref = window.getAgendaDocRef(cls, dateKey);
+    
+    try {
+        const snap = await getDoc(ref);
+        if (snap.exists()) {
+            let firme = snap.data().firme || [];
+            let f = firme[idx];
+
+            // Chiediamo i nuovi dati all'utente
+            const nuovaOra = prompt("Modifica ora (es: 1, 2, Extra):", f.ora);
+            if (nuovaOra === null) return; // Annulla se l'utente preme "Annulla"
+
+            const nuovoArg = prompt("Modifica argomento della lezione:", f.argomento);
+            if (nuovoArg === null) return;
+
+            // Aggiorniamo l'oggetto nell'array
+            firme[idx] = { 
+                ...f, 
+                ora: nuovaOra, 
+                argomento: nuovoArg 
+            };
+
+            // Salviamo l'array aggiornato su Firebase
+            await updateDoc(ref, { firme: firme });
+            
+            alert("✅ Firma modificata correttamente!");
+            // La vista si aggiornerà automaticamente grazie a onSnapshot
+        }
+    } catch (e) {
+        console.error("Errore durante la modifica della firma:", e);
+        alert("Si è verificato un errore durante la modifica.");
     }
 };
 
