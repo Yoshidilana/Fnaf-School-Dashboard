@@ -1910,7 +1910,7 @@ const oggi = new Date();
 const dataLocale = oggi.toLocaleDateString('en-CA'); // Restituisce AAAA-MM-GG correttamente
 inputCal.value = dataLocale;
 
-        window.updateDateContext = (newDate) => {
+window.updateDateContext = async (newDate) => { // Aggiunto async
     const allCalendars = document.querySelectorAll('.shared-calendar, #global-calendar');
     
     // CORREZIONE: Se non c'è una nuova data, usa quella locale e non ISO
@@ -1930,6 +1930,22 @@ inputCal.value = dataLocale;
     const month = date.getMonth() + 1;
     const yearFull = date.getFullYear();
     const ay = month >= 9 ? `${yearFull}/${yearFull + 1}` : `${yearFull - 1}/${yearFull}`;
+
+    // --- NUOVA LOGICA: Caricamento Calendario Scolastico ---
+    const ayDocId = ay.replace('/', '_');
+    const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', ayDocId);
+    
+    try {
+        const calSnap = await getDoc(calRef);
+        if (calSnap.exists()) {
+            window.blockedDates = calSnap.data().blocked_dates || [];
+            console.log(`📅 Calendario ${ay} caricato: ${window.blockedDates.length} giorni festivi rilevati.`);
+        } else {
+            window.blockedDates = []; // Reset se non esiste il documento
+        }
+    } catch (e) {
+        console.error("Errore caricamento calendario:", e);
+    }
 
     // 2. Aggiornamento Display e Etichette
     const topDisplay = document.getElementById('current-date-display');
@@ -7943,36 +7959,29 @@ window.generateRandomValidDateString = (targetMonth = null) => {
     let attempts = 0;
     let randomDate;
 
-    while (!found && attempts < 200) {
-        let start, end;
+    // Se window.blockedDates non è ancora arrivato dal DB, lo inizializziamo come array vuoto per non crashare
+    if (!window.blockedDates) window.blockedDates = [];
 
+    while (!found && attempts < 300) { // Aumentati i tentativi per sicurezza
+        let start, end;
         if (targetMonth !== null) {
-            // Se targetMonth è tra Settembre (8) e Dicembre (11), l'anno è "yearStart"
-            // Se è tra Gennaio (0) e Giugno (5), l'anno è "yearStart + 1"
             const year = (targetMonth >= 8) ? yearStart : (yearStart + 1);
             start = new Date(year, targetMonth, 1);
-            end = new Date(year, targetMonth + 1, 0); // Ultimo giorno del mese
+            end = new Date(year, targetMonth + 1, 0);
         } else {
-            // Range scolastico standard di default
             start = new Date(yearStart, 8, 15);
             end = new Date(yearStart + 1, 5, 10);
         }
 
         randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
         
-        // Verifica domeniche, vacanze o blocchi
+        // window.isRegistrationBlocked userà ora le date caricate nel punto 1
         if (!window.isRegistrationBlocked(randomDate)) {
             found = true;
         }
         attempts++;
     }
     
-    // Fallback di emergenza se dopo 200 tentativi (es. mese pieno di blocchi) non trova nulla
-    if (!found) {
-        const year = (targetMonth !== null && targetMonth >= 8) ? yearStart : (yearStart + 1);
-        randomDate = new Date(year, targetMonth !== null ? targetMonth : 9, 15);
-    }
-
     return randomDate.toISOString().split('T')[0];
 };
 
