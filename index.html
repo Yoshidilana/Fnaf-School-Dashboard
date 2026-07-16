@@ -7874,20 +7874,11 @@ window.openQuickMassGradesModal = () => {
 };
 
 window.prepareMassGradesList = () => {
-    const sub = document.getElementById('quick-mass-sub').value;
     const type = document.getElementById('quick-mass-type').value;
     const minV = parseInt(document.getElementById('quick-mass-min').value);
     const maxV = parseInt(document.getElementById('quick-mass-max').value);
     const students = window.allStudents.filter(s => s.classe === window.selectedClass);
     
-    // RECUPERO SLOT ORARIO
-    const slots = window.getTeacherSlots(window.selectedClass, sub);
-    if (slots.length === 0) {
-        alert("⚠️ Attenzione: Non risultano ore di " + sub.toUpperCase() + " nell'orario di questa classe. Non posso generare date coerenti.");
-        return;
-    }
-    const allowedDays = [...new Set(slots.map(s => s.giornoNum))];
-
     const listContainer = document.getElementById('mass-students-list');
     const step1 = document.getElementById('mass-step-1');
     const step2 = document.getElementById('mass-step-2');
@@ -7899,30 +7890,60 @@ window.prepareMassGradesList = () => {
     confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
     confirmBtn.onclick = window.submitQuickMassGrades;
 
+    const commonDate = window.generateRandomValidDateString(); // Usata per Scritto/Pratico
+    
+    // --- NUOVA LOGICA: DETERMINAZIONE MESE COMUNE PER ORALI ---
+    // Scegliamo un mese a caso tra quelli scolastici (0 = Gennaio, 1 = Febbraio, ... 8 = Settembre, ecc.)
+    // Mesi scolastici validi: Settembre (8), Ottobre (9), Novembre (10), Dicembre (11), Gennaio (0), Febbraio (1), Marzo (2), Aprile (3), Maggio (4)
     const scolasticMonths = [8, 9, 10, 11, 0, 1, 2, 3, 4];
     const chosenMonth = scolasticMonths[Math.floor(Math.random() * scolasticMonths.length)];
-    
-    // Per scritto/pratico, scegliamo uno slot comune
-    const commonSlot = slots[Math.floor(Math.random() * slots.length)];
-    const commonDate = window.generateRandomValidDateString(chosenMonth, [commonSlot.giornoNum]);
 
-    listContainer.innerHTML = `<div class="p-2 mb-2 bg-blue-900/20 text-blue-400 text-[10px] font-bold rounded">Materia: ${sub.toUpperCase()} | Giorni rilevati: ${slots.map(s => s.giornoNome.toUpperCase()).join(', ')}</div>` + 
-    students.map(s => {
+    let headerHtml = "";
+
+    // Se è scritto o pratico, mostriamo il box per la data unica comune
+    if (type === 'Scritto' || type === 'Pratico') {
+        headerHtml = `
+            <div class="p-3 bg-red-955/20 border border-red-900/30 rounded-xl mb-4">
+                <label class="modal-label !text-red-400 text-[9px] font-black uppercase">Data Unica Prova ${type}</label>
+                <input type="date" id="mass-common-date" value="${commonDate}" 
+                       onchange="document.querySelectorAll('.mass-date').forEach(i => i.value = this.value)"
+                       class="modal-input !py-2 bg-zinc-800 border-zinc-700 text-white rounded-lg w-full mt-1 outline-none">
+                <p class="text-[8px] text-zinc-500 mt-1 uppercase font-bold">Cambiando questa data, verrà aggiornata automaticamente per tutti gli studenti.</p>
+            </div>
+        `;
+    } else {
+        // Se è ORALE, possiamo mostrare un piccolo badge informativo che spiega quale mese è stato scelto
+        const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+        headerHtml = `
+            <div class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4 flex justify-between items-center">
+                <div>
+                    <p class="text-[9px] text-zinc-400 font-black uppercase">Periodo Interrogazioni Orale</p>
+                    <p class="text-[11px] text-white font-bold uppercase mt-0.5">Mese selezionato: <span class="text-red-500">${monthNames[chosenMonth]}</span></p>
+                </div>
+                <span class="text-xs">🗣️</span>
+            </div>
+        `;
+    }
+
+    listContainer.innerHTML = headerHtml + students.map(s => {
         let base = Math.floor(Math.random() * (maxV - minV + 1)) + minV;
-        let mod = base === 10 ? "" : ["", "+", "-", "½"][Math.floor(Math.random() * 4)];
-        
-        // Per ogni studente scegliamo uno slot a caso tra quelli della materia
-        const mySlot = (type === 'Scritto' || type === 'Pratico') ? commonSlot : slots[Math.floor(Math.random() * slots.length)];
-        const studentDate = (type === 'Scritto' || type === 'Pratico') ? commonDate : window.generateRandomValidDateString(chosenMonth, [mySlot.giornoNum]);
+        const mods = ["", "+", "-", "½"];
+        let mod = mods[Math.floor(Math.random() * mods.length)];
+        if (base === 10) mod = "";
+        const finalGrade = base + mod;
+
+        // SE SCRITTO/PRATICO: usa la data comune. 
+        // SE ORALE: genera una data casuale ma bloccata ESCLUSIVAMENTE dentro il "chosenMonth" scelto per tutta la classe.
+        const studentDate = (type === 'Scritto' || type === 'Pratico') 
+            ? commonDate 
+            : window.generateRandomValidDateString(chosenMonth);
 
         return `
-            <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3" 
-                 data-sid="${s.id}" data-ora="${mySlot.ora}">
+            <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3" data-sid="${s.id}">
                 <div class="flex-1">
                     <p class="text-[10px] font-black text-white uppercase truncate">${s.name}</p>
-                    <p class="text-[7px] text-zinc-500 font-bold uppercase">Ora assegnata: ${mySlot.ora}° Ora</p>
                 </div>
-                <input type="text" value="${base}${mod}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-xs font-black p-1.5 rounded-lg">
+                <input type="text" value="${finalGrade}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-xs font-black p-1.5 rounded-lg">
                 <input type="date" value="${studentDate}" class="mass-date bg-zinc-800 border border-zinc-700 text-white text-[10px] p-1.5 rounded-lg outline-none">
             </div>
         `;
@@ -7930,7 +7951,8 @@ window.prepareMassGradesList = () => {
 };
 
 // --- AGGIORNAMENTO DELLA FUNZIONE GENERATRICE DI DATE ---
-window.generateRandomValidDateString = (targetMonth = null, allowedDays = []) => {
+// Ora accetta come parametro opzionale "targetMonth" (0-11) per forzare la data all'interno di quel mese
+window.generateRandomValidDateString = (targetMonth = null) => {
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const yearStart = parseInt(ay.split('/')[0]);
     
@@ -7938,32 +7960,36 @@ window.generateRandomValidDateString = (targetMonth = null, allowedDays = []) =>
     let attempts = 0;
     let randomDate;
 
-    while (!found && attempts < 500) {
-        const year = (targetMonth !== null && targetMonth >= 8) ? yearStart : (yearStart + 1);
-        const month = (targetMonth !== null) ? targetMonth : Math.floor(Math.random() * 10); // fallback mesi scolastici
-        
-        // Se non abbiamo un mese target, usiamo il range standard
-        let start = new Date(yearStart, 8, 15);
-        let end = new Date(yearStart + 1, 5, 10);
-        if(targetMonth !== null) {
+    while (!found && attempts < 200) {
+        let start, end;
+
+        if (targetMonth !== null) {
+            // Se targetMonth è tra Settembre (8) e Dicembre (11), l'anno è "yearStart"
+            // Se è tra Gennaio (0) e Giugno (5), l'anno è "yearStart + 1"
+            const year = (targetMonth >= 8) ? yearStart : (yearStart + 1);
             start = new Date(year, targetMonth, 1);
-            end = new Date(year, targetMonth + 1, 0);
+            end = new Date(year, targetMonth + 1, 0); // Ultimo giorno del mese
+        } else {
+            // Range scolastico standard di default
+            start = new Date(yearStart, 8, 15);
+            end = new Date(yearStart + 1, 5, 10);
         }
 
         randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-        randomDate.setHours(0, 0, 0, 0);
-
-        const dayOfWeek = randomDate.getDay(); // 0=Dom, 1=Lun...
-
-        // Controllo: Non è bloccato AND (se abbiamo restrizioni) è uno dei giorni consentiti dall'orario
-        const isAllowedDay = allowedDays.length === 0 || allowedDays.includes(dayOfWeek);
-
-        if (!window.isRegistrationBlocked(randomDate) && isAllowedDay) {
+        
+        // Verifica domeniche, vacanze o blocchi
+        if (!window.isRegistrationBlocked(randomDate)) {
             found = true;
         }
         attempts++;
     }
     
+    // Fallback di emergenza se dopo 200 tentativi (es. mese pieno di blocchi) non trova nulla
+    if (!found) {
+        const year = (targetMonth !== null && targetMonth >= 8) ? yearStart : (yearStart + 1);
+        randomDate = new Date(year, targetMonth !== null ? targetMonth : 9, 15);
+    }
+
     return randomDate.toISOString().split('T')[0];
 };
 
@@ -8020,13 +8046,12 @@ window.submitQuickMassGrades = async () => {
     btn.innerText = "REGISTRAZIONE IN CORSO...";
 
     // Mappa per raggruppare firme e voti giornalieri per data
-    const agendaUpdatesByDate = {}; // Raggruppiamo per data e ORA
+    const agendaUpdatesByDate = {};
 
     for (const row of rows) {
         const sid = row.dataset.sid;
-        const assignedOra = row.dataset.ora; // Recuperiamo l'ora salvata nel data-attribute
         const grade = row.querySelector('.mass-grade').value;
-        const dateVal = row.querySelector('.mass-date').value;
+        const dateVal = row.querySelector('.mass-date').value; // Formato YYYY-MM-DD
 
         if (!grade || !dateVal) continue;
 
@@ -8070,46 +8095,32 @@ window.submitQuickMassGrades = async () => {
             };
         }
 
-        // 2. Prepara AGGIORNAMENTO AGENDA (Raggruppato per Data + Ora)
-        const dayOraKey = `${dateVal}_${assignedOra}`;
-        if (!agendaUpdatesByDate[dayOraKey]) {
-            agendaUpdatesByDate[dayOraKey] = {
-                date: dateVal,
-                firma: {
-                    ora: assignedOra, 
-                    tipo: "Verifica", 
-                    materia: sub.toUpperCase(), 
-                    argomento: `Svolgimento prove ${type.toLowerCase()} (Sessione programmata)`,
-                    prof: finalProfName, 
-                    profId: finalProfId
-                },
-                voti: []
-            };
-        }
-        
-        agendaUpdatesByDate[dayOraKey].voti.push({
-            studente: studentObj ? studentObj.name.toUpperCase() : "STUDENTE",
+        // Aggiungi il voto di questo specifico studente all'elenco giornaliero di questa data
+        agendaUpdatesByDate[dateVal].votiGiornalieri.push({
+            studente: studentName.toUpperCase(),
             studenteId: sid,
             voto: grade.toString(),
             materia: sub.toLowerCase(),
-            argomento: `Prova ${type} (Orario Ufficiale)`
+            argomento: `Prova ${type} (Generata)`
         });
     }
 
-    // SALVATAGGIO IN AGENDA V2
-    for (const key in agendaUpdatesByDate) {
-        const data = agendaUpdatesByDate[key];
-        const agendaRef = window.getAgendaDocRef(targetClass, data.date);
-        
+    // 2. SALVATAGGIO IN AGENDA (FIRME + DAILY_VOTI INSIEME!)
+    for (const d of Object.keys(agendaUpdatesByDate)) {
+        const agendaRef = window.getAgendaDocRef(targetClass, d);
+        const dataGiorno = agendaUpdatesByDate[d];
+
+        // Usiamo arrayUnion sia per le firme che per daily_voti, così non si sovrascrivono!
         await setDoc(agendaRef, {
-            firme: arrayUnion(data.firma),
-            daily_voti: arrayUnion(data.voti)
+            firme: arrayUnion(dataGiorno.firme),
+            daily_voti: arrayUnion(...dataGiorno.votiGiornalieri) // Lo spread operator (...) inserisce tutti i voti dell'elenco
         }, { merge: true });
     }
 
-    alert("✅ Registrazione completata seguendo l'orario scolastico!");
+    alert(`✅ Operazione completata!\n${rows.length} voti registrati a nome di: ${finalProfName}`);
     window.closeModal();
-    // ... (Refresh UI) ...
+    if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
+    else window.handleClassChange();
 };
 
 // --- SISTEMA ORARIO SETTIMANALE ---
