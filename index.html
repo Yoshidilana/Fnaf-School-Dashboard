@@ -1931,6 +1931,20 @@ window.updateDateContext = async (newDate) => { // Aggiunto async
     const yearFull = date.getFullYear();
     const ay = month >= 9 ? `${yearFull}/${yearFull + 1}` : `${yearFull - 1}/${yearFull}`;
 
+    // 2. Aggiornamento Display e Etichette
+    const topDisplay = document.getElementById('current-date-display');
+    if (topDisplay) {
+        // 'it-IT' con opzioni per il formato GIO 23 APR
+        const opzioni = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'};
+        topDisplay.innerText = date.toLocaleDateString('it-IT', opzioni).toUpperCase();
+    }
+
+    const ayElem = document.getElementById('current-academic-year');
+    if (ayElem) ayElem.innerText = `A.S. ${ay}`;
+    
+    const piElem = document.getElementById('period-indicator');
+    if (piElem) piElem.innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
+
     // --- NUOVA LOGICA: Caricamento Calendario Scolastico ---
     const ayDocId = ay.replace('/', '_');
     const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', ayDocId);
@@ -1946,20 +1960,6 @@ window.updateDateContext = async (newDate) => { // Aggiunto async
     } catch (e) {
         console.error("Errore caricamento calendario:", e);
     }
-
-    // 2. Aggiornamento Display e Etichette
-    const topDisplay = document.getElementById('current-date-display');
-    if (topDisplay) {
-        // 'it-IT' con opzioni per il formato GIO 23 APR
-        const opzioni = { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'};
-        topDisplay.innerText = date.toLocaleDateString('it-IT', opzioni).toUpperCase();
-    }
-
-    const ayElem = document.getElementById('current-academic-year');
-    if (ayElem) ayElem.innerText = `A.S. ${ay}`;
-    
-    const piElem = document.getElementById('period-indicator');
-    if (piElem) piElem.innerText = (month >= 9 || month <= 1) ? "1° Quadrimestre" : "2° Quadrimestre";
 
     // PEZZO MANCANTE 1: Pagelle
     const pagellaAyElem = document.getElementById('pagella-anno-scolastico');
@@ -2143,7 +2143,7 @@ toggle('home-btn-pagella', isStudente);
         if (isStaffDidattico) {
         toggle('prof-grade-panel', true);
         window.configuraPannelloVotiDocente();
-        toggle('admin-random-grade-btn', isAdmin);
+        toggle('admin-random-grade-btn',  isStaffDidattico);
     } else {
         toggle('prof-grade-panel', false);
     }
@@ -6804,18 +6804,21 @@ window.loadExamStatus = async () => {
     const snap = await getDoc(ref);
     
     let startYear = null;
-    let materiePerAnno = {}; // <--- AGGIUNTO per non perdere il dato
+    let materiePerAnno = {};
+    let orariPerAnno = {}; // <-- Aggiungiamo questa variabile
     
     if (snap.exists()) {
         const d = snap.data();
         startYear = d.startYear || null;
         materiePerAnno = d.materiePerAnno || {}; // <--- AGGIUNTO per estrarlo da Firestore
+        orariPerAnno = d.orariPerAnno || {}; // <-- Scarichiamo l'orario dal database
     }
 
-    // Salviamo startYear E le materie annuali nella cache senza sovrascriverle con un oggetto vuoto
+    // Salviamo tutto nella cache, incluso l'orario!
     window.classConfigsCache[cls] = { 
         startYear: startYear,
-        materiePerAnno: materiePerAnno // <--- AGGIUNTO per il registro dei voti
+        materiePerAnno: materiePerAnno,
+        orariPerAnno: orariPerAnno // <-- Ora il generatore di voti potrà vederlo
     };
 
     // Calcoliamo se è anno d'esame per la UI
@@ -7861,11 +7864,83 @@ window.openQuickMassGradesModal = () => {
     confirm.classList.add('hidden'); // Nascondiamo il tasto conferma finché non siamo allo step 2
 };
 
+window.getProfDaysForSubject = (profId, materia, cls) => {
+    // Sincronizziamo il formato dell'anno con quello usato nel salvataggio dell'orario (-)
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
+    const config = window.classConfigsCache[cls] || {};
+    const orario = (config.orariPerAnno && config.orariPerAnno[ay]) ? config.orariPerAnno[ay] : {};
+    
+    const giorniMappa = { "dom": 0, "lun": 1, "mar": 2, "mer": 3, "gio": 4, "ven": 5, "sab": 6 };
+    const giorniValidi = new Set();
+    const oreAssegnate = {};
+
+    // Pulizia input per confronto sicuro
+    const targetProfId = String(profId).trim();
+    const targetMateria = String(materia).toLowerCase().trim();
+
+    for (const ora in orario) {
+        for (const giorno in orario[ora]) {
+            const cell = orario[ora][giorno];
+            
+            // Verifichiamo che la cella contenga i dati necessari
+            if (cell && cell.profId && cell.materia) {
+                const cellProfId = String(cell.profId).trim();
+                const cellMateria = String(cell.materia).toLowerCase().trim();
+
+                // Confronto flessibile
+                if (cellProfId === targetProfId && cellMateria === targetMateria) {
+                    const giornoIndex = giorniMappa[giorno.toLowerCase()];
+                    if (giornoIndex !== undefined) {
+                        giorniValidi.add(giornoIndex);
+                        if (!oreAssegnate[giornoIndex]) oreAssegnate[giornoIndex] = ora;
+                    }
+                }
+            }
+        }
+    }
+    
+    const result = { giorni: Array.from(giorniValidi), ore: oreAssegnate };
+    console.log(`🔍 Debug Orario [${cls} - ${materia}]:`, result); // Ti aiuta a vedere cosa trova in console
+    return result;
+};
+
 window.prepareMassGradesList = () => {
     const type = document.getElementById('quick-mass-type').value;
+    const subSelect = document.getElementById('quick-mass-sub');
+    const sub = subSelect.value; // Prende il valore (es. "italiano")
+    
     const minV = parseInt(document.getElementById('quick-mass-min').value);
     const maxV = parseInt(document.getElementById('quick-mass-max').value);
     const students = window.allStudents.filter(s => s.classe === window.selectedClass);
+
+    // --- NUOVA LOGICA IDENTIFICAZIONE DOCENTE PER ADMIN ---
+    let teacherIdToSearch = window.currentUserId; // Di base usa l'utente loggato
+
+    // Se chi preme è un Admin, cerchiamo il prof "titolare" della materia in questa classe
+    if (window.userRole === 'admin') {
+        const assignedTeacher = window.allStudents.find(u => {
+            const r = (u.role || '').toLowerCase();
+            const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside');
+            const inClass = Array.isArray(u.classi_docente) && u.classi_docente.includes(window.selectedClass);
+            const teachesSub = Array.isArray(u.materie) && u.materie.some(m => m.toLowerCase().trim() === sub.toLowerCase().trim());
+            return isStaff && inClass && teachesSub;
+        });
+        
+        if (assignedTeacher) {
+            teacherIdToSearch = assignedTeacher.id;
+            console.log(`[ADMIN-MODE] Cerco orario del prof titolare: ${assignedTeacher.name}`);
+        }
+    }
+    
+    // --- LOGICA ORARIO ---
+
+    const infoOrario = window.getProfDaysForSubject(teacherIdToSearch, sub, window.selectedClass);
+    
+    if (infoOrario.giorni.length === 0) {
+        console.warn("Orario non trovato per:", window.currentUserId, sub);
+        // Messaggio più chiaro per l'utente
+        // alert("Attenzione: Non sei stato trovato nell'orario di questa classe per " + sub.toUpperCase() + ". Verranno usate date casuali.");
+    }
     
     const listContainer = document.getElementById('mass-students-list');
     const step1 = document.getElementById('mass-step-1');
@@ -7929,13 +8004,16 @@ window.prepareMassGradesList = () => {
 
         // SE SCRITTO/PRATICO: usa la data comune. 
         // SE ORALE: la prima metà degli studenti va nel primo mese, la seconda metà nel mese successivo.
-        let studentDate;
-        if (type === 'Scritto' || type === 'Pratico') {
-            studentDate = commonDate;
-        } else {
-            const chosenMonth = (index < halfIndex) ? firstMonth : secondMonth;
-            studentDate = window.generateRandomValidDateString(chosenMonth);
-        }
+let studentDate;
+if (type === 'Scritto' || type === 'Pratico') {
+    // Per gli scritti usiamo la data scelta nel calendario del modal (o quella comune)
+    studentDate = document.getElementById('mass-common-date')?.value || commonDate;
+} else {
+    // PER GLI ORALI: usiamo i giorni dell'orario!
+    const chosenMonth = (index < halfIndex) ? firstMonth : secondMonth;
+    // Passiamo infoOrario.giorni per costringere il generatore a usare solo i tuoi giorni
+    studentDate = window.generateRandomValidDateString(chosenMonth, infoOrario.giorni);
+}
 
         return `
             <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3" data-sid="${s.id}">
@@ -7950,19 +8028,20 @@ window.prepareMassGradesList = () => {
 };
 
 // --- AGGIORNAMENTO DELLA FUNZIONE GENERATRICE DI DATE ---
-// Ora accetta come parametro opzionale "targetMonth" (0-11) per forzare la data all'interno di quel mese
-window.generateRandomValidDateString = (targetMonth = null) => {
+window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = []) => {
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const yearStart = parseInt(ay.split('/')[0]);
-    
     let found = false;
     let attempts = 0;
     let randomDate;
 
-    // Se window.blockedDates non è ancora arrivato dal DB, lo inizializziamo come array vuoto per non crashare
     if (!window.blockedDates) window.blockedDates = [];
 
-    while (!found && attempts < 300) { // Aumentati i tentativi per sicurezza
+    // Se il docente ha dei giorni specifici in orario, usiamo solo quelli
+    // Altrimenti (es. per gli scritti) usiamo tutti i giorni tranne la domenica (1-6)
+    const validDays = (allowedWeekdays && allowedWeekdays.length > 0) ? allowedWeekdays : [1, 2, 3, 4, 5, 6];
+
+    while (!found && attempts < 1000) {
         let start, end;
         if (targetMonth !== null) {
             const year = (targetMonth >= 8) ? yearStart : (yearStart + 1);
@@ -7973,15 +8052,21 @@ window.generateRandomValidDateString = (targetMonth = null) => {
             end = new Date(yearStart + 1, 5, 10);
         }
 
+        // Generiamo una data a caso nel periodo
         randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        randomDate.setHours(0, 0, 0, 0);
+
+        const dayOfWeek = randomDate.getDay(); // 0 = Domenica, 1 = Lunedì...
         
-        // window.isRegistrationBlocked userà ora le date caricate nel punto 1
-        if (!window.isRegistrationBlocked(randomDate)) {
+        // CONDIZIONI DI VALIDITÀ:
+        // 1. Non deve essere Domenica (0)
+        // 2. Il giorno deve essere nell'orario del prof (validDays)
+        // 3. Non deve essere una data bloccata (vacanza/festività)
+        if (dayOfWeek !== 0 && validDays.includes(dayOfWeek) && !window.isRegistrationBlocked(randomDate)) {
             found = true;
         }
         attempts++;
     }
-    
     return randomDate.toISOString().split('T')[0];
 };
 
@@ -8001,7 +8086,7 @@ window.setRandomValidDate = () => {
         randomDate = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
         
         // Verifica se la data è bloccata (Domenica o Festività)
-        if (!window.isRegistrationBlocked(randomDate)) {
+       if (randomDate.getDay() !== 0 && !window.isRegistrationBlocked(randomDate)) {
             found = true;
         }
         attempts++;
@@ -8015,7 +8100,7 @@ window.submitQuickMassGrades = async () => {
     const type = document.getElementById('quick-mass-type').value;
     const targetClass = window.selectedClass;
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    
+    const infoOrario = window.getProfDaysForSubject(window.currentUserId, sub, targetClass);
     const rows = document.querySelectorAll('.mass-row');
     if (rows.length === 0) return;
 
@@ -8073,19 +8158,22 @@ window.submitQuickMassGrades = async () => {
         }, { merge: true });
 
         // Prepara la struttura di raggruppamento temporanea per l'agenda giornaliera
-        if (!agendaUpdatesByDate[dateVal]) {
-            agendaUpdatesByDate[dateVal] = {
-                firme: {
-                    ora: "1", 
-                    tipo: "Verifica", 
-                    materia: sub.toUpperCase(), 
-                    argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
-                    prof: finalProfName, 
-                    profId: finalProfId
-                },
-                votiGiornalieri: []
-            };
-        }
+if (!agendaUpdatesByDate[dateVal]) {
+    const dObj = new Date(dateVal);
+    const oraDaOrario = infoOrario.ore[dObj.getDay()] || "1"; // Prende l'ora esatta dall'orario
+
+    agendaUpdatesByDate[dateVal] = {
+        firme: {
+            ora: oraDaOrario, // <--- ORA DINAMICA DALL'ORARIO
+            tipo: "Verifica", 
+            materia: sub.toUpperCase(), 
+            argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
+            prof: finalProfName, 
+            profId: finalProfId
+        },
+        votiGiornalieri: []
+    };
+}
 
         // Aggiungi il voto di questo specifico studente all'elenco giornaliero di questa data
         agendaUpdatesByDate[dateVal].votiGiornalieri.push({
