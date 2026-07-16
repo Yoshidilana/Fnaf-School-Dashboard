@@ -7862,11 +7862,21 @@ window.prepareMassGradesList = () => {
     confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
     confirmBtn.onclick = window.submitQuickMassGrades;
 
-    const commonDate = window.generateRandomValidDateString(); // Data per prove collettive (Scritto/Pratico)
+    const commonDate = window.generateRandomValidDateString(); // Usata per Scritto/Pratico
+    
+    // --- NUOVA LOGICA: DETERMINAZIONE DEI DUE MESI CONSECUTIVI ---
+    // Mesi scolastici (0 = Gennaio, ..., 11 = Dicembre). Escludiamo Giugno(5), Luglio(6), Agosto(7).
+    // Scegliamo il primo mese escludendo Maggio(4) come partenza, così il mese successivo (Maggio) è comunque valido.
+    const startingMonths = [8, 9, 10, 11, 0, 1, 2, 3]; // Settembre, Ottobre, Novembre, Dicembre, Gennaio, Febbraio, Marzo, Aprile
+    const firstMonth = startingMonths[Math.floor(Math.random() * startingMonths.length)];
+    
+    // Il mese successivo (se è Dicembre (11), il successivo sarà Gennaio (0))
+    const secondMonth = (firstMonth === 11) ? 0 : firstMonth + 1;
 
+    const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+    
     let headerHtml = "";
 
-    // Se è scritto o pratico, mostriamo il box per la data unica comune
     if (type === 'Scritto' || type === 'Pratico') {
         headerHtml = `
             <div class="p-3 bg-red-955/20 border border-red-900/30 rounded-xl mb-4">
@@ -7874,23 +7884,27 @@ window.prepareMassGradesList = () => {
                 <input type="date" id="mass-common-date" value="${commonDate}" 
                        onchange="document.querySelectorAll('.mass-date').forEach(i => i.value = this.value)"
                        class="modal-input !py-2 bg-zinc-800 border-zinc-700 text-white rounded-lg w-full mt-1 outline-none">
-                <p class="text-[8px] text-zinc-500 mt-1 uppercase font-bold">Tutti i voti verranno registrati in questo giorno.</p>
+                <p class="text-[8px] text-zinc-500 mt-1 uppercase font-bold">Cambiando questa data, verrà aggiornata automaticamente per tutti gli studenti.</p>
             </div>
         `;
     } else {
-        // Se è ORALE, avvisiamo che le date sono sparse su tutto l'anno
         headerHtml = `
             <div class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4 flex justify-between items-center">
                 <div>
-                    <p class="text-[9px] text-zinc-400 font-black uppercase">Distribuzione Interrogazioni</p>
-                    <p class="text-[11px] text-white font-bold uppercase mt-0.5">Le date sono generate <span class="text-green-500">casualmente su tutto l'anno</span></p>
+                    <p class="text-[9px] text-zinc-400 font-black uppercase">Periodo Interrogazioni Orale</p>
+                    <p class="text-[11px] text-white font-bold uppercase mt-0.5">
+                        Spalmate su: <span class="text-red-500">${monthNames[firstMonth]}</span> e <span class="text-red-500">${monthNames[secondMonth]}</span>
+                    </p>
                 </div>
-                <span class="text-xs">🎲</span>
+                <span class="text-xs">🗣️</span>
             </div>
         `;
     }
 
-    listContainer.innerHTML = headerHtml + students.map(s => {
+    // Calcoliamo l'indice di metà classe per dividere gli studenti
+    const halfIndex = Math.ceil(students.length / 2);
+
+    listContainer.innerHTML = headerHtml + students.map((s, index) => {
         let base = Math.floor(Math.random() * (maxV - minV + 1)) + minV;
         const mods = ["", "+", "-", "½"];
         let mod = mods[Math.floor(Math.random() * mods.length)];
@@ -7898,11 +7912,14 @@ window.prepareMassGradesList = () => {
         const finalGrade = base + mod;
 
         // SE SCRITTO/PRATICO: usa la data comune. 
-        // SE ORALE: chiama generateRandomValidDateString() senza parametri. 
-        // Questo cercherà un giorno valido in QUALSIASI mese dell'anno scolastico.
-        const studentDate = (type === 'Scritto' || type === 'Pratico') 
-            ? commonDate 
-            : window.generateRandomValidDateString(); 
+        // SE ORALE: la prima metà degli studenti va nel primo mese, la seconda metà nel mese successivo.
+        let studentDate;
+        if (type === 'Scritto' || type === 'Pratico') {
+            studentDate = commonDate;
+        } else {
+            const chosenMonth = (index < halfIndex) ? firstMonth : secondMonth;
+            studentDate = window.generateRandomValidDateString(chosenMonth);
+        }
 
         return `
             <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3" data-sid="${s.id}">
