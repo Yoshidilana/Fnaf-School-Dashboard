@@ -1864,7 +1864,7 @@ main {
     "B": "Buono",
     "d": "Discreto",
     "S": "Sufficiente",
-    "NS": "Non Sufficiente"
+    "NS": "Insufficiente"
 };
 
         const app = initializeApp(firebaseConfig);
@@ -3590,9 +3590,10 @@ if (menu === 'classi') {
 // --- FUNZIONI DI GESTIONE INTEGRATA (PROFILO + AGENDA) ---
 
 window.editNote = async (idx, studentId) => {
-    // Recuperiamo l'anno scolastico attivo nell'interfaccia per la prima lettura di fallback
-    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-    const annoCartellaIniziale = aySelezionato.replace('/', '-');
+    // Recuperiamo l'anno scolastico attivo nell'interfaccia eliminando spazi vuoti
+    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // CORREZIONE: usiamo l'underscore (_) per allinearci al bot e a Firestore
+    const annoCartellaIniziale = aySelezionato.replace('/', '_');
 
     const recordRef = window.getRecordDocRef(studentId, annoCartellaIniziale, 'note');
     const d = await getDoc(recordRef);
@@ -3606,8 +3607,8 @@ window.editNote = async (idx, studentId) => {
             return;
         }
 
-        // Estraiamo il vero anno della nota per aggiornare la cartella corretta (es: "2025/2026" -> "2025-2026")
-        const annoCartellaEffettivo = vecchiaNota.anno ? vecchiaNota.anno.replace('/', '-') : annoCartellaIniziale;
+        // CORREZIONE: Estraiamo il vero anno della nota usando l'underscore (_) invece del trattino (-)
+        const annoCartellaEffettivo = vecchiaNota.anno ? vecchiaNota.anno.replace('/', '_') : annoCartellaIniziale;
         const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'note');
 
         const nuovoTesto = prompt("Modifica la nota/mandato:", vecchiaNota.testo);
@@ -3640,19 +3641,15 @@ window.editNote = async (idx, studentId) => {
 };
 
 window.editVoto = async (idRicevuto, studentId) => {
-    // 1. Identifichiamo l'anno di riferimento DAL VOTO (non dalla UI)
-    // Se non conosciamo l'anno, dobbiamo cercarlo. Qui assumiamo che il voto sia in un array.
-    // Suggerimento: Se hai un modo per sapere l'anno, passalo come parametro.
-    // In mancanza, proviamo a recuperare l'anno di questo specifico voto:
+    // 1. Identifichiamo l'anno di riferimento attivo nell'interfaccia
     const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // Trasformiamo subito la barra in underscore per allinearci a Firestore e al Bot
+    const ayKeyIniziale = aySelezionato.replace('/', '_');
     
     // Per sicurezza, cerchiamo prima nell'anno selezionato
-    const recordRef = window.getRecordDocRef(studentId, aySelezionato, 'voti');
+    const recordRef = window.getRecordDocRef(studentId, ayKeyIniziale, 'voti');
     let d = await getDoc(recordRef);
     
-    // Se non esiste, il voto è in un altro anno (es. anno precedente)
-    // In questo caso dovresti implementare una ricerca negli anni disponibili 
-    // o passare l'anno del voto alla funzione editVoto.
     if (!d.exists()) {
         alert("Errore: Registro non trovato per l'anno selezionato. Controlla l'anno in alto.");
         return;
@@ -3668,12 +3665,12 @@ window.editVoto = async (idRicevuto, studentId) => {
 
     const vecchioVoto = { ...listaVoti[indiceVoto] };
         
-        // Estraiamo l'anno scolastico effettivo memorizzato nel voto (es: "2025/2026" -> "2025-2026")
-        const annoCartellaEffettivo = vecchioVoto.anno ? vecchioVoto.anno.replace('/', '-') : annoCartellaIniziale;
-        // Riferimento preciso nel caso in cui differisca da quello della vista
-        const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'voti');
+    // CORREZIONE: Estraiamo l'anno scolastico effettivo memorizzato nel voto usando l'underscore (_) ed evitando variabili inesistenti
+    const annoCartellaEffettivo = vecchioVoto.anno ? vecchioVoto.anno.replace('/', '_') : ayKeyIniziale;
+    // Riferimento preciso nel caso in cui differisca da quello della vista
+    const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'voti');
         
-// --- PROMPT DI MODIFICA ---
+    // --- PROMPT DI MODIFICA ---
     const nuovoVotoVal = prompt("Modifica il valore del voto:", vecchioVoto.voto);
     if (nuovoVotoVal === null) return;
 
@@ -3696,79 +3693,80 @@ window.editVoto = async (idRicevuto, studentId) => {
     }
 
     // --- SALVATAGGIO ---
-    await setDoc(recordRef, { voti: listaVoti }, { merge: true });
+    // CORREZIONE: Salva sul riferimento preciso (veroRecordRef) allineato con le cartelle corrette
+    await setDoc(veroRecordRef, { voti: listaVoti }, { merge: true });
 
     // --- AGGIORNAMENTO AGENDA ---
-    // NOTA: Assicurati che targetClass sia definita correttamente
     const targetClass = window.selectedClass || "ClasseGenerica";
 
-        // Convertiamo la vecchia data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
-        const vParts = vecchioVoto.data.split('/');
-        const vecchioDateKey = `${vParts[2]}-${vParts[1]}-${vParts[0]}`;
-        const vecchioAgendaRef = window.getAgendaDocRef(targetClass, vecchioDateKey);
+    // Convertiamo la vecchia data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
+    const vParts = vecchioVoto.data.split('/');
+    const vecchioDateKey = `${vParts[2]}-${vParts[1]}-${vParts[0]}`;
+    const vecchioAgendaRef = window.getAgendaDocRef(targetClass, vecchioDateKey);
 
-        // Convertiamo la nuova data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
-        const nParts = nuovaData.split('/');
-        const nuovaDateKey = `${nParts[2]}-${nParts[1]}-${nParts[0]}`;
-        const nuovoAgendaRef = window.getAgendaDocRef(targetClass, nuovaDateKey);
+    // Convertiamo la nuova data (GG/MM/AAAA) nel formato YYYY-MM-DD richiesto dall'helper
+    const nParts = nuovaData.split('/');
+    const nuovaDateKey = `${nParts[2]}-${nParts[1]}-${nParts[0]}`;
+    const nuovoAgendaRef = window.getAgendaDocRef(targetClass, nuovaDateKey);
 
-        // --- RIMOZIONE DAL VECCHIO DOCUMENTO AGENDA V2 ---
-        if (vecchioAgendaRef) {
-            const vSnap = await getDoc(vecchioAgendaRef);
-            if (vSnap.exists()) {
-                let daily = vSnap.data().daily_voti || [];
+    // --- RIMOZIONE DAL VECCHIO DOCUMENTO AGENDA V2 ---
+    if (vecchioAgendaRef) {
+        const vSnap = await getDoc(vecchioAgendaRef);
+        if (vSnap.exists()) {
+            let daily = vSnap.data().daily_voti || [];
+            
+            // Filtra via l'elemento vecchio
+            daily = daily.filter(v => 
+                !(v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto)
+            );
+
+            if (daily.length === 0) {
+                const vecchioDataObj = vSnap.data();
+                const hasAltro = (vecchioDataObj.firme?.length > 0) || 
+                                 (vecchioDataObj.compiti?.length > 0) || 
+                                 (vecchioDataObj.note?.length > 0) ||
+                                 (vecchioDataObj.comunicazioni?.length > 0);
                 
-                // Filtra via l'elemento vecchio
-                daily = daily.filter(v => 
-                    !(v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto)
-                );
-
-                if (daily.length === 0) {
-                    const vecchioDataObj = vSnap.data();
-                    const hasAltro = (vecchioDataObj.firme?.length > 0) || 
-                                     (vecchioDataObj.compiti?.length > 0) || 
-                                     (vecchioDataObj.note?.length > 0) ||
-                                     (vecchioDataObj.comunicazioni?.length > 0);
-                    
-                    if (!hasAltro) {
-                        await deleteDoc(vecchioAgendaRef);
-                    } else {
-                        await updateDoc(vecchioAgendaRef, { daily_voti: daily });
-                    }
+                if (!hasAltro) {
+                    await deleteDoc(vecchioAgendaRef);
                 } else {
                     await updateDoc(vecchioAgendaRef, { daily_voti: daily });
                 }
+            } else {
+                await updateDoc(vecchioAgendaRef, { daily_voti: daily });
             }
         }
+    }
 
-        // --- INSERIMENTO O AGGIORNAMENTO NEL NUOVO DOCUMENTO AGENDA V2 ---
-        const entryNuovaAgenda = {
-            studente: document.getElementById('res-student-name')?.innerText || vecchioVoto.studente || "Studente",
-            studenteId: studentId,
-            voto: nuovoVotoVal,
-            materia: vecchioVoto.materia,
-            argomento: nuovoArgomento
-        };
+    // --- INSERIMENTO O AGGIORNAMENTO NEL NUOVO DOCUMENTO AGENDA V2 ---
+    const entryNuovaAgenda = {
+        studente: document.getElementById('res-student-name')?.innerText || vecchioVoto.studente || "Studente",
+        studenteId: studentId,
+        voto: nuovoVotoVal,
+        materia: vecchioVoto.materia,
+        argomento: nuovoArgomento
+    };
 
-        if (vecchioDateKey === nuovaDateKey) {
-            if (vecchioAgendaRef) {
-                const aSnap = await getDoc(vecchioAgendaRef);
-                let daily = aSnap.exists() ? (aSnap.data().daily_voti || []) : [];
-                daily.push(entryNuovaAgenda);
-                await setDoc(vecchioAgendaRef, { daily_voti: daily }, { merge: true });
-            }
-        } else {
-            if (nuovoAgendaRef) {
-                const nSnap = await getDoc(nuovoAgendaRef);
-                let dailyNuovo = nSnap.exists() ? (nSnap.data().daily_voti || []) : [];
-                dailyNuovo.push(entryNuovaAgenda);
-                await setDoc(nuovoAgendaRef, { daily_voti: dailyNuovo }, { merge: true });
-            }
+    if (vecchioDateKey === nuovaDateKey) {
+        if (vecchioAgendaRef) {
+            const aSnap = await getDoc(vecchioAgendaRef);
+            let daily = aSnap.exists() ? (aSnap.data().daily_voti || []) : [];
+            daily.push(entryNuovaAgenda);
+            await setDoc(vecchioAgendaRef, { daily_voti: daily }, { merge: true });
         }
+    } else {
+        if (nuovoAgendaRef) {
+            const nSnap = await getDoc(nuovoAgendaRef);
+            let dailyNuovo = nSnap.exists() ? (nSnap.data().daily_voti || []) : [];
+            dailyNuovo.push(entryNuovaAgenda);
+            await setDoc(nuovoAgendaRef, { daily_voti: dailyNuovo }, { merge: true });
+        }
+    }
 
-alert("✅ Aggiornamento completato!");
+    alert("✅ Aggiornamento completato!");
     if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
 };
+
 window.deleteNote = async (idx, studentId) => {
     if (!confirm("Eliminare definitivamente questa nota?")) return;
     
@@ -5195,7 +5193,7 @@ window.aggiornaOpzioniVoto = (materia) => {
             { v: "B", t: "Buono" },
             { v: "d", t: "Discreto" },
             { v: "S", t: "Sufficiente" },
-            { v: "NS", t: "Non Sufficiente" }
+            { v: "NS", t: "Insufficiente" }
         ];
         select.innerHTML = giudizi.map(g => `<option value="${g.v}">${g.t} (${g.v})</option>`).join('');
     } else {
@@ -6302,10 +6300,11 @@ card.innerHTML = `
     }
 };
 
-   window.eliminaValutazioneStaff = async (profId, valutazioneObj) => {
+  window.eliminaValutazioneStaff = async (profId, valutazioneObj) => {
     if (!confirm("Vuoi rimuovere permanentemente questa nota dal fascicolo del docente?")) return;
 
-    const profRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', profId);
+    // Corretto percorso per Records V2 Staff
+    const profRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', profId, 'staff', 'valutazioni');
     
     try {
         await updateDoc(profRef, {
