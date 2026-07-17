@@ -4245,10 +4245,13 @@ window.toggleDebug = () => {
         const nRef = window.getRecordDocRef(targetId, as, 'note');
         const pRef = window.getRecordDocRef(targetId, as, 'pagella');
         const sRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', targetId, 'staff', 'valutazioni');
+        const rootRecordRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'records', targetId);
 
-        const [assignSnap, vSnap, nSnap, pSnap, sSnap] = await Promise.all([
-            getDoc(assignRef), getDoc(vRef), getDoc(nRef), getDoc(pRef), getDoc(sRef)
+        const [assignSnap, vSnap, nSnap, pSnap, sSnap, rootSnap] = await Promise.all([
+            getDoc(assignRef), getDoc(vRef), getDoc(nRef), getDoc(pRef), getDoc(sRef), getDoc(rootRecordRef)
         ]);
+
+        const extraSkills = rootSnap.exists() ? rootSnap.data() : {};
 
         if (!assignSnap.exists()) return;
 
@@ -4516,6 +4519,19 @@ if (isStaff) {
             <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 flex flex-col h-[400px]">
                 <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2 flex-shrink-0">⚠️ Note</h3>
                 <div id="profilo-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
+            </div>
+            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 flex flex-col col-span-full mt-4">
+                <h3 class="font-black uppercase text-red-700 text-xs mb-4 border-b pb-2">🏆 Abilità Extra (Discord Bot)</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 bg-zinc-50 rounded-xl text-center">
+                        <p class="text-[9px] font-black text-zinc-400 uppercase">Esperienza Golf</p>
+                        <p class="text-xl font-black text-zinc-800">Lv. ${extraSkills.golf_skill || 0}</p>
+                    </div>
+                    <div class="p-4 bg-zinc-50 rounded-xl text-center">
+                        <p class="text-[9px] font-black text-zinc-400 uppercase">Canestri Basket</p>
+                        <p class="text-xl font-black text-zinc-800">${extraSkills.canestri_basket || 0}</p>
+                    </div>
+                </div>
             </div>
         `;
     }
