@@ -48,9 +48,9 @@ main {
 
 /* Glass-light isolato per mantenere lo stesso colore senza rompere il layout delle card */
 .glass-light {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-    box-shadow: 0 8px 25px var(--shadow) !important;
+    background: #f9fafb !important;
+    border: 1px solid #e4e4e7 !important;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.07) !important;
 }
 
 /* Trasforma i contenitori bianchi in marrone scuro */
@@ -196,7 +196,7 @@ main {
     transform: translateX(4px);
 }
 
-/* Badge dello Stato Presenza (Pillola colorata) */
+/* Badge dello Stato Presenza (Pillola colorata) - Ottimizzati per chiaro */
 .status-pill {
     font-size: 9px;
     font-weight: 900;
@@ -208,12 +208,13 @@ main {
     letter-spacing: 0.05em;
 }
 
-.status-pill.presente { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.2); }
-.status-pill.assente { background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
-.status-pill.ritardo { background: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
-.status-pill.np { background: rgba(113, 113, 122, 0.1); color: #a1a1aa; border: 1px solid rgba(161, 161, 170, 0.2); }
+/* Colori più scuri per leggibilità su fondo bianco */
+.status-pill.presente { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+.status-pill.assente  { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.status-pill.ritardo  { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+.status-pill.np       { background: #f4f4f5; color: #52525b; border: 1px solid #e4e4e7; }
 
-/* Righe Studenti nel widget Presenze */
+/* Righe Studenti - Adattate per fondo chiaro */
 .attendance-row-modern {
     padding: 10px 12px;
     border-radius: 14px;
@@ -224,29 +225,22 @@ main {
 }
 
 .attendance-row-modern:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: #f9fafb; /* Grigio chiarissimo al passaggio del mouse */
 }
 
-/* --- CARDS ADATTIVE --- */
+/* Sovrascrivi le variabili per le card */
 .bacheca-card, .note-card, .staff-card, .agenda-card {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-main) !important;
-    border-radius: 24px !important;
-    padding: 2rem !important;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    position: relative;
-    box-shadow: 0 8px 25px var(--shadow) !important;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #18181b !important; /* Questo è il grigio scuro/nero quasi totale */
 }
 
-.bacheca-card:hover, .note-card:hover, .agenda-card:hover {
-    background: var(--bg-card-hover) !important;
-    transform: translateY(-4px);
-    border-color: #dc2626 !important; /* Mantiene il tocco rosso Fazbear */
-    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.2) !important;
+/* Assicurati che anche i testi piccoli siano leggibili */
+.bacheca-card p, .bacheca-card span {
+    color: #18181b !important;
+}
+
+/* Forza le etichette specifiche (come "Emesso da") a restare leggibili */
+.bacheca-card .text-zinc-400 {
+    color: #71717a !important; /* Un grigio un po' più scuro */
 }
 
 /* --- INPUT E FILTRI --- */
@@ -268,11 +262,11 @@ main {
 
 /* Contenitore esterno (Gestisce l'arrotondamento degli angoli e l'ombra) */
 .registry-container {
-    background: var(--bg-main) !important;
-    border: 1px solid var(--border-color) !important;
+    background: #ffffff !important; /* Sfondo bianco pulito */
+    border: 1px solid #e2e8f0 !important;
     border-radius: 24px !important;
-    overflow: hidden; /* Taglia gli angoli per mantenere l'arrotondamento */
-    box-shadow: 0 10px 30px var(--shadow);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden;
 }
 
 /* Tabella */
@@ -284,22 +278,24 @@ main {
 
 /* Intestazione Tabella (Mantiene font-weight, padding e trasformazione testo) */
 .registry-table thead th {
-    background: var(--bg-surface) !important;
-    color: var(--text-muted) !important;
-    border-bottom: 1px solid var(--border-color);
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    padding: 1.25rem 1.5rem;
+    background: #f8fafc !important; /* Grigio chiarissimo per l'header */
+    color: #475569 !important; /* Testo slate scuro */
+    border-bottom: 2px solid #dc2626 !important; /* Linea rossa Fazbear */
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    padding: 1.5rem 1rem;
 }
 
 /* Celle della tabella (Ripristina padding originale e allineamento) */
 .registry-table td {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-main);
-    vertical-align: middle;
+    padding: 1.25rem 1rem;
+    border-bottom: 1px solid #f1f5f9 !important;
+    color: #1e293b !important; /* Testo quasi nero */
+}
+
+.registry-table tbody tr {
+    transition: all 0.2s ease;
+    background-color: #ffffff !important;
 }
 
 /* Rimuove l'ultimo bordo per non rovinare l'arrotondamento in basso */
@@ -309,8 +305,21 @@ main {
 
 /* Effetto hover sulla riga (Adattivo: usa un'opacità leggera che funziona su entrambi i temi) */
 .registry-table tbody tr:hover {
-    background-color: var(--bg-card-hover) !important;
-    opacity: 0.9;
+    background-color: #f1f5f9 !important; /* Effetto hover azzurrino/grigio */
+    transform: scale(1.002);
+}
+
+/* Badge voti nel registro globale più stilosi */
+.global-grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 10px;
+    min-width: 32px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 /* Colonna Materia (Stile speciale adattivo) */
@@ -540,19 +549,16 @@ main {
 
 <!-- Central Filters -->
 <div class="flex items-center gap-3">
-    <div class="filter-container flex items-center gap-1 px-2 border border-zinc-200 rounded-lg bg-zinc-50">
-        <input type="text" id="quick-year-filter" placeholder="2025" 
-               class="text-[11px] bg-transparent w-12 text-center outline-none font-bold text-zinc-900 placeholder-zinc-400" 
+    <div class="filter-container flex items-center gap-2 px-3 py-1.5 border border-zinc-200 bg-white shadow-sm hover:border-zinc-300 transition-all group">
+        <input type="number" id="quick-year-filter" placeholder="2025" 
+               class="text-[11px] bg-transparent w-14 text-center outline-none font-black !text-zinc-800 placeholder-zinc-300 border-r border-zinc-100 pr-1" 
                onkeypress="if(event.key === 'Enter') window.vaiADataRapida()">
-               
-        <!-- Cambiato text-white/transparent in text-zinc-900 -->
-        <select id="quick-month-filter" class="text-[10px] bg-transparent outline-none font-bold text-zinc-900">
+        <select id="quick-month-filter" class="text-[10px] bg-transparent outline-none font-black !text-zinc-800 cursor-pointer hover:text-red-600 transition-colors">
             <option value="09">SET</option><option value="10">OTT</option><option value="11">NOV</option><option value="12">DIC</option>
             <option value="01">GEN</option><option value="02">FEB</option><option value="03">MAR</option><option value="04">APR</option>
             <option value="05">MAG</option><option value="06">GIU</option>
         </select>
-        
-        <button onclick="window.vaiADataRapida()" class="bg-red-700 text-white text-[8px] px-2 py-1 rounded-lg font-black hover:bg-red-600 transition-colors">GO</button>
+        <button onclick="window.vaiADataRapida()" class="bg-zinc-900 text-white text-[9px] px-3 py-1 rounded-full font-black hover:bg-red-700 transition-all active:scale-90">GO</button>
     </div>
 
     <!-- Selettore Classi Docente -->
@@ -565,7 +571,7 @@ main {
     </div>
 
     <!-- Current Date Display -->
-    <div class="filter-container flex items-center gap-2 px-4 py-2 border border-zinc-200 rounded-lg bg-zinc-50">
+    <div class="filter-container flex items-center gap-2 px-4 py-2 border border-zinc-500 rounded-lg bg-red-50">
         <span class="text-xs">📅</span>
         <!-- Cambiato text-blue-500 in text-blue-700 per contrasto migliore su bianco -->
         <span id="current-date-display" class="text-[10px] font-black uppercase text-blue-700">Seleziona Data</span>
@@ -579,19 +585,22 @@ main {
         <span id="notif-count" class="absolute top-1.5 right-1.5 bg-red-600 text-white text-[7px] w-4 h-4 flex items-center justify-center rounded-full font-black border-2 border-white shadow-sm">0</span>
     </div>
 
-    <!-- Profilo Utente Ristilizzato -->
-   <div class="flex items-center gap-2">
-    <div id="user-profile" class="hidden items-center gap-3 bg-white border border-zinc-200 p-1.5 pr-5 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group" onclick="window.apriProfiloPersonale()">
+<!-- Container principale che tiene allineati profilo e logout -->
+<div class="flex items-center gap-3">
+    
+    <!-- Profilo Utente -->
+    <div id="user-profile" class="hidden items-center gap-3 bg-red-500 border border-zinc-200 p-1.5 pr-5 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group" onclick="window.apriProfiloPersonale()">
         <div class="relative">
-            <img id="user-avatar" src="" class="w-9 h-9 rounded-xl border-2 border-zinc-500 object-cover shadow-sm group-hover:border-red-500 transition-colors">
+            <img id="user-avatar" src="" class="w-9 h-9 rounded-xl border-2 border-zinc-200 object-cover shadow-sm group-hover:border-red-500 transition-colors">
             <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
         </div>
         <div class="flex flex-col justify-center">
             <span id="user-name" class="text-[11px] font-extrabold text-zinc-900 uppercase leading-none tracking-tight">---</span>
-            <span id="user-role-label" class="text-[7px] font-black text-red-600 uppercase tracking-[0.1em] mt-0.5">Ospite</span>
+            <span id="user-role-label" class="text-[7px] font-black text-blue-800 uppercase tracking-[0.1em] mt-0.5">Ospite</span>
         </div>
     </div>
 
+    <!-- Logout (si posiziona subito dopo il profilo senza spazi strani) -->
     <button onclick="window.logoutDiscord()" class="p-2 text-zinc-400 hover:text-red-600 transition-colors" title="Esci">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -599,12 +608,12 @@ main {
     </button>
 </div>
 
-    <!-- Pulsante Login Ristilizzato -->
-    <button id="login-btn" onclick="window.loginDiscord()" 
-        class="group relative px-6 py-2.5 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-xl overflow-hidden transition-all hover:bg-red-700 active:scale-95 shadow-lg shadow-zinc-200">
-        <span class="relative z-10">Accedi</span>
-        <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-    </button>
+<!-- Login (resta fuori dal flex del profilo) -->
+<button id="login-btn" onclick="window.loginDiscord()" 
+    class="group relative px-6 py-2.5 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-xl overflow-hidden transition-all hover:bg-red-700 active:scale-95 shadow-lg shadow-zinc-200">
+    <span class="relative z-10">Accedi</span>
+    <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</button>
 </div>
 </header>
 
@@ -957,7 +966,7 @@ main {
 	<div id="view-gestione-staff" class="tab-content hidden p-4">
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h2 class="text-2xl font-black uppercase italic text-zinc-800 leading-tight">Gestione Personale</h2>
+            <h2 class="text-2xl font-black uppercase italic text-zinc-550 leading-tight">Gestione Personale</h2>
             <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Fascicoli Riservati Dirigenza</p>
         </div>
         <div class="bg-zinc-100 p-2 rounded-2xl">
@@ -974,27 +983,34 @@ main {
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-4">
             <div>
-                <h2 class="text-2xl font-black italic uppercase text-zinc-100">Registro Voti Classe</h2>
+                <h2 class="text-2xl font-black italic uppercase text-yellow-800">Registro Voti Classe</h2>
                 <p id="reg-global-info" class="text-[10px] font-bold text-red-500 uppercase tracking-widest">Caricamento...</p>
             </div>
             <div id="reg-subject-filter-container" class="hidden">
+                <!-- Aggiornato select: sfondo bianco, bordo grigio, testo scuro -->
                 <select id="reg-global-subject-select" onchange="window.renderGlobalClassRegistry(this.value)" 
-                    class="bg-zinc-900 border-2 border-zinc-800 rounded-xl px-3 py-2 text-[10px] font-black uppercase text-white outline-none focus:border-red-600 shadow-sm">
+                    class="bg-white border-2 border-zinc-200 rounded-xl px-3 py-2 text-[10px] font-black uppercase text-zinc-900 outline-none focus:border-red-600 shadow-sm">
                 </select>
             </div>
         </div>
-        <button onclick="window.changeMenu('classi')" class="bg-zinc-800 text-zinc-300 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-700">Indietro</button>
+        <!-- Aggiornato bottone -->
+        <button onclick="window.changeMenu('classi')" class="bg-zinc-100 text-zinc-700 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-200">Indietro</button>
     </div>
-    <div class="registry-container border-zinc-800">
+
+    <!-- Container con classi aggiornate -->
+    <div class="registry-container">
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-[11px]">
-                <thead class="bg-black text-zinc-400 font-black uppercase">
+            <table class="registry-table w-full text-left text-[11px]">
+                <thead class="bg-zinc-50 text-zinc-600 font-black uppercase">
                     <tr id="reg-global-head">
-                        <th class="p-4 border-r border-zinc-800">Studente</th>
+                        <th class="p-4 border-r border-zinc-200">Studente</th>
+                        <th class="p-4">Voti</th> <!-- Aggiunta colonna voti -->
                         <th class="p-4 text-right">Media</th>
                     </tr>
                 </thead>
-                <tbody id="reg-global-body" class="divide-y divide-zinc-800 bg-zinc-900/50"></tbody>
+                <tbody id="reg-global-body" class="divide-y divide-zinc-100 bg-white">
+                    <!-- Il JS popolerà qui -->
+                </tbody>
             </table>
         </div>
     </div>
@@ -1251,7 +1267,7 @@ main {
             <span id="period-indicator" class="text-[9px] font-black uppercase text-red-600 tracking-tighter">Caricamento...</span>
             <!-- Titolo classe: rosso -->
             <h2 class="text-xl font-black uppercase italic text-red-600 leading-none">
-                Classe <span id="agenda-class-title" class="text-zinc-900">--</span>
+                Classe <span id="agenda-class-title" class="text-zinc-950">--</span>
             </h2>
             <div class="flex gap-2 mt-2">
 
@@ -1376,7 +1392,7 @@ main {
             <span class="text-lg">👥</span> Status Alunni
         </h3>
     </div>
-    <div id="attendance-list" class="p-5 bg-white text-zinc-900">
+    <div id="agenda-attendance-info" class="p-5 bg-white text-zinc-900">
         <!-- Popolato via JS -->
     </div>
 </div>
@@ -1390,7 +1406,7 @@ main {
     <div class="flex justify-start mb-2">
         <button onclick="window.changeMenu('home')" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
             <span class="text-lg group-hover:-translate-x-1 transition-transform">🏠</span>
-            <span class="text-[10px] font-black uppercase text-zinc-600">Torna alla Home</span>
+            <span class="text-[10px] font-black uppercase text-zinc-100">Torna alla Home</span>
         </button>
     </div>
 
@@ -1404,7 +1420,7 @@ main {
                 </div>
                 <div class="flex-1">
                     <span id="profilo-classe-badge" class="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Classe -</span>
-                    <h1 id="profilo-nome" class="text-3xl md:text-5xl font-black text-zinc-900 mt-2 leading-none uppercase tracking-tighter">Caricamento...</h1>
+                    <h1 id="profilo-nome" class="text-3xl md:text-5xl font-black text-zinc-550 mt-2 leading-none uppercase tracking-tighter">Caricamento...</h1>
                     <p id="profilo-sottotitolo" class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Fazbear School System II</p>
                 </div>
             </div>
@@ -1467,7 +1483,7 @@ main {
             <!-- VIEW: REGISTRO RIMODERNATO -->
 <div id="view-registro" class="tab-content space-y-6">
 <!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
-<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
+<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-blue-900 p-4 rounded-2xl shadow-lg">
     <div class="flex items-center gap-3">
         <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
             ⬅️ Torna all'Hub Classe
@@ -1494,7 +1510,7 @@ main {
 </div>
 
     <!-- Header Studente (Card) -->
-    <div id="student-header" class="hidden bg-zinc-900 p-6 rounded-[24px] border border-zinc-800 shadow-sm flex justify-between items-center">
+    <div id="student-header" class="hidden bg-red-600 p-6 rounded-[24px] border border-zinc-800 shadow-sm flex justify-between items-center">
         <div class="flex items-center gap-4">
              <img id="res-student-avatar" src="" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-100 shadow-sm bg-zinc-50">
         <div>
@@ -1509,7 +1525,7 @@ main {
     </div>
 
     <!-- Pannello Inserimento Voto (Solo Prof) -->
-    <div id="prof-grade-panel" class="hidden bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm flex flex-wrap gap-4 items-end">
+    <div id="prof-grade-panel" class="hidden bg-red-700 p-4 rounded-2xl border border-zinc-200 shadow-sm flex flex-wrap gap-4 items-end">
         <div class="flex-1 min-w-[150px]">
             <label class="modal-label">Data e Materia</label>
             <div class="flex gap-2">
@@ -1590,7 +1606,7 @@ main {
     </div>
 	
 	<!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
-<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
+<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-blue-900 p-4 rounded-2xl shadow-lg">
     <div class="flex items-center gap-3">
         <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
             ⬅️ Torna all'Hub Classe
@@ -1651,7 +1667,7 @@ main {
             <!-- VIEW: Pagella Rimodernata -->
 <div id="view-pagella" class="tab-content hidden p-4 md:p-8 max-w-5xl mx-auto">
     <!-- Barra di navigazione studente (sempre visibile) -->
-    <div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-zinc-900 p-4 rounded-2xl shadow-lg">
+    <div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-blue-900 p-4 rounded-2xl shadow-lg">
         <div class="flex items-center gap-3">
             <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">⬅️ Torna all'Hub</button>
             <button onclick="window.resetPagellaView()" class="bg-white/10 hover:bg-white/20 text-zinc-100 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">🎓 Selezione Periodo</button>
@@ -2727,24 +2743,24 @@ if (role === 'ospite') {
         const isAssente = myAtt.status === 'assente';
         const pillClass = myAtt.status === 'presente' ? 'presente' : myAtt.status === 'assente' ? 'assente' : 'ritardo';
         
-        attHtml = `
-            <div class="event-card-modern">
-                <div class="flex justify-between items-center ${isAssente ? '' : 'mb-3'}">
-                    <span class="text-[8px] font-black text-zinc-500 uppercase tracking-wider">Il tuo stato</span>
-                    <span class="status-pill ${pillClass}">${myAtt.status}</span>
-                </div>
-                ${!isAssente ? `
-                <div class="grid grid-cols-2 gap-2 mt-2">
-                    <div class="bg-[var(--bg-surface)] p-2 rounded-xl border border-[var(--border-color)] text-center">
-                        <p class="text-[7px] text-zinc-500 uppercase font-black tracking-tight">Entrata</p>
-                        <p class="text-[10px] font-black text-white mt-0.5">${myAtt.entry}</p>
-                    </div>
-                    <div class="bg-[var(--bg-surface)] p-2 rounded-xl border border-[var(--border-color)] text-center">
-                        <p class="text-[7px] text-zinc-500 uppercase font-black tracking-tight">Uscita</p>
-                        <p class="text-[10px] font-black text-white mt-0.5">${myAtt.exit}</p>
-                    </div>
-                </div>` : ''}
-            </div>`;
+attHtml = `
+    <div class="event-card-modern bg-zinc-50 border border-zinc-200 p-3 rounded-2xl">
+        <div class="flex justify-between items-center ${isAssente ? '' : 'mb-3'}">
+            <span class="text-[8px] font-black text-zinc-500 uppercase tracking-wider">Il tuo stato</span>
+            <span class="status-pill ${pillClass}">${myAtt.status}</span>
+        </div>
+        ${!isAssente ? `
+        <div class="grid grid-cols-2 gap-2 mt-2">
+            <div class="bg-white p-2 rounded-xl border border-zinc-200 text-center">
+                <p class="text-[7px] text-zinc-500 uppercase font-black tracking-tight">Entrata</p>
+                <p class="text-[10px] font-black text-zinc-900 mt-0.5">${myAtt.entry}</p>
+            </div>
+            <div class="bg-white p-2 rounded-xl border border-zinc-200 text-center">
+                <p class="text-[7px] text-zinc-500 uppercase font-black tracking-tight">Uscita</p>
+                <p class="text-[10px] font-black text-zinc-900 mt-0.5">${myAtt.exit}</p>
+            </div>
+        </div>` : ''}
+    </div>`;
     } else {
         attHtml = '<p class="text-zinc-500 text-[9px] italic text-center py-4 uppercase font-bold tracking-tight">Appello non registrato</p>';
     }
@@ -2762,18 +2778,18 @@ if (role === 'ospite') {
 
             const statusLetter = info.status === 'presente' ? 'P' : info.status === 'assente' ? 'A' : info.status === 'ritardo' ? 'R' : '-';
             
-            return `
-                <div class="attendance-row-modern border-b border-zinc-800/40 last:border-0">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <span class="status-pill ${pillClass} !min-w-[45px] !px-2 !py-0.5 text-center shrink-0">${statusLetter}</span>
-                        <span class="font-black text-white uppercase text-[10px] truncate">${s.name}</span>
-                    </div>
-                    <div class="flex items-center shrink-0">
-                        <span class="text-[9px] font-mono font-black text-zinc-400 bg-[var(--bg-surface)] px-2 py-1 rounded-md border border-[var(--border-color)]">
-                            ${info.entry} - ${info.exit}
-                        </span>
-                    </div>
-                </div>`;
+return `
+    <div class="attendance-row-modern border-b border-zinc-100 last:border-0 py-2">
+        <div class="flex items-center gap-3 min-w-0">
+            <span class="status-pill ${pillClass} !min-w-[45px] !px-2 !py-0.5 text-center shrink-0">${statusLetter}</span>
+            <span class="font-black text-zinc-900 uppercase text-[10px] truncate">${s.name}</span>
+        </div>
+        <div class="flex items-center shrink-0">
+            <span class="text-[9px] font-mono font-black text-zinc-500 bg-zinc-50 px-2 py-1 rounded-md border border-zinc-200">
+                ${info.entry} - ${info.exit}
+            </span>
+        </div>
+    </div>`;
         }).join('');
     } else {
         attHtml = '<p class="text-zinc-500 text-[9px] italic text-center py-4 uppercase font-bold tracking-tight">Nessuno studente in classe</p>';
@@ -3457,28 +3473,33 @@ window.toggleNotifPanel = () => {
         container.innerHTML = filteredPosts.slice().reverse().map((p, idx) => {
             const isBoss = ['preside', 'vicepreside', 'admin'].includes(window.userRole?.toLowerCase());
             
-            return `
-            <div class="bacheca-card group">
-                <div class="bacheca-icon-box">📢</div>
-                <div class="flex-1">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-[9px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Circolare Ufficiale</span>
-                        <span class="text-[9px] font-bold text-zinc-400 uppercase">${p.date.split(' — ')[0]}</span>
-                    </div>
-                    <p class="text-sm text-zinc-800 font-medium leading-relaxed pr-6">${p.text}</p>
-                    <div class="mt-4 pt-3 border-t border-zinc-50 flex justify-between items-center">
-                        <p class="text-[9px] font-black uppercase text-zinc-400">Emesso da: <span class="text-zinc-900">${p.author}</span></p>
-                        <span class="text-[8px] font-bold text-zinc-300 italic">${p.date.split(' — ')[1] || ''}</span>
-                    </div>
-                </div>
-                ${isBoss ? `
-                <button onclick="window.deleteBacheca(${idx})" 
-                        class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-zinc-300 hover:text-red-600 transition-all p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>` : ''}
-            </div>
+return `
+<div class="bacheca-card group !bg-white !border !border-zinc-200 shadow-sm relative p-4 rounded-2xl">
+    <div class="bacheca-icon-box">📢</div>
+    <div class="flex-1">
+        <div class="flex justify-between items-start mb-2">
+            <span class="text-[9px] font-black text-red-600 uppercase tracking-widest bg-red-50 px-2 py-0.5 rounded">Circolare Ufficiale</span>
+            <!-- Cambiato text-zinc-400 in text-zinc-500 per leggibilità -->
+            <span class="text-[9px] font-bold text-zinc-500 uppercase">${p.date.split(' — ')[0]}</span>
+        </div>
+        <!-- Testo principale: text-zinc-800 va bene, basta che lo sfondo sia bianco -->
+        <p class="text-sm text-zinc-900 font-medium leading-relaxed pr-6">${p.text}</p>
+        
+        <div class="mt-4 pt-3 border-t border-zinc-100 flex justify-between items-center">
+            <!-- Cambiato text-zinc-400 in text-zinc-600 -->
+            <p class="text-[9px] font-black uppercase text-zinc-600">Emesso da: <span class="text-zinc-900 font-bold">${p.author}</span></p>
+            <!-- Cambiato text-zinc-300 in text-zinc-400 -->
+            <span class="text-[8px] font-bold text-zinc-400 italic">${p.date.split(' — ')[1] || ''}</span>
+        </div>
+    </div>
+    ${isBoss ? `
+    <button onclick="window.deleteBacheca(${idx})" 
+            class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-600 transition-all p-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>` : ''}
+</div>
         `}).join('') || `
             <div class="text-center p-20 border-2 border-dashed border-zinc-200 rounded-[32px]">
                 <p class="text-zinc-300 uppercase font-black italic text-xs tracking-widest">Nessuna circolare per l'A.S. ${currentAS}</p>
@@ -4540,7 +4561,7 @@ if (isStaff) {
     const stelle = valutazioni.filter(v => v.tipo === 'stella').length;
     const ammonizioni = valutazioni.filter(v => v.tipo === 'ammonizione').length;
 
-    if (gridContenuti) {
+if (gridContenuti) {
         let infoSpecifica = "";
         let bottoniExtra = "";
 
@@ -4549,86 +4570,92 @@ if (isStaff) {
             if (Array.isArray(materieDocente)) materieDocente = materieDocente.join(', ');
             
             infoSpecifica = `
-                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
-                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Materie Insegnate</p>
-                    <p class="text-[9px] font-black text-red-600 uppercase break-words">${materieDocente}</p>
+                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Materie Insegnate</p>
+                    <p class="text-[10px] font-bold text-zinc-800 uppercase leading-tight">${materieDocente}</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-md">
+                <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-lg shadow-zinc-200">
                     <span>Agenda Classi</span> <span class="text-lg">📋</span>
                 </button>`;
         } else if (roleStr.includes('counselor')) {
-            // --- BOX SPECIFICO COUNSELOR ---
             infoSpecifica = `
-                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100 text-center">
-                    <p class="text-[8px] font-black text-purple-400 uppercase tracking-tighter">Settore Operativo</p>
-                    <p class="text-[9px] font-black text-purple-700 uppercase">Supporto e Ascolto</p>
+                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                    <p class="text-[8px] font-black text-purple-400 uppercase tracking-widest mb-1">Settore Operativo</p>
+                    <p class="text-[10px] font-bold text-purple-700 uppercase">Supporto e Ascolto</p>
                 </div>`;
             bottoniExtra = `
-        <button onclick="window.changeMenu('sportello')" class="w-full p-4 bg-purple-700 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-purple-800 transition-all flex justify-between items-center shadow-md">
-            <span>Sportello Ascolto</span> <span class="text-lg">🧠</span>
-        </button>`;
+                <button onclick="window.changeMenu('sportello')" class="w-full p-4 bg-purple-700 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-purple-800 transition-all flex justify-between items-center shadow-lg shadow-purple-100">
+                    <span>Sportello Ascolto</span> <span class="text-lg">🧠</span>
+                </button>`;
         } else {
-            // --- STAFF GENERICO (Bidello, Tecnico, Segreteria) ---
             infoSpecifica = `
-                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
-                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-tighter">Settore Operativo</p>
-                    <p class="text-[9px] font-black text-zinc-800 uppercase">${ruoloEffettivo}</p>
+                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Settore Operativo</p>
+                    <p class="text-[10px] font-bold text-zinc-800 uppercase">${ruoloEffettivo}</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('hub')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-md">
+                <button onclick="window.changeMenu('hub')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-lg shadow-zinc-200">
                     <span>Pannello di Controllo</span> <span class="text-lg">⚙️</span>
                 </button>`;
         }
 
         gridContenuti.innerHTML = `
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-red-700 text-xs mb-4 border-b pb-2">🏢 Area Personale</h3>
+            <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
+                <h3 class="font-black uppercase text-red-700 text-[10px] mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-red-600 rounded-full"></span> Area Personale
+                </h3>
                 <div class="space-y-4">
-                    <p class="text-[11px] font-bold text-zinc-500 uppercase leading-tight">Benvenuto nel portale gestionale.</p>
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         ${infoSpecifica}
-                        <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100 text-center">
-                            <p class="text-[8px] font-black text-zinc-400 uppercase">Valutazione</p>
-                            <p class="text-[10px] font-black uppercase flex justify-center gap-1">
-                                ${stelle > 0 ? "⭐".repeat(stelle) : ""}
-                                ${ammonizioni > 0 ? "⚠️".repeat(ammonizioni) : (stelle === 0 ? "N/D" : "")}
-                            </p>
+                        <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                            <p class="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Valutazione Servizio</p>
+                            <div class="flex gap-1">
+                                ${stelle > 0 ? `<span class="text-xs">${"⭐".repeat(stelle)}</span>` : ""}
+                                ${ammonizioni > 0 ? `<span class="text-xs">${"⚠️".repeat(ammonizioni)}</span>` : (stelle === 0 ? '<span class="text-[10px] font-bold text-zinc-300">N/D</span>' : "")}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🛠️ Strumenti</h3>
+            <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
+                <h3 class="font-black uppercase text-zinc-800 text-[10px] mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-zinc-400 rounded-full"></span> Strumenti Rapidi
+                </h3>
                 <div class="flex flex-col gap-3">
                     ${bottoniExtra}
-                    <button onclick="window.changeMenu('registro')" class="w-full p-4 bg-white border-2 border-zinc-200 text-zinc-800 rounded-2xl font-black text-[10px] uppercase hover:border-red-600 transition-all flex justify-between items-center">
+                    <button onclick="window.changeMenu('registro')" class="w-full p-4 bg-white border border-zinc-200 text-zinc-800 rounded-2xl font-black text-[10px] uppercase hover:border-red-600 transition-all flex justify-between items-center">
                         <span>Registro Generale</span> <span class="text-lg">📊</span>
                     </button>
                 </div>
             </div>
 
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm col-span-full">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🏅 Fascicolo Note di Servizio</h3>
-                <div class="space-y-3 max-h-[250px] overflow-y-auto pr-2 custom-scroll">
+            <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm col-span-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-black uppercase text-zinc-800 text-[10px] flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-zinc-800 rounded-full"></span> Fascicolo Note di Servizio
+                    </h3>
+                    ${(window.userRole === 'Preside' || window.userRole === 'Admin') ? `
+                        <button onclick="window.apriModalValutaProf('${targetId}')" class="text-[9px] font-black text-red-600 uppercase hover:underline">
+                            + Aggiungi Nota
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scroll">
                     ${valutazioni.slice().reverse().map(v => `
-                        <div class="p-3 ${v.tipo === 'stella' ? 'bg-yellow-50 border-yellow-200' : 'bg-red-50 border-red-200'} border rounded-xl">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-[9px] font-black uppercase ${v.tipo === 'stella' ? 'text-yellow-700' : 'text-red-700'}">${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}</span>
+                        <div class="p-4 ${v.tipo === 'stella' ? 'bg-amber-50/50 border-amber-100' : 'bg-red-50/50 border-red-100'} border rounded-2xl relative group">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[8px] font-black uppercase ${v.tipo === 'stella' ? 'text-amber-600' : 'text-red-600'} tracking-widest">
+                                    ${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}
+                                </span>
                                 <span class="text-[8px] font-bold text-zinc-400">${v.date}</span>
                             </div>
-                            <p class="text-[10px] font-medium text-zinc-950 italic">"${v.motivo}"</p>
-			    <p class="text-[7px] mt-1 uppercase font-black text-zinc-500">- Da: ${v.da}</p>
+                            <p class="text-[11px] font-medium text-zinc-700 leading-relaxed mb-2">"${v.motivo}"</p>
+                            <p class="text-[7px] uppercase font-black text-zinc-400">Firmato: <span class="text-zinc-600">${v.da}</span></p>
                         </div>
-                    `).join('') || '<p class="text-center py-4 text-[10px] italic text-zinc-400 uppercase">Nessuna nota nel fascicolo.</p>'}
+                    `).join('') || '<div class="col-span-full py-10 text-center border-2 border-dashed border-zinc-100 rounded-2xl text-[10px] font-bold text-zinc-300 uppercase">Nessun record nel fascicolo</div>'}
                 </div>
-
-                ${(window.userRole === 'Preside' || window.userRole === 'Admin') ? `
-                    <button onclick="window.apriModalValutaProf('${targetId}')" class="w-full mt-4 p-2 bg-zinc-900 text-white rounded-lg text-[9px] font-black uppercase hover:bg-red-700 transition-all">
-                        Valuta Personale
-                    </button>
-                ` : ''}
             </div>`;
     }
 } else if (isOspite) {
@@ -4712,42 +4739,38 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
         return dataB.localeCompare(dataA);
     });
 
-    el.innerHTML = listaOrdinata.map(item => {
+   el.innerHTML = listaOrdinata.map(item => {
         if (tipo === "voti") {
             const val = window.parseVotoScolastico(item.voto);
-            const colorClass = val < 6 ? 'text-red-500' : 'text-green-400';
-            const borderClass = val < 6 ? 'border-red-900/30' : 'border-green-900/30';
-
+            const colorClass = val < 6 ? 'text-red-600' : 'text-emerald-600';
             return `
-                <div class="flex justify-between items-center bg-zinc-900/50 p-3 rounded-xl border ${borderClass} mb-2 hover:bg-zinc-800 transition-colors">
-                    <div class="flex flex-col">
-                        <div class="flex items-center gap-2 mb-1">
-                            <p class="font-black text-[10px] uppercase text-zinc-100">${item.materia}</p>
-                            <span class="text-[8px] px-1.5 py-0.5 bg-zinc-800 text-zinc-400 rounded font-black border border-zinc-700">${item.data}</span>
+                <div class="flex justify-between items-center p-4 rounded-2xl border border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50/50 transition-all mb-2 group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">${LISTA_MATERIE[item.materia.toLowerCase()] || '📝'}</div>
+                        <div class="flex flex-col">
+                            <p class="font-bold text-[11px] text-zinc-800 uppercase tracking-tight">${item.materia}</p>
+                            <p class="text-[10px] text-zinc-400 font-medium">${item.data} • ${item.argomento || 'Valutazione'}</p>
                         </div>
-                        <p class="text-[9px] text-zinc-500 font-medium italic">${item.argomento || 'Valutazione'}</p>
                     </div>
-                    <span class="text-xl font-black ${colorClass}">${item.voto}</span>
+                    <div class="text-right">
+                        <span class="text-xl font-black ${colorClass}">${item.voto}</span>
+                    </div>
                 </div>`;
         } else {
-            // Stile per le NOTE (Dark Mode)
             const isMandato = item.tipo === 'mandato';
-            const bgClass = isMandato ? 'bg-amber-500/20' : 'bg-red-500/20';
-            const borderClass = isMandato ? 'border-amber-600' : 'border-red-600';
-            const textClass = 'text-white';
-
+            const accentColor = isMandato ? 'amber' : 'red';
             return `
-                <div class="${bgClass} p-4 rounded-xl border-l-4 ${borderClass} border-y border-r border-white/5 mb-2">
+                <div class="p-4 rounded-2xl border border-zinc-100 bg-white hover:shadow-md transition-all mb-3 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-${accentColor}-600"></div>
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-[8px] font-black uppercase ${isMandato ? 'text-amber-500' : 'text-red-500'} tracking-widest">
-                            ${isMandato ? '⚡ Mandato' : '⚠️ Nota Disciplinare'}
-                        </span>
-                        <span class="text-[8px] font-bold text-zinc-500">${item.data}</span>
+                        <span class="text-[8px] font-black uppercase text-${accentColor}-600 tracking-widest">${isMandato ? '⚡ Mandato' : '⚠️ Nota'}</span>
+                        <span class="text-[9px] font-bold text-zinc-400">${item.data}</span>
                     </div>
-                    <p class="text-[11px] ${textClass} font-medium leading-relaxed">"${item.testo}"</p>
-<p class="text-[7px] mt-2 uppercase font-black text-white/80">
-    Emesso da: <span class="text-white">${item.prof || item.autore}</span>
-</p>
+                    <p class="text-xs text-zinc-700 font-medium leading-relaxed mb-3">"${item.testo}"</p>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 rounded-full bg-zinc-100 flex items-center justify-center text-[8px]">👤</div>
+                        <span class="text-[8px] font-black uppercase text-zinc-400">${item.prof || item.autore}</span>
+                    </div>
                 </div>`;
         }
     }).join('');
@@ -5490,18 +5513,27 @@ window.filterByClass = (cls) => {
             ? (studentGrades.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / studentGrades.length).toFixed(1) 
             : "0.0";
 
-        rowsHtml += `
-            <tr class="hover:bg-zinc-50 transition-colors">
-                <td class="p-4 font-black uppercase border-r border-zinc-100 bg-zinc-50/50">${student.name}</td>
-                <td class="p-4 flex flex-wrap gap-1">
-                    ${studentGrades.map(v => `
-                        <span class="px-2 py-1 rounded bg-white border border-zinc-200 font-bold ${window.parseVotoScolastico(v.voto) < 6 ? 'text-red-600' : 'text-green-600'}">
-                            ${v.voto}
-                        </span>
-                    `).join('') || '<span class="text-zinc-300 italic text-[9px]">Nessun voto</span>'}
-                </td>
-                <td class="p-4 text-right font-black text-sm ${parseFloat(media) < 6 ? 'text-red-600' : 'text-blue-600'}">${media}</td>
-            </tr>`;
+rowsHtml += `
+    <tr class="hover:bg-slate-50 transition-colors">
+        <td class="p-4 font-black uppercase border-r border-slate-100 bg-slate-50/30 text-slate-700">${student.name}</td>
+        <td class="p-4 flex flex-wrap gap-2">
+            ${studentGrades.map(v => {
+                const val = window.parseVotoScolastico(v.voto);
+                const colorClass = val < 6 
+                    ? 'bg-red-50 text-red-600 border-red-200' 
+                    : 'bg-emerald-50 text-emerald-600 border-emerald-200';
+                return `
+                    <span class="global-grade-badge border ${colorClass}">
+                        ${v.voto}
+                    </span>`;
+            }).join('') || '<span class="text-slate-300 italic text-[9px]">Nessun voto</span>'}
+        </td>
+        <td class="p-4 text-right">
+            <span class="text-base font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-blue-600'}">
+                ${media}
+            </span>
+        </td>
+    </tr>`;
     }
     tbody.innerHTML = rowsHtml || '<tr><td colspan="10" class="p-10 text-center">Nessuno studente trovato.</td></tr>';
 };
