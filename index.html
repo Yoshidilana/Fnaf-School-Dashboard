@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fazbear Classroom - Sistema Gestionale</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ebc910c0-c04f-4b1b-a31a-c9f220911b5d/deuv19u-e2af4a7c-51bb-436f-a33c-41094be37cc3.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi9lYmM5MTBjMC1jMDRmLTRiMWItYTMxYS1jOWYyMjA5MTFiNWQvZGV1djE5dS1lMmFmNGE3Yy01MWJiLTQzNmYtYTMzYy00MTA5NGJlMzdjYzMucG5nIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0._9kLWOP9WC9GSxbRAVzfMrwadShXa8gZamBnm3OtCYQ">
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
@@ -206,12 +207,7 @@ main {
     color: #71717a !important; /* Un grigio un po' più scuro */
 }
 
-/* --- INPUT E FILTRI --- */
-.modal-input, .filter-container, .quick-student-switcher, .quad-switch-container, select option {
-    background-color: var(--bg-surface) !important;
-    border: 1px solid var(--border-color) !important;
-    color: var(--text-main) !important;
-}
+
 
 /* Override per le classi di sistema */
 .bg-zinc-900, .bg-[#18181b] { background-color: #161311 !important; }
@@ -661,7 +657,7 @@ main {
         </nav>
     </div>
     <div class="px-8 mt-auto pt-6 border-t border-zinc-800">
-        <p class="text-[8px] font-bold text-zinc-600 uppercase">Fazbear Classroom v3.0</p>
+        <p class="text-[8px] font-bold text-zinc-600 uppercase">Fazbear Classroom v4.0</p>
     </div>
 </aside>
 
@@ -1408,25 +1404,25 @@ main {
         </div>
     </div>
 
-    <div id="profilo-content-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+<div id="profilo-content-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
     <!-- Box Voti -->
-    <div class="glass-light p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
-        <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-800 pb-3 flex items-center gap-2">
+    <div class="bg-green-900 p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
+        <h3 class="font-black uppercase text-zinc-100 text-xs mb-4 border-b pb-3 flex items-center gap-2">
             <span class="bg-red-900/30 p-1 rounded-lg">🎯</span> Ultimi Voti
         </h3>
-            <div id="profilo-voti-list" class="space-y-4">
-                </div>
-        </div>
-
-    <!-- Box Note -->
-    <div class="glass-light p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
-        <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-800 pb-3 flex items-center gap-2">
-            <span class="bg-amber-900/30 p-1 rounded-lg">⚠️</span> Note
-        </h3>
-            <div id="profilo-note-list" class="space-y-4">
-                </div>
+        <div id="profilo-voti-list" class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
         </div>
     </div>
+
+    <!-- Box Note -->
+    <div class="bg-amber-900 p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
+        <h3 class="font-black uppercase text-zinc-100 text-xs mb-4 border-b pb-3 flex items-center gap-2">
+            <span class="bg-amber-900/30 p-1 rounded-lg">⚠️</span> Note
+        </h3>
+        <div id="profilo-note-list" class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+        </div>
+    </div>
+</div>
 </div>
 
 
@@ -1654,7 +1650,7 @@ main {
     <!-- SCHERMATA 1: SELEZIONE PERIODO -->
     <div id="pagella-selection-screen" class="flex flex-col items-center justify-center min-h-[50vh] space-y-8">
         <div class="text-center">
-            <h2 class="text-3xl font-black uppercase italic text-white tracking-tighter">Documento di <span class="text-red-600">Valutazione</span></h2>
+            <h2 class="text-3xl font-black uppercase italic text-yellow-500 tracking-tighter">Documento di <span class="text-red-600">Valutazione</span></h2>
             <p class="text-zinc-500 font-bold uppercase text-[10px] tracking-[0.3em] mt-2">Seleziona il periodo da visualizzare</p>
         </div>
         
@@ -4693,27 +4689,27 @@ if (gridContenuti) {
             </div>`;
     }
 } else {
-    // STUDENTE: Fix del "muro di voti"
+    // STUDENTE: Fix del "muro di voti" in modalità scura coerente
     if (gridContenuti) {
         gridContenuti.innerHTML = `
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 flex flex-col h-[400px]">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2 flex-shrink-0">🎯 Ultimi Voti</h3>
-                <div id="profilo-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
+            <div class="bg-cyan-900 p-6 rounded-2xl border border-zinc-950 shadow-md flex flex-col h-[400px]">
+                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2 flex-shrink-0 flex items-center gap-1.5">🎯 Ultimi Voti</h3>
+                <div id="profilo-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow text-white"></div>
             </div>
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 flex flex-col h-[400px]">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2 flex-shrink-0">⚠️ Note</h3>
-                <div id="profilo-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow"></div>
+            <div class="bg-yellow-700 p-6 rounded-2xl border border-zinc-950 shadow-md flex flex-col h-[400px]">
+                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2 flex-shrink-0 flex items-center gap-1.5">⚠️ Note</h3>
+                <div id="profilo-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow text-white"></div>
             </div>
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 flex flex-col col-span-full mt-4">
-                <h3 class="font-black uppercase text-red-700 text-xs mb-4 border-b pb-2">🏆 Abilità Extra (Discord Bot)</h3>
+            <div class="bg-red-700 p-6 rounded-2xl border border-zinc-950 shadow-md flex flex-col col-span-full mt-4">
+                <h3 class="font-black uppercase text-red-500 text-xs mb-4 border-b border-zinc-950 pb-2 flex items-center gap-1.5">🏆 Abilità Extra (Discord Bot)</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="p-4 bg-zinc-50 rounded-xl text-center">
-                        <p class="text-[9px] font-black text-zinc-400 uppercase">Esperienza Golf</p>
-                        <p class="text-xl font-black text-zinc-800">Lv. ${extraSkills.golf_skill || 0}</p>
+                    <div class="p-4 bg-red-900 border border-zinc-950 rounded-xl text-center">
+                        <p class="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Esperienza Golf</p>
+                        <p class="text-xl font-black text-white mt-1">Lv. ${extraSkills.golf_skill || 0}</p>
                     </div>
-                    <div class="p-4 bg-zinc-50 rounded-xl text-center">
-                        <p class="text-[9px] font-black text-zinc-400 uppercase">Canestri Basket</p>
-                        <p class="text-xl font-black text-zinc-800">${extraSkills.canestri_basket || 0}</p>
+                    <div class="p-4 bg-red-900 border border-zinc-950 rounded-xl text-center">
+                        <p class="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Canestri Basket</p>
+                        <p class="text-xl font-black text-white mt-1">${extraSkills.canestri_basket || 0}</p>
                     </div>
                 </div>
             </div>
@@ -4722,7 +4718,6 @@ if (gridContenuti) {
     renderListaProfilo('profilo-voti-list', votiFiltrati, false, "voti", as);
     renderListaProfilo('profilo-note-list', noteFiltrate, false, "note", as);
 }
-
     } catch (error) {
         console.error("Errore profilo:", error);
     }
@@ -4749,17 +4744,18 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
         return dataB.localeCompare(dataA);
     });
 
-   el.innerHTML = listaOrdinata.map(item => {
+el.innerHTML = listaOrdinata.map(item => {
         if (tipo === "voti") {
             const val = window.parseVotoScolastico(item.voto);
-            const colorClass = val < 6 ? 'text-red-600' : 'text-emerald-600';
+            // Colori accesi ad alto contrasto per i voti sul fondo scuro/bluastro
+            const colorClass = val < 6 ? 'text-red-500' : 'text-emerald-400';
             return `
-                <div class="flex justify-between items-center p-4 rounded-2xl border border-zinc-100 hover:border-zinc-200 hover:bg-zinc-50/50 transition-all mb-2 group">
+                <div class="flex justify-between items-center p-4 rounded-2xl border border-black/20 bg-black/20 hover:bg-black/30 transition-all mb-2 group">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-zinc-50 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">${LISTA_MATERIE[item.materia.toLowerCase()] || '📝'}</div>
+                        <div class="w-10 h-10 rounded-xl bg-black/40 flex items-center justify-center text-lg text-white group-hover:scale-110 transition-transform">${LISTA_MATERIE[item.materia.toLowerCase()] || '📝'}</div>
                         <div class="flex flex-col">
-                            <p class="font-bold text-[11px] text-zinc-800 uppercase tracking-tight">${item.materia}</p>
-                            <p class="text-[10px] text-zinc-400 font-medium">${item.data} • ${item.argomento || 'Valutazione'}</p>
+                            <p class="font-bold text-[11px] text-white uppercase tracking-tight">${item.materia}</p>
+                            <p class="text-[10px] text-white/50 font-medium">${item.data} • ${item.argomento || 'Valutazione'}</p>
                         </div>
                     </div>
                     <div class="text-right">
@@ -4768,17 +4764,18 @@ function renderListaProfilo(elementId, lista, isStaff, tipo, anno) {
                 </div>`;
         } else {
             const isMandato = item.tipo === 'mandato';
-            const accentColor = isMandato ? 'amber' : 'red';
+            // Colori per le etichette in linea con lo stile dello screenshot
+            const accentColor = isMandato ? 'amber-500' : 'red-500';
             return `
-                <div class="p-4 rounded-2xl border border-zinc-100 bg-white hover:shadow-md transition-all mb-3 relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-${accentColor}-600"></div>
+                <div class="p-4 rounded-2xl border border-zinc-950/40 bg-[#16171d] hover:bg-[#1c1d24] transition-all mb-3 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-${isMandato ? 'amber-500' : 'red-600'}"></div>
                     <div class="flex justify-between items-center mb-2">
-                        <span class="text-[8px] font-black uppercase text-${accentColor}-600 tracking-widest">${isMandato ? '⚡ Mandato' : '⚠️ Nota'}</span>
-                        <span class="text-[9px] font-bold text-zinc-400">${item.data}</span>
+                        <span class="text-[8px] font-black uppercase text-${accentColor} tracking-widest">${isMandato ? '⚡ Mandato' : '⚠️ Nota'}</span>
+                        <span class="text-[9px] font-bold text-zinc-500">${item.data}</span>
                     </div>
-                    <p class="text-xs text-zinc-700 font-medium leading-relaxed mb-3">"${item.testo}"</p>
+                    <p class="text-xs text-zinc-300 font-medium leading-relaxed mb-3">"${item.testo}"</p>
                     <div class="flex items-center gap-2">
-                        <div class="w-4 h-4 rounded-full bg-zinc-100 flex items-center justify-center text-[8px]">👤</div>
+                        <div class="w-4 h-4 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] text-zinc-400">👤</div>
                         <span class="text-[8px] font-black uppercase text-zinc-400">${item.prof || item.autore}</span>
                     </div>
                 </div>`;
