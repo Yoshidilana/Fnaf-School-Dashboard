@@ -53,43 +53,6 @@ main {
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.07) !important;
 }
 
-/* Trasforma i contenitori bianchi in marrone scuro */
-#view-agenda .bg-white {
-    background-color: #161311 !important;
-    border-color: #26211e !important;
-}
-
-/* Rende scuri gli header delle sezioni (Lezioni, Compiti, ecc.) */
-#view-agenda .bg-zinc-50\/50, #view-agenda .bg-zinc-50 {
-    background-color: #1a1714 !important;
-    border-color: #26211e !important;
-}
-
-/* --- OVERRIDE DELLE SCRITTE DI SISTEMA --- */
-#view-agenda h3, #view-agenda label, .text-zinc-800, .text-zinc-900, .text-zinc-700 {
-    color: var(--text-main) !important;
-}
-
-/* Modifica i box dei compiti (Blue scuro trasparente) */
-#agenda-compiti-list .bg-blue-50\/50 {
-    background-color: rgba(30, 58, 138, 0.2) !important;
-    border-color: #1e40af !important;
-}
-
-/* Modifica i box dei voti e presenze nel riepilogo laterale */
-#agenda-attendance-info .bg-zinc-50,
-#agenda-daily-info .bg-white,
-#agenda-daily-info .bg-green-50,
-#agenda-daily-info .bg-red-50 {
-    background-color: #2a2420 !important;
-    border-color: #3f352f !important;
-}
-
-/* Forza il testo bianco per le scritte nere residue */
-#view-agenda .text-zinc-800, #view-agenda .text-zinc-900 {
-    color: #e7e5e4 !important;
-}
-
 /* --- NUOVO LOOK AGENDA --- */
 
 .agenda-header-glow {
@@ -122,78 +85,78 @@ main {
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
-/* Card Firme (Lezioni) - Effetto Glass con bordo rosso Fazbear */
+/* Card Firme (Lezioni) - Ora in un elegante Rosso Scuro/Vino */
 .firme-card-modern {
-    background: rgba(30, 26, 23, 0.6) !important;
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.05), rgba(0, 0, 0, 0.02)) !important;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(63, 53, 47, 0.5) !important;
-    border-left: 5px solid #dc2626 !important;
+    border: 1px solid rgba(220, 38, 38, 0.2) !important;
+    border-left: 6px solid #dc2626 !important; /* Rosso vivido Fazbear */
     border-radius: 20px !important;
     padding: 1.25rem !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .firme-card-modern:hover {
-    background: rgba(45, 39, 34, 0.8) !important;
-    transform: scale(1.01);
-    border-color: #dc2626 !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.1), rgba(220, 38, 38, 0.05)) !important;
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 12px 20px -5px rgba(220, 38, 38, 0.15);
 }
 
-/* Badge dell'ora più tecnologico */
-.hour-badge-modern {
-    background: #0f0d0c;
-    border: 2px solid #3f352f;
-    color: #ef4444;
-    width: 52px;
-    height: 52px;
-    border-radius: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.1);
-}
-
-/* Card Compiti (Stile Blue-Tech) */
+/* Card Compiti - Un Blu Elettrico/Tecnologico molto moderno */
 .compito-card {
-    background: rgba(30, 58, 138, 0.1) !important;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.08), rgba(59, 130, 246, 0.03)) !important;
     border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    border-top: 4px solid #3b82f6 !important;
     border-radius: 18px !important;
-    padding: 1rem;
+    padding: 1.25rem;
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.compito-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; width: 4px; height: 100%;
-    background: #3b82f6;
+.compito-card:hover {
+    background: rgba(30, 58, 138, 0.12) !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 8px 15px -3px rgba(59, 130, 246, 0.2);
 }
 
-/* Sezioni laterali (Attività e Presenze) */
+/* Widget Laterali (Eventi e Presenze) - Colore Ambra/Crema per staccare */
 .agenda-side-panel {
-    background: #161311 !important;
-    border: 1px solid #2a2420 !important;
+    background: #ffffff !important;
+    border: 1px solid #fde68a !important; /* Bordo color ambra */
     border-radius: 24px !important;
+    box-shadow: 0 4px 20px rgba(251, 191, 36, 0.05) !important;
     overflow: hidden;
 }
 
-/* --- NUOVO LOOK WIDGET LATERALI AGENDA --- */
-
-/* Card per Eventi (Voti e Note) nel riepilogo */
 .event-card-modern {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(245, 158, 11, 0.05); /* Sfondo leggerissimo arancio */
+    border: 1px solid rgba(245, 158, 11, 0.1);
     border-radius: 16px;
     padding: 12px;
+    margin-bottom: 8px;
     transition: all 0.2s ease;
 }
 
 .event-card-modern:hover {
-    background: rgba(255, 255, 255, 0.06);
-    transform: translateX(4px);
+    background: rgba(245, 158, 11, 0.1);
+    transform: translateX(5px);
+    border-color: #f59e0b;
+}
+
+/* Badge dell'ora (Più colorato) */
+.hour-badge-modern {
+    background: #18181b;
+    border: 2px solid #dc2626;
+    color: #ffffff;
+    font-weight: 900;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
 
 /* Badge dello Stato Presenza (Pillola colorata) - Ottimizzati per chiaro */
@@ -528,7 +491,7 @@ main {
 <header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-800 bg-[#18181b] z-50">
     <div class="flex items-center gap-4">
 
-<button onclick="window.toggleSidebarManual()" class="p-2 mr-2 bg-zinc-800 hover:bg-red-700 text-white rounded-lg transition-all">
+<button onclick="window.toggleSidebarManual()" class="p-2 mr-2 bg-red-800 hover:bg-red-700 text-white rounded-lg transition-all">
     ☰
 </button>
 
@@ -543,23 +506,33 @@ main {
         </div>
     </div>
 
-<button id="btn-gestione-calendario" class="hidden items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-xs font-bold uppercase tracking-wider text-white rounded-lg border border-zinc-700 transition-all" onclick="window.openCalendarModal()">
+<button id="btn-gestione-calendario" class="hidden items-center gap-2 px-4 py-2 bg-red-600 hover:bg-zinc-700 active:scale-95 text-xs font-bold uppercase tracking-wider text-white rounded-lg border border-zinc-700 transition-all" onclick="window.openCalendarModal()">
     📅 Calendario Scolastico
 </button>
 
 <!-- Central Filters -->
 <div class="flex items-center gap-3">
-    <div class="filter-container flex items-center gap-2 px-3 py-1.5 border border-zinc-200 bg-white shadow-sm hover:border-zinc-300 transition-all group">
+    <div class="flex items-center gap-2 px-3 py-1.5 border-2 border-zinc-950 bg-amber-500 shadow-md rounded-2xl group">
         <input type="number" id="quick-year-filter" placeholder="2025" 
-               class="text-[11px] bg-transparent w-14 text-center outline-none font-black !text-zinc-800 placeholder-zinc-300 border-r border-zinc-100 pr-1" 
+               class="text-[11px] bg-transparent w-14 text-center outline-none font-black text-zinc-950 placeholder-zinc-700 border-r border-zinc-950/30 pr-1" 
                onkeypress="if(event.key === 'Enter') window.vaiADataRapida()">
-        <select id="quick-month-filter" class="text-[10px] bg-transparent outline-none font-black !text-zinc-800 cursor-pointer hover:text-red-600 transition-colors">
-            <option value="09">SET</option><option value="10">OTT</option><option value="11">NOV</option><option value="12">DIC</option>
-            <option value="01">GEN</option><option value="02">FEB</option><option value="03">MAR</option><option value="04">APR</option>
-            <option value="05">MAG</option><option value="06">GIU</option>
+        
+        <select id="quick-month-filter" class="text-[10px] bg-transparent outline-none font-black text-zinc-950 cursor-pointer hover:text-red-800 transition-colors uppercase">
+            <option value="09" class="bg-amber-500 text-zinc-950 font-black">SET</option>
+            <option value="10" class="bg-amber-500 text-zinc-950 font-black">OTT</option>
+            <option value="11" class="bg-amber-500 text-zinc-950 font-black">NOV</option>
+            <option value="12" class="bg-amber-500 text-zinc-950 font-black">DIC</option>
+            <option value="01" class="bg-amber-500 text-zinc-950 font-black">GEN</option>
+            <option value="02" class="bg-amber-500 text-zinc-950 font-black">FEB</option>
+            <option value="03" class="bg-amber-500 text-zinc-950 font-black">MAR</option>
+            <option value="04" class="bg-amber-500 text-zinc-950 font-black">APR</option>
+            <option value="05" class="bg-amber-500 text-zinc-950 font-black">MAG</option>
+            <option value="06" class="bg-amber-500 text-zinc-950 font-black">GIU</option>
         </select>
-        <button onclick="window.vaiADataRapida()" class="bg-zinc-900 text-white text-[9px] px-3 py-1 rounded-full font-black hover:bg-red-700 transition-all active:scale-90">GO</button>
+        
+        <button onclick="window.vaiADataRapida()" class="bg-zinc-950 text-white text-[9px] px-3 py-1 rounded-xl font-black hover:bg-red-700 transition-all active:scale-90 border border-zinc-950">GO</button>
     </div>
+</div>
 
     <!-- Selettore Classi Docente -->
     <div id="prof-class-switcher-container" class="hidden filter-container flex items-center gap-2 px-3 border border-zinc-200 rounded-lg bg-zinc-50">
@@ -969,7 +942,7 @@ main {
             <h2 class="text-2xl font-black uppercase italic text-zinc-550 leading-tight">Gestione Personale</h2>
             <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Fascicoli Riservati Dirigenza</p>
         </div>
-        <div class="bg-zinc-100 p-2 rounded-2xl">
+        <div class="bg-red-500 p-2 rounded-2xl">
             <span class="text-xl">👔</span>
         </div>
     </div>
@@ -1109,7 +1082,7 @@ main {
 <!-- VIEW: PROFILO TARGET (STUDENTI & STAFF) -->
 <div id="view-profilo-target" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
     <div class="flex justify-start mb-2">
-        <button onclick="window.goBackFromProfile()" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+        <button onclick="window.goBackFromProfile()" class="group flex items-center gap-2 bg-yellow-500 border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
             <span class="text-lg group-hover:-translate-x-1 transition-transform">⬅️</span>
             <span class="text-[10px] font-black uppercase text-zinc-500">Torna all'elenco</span>
         </button>
@@ -1272,70 +1245,71 @@ main {
             <div class="flex gap-2 mt-2">
 
                 <!-- Bottoni: sfondo chiaro, testo scuro -->
-                <button onclick="window.changeMenu('classi')" class="btn-staff-nav hidden bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-zinc-200">
+<button onclick="window.changeMenu('classi')" class="btn-staff-nav hidden bg-red-500 hover:bg-zinc-200 text-white hover:text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-red-500 shadow-sm">
                     ⬅ Hub
                 </button>
-                <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" class="bg-zinc-100 hover:bg-zinc-200 text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-zinc-200">
+                <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" class="bg-red-500 hover:bg-zinc-200 text-white hover:text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-red-500 shadow-sm">
                     🏫 Cambia
                 </button>
             </div>
         </div>
     </div>
 
-<!-- Navigazione Rapida (Pills) -->
-<!-- Cambiato bg-black/40 in bg-zinc-100 e border-zinc-800 in border-zinc-200 -->
-<div class="flex items-center gap-2 bg-zinc-100 p-2 rounded-2xl border border-zinc-200">
-    <button onclick="navDate('day', -1)" class="nav-pill !text-zinc-900">Ieri</button>
-    <button onclick="navDate('week', -1)" class="nav-pill !text-zinc-900">Sett. Prec.</button>
-<button onclick="navDate('month', -1)" 
-    class="px-3 py-2 !bg-white hover:!bg-red-50 !text-zinc-900 text-[10px] font-black rounded-lg border !border-zinc-200 transition-all">
-    -1M
-</button>
-
-<button onclick="navDate('year', -1)" 
-    class="px-2 py-1 !bg-white hover:!bg-zinc-200 !text-zinc-900 text-[9px] font-black uppercase rounded-md border !border-zinc-200 transition-all">
-    -1A
-</button>
+<!-- Navigazione Rapida (Pills) - Versione Rosso Soft -->
+<div class="flex items-center gap-2 p-2 rounded-2xl border border-red-200" style="background: rgba(220, 38, 38, 0.04) !important;">
+    <button onclick="navDate('day', -1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Ieri</button>
+    <button onclick="navDate('week', -1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Sett. Prec.</button>
     
-    <!-- Cambiato il separatore in un grigio chiaro -->
-    <div class="w-[1px] h-4 bg-zinc-300 mx-1"></div>
-    
-    <button onclick="navDate('day', 1)" class="nav-pill !text-red-600">Domani</button>
-    <button onclick="navDate('week', 1)" class="nav-pill !text-zinc-900">Prossima</button>
-<button onclick="navDate('month', 1)" 
-    class="px-3 py-2 !bg-white hover:!bg-red-50 !text-zinc-900 text-[10px] font-black rounded-lg border !border-zinc-200 transition-all">
-    +1M
-</button>
+    <button onclick="navDate('month', -1)" 
+        class="px-3 py-2 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[10px] font-black rounded-lg border !border-red-200 transition-all">
+        -1M
+    </button>
 
-<button onclick="navDate('year', 1)" 
-    class="px-2 py-1 !bg-white hover:!bg-zinc-200 !text-zinc-900 text-[9px] font-black uppercase rounded-md border !border-zinc-200 transition-all">
-    +1A
-</button>
+    <button onclick="navDate('year', -1)" 
+        class="px-2 py-1 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[9px] font-black uppercase rounded-md border !border-red-200 transition-all">
+        -1A
+    </button>
+    
+    <!-- Separatore Rosso -->
+    <div class="w-[1px] h-4 bg-red-300 mx-1"></div>
+    
+    <button onclick="navDate('day', 1)" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300 font-black">Domani</button>
+    <button onclick="navDate('week', 1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Prossima</button>
+    
+    <button onclick="navDate('month', 1)" 
+        class="px-3 py-2 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[10px] font-black rounded-lg border !border-red-200 transition-all">
+        +1M
+    </button>
+
+    <button onclick="navDate('year', 1)" 
+        class="px-2 py-1 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[9px] font-black uppercase rounded-md border !border-red-200 transition-all">
+        +1A
+    </button>
 </div>
-    </div>
+</div>
 
-    <!-- Pannello Azioni Docente -->
-    <div id="prof-comm-panel" class="hidden bg-[#161311] p-6 rounded-[28px] shadow-xl border border-zinc-800 relative overflow-hidden">
-        <div class="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
-            <span class="text-6xl font-black italic">STAFF</span>
+<!-- Pannello Azioni Docente -->
+    <div id="prof-comm-panel" class="hidden bg-amber-600 p-6 rounded-[28px] shadow-xl border border-black/20 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
+            <span class="text-6xl font-black italic text-black">STAFF</span>
         </div>
         <div class="flex flex-col md:flex-row gap-6 items-end relative z-10">
             <div class="flex-1 w-full">
                 <div class="flex justify-between items-center mb-3">
-                    <p class="text-[10px] font-black uppercase text-red-600 tracking-[0.2em] flex items-center gap-2">
-                        <span class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span> Terminale Comunicazioni
+                    <p class="text-[10px] font-black uppercase text-black tracking-[0.2em] flex items-center gap-2">
+                        <span class="w-2 h-2 bg-black rounded-full animate-pulse"></span> Terminale Comunicazioni
                     </p>
                     <div id="prof-actions-agenda" class="flex gap-2">
-                        <button onclick="window.openModal('firme')" class="bg-zinc-800 hover:bg-red-700 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-zinc-700">✍️ Firma</button>
-                        <button onclick="window.openModal('compiti')" class="bg-blue-900/40 hover:bg-blue-800 text-blue-400 text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-blue-800/30">📚 Compiti</button>
+                        <button onclick="window.openModal('firme')" class="bg-black text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-black hover:bg-zinc-900">✍️ Firma</button>
+                        <button onclick="window.openModal('compiti')" class="bg-blue-600 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-blue-700 hover:bg-blue-700">📚 Compiti</button>
                     </div>
                 </div>
                 <textarea id="input-testo-avviso" 
-                    class="w-full p-4 bg-black/40 border border-zinc-800 rounded-2xl text-sm font-medium text-white placeholder:text-zinc-700 focus:outline-none focus:border-red-600 transition-all resize-none" 
+                    class="w-full p-4 bg-black text-sm font-medium text-white placeholder:text-zinc-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black transition-all resize-none border-none" 
                     placeholder="Scrivi un avviso per la classe..." rows="2"></textarea>
             </div>
             <button onclick="window.addAvviso(document.getElementById('input-testo-avviso').value, window.selectedClass)" 
-                class="w-full md:w-auto bg-red-700 text-white text-[10px] font-black px-8 py-5 rounded-2xl uppercase hover:bg-red-600 transition-all shadow-lg shadow-red-900/20 shrink-0">
+                class="w-full md:w-auto bg-black text-white text-[10px] font-black px-8 py-5 rounded-2xl uppercase hover:bg-zinc-900 transition-all shadow-lg shrink-0 border border-black">
                 Invia Messaggio
             </button>
         </div>
@@ -1351,52 +1325,51 @@ main {
             <div class="space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <span class="text-xl">📑</span>
-                    <h3 class="text-[11px] font-black uppercase text-zinc-100 tracking-[0.3em]">Diario di Bordo</h3>
+                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Diario di Bordo</h3>
                 </div>
                 <div id="agenda-firme-list" class="space-y-4 min-h-[100px]">
                     <!-- Popolato via JS -->
                 </div>
             </div>
 
-            <!-- Compiti -->
-            <div class="space-y-4">
-                <div class="flex items-center gap-3 px-2">
-                    <span class="text-xl">📘</span>
-                    <h3 class="text-[11px] font-black uppercase text-zinc-100 tracking-[0.3em]">Scadenze e Studio</h3>
-                </div>
-                <div id="agenda-compiti-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Popolato via JS -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Colonna Destra (1/3): Info Extra -->
-        <div class="space-y-8">
-            
-<!-- Attività Odierna -->
-<div class="agenda-side-panel bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
-    <div class="p-5 border-b border-zinc-100 bg-white">
-        <h3 class="text-[10px] font-black uppercase text-zinc-900 tracking-widest flex items-center gap-2">
-            <span class="text-lg">🎯</span> Eventi del Giorno
-        </h3>
+<!-- Compiti -->
+<div class="space-y-4">
+    <div class="flex items-center gap-3 px-2">
+        <span class="text-xl">📘</span>
+        <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Scadenze e Studio</h3> <!-- CAMBIATO IN text-black -->
     </div>
-    <div id="agenda-daily-info" class="p-5 space-y-4 bg-white text-zinc-900">
-        <!-- Popolato via JS -->
-    </div>
-</div>
-
-<!-- Presenze -->
-<div class="agenda-side-panel bg-white border border-zinc-200 rounded-2xl overflow-hidden mt-4 shadow-sm">
-    <div class="p-5 border-b border-zinc-100 bg-white">
-        <h3 class="text-[10px] font-black uppercase text-zinc-900 tracking-widest flex items-center gap-2">
-            <span class="text-lg">👥</span> Status Alunni
-        </h3>
-    </div>
-    <div id="agenda-attendance-info" class="p-5 bg-white text-zinc-900">
+    <div id="agenda-compiti-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Popolato via JS -->
     </div>
 </div>
         </div>
+
+<!-- Colonna Destra (1/3): Info Extra - SOSTITUISCI QUESTO BLOCCO NELL'HTML -->
+<div class="space-y-6">
+    <!-- Attività Odierna -->
+    <div class="bg-blue-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
+        <div class="p-5 border-b border-black/20 bg-black/10">
+            <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
+                <span class="text-sm">🎯</span> Eventi del Giorno
+            </h3>
+        </div>
+        <div id="agenda-daily-info" class="p-5 space-y-3">
+            <!-- Popolato via JS (Note Rosse e Voti Verdi) -->
+        </div>
+    </div>
+
+    <!-- Presenze -->
+    <div class="bg-purple-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
+        <div class="p-5 border-b border-black/20 bg-black/10">
+            <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
+                <span class="text-sm">👥</span> Status Alunni
+            </h3>
+        </div>
+        <div id="agenda-attendance-info" class="p-5">
+            <!-- Popolato via JS -->
+        </div>
+    </div>
+</div>
     </div>
 </div>
 
@@ -1404,7 +1377,7 @@ main {
 <div id="view-profilo" class="tab-content space-y-6 max-w-7xl mx-auto p-4">
     <!-- PULSANTE TORNA ALLA HOME AGGIUNTO QUI -->
     <div class="flex justify-start mb-2">
-        <button onclick="window.changeMenu('home')" class="group flex items-center gap-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+        <button onclick="window.changeMenu('home')" class="group flex items-center gap-2 bg-green-600 border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
             <span class="text-lg group-hover:-translate-x-1 transition-transform">🏠</span>
             <span class="text-[10px] font-black uppercase text-zinc-100">Torna alla Home</span>
         </button>
@@ -1425,7 +1398,7 @@ main {
                 </div>
             </div>
 
-            <div class="bg-zinc-50 p-4 rounded-xl border border-zinc-100 text-center min-w-[140px] relative overflow-hidden flex-shrink-0">
+            <div class="bg-yellow-800 p-4 rounded-xl border border-zinc-100 text-center min-w-[140px] relative overflow-hidden flex-shrink-0">
     <p class="text-[9px] font-black text-zinc-400 uppercase mb-1">Media Personale</p>
     <p id="profilo-media" class="...">0.0</p>
                 <div class="absolute bottom-0 left-0 w-full h-1 bg-zinc-200">
@@ -1459,7 +1432,7 @@ main {
 
 		<!-- VIEW: DIDATTICA -->
 <div id="view-didattica" class="tab-content hidden space-y-6">
-    <div class="flex justify-between items-center bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-lg">
+    <div class="flex justify-between items-center bg-emerald-500 p-6 rounded-2xl border border-zinc-800 shadow-lg">
         <div>
             <h2 class="text-2xl font-black uppercase italic text-white">Materiale Didattico</h2>
             <p class="text-[10px] font-bold text-red-600 uppercase tracking-widest">Dispense, PDF e Risorse di Studio</p>
@@ -1600,7 +1573,7 @@ main {
     <div class="flex justify-between items-center bg-red-500 p-4 rounded-2xl border border-zinc-200 shadow-sm">
         <h2 class="text-2xl font-black uppercase italic text-zinc-800">Note</h2>
         <div id="note-date-container" class="hidden flex items-center gap-3">
-            <input type="date" class="shared-calendar bg-zinc-100 border border-zinc-300 rounded-xl px-3 py-2 text-xs font-bold">
+            <input type="date" class="shared-calendar bg-green-700 border border-zinc-300 rounded-xl px-3 py-2 text-xs font-bold">
             <button id="btn-add-note" onclick="window.openModal('note')" class="bg-amber-600 text-white text-[9px] font-bold px-4 py-2 rounded uppercase">Emetti Nota</button>
         </div>
     </div>
@@ -1843,7 +1816,7 @@ main {
 </div>
 
 		<!-- VIEW: APPELLO (Versione con Calendario Integrato) -->
-<div id="view-appello" class="tab-content hidden mb-6 bg-[#18181b] p-4 rounded-2xl border border-zinc-800 shadow-sm">
+<div id="view-appello" class="tab-content hidden mb-6 bg-green-600 p-4 rounded-2xl border border-zinc-800 shadow-sm">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 border-b border-zinc-800 pb-4">
         <div class="flex items-center gap-4 w-full md:w-auto">
             <button onclick="window.changeMenu('classi')" class="bg-zinc-800 hover:bg-zinc-700 text-white p-2.5 rounded-xl transition-all shadow-sm">⬅️</button>
@@ -1880,7 +1853,7 @@ main {
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead>
-                <tr class="text-[9px] font-black text-zinc-500 uppercase border-b border-zinc-800">
+                <tr class="text-[9px] font-black text-zinc-550 uppercase border-b border-zinc-800">
                     <th class="pb-3 pl-2">Studente</th>
                     <th class="pb-3 text-center">Stato Presenza</th>
                     <th class="pb-3 text-center">Orario Entrata</th>
@@ -1892,53 +1865,54 @@ main {
     </div>
 </div>
 
-		<!-- VIEW: HUB (Pannello Admin Potenziato) -->
+<!-- VIEW: HUB (Pannello Admin Potenziato) -->
 <div id="view-hub" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4">
-    <div class="glass-light p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white">
-        <h1 class="text-3xl font-black uppercase text-zinc-900 flex items-center gap-3">
+    <!-- Header Admin già modificato -->
+    <div class="p-8 rounded-3xl border-2 border-zinc-950 shadow-xl bg-emerald-900">
+        <h1 class="text-3xl font-black uppercase text-white flex items-center gap-3">
             <span>⚙️</span> Amministrazione Sistema
         </h1>
-        <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Controllo Totale Fazbear School System</p>
+        <p class="text-red-500 text-[10px] font-bold uppercase mt-2 tracking-widest">Controllo Totale Fazbear School System</p>
     </div>
 
-    <!-- STATISTICHE RAPIDE -->
+    <!-- STATISTICHE RAPIDE - Colori Vivi con Bordi Decisi -->
     <div id="admin-stats-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-amber-900 p-4 rounded-2xl border border-zinc-800">
-            <p class="text-[8px] font-black text-zinc-500 uppercase">Studenti Totali</p>
-            <p id="stat-total-students" class="text-2xl font-black text-white">--</p>
+        <div class="bg-red-700 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
+            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Studenti Totali</p>
+            <p id="stat-total-students" class="text-3xl font-black text-white mt-1">--</p>
         </div>
-        <div class="bg-green-900 p-4 rounded-2xl border border-zinc-800">
-            <p class="text-[8px] font-black text-zinc-500 uppercase">Media Scolastica</p>
-            <p id="stat-global-media" class="text-2xl font-black text-red-600">--</p>
+        <div class="bg-green-600 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
+            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Media Scolastica</p>
+            <p id="stat-global-media" class="text-3xl font-black text-white mt-1">--</p>
         </div>
-        <div class="bg-blue-900 p-4 rounded-2xl border border-zinc-800">
-            <p class="text-[8px] font-black text-zinc-500 uppercase">Staff Attivo</p>
-            <p id="stat-total-staff" class="text-2xl font-black text-white">--</p>
+        <div class="bg-blue-600 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
+            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Staff Attivo</p>
+            <p id="stat-total-staff" class="text-3xl font-black text-white mt-1">--</p>
         </div>
-        <div class="bg-yellow-900 p-4 rounded-2xl border border-zinc-800">
-            <p class="text-[8px] font-black text-zinc-500 uppercase">Note Emesse</p>
-            <p id="stat-total-notes" class="text-2xl font-black text-amber-500">--</p>
+        <div class="bg-amber-500 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
+            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Note Emesse</p>
+            <p id="stat-total-notes" class="text-3xl font-black text-zinc-950 mt-1">--</p>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Gestione Utenti -->
         <div class="lg:col-span-2 space-y-4">
-            <div class="glass-light p-6 rounded-2xl bg-[#a49961] border border-zinc-100 shadow-sm">
+            <div class="p-6 rounded-2xl bg-sky-950 border-2 border-zinc-950 shadow-md">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-black uppercase text-zinc-800 text-xs">👥 Gestione Database Utenti</h3>
+                    <h3 class="font-black uppercase text-red-500 text-xs tracking-wide">👥 Gestione Database Utenti</h3>
                     <div class="flex gap-2">
-                        <button onclick="window.hubManager.mostraListaUtenti()" class="bg-zinc-900 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Lista</button>
-                        <button onclick="window.hubManager.nuovoUtente()" class="bg-red-700 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Nuovo +</button>
+                        <button onclick="window.hubManager.mostraListaUtenti()" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-950 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all active:scale-90">Lista</button>
+                        <button onclick="window.hubManager.nuovoUtente()" class="bg-red-600 hover:bg-red-700 border border-zinc-950 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all active:scale-90">Nuovo +</button>
                     </div>
                 </div>
                 
-                <!-- Ricerca Globale -->
+                <!-- Ricerca Globale ad Alto Contrasto -->
                 <div class="relative mb-4">
                     <input type="text" id="global-search-input" oninput="window.hubManager.ricercaGlobale(this.value)" 
                         placeholder="Cerca studente o docente in tutta la scuola..." 
-                        class="w-full p-4 bg-zinc-100 border-none rounded-2xl text-xs font-bold outline-none focus:ring-2 focus:ring-red-500">
-                    <div id="global-search-results" class="absolute top-full left-0 w-full bg-white border border-zinc-200 rounded-2xl mt-2 shadow-2xl z-50 hidden max-h-60 overflow-y-auto"></div>
+                        class="w-full p-4 bg-black/40 border-2 border-zinc-950 rounded-2xl text-xs font-black text-white placeholder-zinc-500 outline-none focus:border-red-500 transition-colors uppercase">
+                    <div id="global-search-results" class="absolute top-full left-0 w-full bg-zinc-900 border-2 border-zinc-950 rounded-2xl mt-2 shadow-2xl z-50 hidden max-h-60 overflow-y-auto p-2"></div>
                 </div>
 
                 <div id="hub-dynamic-content" class="hidden"></div>
@@ -1947,17 +1921,19 @@ main {
 
         <!-- Manutenzione e Log -->
         <div class="space-y-6">
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">🛠️ Manutenzione AS</h3>
-                <button onclick="window.hubManager.calcolaStatistiche()" class="w-full p-3 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-[9px] font-black uppercase mb-2 transition-all">Aggiorna Statistiche</button>
-                <button onclick="alert('Funzione di backup database attivata')" class="w-full p-3 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-[9px] font-black uppercase transition-all">Esporta Backup JSON</button>
+            <!-- Box Manutenzione con Bottoni Gialli Accesi -->
+            <div class="p-6 rounded-2xl bg-amber-900 border-2 border-zinc-950 shadow-md">
+                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2">🛠️ Manutenzione AS</h3>
+                <button onclick="window.hubManager.calcolaStatistiche()" class="w-full p-3 bg-yellow-400 hover:bg-yellow-500 border border-zinc-950 text-zinc-950 rounded-xl text-[9px] font-black uppercase mb-2 transition-all active:scale-95">Aggiorna Statistiche</button>
+                <button onclick="alert('Funzione di backup database attivata')" class="w-full p-3 bg-yellow-400 hover:bg-yellow-500 border border-zinc-950 text-zinc-950 rounded-xl text-[9px] font-black uppercase transition-all active:scale-95">Esporta Backup JSON</button>
             </div>
 
-            <div class="glass-light p-6 rounded-2xl bg-white border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-zinc-800 text-xs mb-4 border-b pb-2">📜 Log Attività Recenti</h3>
-                <div id="admin-audit-logs" class="space-y-2 max-h-48 overflow-y-auto text-[9px] font-mono text-zinc-500">
-                    <p>> Sistema inizializzato...</p>
-                    <p>> Admin loggato...</p>
+            <!-- Box Log Attività -->
+            <div class="p-6 rounded-2xl bg-blue-900 border-2 border-zinc-950 shadow-md">
+                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2">📜 Log Attività Recenti</h3>
+                <div id="admin-audit-logs" class="space-y-2 max-h-48 overflow-y-auto text-[10px] font-mono text-green-400 bg-black/30 p-3 rounded-xl border border-zinc-950">
+                    <p class="font-bold">> Sistema inizializzato...</p>
+                    <p class="font-bold">> Admin loggato...</p>
                 </div>
             </div>
         </div>
@@ -2611,34 +2587,43 @@ const firmeHtml = (data.firme || [])
         const visualizzaOra = isNaN(f.ora) ? f.ora : `${f.ora}°`;
         
         return `
-        <div class="firme-card flex items-center gap-4 p-4 rounded-2xl mb-3 shadow-sm">
-            <div class="hour-badge shrink-0">
-                <span class="text-xs font-extrabold leading-none">${visualizzaOra}</span>
-                <span class="text-[7px] uppercase font-black opacity-60">Ora</span>
+        <!-- Card principale con colore vivo (Azzurro/Blu) e bordi decisi -->
+        <div class="p-4 bg-blue-600 border-2 border-zinc-950 rounded-2xl flex items-center gap-4 mb-3 shadow-md"> 
+            
+            <!-- Badge Ora: Sfondo Bianco e Testo Nero Pieno per risaltare -->
+            <div class="w-14 h-14 bg-red-600 border-2 border-zinc-950 rounded-xl flex flex-col items-center justify-center shrink-0 shadow-sm"> 
+                <span class="text-sm font-black text-zinc-950 leading-none">${visualizzaOra}</span>
+                <span class="text-[7px] uppercase font-black text-zinc-950 opacity-80 mt-0.5">Ora</span>
             </div>
 
+            <!-- Contenuto Centrale -->
             <div class="flex-1 min-w-0">
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-1">
-                    <h4 class="text-[11px] font-black uppercase tracking-tight text-[var(--text-main)]">
-                        ${f.materia} <span class="mx-1 opacity-20">|</span> <span class="text-red-600/80">${f.tipo || 'Lezione'}</span>
+                    <h4 class="text-[11px] font-black uppercase tracking-tight text-zinc-950">
+                        <span>${f.materia.toUpperCase()}</span> 
+                        <span class="mx-1 text-white opacity-60">|</span> 
+                        <span class="text-red-950 font-black">${f.tipo || 'Lezione'}</span>
                     </h4>
-                    <span class="text-[9px] font-black bg-[var(--bg-surface)] px-2 py-1 rounded-lg text-[var(--text-muted)] border border-[var(--border-color)]">
-                        DOCENTE: ${f.prof.toUpperCase()}
+                    
+                    <!-- Badge Prof: Giallo Vivo con Testo Nero ad alto contrasto -->
+                    <span class="text-[9px] font-black bg-yellow-400 px-2 py-1 rounded-lg text-zinc-950 border border-zinc-950 uppercase">
+                        Prof: ${f.prof.toUpperCase()}
                     </span>
                 </div>
-                <p class="text-xs text-[var(--text-muted)] italic leading-snug truncate group-hover:whitespace-normal">
+                <p class="text-xs text-white font-bold uppercase opacity-90 leading-snug">
                     ${f.argomento || "Nessun argomento registrato"}
                 </p>
             </div>
 
+            <!-- Bottoni Azione -->
             <div class="flex gap-1 ml-2 shrink-0">
                 ${isAdmin || (role === 'prof' && f.profId === window.currentUserId) ? `
-                    <button onclick="window.editFirma(${idx}, '${cls}')" class="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-colors">✏️</button>
-                    <button onclick="window.deleteFirma(${idx}, '${cls}')" class="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">🗑️</button>
+                    <button onclick="window.editFirma(${idx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">✏️</button>
+                    <button onclick="window.deleteFirma(${idx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-red-700 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">🗑️</button>
                 ` : ''}
             </div>
         </div>`;
-    }).join('') || '<div class="text-center py-10 opacity-20 font-black uppercase text-[10px] text-[var(--text-main)]">Nessuna lezione registrata</div>';
+    }).join('') || '<div class="text-center py-10 font-black uppercase text-[10px] text-zinc-600">Nessuna lezione registrata</div>';
 
         // Iniezione nella lista (senza il box di input)
         document.getElementById('agenda-firme-list').innerHTML = avvisiHtml + firmeHtml;
@@ -2647,24 +2632,28 @@ const firmeHtml = (data.firme || [])
     // Verifichiamo se l'utente può eliminare (Admin o il Prof che ha creato il compito)
     const canDeleteCompito = isStaff || isAdmin;
 
-    return `
-    <div class="p-4 bg-blue-50/50 border-l-4 border-blue-500 rounded-2xl shadow-sm relative group">
+return `
+    <!-- Sostituito bg-blue-50/50 con compito-card per avere lo sfondo blu colorato che hai nel CSS -->
+    <div class="compito-card border-l-4 border-blue-500 rounded-2xl shadow-sm relative group mb-3">
         <div class="flex items-center justify-between mb-2">
-            <span class="text-[9px] font-black uppercase text-blue-700 bg-blue-100 px-2 py-0.5 rounded">${c.materia}</span>
+            <!-- Il badge della materia ora ha un testo blu scuro pieno -->
+            <span class="text-[9px] font-black uppercase bg-blue-100 px-2 py-0.5 rounded" style="color: #1e3a8a !important;">${c.materia}</span>
             
             ${canDeleteCompito ? `
                 <button onclick="window.deleteCompito(${idx}, '${cls}')" 
-                        class="opacity-0 group-hover:opacity-100 text-blue-400 hover:text-red-600 transition-all p-1">
+                        class="opacity-0 group-hover:opacity-100 text-blue-500 hover:text-red-600 transition-all p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             ` : ''}
         </div>
-        <p class="text-xs font-bold text-zinc-800 leading-relaxed">${c.testo}</p>
-        <p class="text-[7px] mt-2 uppercase font-black text-zinc-400">Assegnato da: ${c.prof || 'Docente'}</p>
+        <!-- Contenuto del compito forzato in nero pieno -->
+        <p class="text-xs font-bold leading-relaxed" style="color: black !important;">${c.testo}</p>
+        <!-- Nome del prof in grigio scuro deciso anziché zinc-400 chiaro -->
+        <p class="text-[7px] mt-2 uppercase font-black" style="color: #4b5563 !important;">Assegnato da: ${c.prof || 'Docente'}</p>
     </div>`;
-}).join('') || '<p class="col-span-full text-center py-6 text-zinc-300 italic text-[10px] font-black uppercase">Nessun compito assegnato</p>';
+}).join('') || '<p class="col-span-full text-center py-6 italic text-[10px] font-black uppercase" style="color: #4b5563 !important;">Nessun compito assegnato</p>';
         
         let infoHtml = "";
         const note = (data.note || []);
@@ -2675,56 +2664,62 @@ if (role === 'studente') {
     const myNote = note.filter(n => (n.studenteId || n.id) == window.currentUserId);
     const myVoti = voti.filter(v => (v.studenteId || v.id) == window.currentUserId);
 
-    // Note Studente
+// Note Studente (Sfondo Rosso Vivo / Bordi Definiti)
     infoHtml += myNote.map(n => `
-        <div class="event-card-modern border-l-4 !border-red-600 mb-3">
+        <div class="event-card-modern mb-3 p-3 bg-red-600 rounded-2xl border-2 border-zinc-950 shadow-md">
             <div class="flex justify-between items-center mb-1">
-                <span class="text-[8px] font-black uppercase text-red-500">⚠️ Nota Disciplinare</span>
+                <span class="text-[8px] font-black uppercase text-zinc-950 tracking-wider">⚠️ Nota Disciplinare</span>
             </div>
-            <p class="text-xs font-bold text-zinc-200 leading-tight">${n.testo}</p>
+            <p class="text-[11px] font-black text-white uppercase leading-tight">${n.testo}</p>
         </div>`).join('');
 
-    // Voti Studente
+    // Voti Studente (Sfondo Verde Vivo / Dettagli in Contrasto)
     infoHtml += myVoti.map(v => `
-        <div class="event-card-modern border-l-4 !border-green-500 mb-3">
-            <div class="flex justify-between items-center mb-1">
+        <div class="event-card-modern mb-3 p-3 bg-green-600 rounded-2xl border-2 border-zinc-950 shadow-md">
+            <div class="flex justify-between items-center">
                 <div>
-                    <span class="text-[8px] font-black uppercase text-green-500">⭐ Nuova Valutazione</span>
-                    <p class="text-xs font-black text-white uppercase">${safeCap(v.materia)}</p>
+                    <span class="text-[8px] font-black uppercase text-zinc-950 tracking-wider">⭐ Nuova Valutazione</span>
+                    <p class="text-xs font-black uppercase text-white mt-0.5 leading-none">${safeCap(v.materia)}</p>
                 </div>
-                <span class="text-xl font-black text-green-400">${v.voto}</span>
+                <span class="text-xl font-black text-white bg-zinc-950 px-2.5 py-1 rounded-xl border border-zinc-950 shadow-sm">${v.voto}</span>
             </div>
-            <p class="text-[8px] text-zinc-400 mt-1 italic">${v.argomento || "Nessun argomento"}</p>
+            <p class="text-[8px] mt-2 italic font-bold text-zinc-950 uppercase opacity-80">${v.argomento || "Nessun argomento"}</p>
         </div>`).join('');
 } else {
-    // Vista Staff (Prof/Preside/Admin)
+ // Vista Staff (Prof/Preside/Admin)
+    // Note Staff (Sfondo Rosso Vivo)
     infoHtml += note.map(n => `
-        <div class="event-card-modern mb-2">
-            <p class="text-[9px] font-black text-red-500 uppercase mb-1">${n.studente}</p>
-            <p class="text-[10px] text-zinc-300 font-medium">Nota: ${n.testo}</p>
+        <div class="event-card-modern mb-2 p-3 bg-red-600 rounded-2xl border-2 border-zinc-950 shadow-md">
+            <p class="text-[9px] font-black text-zinc-950 uppercase mb-0.5 tracking-wide">${n.studente}</p>
+            <p class="text-[10px] font-black text-white uppercase leading-tight">Nota: ${n.testo}</p>
         </div>`).join('');
 
+    // Voti Staff (Sfondo Verde Vivo)
     infoHtml += voti.map(v => `
-        <div class="event-card-modern mb-2">
+        <div class="event-card-modern mb-2 p-3 bg-green-600 rounded-2xl border-2 border-zinc-950 shadow-md">
             <div class="flex justify-between items-center">
                 <div class="flex flex-col">
-                    <span class="text-[9px] font-black text-white uppercase">${v.studente}</span>
-                    <span class="text-[8px] font-bold text-zinc-500 uppercase">${safeCap(v.materia)}</span>
+                    <span class="text-[9px] font-black uppercase text-zinc-950 tracking-wide">${v.studente}</span>
+                    <span class="text-[8px] font-black text-white uppercase opacity-90 mt-0.5">${safeCap(v.materia)}</span>
                 </div>
-                <span class="text-sm font-black text-green-400 bg-green-500/10 px-2 py-1 rounded-lg">${v.voto}</span>
+                <span class="text-xs font-black text-white bg-zinc-950 px-2 py-1 rounded-lg border border-zinc-950">${v.voto}</span>
             </div>
-            <p class="text-[8px] text-zinc-400 mt-1 italic">${v.argomento || "Nessun argomento"}</p>
+            <p class="text-[8px] mt-1 italic font-bold text-zinc-950 uppercase opacity-80">${v.argomento || "Nessun argomento"}</p>
         </div>`).join('');
 }
         const dailyContainer = document.getElementById('agenda-daily-info');
         if (dailyContainer) {
             dailyContainer.innerHTML = infoHtml || `
-                <div class="py-10 text-center opacity-20">
-                    <p class="text-[10px] font-black uppercase tracking-widest">Nessuna Attività</p>
+                <div class="py-10 text-center bg-zinc-950 rounded-2xl border-2 border-zinc-900 shadow-inner">
+                    <p class="text-[10px] font-black uppercase tracking-widest text-zinc-500">Nessuna Attività</p>
                 </div>`;
         }
 
-        document.getElementById('agenda-daily-info').innerHTML = infoHtml || '<p class="text-zinc-300 text-[10px] italic text-center py-4 uppercase font-bold">Nessun aggiornamento</p>';
+        // Fallback finale coerente (Sfondo scuro con testo acceso)
+        document.getElementById('agenda-daily-info').innerHTML = infoHtml || `
+            <div class="py-6 text-center bg-zinc-950 rounded-2xl border-2 border-zinc-900">
+                <p class="text-[10px] uppercase font-black text-zinc-500 tracking-wider">Nessun aggiornamento</p>
+            </div>`;
     });
 
     // 3. Listener Real-time Presenze per l'Agenda
@@ -2767,34 +2762,44 @@ attHtml = `
         attHtml = '<p class="text-zinc-500 text-[9px] italic text-center py-4 uppercase font-bold tracking-tight">Appello non registrato</p>';
     }
 } else if (isStaff) {
-    // Vista Staff: Vede tutti gli studenti della classe
+// Vista Staff: Vede tutti gli studenti della classe
     const classStudents = window.allStudents.filter(s => s.classe === cls);
     if (classStudents.length > 0) {
         attHtml = classStudents.map(s => {
             const info = attData[s.id] || { status: 'N.P.', entry: '--:--', exit: '--:--' };
             
-            let pillClass = 'np';
-            if (info.status === 'presente') pillClass = 'presente';
-            if (info.status === 'assente') pillClass = 'assente';
-            if (info.status === 'ritardo') pillClass = 'ritardo';
+            // Colori vivaci per i badge di stato
+            let statusBg = 'bg-zinc-700 text-white';
+            if (info.status === 'presente') statusBg = 'bg-green-600 text-white';
+            if (info.status === 'assente') statusBg = 'bg-red-600 text-white';
+            if (info.status === 'ritardo') statusBg = 'bg-amber-500 text-zinc-950';
 
             const statusLetter = info.status === 'presente' ? 'P' : info.status === 'assente' ? 'A' : info.status === 'ritardo' ? 'R' : '-';
             
-return `
-    <div class="attendance-row-modern border-b border-zinc-100 last:border-0 py-2">
-        <div class="flex items-center gap-3 min-w-0">
-            <span class="status-pill ${pillClass} !min-w-[45px] !px-2 !py-0.5 text-center shrink-0">${statusLetter}</span>
-            <span class="font-black text-zinc-900 uppercase text-[10px] truncate">${s.name}</span>
-        </div>
-        <div class="flex items-center shrink-0">
-            <span class="text-[9px] font-mono font-black text-zinc-500 bg-zinc-50 px-2 py-1 rounded-md border border-zinc-200">
-                ${info.entry} - ${info.exit}
-            </span>
-        </div>
-    </div>`;
+            return `
+            <div class="flex items-center justify-between gap-3 p-2 bg-zinc-950/40 rounded-xl border border-black/20 mb-1.5 last:mb-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <!-- Badge Stato Vivo -->
+                    <span class="${statusBg} min-w-[32px] h-6 flex items-center justify-center text-[10px] font-black uppercase rounded-lg border border-zinc-950 shrink-0">
+                        ${statusLetter}
+                    </span>
+                    <!-- Nome studente in Bianco Pieno -->
+                    <span class="font-black uppercase text-[10px] truncate text-white">${s.name}</span>
+                </div>
+                <div class="flex items-center shrink-0">
+                    <!-- Ore ingresso/uscita: Badge Giallo Vivo e Testo Nero Pieno -->
+                    <span class="text-[9px] font-mono font-black bg-yellow-400 px-2 py-0.5 rounded-lg border border-zinc-950 text-zinc-950 uppercase">
+                        ${info.entry} - ${info.exit}
+                    </span>
+                </div>
+            </div>`;
         }).join('');
     } else {
-        attHtml = '<p class="text-zinc-500 text-[9px] italic text-center py-4 uppercase font-bold tracking-tight">Nessuno studente in classe</p>';
+        // Fallback coerente con sfondo scuro
+        attHtml = `
+            <div class="py-6 text-center bg-zinc-950/60 rounded-xl border border-black/20">
+                <p class="text-[9px] font-black uppercase tracking-wider text-zinc-400">Nessuno studente in classe</p>
+            </div>`;
     }
 }
             container.innerHTML = attHtml;
@@ -4571,94 +4576,98 @@ if (gridContenuti) {
             if (Array.isArray(materieDocente)) materieDocente = materieDocente.join(', ');
             
             infoSpecifica = `
-                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Materie Insegnate</p>
-                    <p class="text-[10px] font-bold text-zinc-800 uppercase leading-tight">${materieDocente}</p>
+                <div class="p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
+                    <p class="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Materie Insegnate</p>
+                    <p class="text-[10px] font-bold text-zinc-200 uppercase leading-tight">${materieDocente}</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-lg shadow-zinc-200">
-                    <span>Agenda Classi</span> <span class="text-lg">📋</span>
+                <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase border border-zinc-800 hover:border-red-600 transition-all flex justify-between items-center shadow-lg">
+                    <span>Agenda Classi</span> <span class="text-sm">📋</span>
                 </button>`;
         } else if (roleStr.includes('counselor')) {
             infoSpecifica = `
-                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100">
-                    <p class="text-[8px] font-black text-purple-400 uppercase tracking-widest mb-1">Settore Operativo</p>
-                    <p class="text-[10px] font-bold text-purple-700 uppercase">Supporto e Ascolto</p>
+                <div class="p-4 bg-purple-950 bg-opacity-20 rounded-2xl border border-purple-900 border-opacity-40">
+                    <p class="text-[8px] font-black text-purple-300 uppercase tracking-widest mb-1">Settore Operativo</p>
+                    <p class="text-[10px] font-bold text-purple-300 uppercase">Supporto e Ascolto</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('sportello')" class="w-full p-4 bg-purple-700 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-purple-800 transition-all flex justify-between items-center shadow-lg shadow-purple-100">
-                    <span>Sportello Ascolto</span> <span class="text-lg">🧠</span>
+                <button onclick="window.changeMenu('sportello')" class="w-full p-4 bg-purple-900 text-white rounded-2xl font-black text-[10px] uppercase border border-purple-700 hover:bg-purple-800 transition-all flex justify-between items-center shadow-lg">
+                    <span>Sportello Ascolto</span> <span class="text-sm">🧠</span>
                 </button>`;
         } else {
             infoSpecifica = `
-                <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                    <p class="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Settore Operativo</p>
-                    <p class="text-[10px] font-bold text-zinc-800 uppercase">${ruoloEffettivo}</p>
+                <div class="p-4 bg-red-900 rounded-2xl border border-zinc-800">
+                    <p class="text-[8px] font-black text-zinc-100 uppercase tracking-widest mb-1">Settore Operativo</p>
+                    <p class="text-[10px] font-bold text-zinc-200 uppercase">${ruoloEffettivo}</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('hub')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase hover:bg-red-700 transition-all flex justify-between items-center shadow-lg shadow-zinc-200">
-                    <span>Pannello di Controllo</span> <span class="text-lg">⚙️</span>
+                <button onclick="window.changeMenu('hub')" class="w-full p-4 bg-amber-900 text-white rounded-2xl font-black text-[10px] uppercase border border-zinc-800 hover:border-red-600 transition-all flex justify-between items-center shadow-lg">
+                    <span>Pannello di Controllo</span> <span class="text-sm">⚙️</span>
                 </button>`;
         }
 
         gridContenuti.innerHTML = `
-            <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-red-700 text-[10px] mb-4 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-red-600 rounded-full"></span> Area Personale
+            <!-- AREA PERSONALE -->
+            <div class="bg-red-800 p-6 rounded-3xl border border-zinc-800 border-opacity-80 shadow-md">
+                <h3 class="font-black uppercase text-red-100 text-[10px] mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-red-900 rounded-full"></span> Area Personale
                 </h3>
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         ${infoSpecifica}
-                        <div class="p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                            <p class="text-[8px] font-black text-zinc-400 uppercase tracking-widest mb-1">Valutazione Servizio</p>
-                            <div class="flex gap-1">
+                        <div class="p-4 bg-red-900 rounded-2xl border border-zinc-800">
+                            <p class="text-[8px] font-black text-zinc-100 uppercase tracking-widest mb-1">Valutazione Servizio</p>
+                            <div class="flex gap-1 items-center min-h-[15px]">
                                 ${stelle > 0 ? `<span class="text-xs">${"⭐".repeat(stelle)}</span>` : ""}
-                                ${ammonizioni > 0 ? `<span class="text-xs">${"⚠️".repeat(ammonizioni)}</span>` : (stelle === 0 ? '<span class="text-[10px] font-bold text-zinc-300">N/D</span>' : "")}
+                                ${ammonizioni > 0 ? `<span class="text-xs">${"⚠️".repeat(ammonizioni)}</span>` : (stelle === 0 ? '<span class="text-[10px] font-bold text-zinc-600 uppercase">N/D</span>' : "")}
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm">
-                <h3 class="font-black uppercase text-zinc-800 text-[10px] mb-4 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-zinc-400 rounded-full"></span> Strumenti Rapidi
+            <!-- STRUMENTI RAPIDI -->
+            <div class="bg-amber-800 p-6 rounded-3xl border border-zinc-800 border-opacity-80 shadow-md">
+                <h3 class="font-black uppercase text-zinc-100 text-[10px] mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-amber-900 rounded-full"></span> Strumenti Rapidi
                 </h3>
                 <div class="flex flex-col gap-3">
                     ${bottoniExtra}
-                    <button onclick="window.changeMenu('registro')" class="w-full p-4 bg-white border border-zinc-200 text-zinc-800 rounded-2xl font-black text-[10px] uppercase hover:border-red-600 transition-all flex justify-between items-center">
-                        <span>Registro Generale</span> <span class="text-lg">📊</span>
+                    <button onclick="window.changeMenu('registro')" class="w-full p-4 bg-amber-900 border border-zinc-800 text-zinc-200 rounded-2xl font-black text-[10px] uppercase hover:border-zinc-600 transition-all flex justify-between items-center">
+                        <span>Registro Generale</span> <span class="text-sm">📊</span>
                     </button>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm col-span-full">
+            <!-- FASCICOLO NOTE DI SERVIZIO -->
+            <div class="bg-blue-800 p-6 rounded-3xl border border-zinc-800 border-opacity-80 shadow-md col-span-full">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-black uppercase text-zinc-800 text-[10px] flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-zinc-800 rounded-full"></span> Fascicolo Note di Servizio
+                    <h3 class="font-black uppercase text-zinc-100 text-[10px] flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Fascicolo Note di Servizio
                     </h3>
                     ${(window.userRole === 'Preside' || window.userRole === 'Admin') ? `
-                        <button onclick="window.apriModalValutaProf('${targetId}')" class="text-[9px] font-black text-red-600 uppercase hover:underline">
+                        <button onclick="window.apriModalValutaProf('${targetId}')" class="text-[9px] font-black text-red-500 uppercase hover:text-red-400 transition-colors">
                             + Aggiungi Nota
                         </button>
                     ` : ''}
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scroll">
                     ${valutazioni.slice().reverse().map(v => `
-                        <div class="p-4 ${v.tipo === 'stella' ? 'bg-amber-50/50 border-amber-100' : 'bg-red-50/50 border-red-100'} border rounded-2xl relative group">
+                        <div class="p-4 ${v.tipo === 'stella' ? 'bg-red-950 bg-opacity-20 border-amber-900 border-opacity-40' : 'bg-red-950 bg-opacity-20 border-red-900 border-opacity-40'} border rounded-2xl relative group">
                             <div class="flex justify-between items-center mb-2">
-                                <span class="text-[8px] font-black uppercase ${v.tipo === 'stella' ? 'text-amber-600' : 'text-red-600'} tracking-widest">
+                                <span class="text-[8px] font-black uppercase ${v.tipo === 'stella' ? 'text-amber-400' : 'text-red-400'} tracking-widest">
                                     ${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}
                                 </span>
-                                <span class="text-[8px] font-bold text-zinc-400">${v.date}</span>
+                                <span class="text-[8px] font-bold text-zinc-500">${v.date}</span>
                             </div>
-                            <p class="text-[11px] font-medium text-zinc-700 leading-relaxed mb-2">"${v.motivo}"</p>
-                            <p class="text-[7px] uppercase font-black text-zinc-400">Firmato: <span class="text-zinc-600">${v.da}</span></p>
+                            <p class="text-[11px] font-medium text-zinc-300 leading-relaxed mb-2">"${v.motivo}"</p>
+                            <p class="text-[7px] uppercase font-black text-zinc-500">Firmato: <span class="text-zinc-400">${v.da}</span></p>
                         </div>
-                    `).join('') || '<div class="col-span-full py-10 text-center border-2 border-dashed border-zinc-100 rounded-2xl text-[10px] font-bold text-zinc-300 uppercase">Nessun record nel fascicolo</div>'}
+                    `).join('') || '<div class="col-span-full py-10 text-center border-2 border-dashed border-zinc-800 rounded-2xl text-[10px] font-bold text-zinc-100 uppercase tracking-wider">Nessun record nel fascicolo</div>'}
                 </div>
             </div>`;
-    }
+}
+
 } else if (isOspite) {
     // LOGICA PER UTENTE NON REGISTRATO
     if (nomeEl) nomeEl.innerText = "OSPITE ESTERNO";
@@ -5948,41 +5957,46 @@ window.verifyGoldenPass = async function() {
     }
 };
 
-	// --- GESTORE AMMINISTRAZIONE (HUB) ---
+// --- GESTORE AMMINISTRAZIONE (HUB) ---
 window.hubManager = {
     // 1. MOSTRA LISTA
     mostraListaUtenti: async function() {
         const container = document.getElementById('hub-dynamic-content');
         container.classList.remove('hidden');
-        container.innerHTML = '<p class="text-center p-4 animate-pulse text-[10px] font-black uppercase">Sincronizzazione Database...</p>';
+        container.innerHTML = '<p class="text-center p-4 animate-pulse text-[10px] font-black uppercase text-white">Sincronizzazione Database...</p>';
 
         try {
             const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
-           window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            
+            // Contenitore principale scuro con bordi definiti per integrarsi nell'interfaccia
             let html = `
-                <div class="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-sm">
-                    <div class="p-4 border-b border-zinc-100 bg-zinc-50 space-y-3">
+                <div class="bg-zinc-900 border-2 border-zinc-950 rounded-2xl overflow-hidden shadow-md mt-4">
+                    <div class="p-4 border-b border-zinc-950 bg-zinc-950/40 space-y-3">
                         <div class="flex flex-col md:flex-row gap-3 justify-between items-center">
+                            <!-- Input di ricerca visibile: Testo Bianco su Sfondo Nero -->
                             <input type="text" id="hub-user-search" placeholder="Cerca per nome o ID..." 
-                                   class="bg-white border border-zinc-300 rounded-lg px-3 py-2 text-[10px] outline-none focus:border-red-600 w-full md:w-1/3"
+                                   class="bg-black/50 border-2 border-zinc-950 rounded-xl px-3 py-2 text-[10px] text-white font-black placeholder-zinc-500 outline-none focus:border-red-600 w-full md:w-1/3 uppercase"
                                    oninput="window.hubManager.filtraUtenti()">
+                            
+                            <!-- Pulsanti Filtro ad Alto Contrasto -->
                             <div class="flex flex-wrap gap-1 justify-center">
-                                <button onclick="window.hubManager.setFiltroRuolo('all')" class="hub-filter-btn active bg-zinc-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Tutti</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('dirigenza')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Dirigenza</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('prof')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Docenti</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('personale')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Personale</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('studente')" class="hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase">Studenti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('all')" class="hub-filter-btn active bg-red-600 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Tutti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('dirigenza')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Dirigenza</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('prof')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Docenti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('personale')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Personale</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('studente')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Studenti</button>
                             </div>
                         </div>
                     </div>
                     <div class="max-h-[500px] overflow-y-auto custom-scroll">
                         <table class="w-full text-left text-[10px]">
-                            <thead class="bg-zinc-900 text-white sticky top-0 z-20">
+                            <thead class="bg-zinc-950 text-white sticky top-0 z-20 border-b border-zinc-950">
                                 <tr>
-                                    <th class="p-4 uppercase tracking-widest">Utente</th>
-                                    <th class="p-4 uppercase tracking-widest">Ruolo</th>
-                                    <th class="p-4 uppercase tracking-widest">Classe</th>
-                                    <th class="p-4 uppercase tracking-widest text-right">Azioni</th>
+                                    <th class="p-4 uppercase tracking-widest text-zinc-400">Utente</th>
+                                    <th class="p-4 uppercase tracking-widest text-zinc-400">Ruolo</th>
+                                    <th class="p-4 uppercase tracking-widest text-zinc-400">Classe / Insegnamento</th>
+                                    <th class="p-4 uppercase tracking-widest text-zinc-400 text-right">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody id="hub-users-body">`;
@@ -5992,47 +6006,49 @@ window.hubManager = {
                 const id = docSnap.id;
                 const role = u.role || 'ospite';
                 const roleType = getRoleType(role);
-const displayClasse = (roleType === ROLES.STUDENTE) ? (u.classe || '-') : (u.classi_docente ? u.classi_docente.join(', ') : '-');
+                
+                // Separazione netta: se è prof dice "DOCENZE: classe", se è studente mostra la classe pulita
+                const displayClasse = (roleType === ROLES.STUDENTE) 
+                    ? `<span class="text-white font-black uppercase bg-zinc-950 px-2 py-1 rounded-md border border-zinc-800">${u.classe || '-'}</span>` 
+                    : (u.classi_docente ? `<span class="text-red-500 font-black uppercase tracking-tight">DOCENZE: ${u.classi_docente.join(', ')}</span>` : '<span class="text-zinc-600">-</span>');
 
                 if (roleType === ROLES.OSPITE) return;
 
                 const foto = u.avatar || u.avatar_npc || `https://ui-avatars.com/api/?name=${u.name || 'U'}&background=random`;
 
                 html += `
-                    <tr class="border-b border-zinc-100 hover:bg-red-50/30 transition-colors user-row cursor-pointer" 
+                    <tr class="border-b border-zinc-950 hover:bg-red-950/20 transition-colors user-row cursor-pointer" 
                         data-role-cat="${this.getCategoriaRuolo(roleType)}"
                         data-search="${(u.name || '').toLowerCase()} ${id.toLowerCase()}"
                         onclick="window.hubManager.vaiAlProfilo('${id}', '${roleType}')">
                         <td class="p-3">
                             <div class="flex items-center gap-3">
-                                <img src="${foto}" class="w-8 h-8 rounded-lg object-cover border border-zinc-200 shadow-sm">
+                                <img src="${foto}" class="w-8 h-8 rounded-lg object-cover border-2 border-zinc-950 shadow-sm">
                                 <div>
-                                    <p class="font-black text-zinc-800 uppercase leading-none">${u.name || 'N.D.'}</p>
-                                    <p class="text-[7px] text-zinc-400 font-mono mt-1">${id}</p>
+                                    <p class="font-black text-white uppercase leading-none tracking-wide">${u.name || 'N.D.'}</p>
+                                    <p class="text-[7px] text-zinc-500 font-mono mt-1">${id}</p>
                                 </div>
                             </div>
                         </td>
                         <td class="p-3">
-                            <span class="px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase border ${this.getRoleStyle(roleType)}">
+                            <span class="px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase border border-zinc-950 bg-zinc-950 text-white">
                                 ${role}
                             </span>
                         </td>
-                        <td class="p-3 font-bold text-zinc-500">${displayClasse}</td>
+                        <td class="p-3 font-bold">${displayClasse}</td>
                         <td class="p-3 text-right" onclick="event.stopPropagation()">
-    <button onclick="window.hubManager.modificaUtente('${id}')" class="text-zinc-300 hover:text-blue-500 p-2 transition-colors">✏️</button>
-    <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-zinc-300 hover:text-red-600 p-2 transition-colors">🗑️</button>
-</td>
+                            <button onclick="window.hubManager.modificaUtente('${id}')" class="text-zinc-400 hover:text-blue-400 p-2 text-xs transition-colors active:scale-90">✏️</button>
+                            <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-zinc-400 hover:text-red-500 p-2 text-xs transition-colors active:scale-90">🗑️</button>
+                        </td>
                     </tr>`;
             });
 
             html += `</tbody></table></div></div>`;
             container.innerHTML = html;
         } catch (e) {
-            container.innerHTML = `<p class="text-red-500 p-4 text-[10px]">Errore: ${e.message}</p>`;
+            container.innerHTML = `<p class="text-red-500 p-4 text-[10px] font-black uppercase">Errore: ${e.message}</p>`;
         }
-    },
-
-		
+    },		
 
     // 2. NUOVO UTENTE
  nuovoUtente: function() {
@@ -6213,33 +6229,41 @@ modificaUtente: function(id) {
 },
 
     currentRoleFilter: 'all',
-    setFiltroRuolo: function(cat) {
+ setFiltroRuolo: function(cat) {
         this.currentRoleFilter = cat;
         document.querySelectorAll('.hub-filter-btn').forEach(btn => {
             const onclickText = btn.getAttribute('onclick');
             const isActive = onclickText && onclickText.includes(`'${cat}'`);
+            
+            // Classi corrette per il tema scuro ad alto contrasto
             btn.className = isActive ? 
-                "hub-filter-btn active bg-zinc-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase" : 
-                "hub-filter-btn bg-white border border-zinc-200 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase";
+                "hub-filter-btn active bg-red-600 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all" : 
+                "hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-zinc-600";
         });
         this.filtraUtenti();
     },
 
-
-
     filtraUtenti: function() {
         const searchInput = document.getElementById('hub-user-search');
-        const query = searchInput ? searchInput.value.toLowerCase() : '';
-        const cat = this.currentRoleFilter;
+        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+        const cat = this.currentRoleFilter || 'all';
 
         document.querySelectorAll('.user-row').forEach(row => {
-            const matchesSearch = row.dataset.search.includes(query);
-            const matchesRole = (cat === 'all' || row.dataset.roleCat === cat);
+            // Controllo sicuro sui dataset per evitare errori se mancano i dati
+            const searchData = row.dataset.search ? row.dataset.search.toLowerCase() : '';
+            const roleCatData = row.dataset.roleCat || '';
+            
+            const matchesSearch = searchData.includes(query);
+            const matchesRole = (cat === 'all' || roleCatData === cat);
+            
             row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
         });
     },
-   vaiAlProfilo: function(id, roleType) {
-        if (typeof window.selectAndGoToProfile === 'function') window.selectAndGoToProfile(id, roleType); 
+
+    vaiAlProfilo: function(id, roleType) {
+        if (typeof window.selectAndGoToProfile === 'function') {
+            window.selectAndGoToProfile(id, roleType); 
+        }
     },
 
     // --- NUOVE FUNZIONI INSERITE CORRETTAMENTE ---
@@ -6490,14 +6514,15 @@ window.editSubjectComment = async (materia, quad) => {
         container.innerHTML = "";
         staff.forEach(s => {
             const card = document.createElement('div');
-card.className = "bg-zinc-900 p-4 rounded-3xl border-2 border-zinc-800 flex items-center gap-4 cursor-pointer hover:border-red-600 transition-all active:scale-95 group";
-card.innerHTML = `
-    <img src="${s.avatar || s.avatar_npc}" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-800 shadow-sm">
-    <div class="flex-1">
-        <p class="text-[11px] font-black uppercase text-zinc-100 leading-none">${s.name || 'N.D.'}</p>
-        <p class="text-[8px] font-bold text-red-500 uppercase mt-1">${s.role || 'Staff'}</p>
-    </div>
-`;
+            // Impostato bg-green-800 per richiamare il verde vivo del bidello nello screenshot
+            card.className = "bg-green-800 p-4 rounded-3xl border-2 border-zinc-800 flex items-center gap-4 cursor-pointer hover:border-red-600 transition-all active:scale-95 group";
+            card.innerHTML = `
+                <img src="${s.avatar || s.avatar_npc}" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-800 shadow-sm">
+                <div class="flex-1">
+                    <p class="text-[11px] font-black uppercase text-zinc-100 leading-none">${s.name || 'N.D.'}</p>
+                    <p class="text-[8px] font-bold text-red-500 uppercase mt-1">${s.role || 'Staff'}</p>
+                </div>
+            `;
             card.onclick = () => window.selectAndGoToProfile(s.id);
             container.appendChild(card);
         });
