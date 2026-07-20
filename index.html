@@ -1491,7 +1491,7 @@ main {
             <h2 id="res-student-name" class="text-2xl font-black uppercase text-zinc-100 tracking-tighter">Dati Studente</h2>
         </div>
     </div>
-        <div class="text-right bg-zinc-900 p-4 rounded-2xl min-w-[120px]">
+        <div class="text-right bg-red-900 p-4 rounded-2xl min-w-[120px]">
             <p class="text-[8px] uppercase font-black text-zinc-400 mb-1">Media Globale</p>
             <p id="res-student-media" class="text-2xl font-black text-white">0.0</p>
         </div>
@@ -8060,7 +8060,7 @@ window.openQuickMassGradesModal = () => {
     
     title.innerText = "Generatore Voti Classe";
     document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
-
+    confirm.disabled = false; 
     const materieDocente = window.currentUserData?.materie || [];
     const isAdmin = window.userRole === 'admin';
 
@@ -8178,7 +8178,7 @@ window.getProfDaysForSubject = (profId, materia, cls) => {
 window.prepareMassGradesList = () => {
     const type = document.getElementById('quick-mass-type').value;
     const subSelect = document.getElementById('quick-mass-sub');
-    const sub = subSelect.value; // Prende il valore (es. "italiano")
+    const sub = subSelect.value;
     
     const minV = parseInt(document.getElementById('quick-mass-min').value);
     const maxV = parseInt(document.getElementById('quick-mass-max').value);
@@ -8205,9 +8205,8 @@ window.prepareMassGradesList = () => {
     
     // --- LOGICA ORARIO (GIORNI SELEZIONATI DA CHECKBOX) ---
     const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
-    const giorniSelezionati = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-    // Fallback se nessun giorno è selezionato
-    const giorniValidi = giorniSelezionati.length > 0 ? giorniSelezionati : [1, 2, 3, 4, 5, 6];
+    const giorniValidi = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+    const giorniFermi = giorniValidi.length > 0 ? giorniValidi : [1, 2, 3, 4, 5, 6];
     
     const listContainer = document.getElementById('mass-students-list');
     const step1 = document.getElementById('mass-step-1');
@@ -8217,6 +8216,7 @@ window.prepareMassGradesList = () => {
     step1.classList.add('hidden');
     step2.classList.remove('hidden');
     confirmBtn.classList.remove('hidden');
+    confirmBtn.disabled = false; // Riabilita il tasto per il nuovo utilizzo
     confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
     confirmBtn.onclick = window.submitQuickMassGrades;
 
@@ -8230,55 +8230,51 @@ window.prepareMassGradesList = () => {
 
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
     
+    // Mese di default: quello selezionato nel calendario dell'agenda o quello attuale
+    const currentCalDate = new Date(document.getElementById('global-calendar').value);
+    const defaultMonth = currentCalDate.getMonth();
+
     let headerHtml = "";
 
     if (type === 'Scritto' || type === 'Pratico') {
+        const commonDate = window.generateRandomValidDateString(defaultMonth, giorniFermi); 
         headerHtml = `
-            <div class="p-3 bg-red-955/20 border border-red-900/30 rounded-xl mb-4">
-                <label class="modal-label !text-red-400 text-[9px] font-black uppercase">Data Unica Prova ${type}</label>
+            <div class="p-3 bg-red-900/20 border border-red-900/30 rounded-xl mb-4">
+                <label class="modal-label !text-red-400">Data Unica Prova ${type}</label>
                 <input type="date" id="mass-common-date" value="${commonDate}" 
                        onchange="document.querySelectorAll('.mass-date').forEach(i => i.value = this.value)"
                        class="modal-input !py-2 bg-zinc-800 border-zinc-700 text-white rounded-lg w-full mt-1 outline-none">
-                <p class="text-[8px] text-zinc-500 mt-1 uppercase font-bold">Cambiando questa data, verrà aggiornata automaticamente per tutti gli studenti.</p>
             </div>
         `;
     } else {
         headerHtml = `
-            <div class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4 flex justify-between items-center">
-                <div>
-                    <p class="text-[9px] text-zinc-400 font-black uppercase">Periodo Interrogazioni Orale</p>
-                    <p class="text-[11px] text-white font-bold uppercase mt-0.5">
-                        Spalmate su: <span class="text-red-500">${monthNames[firstMonth]}</span> e <span class="text-red-500">${monthNames[secondMonth]}</span>
-                    </p>
-                </div>
-                <span class="text-xs">🗣️</span>
+            <div class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4">
+                <label class="modal-label">Mese per Interrogazioni (Orale)</label>
+                <select id="mass-master-month" class="modal-input !py-2" onchange="window.regenMassDatesByMonth(this.value)">
+                    ${monthNames.map((name, idx) => {
+                        // Mostriamo solo i mesi scolastici (Settembre-Giugno)
+                        if (idx === 6 || idx === 7) return ''; 
+                        return `<option value="${idx}" ${idx === defaultMonth ? 'selected' : ''}>${name.toUpperCase()}</option>`;
+                    }).join('')}
+                </select>
+                <p class="text-[8px] text-zinc-500 mt-2 uppercase font-bold">Cambiando il mese, verranno rigenerate date casuali diverse per ogni studente.</p>
             </div>
         `;
     }
 
-    const halfIndex = Math.ceil(students.length / 2);
-
-    listContainer.innerHTML = headerHtml + students.map((s, index) => {
+    listContainer.innerHTML = headerHtml + students.map((s) => {
+        // Generazione voto casuale
         let base = Math.floor(Math.random() * (maxV - minV + 1)) + minV;
         const mods = ["", "+", "-", "½"];
-        let mod = mods[Math.floor(Math.random() * mods.length)];
-        if (base === 10) mod = "";
+        let mod = base === 10 ? "" : mods[Math.floor(Math.random() * mods.length)];
         const finalGrade = base + mod;
 
-        let studentDate;
-        if (type === 'Scritto' || type === 'Pratico') {
-            studentDate = document.getElementById('mass-common-date')?.value || commonDate;
-        } else {
-            const chosenMonth = (index < halfIndex) ? firstMonth : secondMonth;
-            // Usiamo i giorni scelti dai checkbox
-            studentDate = window.generateRandomValidDateString(chosenMonth, giorniValidi);
-        }
+        // Generazione data casuale nel mese scelto
+        const studentDate = window.generateRandomValidDateString(defaultMonth, giorniFermi);
 
         return `
             <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3" data-sid="${s.id}">
-                <div class="flex-1">
-                    <p class="text-[10px] font-black text-white uppercase truncate">${s.name}</p>
-                </div>
+                <div class="flex-1"><p class="text-[10px] font-black text-white uppercase truncate">${s.name}</p></div>
                 <input type="text" value="${finalGrade}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-xs font-black p-1.5 rounded-lg">
                 <input type="date" value="${studentDate}" class="mass-date bg-zinc-800 border border-zinc-700 text-white text-[10px] p-1.5 rounded-lg outline-none">
             </div>
@@ -8802,6 +8798,20 @@ window.jumpToEvent = async (direction) => {
         console.error("Errore salto evento:", e);
         alert("Errore durante la ricerca degli eventi.");
     }
+};
+
+window.regenMassDatesByMonth = (newMonth) => {
+    const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
+    const giorniValidi = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+    const giorniFermi = giorniValidi.length > 0 ? giorniValidi : [1, 2, 3, 4, 5, 6];
+
+    // Seleziona tutti gli input data degli studenti e rigenerali casualmente
+    document.querySelectorAll('.mass-row').forEach(row => {
+        const dateInput = row.querySelector('.mass-date');
+        if (dateInput) {
+            dateInput.value = window.generateRandomValidDateString(parseInt(newMonth), giorniFermi);
+        }
+    });
 };
 
    </script>
