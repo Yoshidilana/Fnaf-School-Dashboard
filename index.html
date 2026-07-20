@@ -1767,38 +1767,40 @@ main {
     </div>
 </div>
 
-		<!-- VIEW: ESAMI DI STATO -->
+<!-- VIEW: ESAMI DI STATO -->
 <div id="view-esami" class="tab-content hidden p-6 max-w-6xl mx-auto">
-    <div class="flex justify-between items-center mb-8 bg-zinc-900 p-6 rounded-3xl border border-zinc-800 shadow-xl">
+    <div class="flex justify-between items-center mb-8 bg-amber-950 p-6 rounded-3xl border border-zinc-800 shadow-xl">
         <div>
-            <h2 class="text-3xl font-black uppercase italic text-white tracking-tighter">Commissione <span class="text-red-600">Esami di Stato</span></h2>
-            <p id="exam-class-info" class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Gestione prove d'esame e scrutini finali</p>
+            <h2 class="text-3xl font-black uppercase italic text-white tracking-tighter">Commissione <span class="text-red-500">Esami di Stato</span></h2>
+            <p id="exam-class-info" class="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Gestione prove d'esame e scrutini finali</p>
         </div>
         <div class="flex gap-2">
-            <button id="btn-config-esami" onclick="window.toggleExamConfig()" class="hidden bg-zinc-800 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase hover:bg-zinc-700 transition-all">⚙️ Configura Materie</button>
-            <button onclick="window.changeMenu('classi')" class="bg-zinc-800 text-zinc-400 text-[9px] font-black px-4 py-2 rounded-xl uppercase">Indietro</button>
+            <button id="btn-config-esami" onclick="window.toggleExamConfig()" class="hidden bg-zinc-900 text-zinc-200 border border-zinc-800 text-[9px] font-black px-4 py-2 rounded-xl uppercase hover:bg-zinc-800 hover:text-white transition-all shadow-md">⚙️ Configura Materie</button>
+            <button onclick="window.changeMenu('classi')" class="bg-zinc-900 text-zinc-400 border border-zinc-800 text-[9px] font-black px-4 py-2 rounded-xl uppercase hover:bg-zinc-800 hover:text-zinc-200 transition-all shadow-md">Indietro</button>
         </div>
     </div>
 
-
     <!-- Pannello Configurazione Materie -->
-    <div id="exam-config-panel" class="hidden bg-zinc-900 p-6 rounded-3xl border border-red-900/30 mb-6">
-        <h3 class="text-white font-black uppercase text-xs mb-4">Seleziona Materie d'Esame per questa classe</h3>
+    <div id="exam-config-panel" class="hidden bg-zinc-950 p-6 rounded-3xl border border-red-900/40 shadow-2xl shadow-red-950/20 mb-6">
+        <h3 class="text-white font-black uppercase text-xs mb-4 tracking-wider">Seleziona Materie d'Esame per questa classe</h3>
         <div id="exam-subjects-checklist" class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4"></div>
-        <button onclick="window.saveExamSubjects()" class="bg-red-700 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase">Salva Configurazione</button>
+        <button onclick="window.saveExamSubjects()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-lg shadow-red-900/20">Salva Configurazione</button>
     </div>
 
     <!-- Tabellone Esami Dinamico -->
-<div class="w-full max-w-full px-4 mx-auto">
-        <div class="registry-container border-zinc-800 overflow-hidden w-full">
-            <div class="bg-black text-zinc-400 font-black uppercase text-[11px] p-4 border-b border-zinc-800 flex justify-between items-center">
+    <div class="w-full max-w-full px-4 mx-auto">
+        <div class="bg-zinc-950 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden w-full">
+            <div class="bg-zinc-900/50 text-zinc-300 font-black uppercase text-[11px] p-5 border-b border-zinc-800 flex justify-between items-center tracking-wider">
                 <span>Gestione Prove d'Esame e Scrutini Finali</span>
-                <span class="text-amber-500 font-bold" id="exam-class-title"></span>
+                <span class="text-amber-400 font-black text-xs bg-amber-950/40 border border-amber-900/40 px-3 py-1 rounded-full" id="exam-class-title"></span>
             </div>
             
-            <div id="exam-grades-body" class="divide-y divide-zinc-800/50 bg-zinc-900/30">
-                </div>
-        </div> </div> </div>
+            <div id="exam-grades-body" class="divide-y divide-zinc-800/60 bg-green-950">
+                <!-- I blocchi degli studenti verranno iniettati qui -->
+            </div>
+        </div> 
+    </div> 
+</div>
 
 		<!-- VIEW: ARCHIVIO NOTIFICHE COMPLETO -->
 <div id="view-notifiche-full" class="tab-content hidden p-6 max-w-5xl mx-auto">
@@ -2519,7 +2521,7 @@ return `
     // 3. Gestione Pagella (se presente nel DOM)
     const pagellaName = document.getElementById('pagella-student-name');
     if(pagellaName) {
-        pagellaName.innerText = student.name;
+        pagellaName.innerText = student.name.toUpperCase();
         
         // Recuperiamo l'anno accademico dall'elemento globale
         const annoAttuale = document.getElementById('current-academic-year').innerText;
@@ -3001,7 +3003,7 @@ vHtml += `
         // 7. Render Elementi Esterni (Nome Pagella e Aggiornamento Pagella)
         if(document.getElementById('pagella-student-name')) {
             const student = window.allStudents.find(s => s.id === studentId);
-            document.getElementById('pagella-student-name').innerText = student ? student.name : "Studente";
+            document.getElementById('pagella-student-name').innerText = student ? student.name.toUpperCase() : "STUDENTE";
         }
         
 if (typeof window.renderPagella === 'function') {
@@ -7039,21 +7041,18 @@ window.loadExamStatus = async () => {
     const snap = await getDoc(ref);
     
     let startYear = null;
-    let materiePerAnno = {};
-    let orariPerAnno = {}; // <-- Aggiungiamo questa variabile
+    let materiePerAnno = {}; // <--- AGGIUNTO per non perdere il dato
     
     if (snap.exists()) {
         const d = snap.data();
         startYear = d.startYear || null;
         materiePerAnno = d.materiePerAnno || {}; // <--- AGGIUNTO per estrarlo da Firestore
-        orariPerAnno = d.orariPerAnno || {}; // <-- Scarichiamo l'orario dal database
     }
 
-    // Salviamo tutto nella cache, incluso l'orario!
+    // Salviamo startYear E le materie annuali nella cache senza sovrascriverle con un oggetto vuoto
     window.classConfigsCache[cls] = { 
         startYear: startYear,
-        materiePerAnno: materiePerAnno,
-        orariPerAnno: orariPerAnno // <-- Ora il generatore di voti potrà vederlo
+        materiePerAnno: materiePerAnno // <--- AGGIUNTO per il registro dei voti
     };
 
     // Calcoliamo se è anno d'esame per la UI
@@ -7063,6 +7062,10 @@ window.loadExamStatus = async () => {
     // 1. Mostra/Nasconde il badge "Maturità" nell'Hub
     const statusBadge = document.getElementById('exam-status-badge');
     if (statusBadge) statusBadge.classList.toggle('hidden', !isExam);
+
+   // Mostra o nasconde direttamente il pulsante esami senza richiamare applyRoleUI()
+const examButton = document.getElementById('hub-btn-esami'); 
+if (examButton) examButton.classList.toggle('hidden', !isExam);
 
     // 2. Aggiorna l'input dell'anno di inizio
     const startInput = document.getElementById('class-start-year-input');
@@ -7083,12 +7086,6 @@ window.loadExamStatus = async () => {
     for (let [id, val] of Object.entries(elementsToUpdate)) {
         const el = document.getElementById(id);
         if (el) el.innerText = val;
-    }
-
-    // --- AGGIUNTA FONDAMENTALE ---
-    // Ora che abbiamo i dati certi, rinfreschiamo l'interfaccia per mostrare i tasti Esami
-    if (typeof applyRoleUI === 'function') {
-        applyRoleUI();
     }
 };
 
@@ -7384,47 +7381,55 @@ window.loadExamManager = async () => {
         const esameRapportatoSessantesimi = maxEsameTeorico > 0 ? (sommaEsameReale * 60) / maxEsameTeorico : 0;
         const total = triennioCredits + esameRapportatoSessantesimi;
 
-        // Generazione del blocco dello studente (Grid fluida)
+// Generazione del blocco dello studente (Grid fluida)
         rowsHtml += `
-            <div class="p-4 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 hover:bg-zinc-800/20 transition-colors border-b border-zinc-800/50">
+            <div class="p-5 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 hover:bg-zinc-900/40 transition-colors border-b border-zinc-800/40">
                 
-                <div class="flex items-center gap-3 w-full xl:w-1/5 min-w-[180px]">
+                <!-- Info Studente e Crediti -->
+                <div class="flex items-center gap-3 w-full xl:w-1/5 min-w-[200px]">
                     <div class="flex flex-col">
-                        <span class="font-black uppercase text-white text-xs tracking-wide">${s.name}</span>
-                        <span class="text-[10px] font-bold text-amber-500">Crediti Triennio: <span class="text-sm font-black">${triennioCredits}</span></span>
+                        <span class="font-black uppercase text-white text-sm tracking-wide">${s.name}</span>
+                        <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider mt-0.5">
+                            Crediti Triennio: <span class="text-sm font-black text-amber-300 ml-1">${triennioCredits}</span>
+                        </span>
                     </div>
                 </div>
 
+                <!-- Lista Materie e Input Voti -->
                 <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-2 flex-grow w-full">
                     ${examSubjects.map(sub => {
                         const subKey = sub.toLowerCase().trim();
                         const votoMateria = examGrades[subKey] || 0;
                         return `
-                            <div class="flex flex-col items-center bg-black/20 border border-zinc-800/60 rounded p-1.5 min-w-[75px]">
-                                <span class="text-[9px] font-black text-zinc-400 uppercase tracking-tighter truncate w-full text-center" title="${sub.toUpperCase()}">
+                            <div class="flex flex-col items-center bg-zinc-900 border border-zinc-800/80 rounded-xl p-2 min-w-[80px] shadow-sm">
+                                <span class="text-[9px] font-black text-zinc-300 uppercase tracking-tight truncate w-full text-center pb-1 border-b border-zinc-800/50" title="${sub.toUpperCase()}">
                                     ${sub}
                                 </span>
                                 <input type="number" value="${votoMateria}" 
                                     onchange="window.updateExamGrade('${s.id}', '${subKey}', this.value)" 
                                     ${!isStaff ? 'disabled' : ''} 
-                                    class="w-10 bg-black/40 border border-zinc-800/80 rounded mt-1 p-0.5 text-center font-bold text-white text-xs focus:border-red-600 outline-none">
+                                    class="w-12 bg-zinc-950 border border-zinc-800 rounded-lg mt-2 py-1 text-center font-black text-white text-xs focus:border-red-500 focus:ring-1 focus:ring-red-500 disabled:opacity-70 disabled:bg-zinc-900/30 disabled:border-zinc-800/40 outline-none transition-all">
                             </div>
                         `;
                     }).join('')}
 
-                    <div class="flex flex-col items-center bg-amber-950/10 border border-amber-900/30 rounded p-1.5 min-w-[75px]">
-                        <span class="text-[9px] font-black text-amber-500 uppercase tracking-tighter text-center">ORALE</span>
+                    <!-- Colonna Speciale Orale -->
+                    <div class="flex flex-col items-center bg-amber-950/20 border border-amber-900/40 rounded-xl p-2 min-w-[80px] shadow-sm">
+                        <span class="text-[9px] font-black text-amber-400 uppercase tracking-wider pb-1 border-b border-amber-900/30 text-center w-full">ORALE</span>
                         <input type="number" value="${examGrades.oral || 0}" 
                             onchange="window.updateExamGrade('${s.id}', 'oral', this.value)" 
                             ${!isStaff ? 'disabled' : ''} 
-                            class="w-10 bg-black/40 border border-zinc-800/80 rounded mt-1 p-0.5 text-center font-bold text-white text-xs focus:border-red-600 outline-none">
+                            class="w-12 bg-zinc-950 border border-amber-900/50 rounded-lg mt-2 py-1 text-center font-black text-amber-300 text-xs focus:border-amber-500 focus:ring-1 focus:ring-amber-500 disabled:opacity-70 disabled:bg-zinc-900/30 disabled:border-zinc-800/40 outline-none transition-all">
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end xl:pl-4 xl:border-l xl:border-zinc-800/50 w-full xl:w-24">
-                    <div class="text-right">
-                        <span class="text-2xl font-black ${total >= 60 ? 'text-green-500' : 'text-red-600'}">${Math.round(total)}</span>
-                        <span class="block text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Punti /100</span>
+                <!-- Punteggio Finale /100 -->
+                <div class="flex items-center justify-end xl:pl-5 xl:border-l xl:border-zinc-800/60 w-full xl:w-28">
+                    <div class="text-right bg-zinc-900/60 border border-zinc-800/60 px-4 py-2 rounded-2xl min-w-[90px] text-center shadow-inner">
+                        <span class="text-3xl font-black tracking-tighter ${total >= 60 ? 'text-green-400 [text-shadow:0_0_12px_rgba(74,222,128,0.2)]' : 'text-red-500 [text-shadow:0_0_12px_rgba(239,68,68,0.2)]'}">
+                            ${Math.round(total)}
+                        </span>
+                        <span class="block text-[8px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Punti /100</span>
                     </div>
                 </div>
 
