@@ -1253,6 +1253,8 @@ main {
 
 <!-- Navigazione Rapida (Pills) - Versione Rosso Soft -->
 <div class="flex items-center gap-2 p-2 rounded-2xl border border-red-200" style="background: rgba(220, 38, 38, 0.04) !important;">
+    <!-- NUOVI PULSANTI SMART -->
+    <button onclick="window.jumpToEvent('prev')" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">◀ Evento Prec.</button>
     <button onclick="navDate('day', -1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Ieri</button>
     <button onclick="navDate('week', -1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Sett. Prec.</button>
     
@@ -1270,6 +1272,8 @@ main {
     <div class="w-[1px] h-4 bg-red-300 mx-1"></div>
     
     <button onclick="navDate('day', 1)" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300 font-black">Domani</button>
+    <!-- NUOVI PULSANTI SMART -->
+    <button onclick="window.jumpToEvent('next')" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">Prossimo Evento ▶</button>
     <button onclick="navDate('week', 1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Prossima</button>
     
     <button onclick="navDate('month', 1)" 
@@ -8741,6 +8745,57 @@ window.editFirma = async (idx, cls) => {
     } catch (e) {
         console.error("Errore durante la modifica della firma:", e);
         alert("Si è verificato un errore durante la modifica.");
+    }
+};
+
+window.jumpToEvent = async (direction) => {
+    const cls = window.selectedClass;
+    if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica.");
+
+    const inputCal = document.getElementById('global-calendar');
+    const currentDate = inputCal.value; // Esempio: "2025-05-20"
+    
+    // Capisce l'anno accademico corrente per cercare nella cartella giusta
+    const parts = currentDate.split('-');
+    const y = parseInt(parts[0]);
+    const m = parseInt(parts[1]);
+    const ay = (m >= 9) ? `${y}_${y+1}` : `${y-1}_${y}`;
+
+    try {
+        // 1. Recupera tutti i giorni registrati per questa classe in questo anno
+        const annoCollRef = collection(db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'agendas_v2', cls, ay);
+        const snapshot = await getDocs(annoCollRef);
+
+        if (snapshot.empty) {
+            alert("Non ci sono eventi registrati in questo anno scolastico.");
+            return;
+        }
+
+        // 2. Mette le date in ordine
+        const allDates = snapshot.docs.map(doc => doc.id).sort();
+
+        // 3. Trova la posizione della data che stiamo guardando ora
+        let targetDate = null;
+
+        if (direction === 'next') {
+            // Cerca la prima data successiva a quella odierna
+            targetDate = allDates.find(date => date > currentDate);
+        } else {
+            // Cerca le date precedenti, le inverte e prende la prima
+            targetDate = [...allDates].reverse().find(date => date < currentDate);
+        }
+
+        // 4. Se trova una data, salta lì!
+        if (targetDate) {
+            inputCal.value = targetDate;
+            window.updateDateContext(targetDate);
+        } else {
+            alert(direction === 'next' ? "Non ci sono eventi futuri." : "Non ci sono eventi passati.");
+        }
+
+    } catch (e) {
+        console.error("Errore salto evento:", e);
+        alert("Errore durante la ricerca degli eventi.");
     }
 };
 
