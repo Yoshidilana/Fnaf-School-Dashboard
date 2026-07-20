@@ -1315,61 +1315,62 @@ main {
         </div>
     </div>
 
-    <!-- Grid Contenuti -->
+    <!-- Grid Riordinata -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
         
-        <!-- Colonna Sinistra (2/3): Diario e Compiti -->
+        <!-- COLONNA SINISTRA (2/3): IL CUORE DEL GIORNO -->
         <div class="xl:col-span-2 space-y-8">
             
-            <!-- Diario Lezioni -->
+            <!-- 1. DIARIO LEZIONI (Firme) -->
             <div class="space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <span class="text-xl">📑</span>
-                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Diario di Bordo</h3>
+                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Diario di Bordo (Lezioni)</h3>
                 </div>
                 <div id="agenda-firme-list" class="space-y-4 min-h-[100px]">
                     <!-- Popolato via JS -->
                 </div>
             </div>
 
-<!-- Compiti -->
-<div class="space-y-4">
-    <div class="flex items-center gap-3 px-2">
-        <span class="text-xl">📘</span>
-        <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Scadenze e Studio</h3> <!-- CAMBIATO IN text-black -->
-    </div>
-    <div id="agenda-compiti-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Popolato via JS -->
-    </div>
-</div>
+            <!-- 2. SCADENZE E STUDIO (Compiti) -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 px-2">
+                    <span class="text-xl">📘</span>
+                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Lavoro a Casa e Scadenze</h3>
+                </div>
+                <div id="agenda-compiti-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Popolato via JS -->
+                </div>
+            </div>
         </div>
 
-<!-- Colonna Destra (1/3): Info Extra - SOSTITUISCI QUESTO BLOCCO NELL'HTML -->
-<div class="space-y-6">
-    <!-- Attività Odierna -->
-    <div class="bg-blue-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
-        <div class="p-5 border-b border-black/20 bg-black/10">
-            <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
-                <span class="text-sm">🎯</span> Eventi del Giorno
-            </h3>
-        </div>
-        <div id="agenda-daily-info" class="p-5 space-y-3">
-            <!-- Popolato via JS (Note Rosse e Voti Verdi) -->
-        </div>
-    </div>
+        <!-- COLONNA DESTRA (1/3): STATUS E LOG -->
+        <div class="space-y-6">
+            
+            <!-- 3. STATUS ALUNNI (Presenze) - Spostato in alto per controllo rapido -->
+            <div class="bg-purple-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
+                <div class="p-5 border-b border-black/20 bg-black/10">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
+                        <span class="text-sm">👥</span> Appello e Status
+                    </h3>
+                </div>
+                <div id="agenda-attendance-info" class="p-5">
+                    <!-- Popolato via JS (Badge viola) -->
+                </div>
+            </div>
 
-    <!-- Presenze -->
-    <div class="bg-purple-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
-        <div class="p-5 border-b border-black/20 bg-black/10">
-            <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
-                <span class="text-sm">👥</span> Status Alunni
-            </h3>
+            <!-- 4. EVENTI DEL GIORNO (Voti e Note) -->
+            <div class="bg-blue-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
+                <div class="p-5 border-b border-black/20 bg-black/10">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
+                        <span class="text-sm">🎯</span> Log Valutazioni e Note
+                    </h3>
+                </div>
+                <div id="agenda-daily-info" class="p-5 space-y-3">
+                    <!-- Popolato via JS (Verde per voti, Rosso per note) -->
+                </div>
+            </div>
         </div>
-        <div id="agenda-attendance-info" class="p-5">
-            <!-- Popolato via JS -->
-        </div>
-    </div>
-</div>
     </div>
 </div>
 
@@ -1477,7 +1478,7 @@ main {
     <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
         <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
         <select onchange="window.quickSwitchStudent(this.value)" 
-    class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+    class="quick-student-switcher bg-blue-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
 </select>
     </div>
 </div>
@@ -1599,7 +1600,7 @@ main {
     <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
         <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
         <select onchange="window.quickSwitchStudent(this.value)" 
-    class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
+    class="quick-student-switcher bg-blue-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
 </select>
     </div>
 </div>	
@@ -1647,7 +1648,7 @@ main {
         </div>
         <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
             <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
-            <select onchange="window.quickSwitchStudent(this.value)" class="quick-student-switcher bg-zinc-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg"></select>
+            <select onchange="window.quickSwitchStudent(this.value)" class="quick-student-switcher bg-blue-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg"></select>
         </div>
     </div>
 
@@ -4143,8 +4144,9 @@ const techClass = student?.classe || "A";
 const classConfig = window.classConfigsCache[techClass] || { startYear: null };
 const grade = window.calculateClassGrade(aySelezionato, classConfig.startYear);
 
-// Mostriamo il box solo nel triennio (3, 4, 5) e al 2° Quadrimestre
-if (grade >= 3 && currentQ === 2) {
+// Mostriamo il box solo se lo studente è nel triennio (3, 4, 5) e siamo nel 2° Quadrimestre
+// Se grade è superiore a 5 (es. 6), il box verrà nascosto automaticamente.
+if (grade >= 3 && grade <= 5 && currentQ === 2) {
     creditsBox.classList.remove('hidden');
     
     // 1. Calcolo suggerito (automatico)
