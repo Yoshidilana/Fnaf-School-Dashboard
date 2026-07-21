@@ -251,24 +251,30 @@ main {
     border-bottom: 1px solid #f8fafc !important;
 }
 
-/* Colonna materia prominente */
-.subject-column-new {
-    width: 30%; /* Spazio dedicato al nome */
+.registry-table tbody tr {
+    transition: all 0.2s ease;
+    background-color: #ffffff !important;
 }
 
-/* Permette ai voti di andare a capo invece di spingere la larghezza */
-.grades-flex-container {
-    display: flex;
-    flex-wrap: wrap; /* Fondamentale per eliminare lo scroll */
-    gap: 6px;
+/* Badge voti nel registro globale più stilosi */
+.global-grade-badge {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 10px;
+    min-width: 32px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.media-column-new {
-    width: 80px;
-    text-align: right;
+/* Colonna Materia (Stile speciale adattivo) */
+.subject-column {
+    font-weight: 800;
+    color: var(--text-main) !important;
+    font-size: 0.8rem;
 }
-
 
     /* --- BADGE VOTI (PILL STYLE) --- */
 .grade-badge {
@@ -2915,33 +2921,33 @@ const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.
                              (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
 
 vHtml += `
-    <tr class="hover:bg-slate-50/50 transition-all group">
-        <td class="subject-column-new">
-            <div class="flex items-center gap-3">
-
-                <div class="flex flex-col min-w-0">
-                    <span class="font-black text-slate-800 uppercase text-[11px] truncate">${m.toUpperCase()}</span>
-                    <span class="text-[8px] text-slate-400 font-bold uppercase truncate">Prof: ${nomeDocente}</span>
-                </div>
-            </div>
-        </td>
-        <td class="p-2">
-            <div class="grades-flex-container">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div>
-            <div class="media-quad-box hidden text-center mt-1 text-[8px] font-black text-blue-500 bg-blue-50 rounded py-0.5">MED: ${avgQ1}</div>
-        </td>
-        <td class="p-2 border-l border-slate-50">
-            <div class="grades-flex-container">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div>
-            <div class="media-quad-box hidden text-center mt-1 text-[8px] font-black text-blue-500 bg-blue-50 rounded py-0.5">MED: ${avgQ2}</div>
-        </td>
-        <td class="media-column-new">
-            <div class="flex flex-col items-end">
-                <span class="text-lg font-black ${parseFloat(avgTotal) < 6 ? 'text-red-500' : 'text-emerald-500'}">${avgTotal}</span>
-                <div class="w-8 h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
-                    <div class="h-full ${parseFloat(avgTotal) < 6 ? 'bg-red-500' : 'bg-emerald-500'}" style="width: ${Math.min(parseFloat(avgTotal)*10, 100)}%"></div>
-                </div>
-            </div>
-        </td>
-    </tr>`;
+    <tr class="group">
+        <td class="subject-column">
+            <div class="flex flex-col">
+                <div class="flex items-center gap-2">
+                    <span class="font-black text-zinc-500 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
+                            ${canReset ? `
+                                <button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" 
+                                        class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-600 transition-all text-[10px]" 
+                                        title="Elimina tutti i voti di questa materia">
+                                    🗑️
+                                </button>` : ''}
+                        </div>
+                        <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${nomeDocente}</span>
+                    </div>
+                </td>
+                <td class="text-center p-2">
+                    <div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
+                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ1}</div>
+                </td>
+                <td class="text-center p-2">
+                    <div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
+                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ2}</div>
+                </td>
+                <td class="text-right">
+                    <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-green-600'}">${avgTotal}</span>
+                </td>
+            </tr>`;
         });
 
 
