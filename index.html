@@ -217,76 +217,58 @@ main {
     background-color: #1b1816 !important;
 }
 
-/* --- REGISTRO VOTI ADATTIVO --- */
-
-/* Contenitore esterno (Gestisce l'arrotondamento degli angoli e l'ombra) */
+/* --- REGISTRO VOTI MODERNIZZATO (NO SCROLL) --- */
 .registry-container {
-    background: #ffffff !important; /* Sfondo bianco pulito */
-    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    border: 1px solid #eef2f6 !important;
     border-radius: 24px !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
     overflow: hidden;
+    width: 100%; /* Blocca larghezza */
 }
 
-/* Tabella */
 .registry-table {
-    border-collapse: separate;
-    border-spacing: 0;
     width: 100%;
+    table-layout: fixed; /* Impedisce alla tabella di espandersi oltre il contenitore */
+    border-collapse: collapse;
 }
 
-/* Intestazione Tabella (Mantiene font-weight, padding e trasformazione testo) */
+/* Header più sottile e professionale */
 .registry-table thead th {
-    background: #f8fafc !important; /* Grigio chiarissimo per l'header */
-    color: #475569 !important; /* Testo slate scuro */
-    border-bottom: 2px solid #dc2626 !important; /* Linea rossa Fazbear */
-    font-size: 11px;
-    letter-spacing: 0.05em;
-    padding: 1.5rem 1rem;
-}
-
-/* Celle della tabella (Ripristina padding originale e allineamento) */
-.registry-table td {
-    padding: 1.25rem 1rem;
+    background: #fdfdfd !important;
+    color: #64748b !important;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 1rem;
     border-bottom: 1px solid #f1f5f9 !important;
-    color: #1e293b !important; /* Testo quasi nero */
 }
 
-.registry-table tbody tr {
-    transition: all 0.2s ease;
-    background-color: #ffffff !important;
+/* Celle adattive */
+.registry-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f8fafc !important;
 }
 
-/* Rimuove l'ultimo bordo per non rovinare l'arrotondamento in basso */
-.registry-table tbody tr:last-child td {
-    border-bottom: none;
+/* Colonna materia prominente */
+.subject-column-new {
+    width: 30%; /* Spazio dedicato al nome */
 }
 
-/* Effetto hover sulla riga (Adattivo: usa un'opacità leggera che funziona su entrambi i temi) */
-.registry-table tbody tr:hover {
-    background-color: #f1f5f9 !important; /* Effetto hover azzurrino/grigio */
-    transform: scale(1.002);
-}
-
-/* Badge voti nel registro globale più stilosi */
-.global-grade-badge {
-    display: inline-flex;
-    align-items: center;
+/* Permette ai voti di andare a capo invece di spingere la larghezza */
+.grades-flex-container {
+    display: flex;
+    flex-wrap: wrap; /* Fondamentale per eliminare lo scroll */
+    gap: 6px;
     justify-content: center;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 10px;
-    min-width: 32px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-/* Colonna Materia (Stile speciale adattivo) */
-.subject-column {
-    font-weight: 800;
-    color: var(--text-main) !important;
-    font-size: 0.8rem;
+.media-column-new {
+    width: 80px;
+    text-align: right;
 }
+
 
     /* --- BADGE VOTI (PILL STYLE) --- */
 .grade-badge {
@@ -2933,33 +2915,33 @@ const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.
                              (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
 
 vHtml += `
-    <tr class="group">
-        <td class="subject-column">
-            <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <span class="font-black text-zinc-500 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
-                            ${canReset ? `
-                                <button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" 
-                                        class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-600 transition-all text-[10px]" 
-                                        title="Elimina tutti i voti di questa materia">
-                                    🗑️
-                                </button>` : ''}
-                        </div>
-                        <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${nomeDocente}</span>
-                    </div>
-                </td>
-                <td class="text-center p-2">
-                    <div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
-                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ1}</div>
-                </td>
-                <td class="text-center p-2">
-                    <div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
-                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ2}</div>
-                </td>
-                <td class="text-right">
-                    <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-green-600'}">${avgTotal}</span>
-                </td>
-            </tr>`;
+    <tr class="hover:bg-slate-50/50 transition-all group">
+        <td class="subject-column-new">
+            <div class="flex items-center gap-3">
+
+                <div class="flex flex-col min-w-0">
+                    <span class="font-black text-slate-800 uppercase text-[11px] truncate">${m.toUpperCase()}</span>
+                    <span class="text-[8px] text-slate-400 font-bold uppercase truncate">Prof: ${nomeDocente}</span>
+                </div>
+            </div>
+        </td>
+        <td class="p-2">
+            <div class="grades-flex-container">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div>
+            <div class="media-quad-box hidden text-center mt-1 text-[8px] font-black text-blue-500 bg-blue-50 rounded py-0.5">MED: ${avgQ1}</div>
+        </td>
+        <td class="p-2 border-l border-slate-50">
+            <div class="grades-flex-container">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div>
+            <div class="media-quad-box hidden text-center mt-1 text-[8px] font-black text-blue-500 bg-blue-50 rounded py-0.5">MED: ${avgQ2}</div>
+        </td>
+        <td class="media-column-new">
+            <div class="flex flex-col items-end">
+                <span class="text-lg font-black ${parseFloat(avgTotal) < 6 ? 'text-red-500' : 'text-emerald-500'}">${avgTotal}</span>
+                <div class="w-8 h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                    <div class="h-full ${parseFloat(avgTotal) < 6 ? 'bg-red-500' : 'bg-emerald-500'}" style="width: ${Math.min(parseFloat(avgTotal)*10, 100)}%"></div>
+                </div>
+            </div>
+        </td>
+    </tr>`;
         });
 
 
@@ -4637,9 +4619,9 @@ if (gridContenuti) {
                 </h3>
                 <div class="flex flex-col gap-3">
                     ${bottoniExtra}
-                    <button onclick="window.changeMenu('registro')" class="w-full p-4 bg-amber-900 border border-zinc-800 text-zinc-200 rounded-2xl font-black text-[10px] uppercase hover:border-zinc-600 transition-all flex justify-between items-center">
-                        <span>Registro Generale</span> <span class="text-sm">📊</span>
-                    </button>
+<button onclick="window.smartNavigateToRegistry()" class="w-full p-4 bg-amber-900 border border-zinc-800 text-zinc-200 rounded-2xl font-black text-[10px] uppercase hover:border-zinc-600 transition-all flex justify-between items-center">
+    <span>Registro di Classe</span> <span class="text-sm">📊</span>
+</button>
                 </div>
             </div>
 
@@ -7137,36 +7119,20 @@ window.updateClassStartYear = async (year) => {
     } catch (e) { console.error(e); }
 };
 
-window.deleteCompito = async (idx, cls) => {
-    if (!confirm("Vuoi eliminare definitivamente questo compito?")) return;
+    window.deleteCompito = async (idx, cls) => {
+        if (!confirm("Eliminare questo compito?")) return;
+        const dateKey = document.getElementById('global-calendar').value;
+        const ref = window.getAgendaDocRef(cls, dateKey); // Ora usa V2
 
-    const cal = document.getElementById('global-calendar');
-    const dateKey = cal ? cal.value : null;
-    
-    if (!dateKey || !cls) return;
-
-    const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'agendas', `${cls}_${dateKey}`);
-
-    try {
-        const snap = await getDoc(ref);
-        if (snap.exists()) {
-            const data = snap.data();
-            let compiti = [...(data.compiti || [])];
-
-            // Rimuoviamo il compito all'indice selezionato
-            compiti.splice(idx, 1);
-
-            // Aggiorniamo il documento su Firebase
-            await updateDoc(ref, { compiti: compiti });
-            
-            // Non serve alert, onSnapshot aggiornerà la grafica automaticamente
-            console.log("✅ Compito eliminato con successo");
-        }
-    } catch (e) {
-        console.error("Errore durante l'eliminazione del compito:", e);
-        alert("Errore tecnico durante l'eliminazione.");
-    }
-};
+        try {
+            const snap = await getDoc(ref);
+            if (snap.exists()) {
+                let compiti = [...(snap.data().compiti || [])];
+                compiti.splice(idx, 1);
+                await updateDoc(ref, { compiti: compiti });
+            }
+        } catch (e) { console.error("Errore eliminazione compito:", e); }
+    };
 
 window.getSection = (techId) => techId ? techId.charAt(0).toUpperCase() : "?";
 
@@ -8814,6 +8780,46 @@ window.regenMassDatesByMonth = (newMonth) => {
             dateInput.value = window.generateRandomValidDateString(parseInt(newMonth), giorniFermi);
         }
     });
+};
+
+    window.addEventListener('load', () => {
+        console.log("%cFazbear Classroom OS v4.0", "color: #dc2626; font-size: 16px; font-weight: 900;");
+        
+        // Forza l'aggiornamento del contesto data se non inizializzato
+        if (typeof window.updateDateContext === 'function') {
+            const cal = document.getElementById('global-calendar');
+            if (cal && !cal.value) {
+                const oggi = new Date().toLocaleDateString('en-CA');
+                cal.value = oggi;
+                window.updateDateContext(oggi);
+            }
+        }
+
+        // Fix per il ridimensionamento della sidebar su schermi piccoli
+        if (window.innerWidth < 768) {
+            document.body.classList.add('sidebar-hidden');
+            window.sidebarManuallyHidden = true;
+        }
+    });
+
+    // Gestione errori globale per il debug
+    window.onerror = function(msg, url, line) {
+        console.error(`[Fazbear System Error]: ${msg} @ ${line}`);
+        return false;
+    };
+
+window.smartNavigateToRegistry = () => {
+    const cls = window.selectedClass;
+    
+    // Controlla se la classe selezionata è valida
+    if (cls && cls !== 'ALL' && cls !== 'None' && CLASSI_VALIDE.includes(cls)) {
+        console.log(`[ROUTE] Accesso diretto al registro per la classe: ${cls}`);
+        window.renderGlobalClassRegistry();
+    } else {
+        // Rotta alternativa: Hub Classi
+        alert("⚠️ Nessuna classe selezionata.\nVerrai reindirizzato all'Hub Classi per sceglierne una.");
+        window.changeMenu('classi');
+    }
 };
 
    </script>
