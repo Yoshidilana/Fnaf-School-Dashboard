@@ -219,12 +219,8 @@ main {
 
 /* --- REGISTRO VOTI MODERNIZZATO (NO SCROLL) --- */
 .registry-container {
-    background: #ffffff
-    border: 1px solid #eef2f6 !important;
-    border-radius: 24px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
-    overflow: hidden;
-    width: 100%; /* Blocca larghezza */
+    background: #ffffff; border-radius: 24px; border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden;
 }
 
 .registry-table {
@@ -235,13 +231,8 @@ main {
 
 /* Header più sottile e professionale */
 .registry-table thead th {
-    background: #fdfdfd 
-    color: #64748b !important;
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 1rem;
-    border-bottom: 1px solid #f1f5f9 !important;
+    background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800;
+    text-transform: uppercase; padding: 1.25rem 1rem; border-bottom: 2px solid #f1f5f9;
 }
 
 /* Celle adattive */
@@ -256,40 +247,21 @@ main {
     background-color: #ffffff 
 }
 
-/* Badge voti nel registro globale più stilosi */
-.global-grade-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-weight: 800;
-    font-size: 10px;
-    min-width: 32px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
+
 
 /* Colonna Materia (Stile speciale adattivo) */
-.subject-column {
-    font-weight: 800;
-    color: var(--text-main) !important;
-    font-size: 0.8rem;
+.subject-column { 
+    background: linear-gradient(to right, #fcfcfc, #ffffff); 
+    border-right: 1px solid #f8fafc; padding-left: 1.5rem !important;
 }
 
     /* --- BADGE VOTI (PILL STYLE) --- */
 .grade-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    height: 32px;
-    padding: 0 8px;
-    border-radius: 10px; /* Arrotondamento moderno (squircle) */
-    font-weight: 800;
-    font-size: 0.75rem;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+    width: 38px; height: 38px; border-radius: 12px; font-size: 13px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08); border: 2px solid transparent;
 }
+.grade-positive { background: #ecfdf5; color: #059669; border-color: #10b98133; }
+.grade-negative { background: #fef2f2; color: #dc2626; border-color: #ef444433; }
 
 /* Effetto al passaggio del mouse sui voti */
 .grade-badge:hover {
@@ -307,18 +279,20 @@ main {
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.05);
 }
-    .grade-positive { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.4); }
-    .grade-negative { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.4); }
-    .grade-neutral { background: #3d2b1f; color: #d6d3d1; border: 1px solid #57534e; }
 
-    .note-accent-counselor {
-    	border-left: 4px solid #a855f7 !important; /* Viola */
+/* Badge voti nel registro globale più stilosi */
+.global-grade-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 10px;
+    min-width: 32px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-    .badge-counselor {
-    	background: #f3e8ff;
-    	color: #7e22ce;
-}
 
 /* Stile per la lista voti nel pop-up del tabellone */
 .tabellone-detail-row {
@@ -332,7 +306,19 @@ main {
     border: 1px solid rgba(255,255,255,0.05);
 }
 
-
+.note-card {
+    background: #ffffff; border-radius: 20px; padding: 1.5rem;
+    box-shadow: 0 4px 15px -3px rgba(0,0,0,0.07); transition: all 0.3s ease;
+    border: 1px solid #f1f5f9; position: relative; overflow: hidden;
+}
+.note-card:hover { transform: translateY(-3px); box-shadow: 0 12px 25px -5px rgba(0,0,0,0.1); }
+.note-accent-disciplinare { border-left: 6px solid #ef4444; background: linear-gradient(to right, #fef2f2, #ffffff); }
+.note-accent-mandato { border-left: 6px solid #f59e0b; background: linear-gradient(to right, #fffbeb, #ffffff); }
+.note-accent-counselor { border-left: 6px solid #a855f7; background: linear-gradient(to right, #faf5ff, #ffffff); }
+.note-badge { font-size: 8px; font-weight: 900; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
+.badge-disciplinare { background: #fee2e2; color: #991b1b; }
+.badge-mandato { background: #fef3c7; color: #92400e; }
+.badge-counselor { background: #f3e8ff; color: #6b21a8; }
 
 /* Badge Maturità */
 .badge-maturita {
@@ -2921,33 +2907,25 @@ const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.
                              (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
 
 vHtml += `
-    <tr class="group">
-        <td class="subject-column">
+    <tr class="group hover:bg-slate-50/50 transition-colors">
+        <td class="subject-column py-5">
             <div class="flex flex-col">
                 <div class="flex items-center gap-2">
-                    <span class="font-black text-zinc-500 uppercase text-[11px] tracking-tight">${m.toUpperCase()}</span>
-                            ${canReset ? `
-                                <button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" 
-                                        class="opacity-0 group-hover:opacity-100 text-zinc-500 hover:text-red-600 transition-all text-[10px]" 
-                                        title="Elimina tutti i voti di questa materia">
-                                    🗑️
-                                </button>` : ''}
-                        </div>
-                        <span class="text-[8px] text-zinc-500 font-bold uppercase mt-0.5">Docente: ${nomeDocente}</span>
-                    </div>
-                </td>
-                <td class="text-center p-2">
-                    <div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
-                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ1}</div>
-                </td>
-                <td class="text-center p-2">
-                    <div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '---'}</div>
-                    <div class="media-quad-box hidden mt-2 pt-1 border-t border-zinc-800 text-[10px] font-black text-blue-400">MEDIA: ${avgQ2}</div>
-                </td>
-                <td class="text-right">
-                    <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-green-600'}">${avgTotal}</span>
-                </td>
-            </tr>`;
+                    <span class="text-[13px] font-extrabold text-slate-800 uppercase tracking-tight">${m.toUpperCase()}</span>
+                    ${canReset ? `<button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all">🗑️</button>` : ''}
+                </div>
+                <span class="text-[10px] text-slate-400 font-semibold uppercase">👨‍🏫 ${nomeDocente}</span>
+            </div>
+        </td>
+        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">---</span>'}</div></td>
+        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">---</span>'}</div></td>
+        <td class="text-right pr-6 py-4">
+            <div class="inline-flex flex-col items-end">
+                <span class="text-lg font-black ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-emerald-600'}">${avgTotal}</span>
+                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Media Totale</span>
+            </div>
+        </td>
+    </tr>`;
         });
 
 
@@ -3038,28 +3016,23 @@ if (typeof window.renderPagella === 'function') {
                         etichetta = '🧠 Colloquio di Supporto';
                     }
                     
-                    return `
-                    <div class="note-card ${cardClass} group">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex flex-col gap-1">
-                                <span class="note-badge ${badgeClass} w-fit">
-                                    ${etichetta}
-                                </span>
-                                <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">${n.data}</span>
-                            </div>
-                            ${typeof renderNoteActions === 'function' ? renderNoteActions(n, realIdx, studentId) : ''}
-                        </div>
-                        
-<p id="note-text-${realIdx}" class="text-sm !text-zinc-700 leading-relaxed font-medium italic">
-    "${n.testo}"
-</p>
-                        
-                        <div class="mt-4 pt-3 border-t border-zinc-100 flex justify-between items-center">
-                           <p class="text-[9px] font-black uppercase !text-zinc-400">
-    Emesso da: <span class="!text-zinc-900">${n.prof || n.autore}</span>
-</p>
-                        </div>
-                    </div>`;
+return `
+<div class="note-card ${cardClass} group">
+    <div class="flex justify-between items-start mb-4">
+        <div class="flex flex-col gap-1.5">
+            <span class="note-badge ${badgeClass} w-fit tracking-widest">${etichetta}</span>
+            <span class="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Protocollo del ${n.data}</span>
+        </div>
+        ${typeof renderNoteActions === 'function' ? renderNoteActions(n, realIdx, studentId) : ''}
+    </div>
+    <p class="text-[13px] text-zinc-500 leading-relaxed font-semibold italic border-l-2 border-zinc-100 pl-4 py-1">
+        "${n.testo}"
+    </p>
+    <div class="mt-5 pt-3 border-t border-zinc-50 flex justify-between items-center">
+        <p class="text-[9px] font-black uppercase text-zinc-400">Rilasciato da: <span class="text-zinc-400">${n.prof || n.autore}</span></p>
+        <span class="text-[14px] grayscale group-hover:grayscale-0 transition-all">📋</span>
+    </div>
+</div>`;
                 }).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
                                     <p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p>
                                  </div>`;
@@ -3068,34 +3041,15 @@ if (typeof window.renderPagella === 'function') {
     }); // Questa chiude l'onSnapshot dei voti originario (se non l'avevi già chiusa sopra)
 } // Questa chiude definitivamente loadStudentRecords
 
-        function renderVotoTag(v, studentId) {
-    const isProf = window.userRole === ROLES.PROF && v.profId === window.currentUserId;
-    const isStaff = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
-    const canManage = isProf || isStaff;
+function renderVotoTag(v, studentId) {
+    const valNum = window.parseVotoScolastico(v.voto);
+    const statusClass = valNum >= 6 ? "grade-positive" : (valNum > 0 ? "grade-negative" : "grade-neutral");
+    const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.ADMIN].includes(window.userRole) 
+        ? `onclick="window.editVoto('${v.id}', '${studentId}')" oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"` 
+        : "";
 
-    const valoreNumerico = window.parseVotoScolastico(v.voto);
-    let statusClass = "grade-neutral";
-    
-    if (valoreNumerico >= 6) statusClass = "grade-positive";
-    else if (valoreNumerico > 0) statusClass = "grade-negative";
-
-    const infoTooltip = `${v.data} - ${v.argomento || 'Valutazione'}`;
-
-    // Aggiungiamo gli eventi per modifica (click) ed eliminazione (tasto destro)
-    let handlers = "";
-    if (canManage) {
-        handlers += ` onclick="window.editVoto('${v.id}', '${studentId}')"`;
-        handlers += ` oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"`;
-    }
-
-    return `
-        <span title="${infoTooltip}" 
-              class="grade-badge ${statusClass} ${canManage ? 'hover:border-zinc-400' : ''}" 
-              ${handlers}>
-            ${v.voto}
-        </span>`;
+    return `<span class="grade-badge inline-flex items-center justify-center font-black cursor-pointer transition-transform hover:scale-110 active:scale-90 ${statusClass}" title="${v.data} - ${v.argomento || ''}" ${handlers}>${v.voto}</span>`;
 }
-
         function renderNoteActions(n, idx, studentId) {
             const isMyNote = n.profId === window.currentUserId;
             const isPreside = window.userRole === ROLES.PRESIDE;
