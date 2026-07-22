@@ -229,10 +229,11 @@ main {
     border-collapse: collapse;
 }
 
-/* Header più sottile e professionale */
+/* Header Tabella e Colonne Quadrimestri più scure */
 .registry-table thead th {
-    background: #f8fafc; color: #64748b; font-size: 10px; font-weight: 800;
-    text-transform: uppercase; padding: 1.25rem 1rem; border-bottom: 2px solid #f1f5f9;
+    background: #111827 !important; color: #f3f4f6 !important;
+    font-size: 9px; font-weight: 900; letter-spacing: 0.1em;
+    padding: 1.25rem 1rem; border-bottom: 3px solid #dc2626 !important;
 }
 
 /* Celle adattive */
@@ -242,12 +243,14 @@ main {
     border-bottom: 1px solid #f8fafc !important;
 }
 
+.registry-table td:nth-child(2), .registry-table td:nth-child(3) {
+    background: rgba(0, 0, 0, 0.02); /* Effetto profondità per i quadrimestri */
+}
+
 .registry-table tbody tr {
     transition: all 0.2s ease;
     background-color: #ffffff 
 }
-
-
 
 /* Colonna Materia (Stile speciale adattivo) */
 .subject-column { 
@@ -270,14 +273,16 @@ main {
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* Media Badge (Più grande e visibile) */
+/* Box Media Grande nel Registro */
+.res-media-container {
+    background: #0f172a !important; /* Blu notte molto scuro */
+    border: 1px solid #1e293b; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
 .media-badge-large {
-    font-size: 1.1rem;
-    font-weight: 900;
-    padding: 4px 12px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.05);
+    font-size: 1.25rem; font-weight: 900; padding: 6px 14px;
+    background: #111827 !important; color: #ffffff !important;
+    border-radius: 12px; border: 1px solid #374151;
 }
 
 /* Badge voti nel registro globale più stilosi */
@@ -1466,10 +1471,10 @@ main {
             <h2 id="res-student-name" class="text-2xl font-black uppercase text-zinc-100 tracking-tighter">Dati Studente</h2>
         </div>
     </div>
-        <div class="text-right bg-red-900 p-4 rounded-2xl min-w-[120px]">
-            <p class="text-[8px] uppercase font-black text-zinc-400 mb-1">Media Globale</p>
-            <p id="res-student-media" class="text-2xl font-black text-white">0.0</p>
-        </div>
+<div class="text-right res-media-container p-4 rounded-2xl min-w-[130px] border-l-4 border-red-600">
+    <p class="text-[8px] uppercase font-black text-zinc-500 mb-1 tracking-widest">Media Globale</p>
+    <p id="res-student-media" class="text-3xl font-black text-white drop-shadow-md">0.0</p>
+</div>
     </div>
 
     <!-- Pannello Inserimento Voto (Solo Prof) -->
@@ -1515,10 +1520,10 @@ main {
             <table class="w-full text-left registry-table">
                 <thead>
                     <tr>
-                        <th class="w-1/4">Materia</th>
-                        <th class="text-center">1° Quadrimestre</th>
-                        <th class="text-center">2° Quadrimestre</th>
-                        <th class="text-right">Media</th>
+                        <th class="w-1/4">MATERIA</th>
+                        <th class="text-center">1° QUADRIMESTRE</th>
+                        <th class="text-center">2° QUADRIMESTRE</th>
+                        <th class="text-right">MEDIA</th>
                     </tr>
                 </thead>
                 <tbody id="registro-voti-body" class="divide-y divide-slate-100">
@@ -2917,14 +2922,16 @@ vHtml += `
                 <span class="text-[10px] text-slate-400 font-semibold uppercase">👨‍🏫 ${nomeDocente}</span>
             </div>
         </td>
-        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">---</span>'}</div></td>
-        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">---</span>'}</div></td>
-        <td class="text-right pr-6 py-4">
-            <div class="inline-flex flex-col items-end">
-                <span class="text-lg font-black ${parseFloat(avgTotal) < 6 ? 'text-red-600' : 'text-emerald-600'}">${avgTotal}</span>
-                <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Media Totale</span>
-            </div>
-        </td>
+        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div></td>
+        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div></td>
+<td class="text-right pr-6 py-4 bg-zinc-900/5">
+    <div class="inline-flex flex-col items-end">
+        <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? '!text-red-500' : '!text-emerald-400'}">
+            ${avgTotal}
+        </span>
+        <span class="text-[7px] font-black text-zinc-400 uppercase tracking-tighter mt-1">Esito Finale</span>
+    </div>
+</td>
     </tr>`;
         });
 
