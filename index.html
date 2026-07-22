@@ -219,7 +219,7 @@ main {
 
 /* --- REGISTRO VOTI MODERNIZZATO (NO SCROLL) --- */
 .registry-container {
-    background: #ffffff !important;
+    background: #ffffff
     border: 1px solid #eef2f6 !important;
     border-radius: 24px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
@@ -235,7 +235,7 @@ main {
 
 /* Header più sottile e professionale */
 .registry-table thead th {
-    background: #fdfdfd !important;
+    background: #fdfdfd 
     color: #64748b !important;
     font-size: 9px;
     text-transform: uppercase;
@@ -253,7 +253,7 @@ main {
 
 .registry-table tbody tr {
     transition: all 0.2s ease;
-    background-color: #ffffff !important;
+    background-color: #ffffff 
 }
 
 /* Badge voti nel registro globale più stilosi */
@@ -596,7 +596,7 @@ main {
             </button>
 
         <button onclick="window.changeMenu('presenze-studente')" id="menu-presenze-studente" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
-            <span class="text-lg">🕒</span> Assenze e Ritardi
+            <span class="text-lg">🕒</span> ASSENZE E RITARDI
         </button>
 
             <button onclick="window.changeMenu('agenda')" id="menu-agenda" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
@@ -612,7 +612,7 @@ main {
         </button>
 
         <button onclick="window.changeMenu('pagella')" id="menu-pagella" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
-            <span class="text-lg">🎓</span> Pagella
+            <span class="text-lg">🎓</span> PAGELLA
         </button>
 
 	<button onclick="window.changeMenu('esami')" id="menu-esami" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
@@ -893,7 +893,7 @@ main {
         <!-- Registro Voti -->
         <button id="hub-btn-registro-globale" onclick="window.renderGlobalClassRegistry()" class="hidden p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
     <span class="text-4xl group-hover:scale-110 transition-transform">📊</span>
-    <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti</span>
+    <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Registro Voti Classe</span>
 </button>
 
 	<!-- Didattica e Materiali (AGGIUNTO) -->
@@ -958,7 +958,7 @@ main {
     <div class="registry-container">
         <div class="overflow-x-auto">
             <table class="registry-table w-full text-left text-[11px]">
-                <thead class="bg-zinc-50 text-zinc-600 font-black uppercase">
+                <thead class="bg-zinc-0 text-zinc-600 font-black uppercase">
                     <tr id="reg-global-head">
                         <th class="p-4 border-r border-zinc-200">Studente</th>
                         <th class="p-4">Voti</th> <!-- Aggiunta colonna voti -->
