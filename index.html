@@ -6984,7 +6984,8 @@ window.classConfigsCache = window.classConfigsCache || {};
 
 window.loadExamStatus = async () => {
     const cls = window.selectedClass;
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // AGGIUNTO .replace('/', '-') per combaciare perfettamente con la chiave di orariPerAnno!
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
     
     if (!cls || cls === 'ALL') return;
 
@@ -6992,20 +6993,23 @@ window.loadExamStatus = async () => {
     const snap = await getDoc(ref);
     
     let startYear = null;
-    let materiePerAnno = {}; // <--- AGGIUNTO per non perdere il dato
+    let materiePerAnno = {};
+    let orariPerAnno = {}; // <--- AGGIUNTO
     
     if (snap.exists()) {
         const d = snap.data();
         startYear = d.startYear || null;
-        materiePerAnno = d.materiePerAnno || {}; // <--- AGGIUNTO per estrarlo da Firestore
+        materiePerAnno = d.materiePerAnno || {};
+        orariPerAnno = d.orariPerAnno || {}; // <--- AGGIUNTO
     }
 
-    // Salviamo startYear E le materie annuali nella cache senza sovrascriverle con un oggetto vuoto
+    // Manteniamo tutto nella cache senza perdere orariPerAnno
     window.classConfigsCache[cls] = { 
+        ...(window.classConfigsCache[cls] || {}),
         startYear: startYear,
-        materiePerAnno: materiePerAnno // <--- AGGIUNTO per il registro dei voti
+        materiePerAnno: materiePerAnno,
+        orariPerAnno: orariPerAnno // <--- AGGIUNTO
     };
-
     // Calcoliamo se è anno d'esame per la UI
     const grade = window.calculateClassGrade(ay, startYear);
     const isExam = grade === 5;
@@ -8305,12 +8309,10 @@ window.submitQuickMassGrades = async () => {
     const targetClass = window.selectedClass;
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     
-    // Recuperiamo l'orario come backup per le ore delle firme
-    const infoOrario = window.getProfDaysForSubject(window.currentUserId, sub, targetClass);
     const rows = document.querySelectorAll('.mass-row');
     if (rows.length === 0) return;
 
-    // --- RICERCA DOCENTE ASSEGNATO ---
+    // --- RICERCA DOCENTE ASSEGNATO (SPOSTATA PRIMA DELL'ORARIO) ---
     const profAssegnato = window.allStudents.find(u => {
         const r = (u.role || '').toLowerCase();
         const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice');
@@ -8321,6 +8323,9 @@ window.submitQuickMassGrades = async () => {
 
     const finalProfName = profAssegnato ? profAssegnato.name : window.currentUserData.name;
     const finalProfId = profAssegnato ? profAssegnato.id : window.currentUserId;
+
+    // Recuperiamo l'orario usando il finalProfId CORRETTO
+    const infoOrario = window.getProfDaysForSubject(finalProfId, sub, targetClass);
 
     if (!confirm(`Stai per registrare ${rows.length} valutazioni individuali per la classe ${targetClass}.\nDocente Firmatario: ${finalProfName}\nProcedere?`)) return;
 
@@ -8365,12 +8370,10 @@ window.submitQuickMassGrades = async () => {
 
         // Prepara la struttura di raggruppamento temporanea per l'agenda giornaliera
         if (!agendaUpdatesByDate[dateVal]) {
-            // Calcolo locale e sicuro del giorno della settimana (0 = Domenica, 1 = Lunedì...)
-            // Evita totalmente lo sfasamento del fuso orario di "new Date(dateVal)"
             const localDateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
             const localDayOfWeek = localDateObj.getDay();
 
-            // Estrae l'ora reale dall'orario. Se non esiste, mette come fallback la prima ora ("1")
+            // Estrae l'ora reale dall'orario. Se non esiste per quel giorno, usa la prima ora ("1")
             const oraDaOrario = (infoOrario && infoOrario.ore && infoOrario.ore[localDayOfWeek]) 
                 ? infoOrario.ore[localDayOfWeek] 
                 : "1";
