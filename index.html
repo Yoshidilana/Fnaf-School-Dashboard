@@ -948,12 +948,12 @@ main {
     <!-- Container con classi aggiornate -->
     <div class="registry-container">
         <div class="overflow-x-auto">
-            <table class="registry-table w-full text-left text-[11px]">
+<table class="registry-table w-full table-fixed text-left text-[11px]">
                 <thead class="bg-zinc-0 text-zinc-600 font-black uppercase">
                     <tr id="reg-global-head">
-                        <th class="p-4 border-r border-zinc-200">Studente</th>
-                        <th class="p-4">Voti</th> <!-- Aggiunta colonna voti -->
-                        <th class="p-4 text-right">Media</th>
+                        <th class="w-1/4 p-4 border-r border-zinc-200">Studente</th>
+                        <th class="w-1/2 p-4">Voti</th>
+                        <th class="w-1/4 p-4 text-right">Media</th>
                     </tr>
                 </thead>
                 <tbody id="reg-global-body" class="divide-y divide-zinc-100 bg-white">
@@ -1517,13 +1517,13 @@ main {
     <!-- Tabella Registro -->
     <div class="registry-container">
         <div class="overflow-x-auto">
-            <table class="w-full text-left registry-table">
+<table class="w-full text-left registry-table border-collapse">
                 <thead>
-                    <tr>
-                        <th class="w-1/4">MATERIA</th>
-                        <th class="text-center">1° QUADRIMESTRE</th>
-                        <th class="text-center">2° QUADRIMESTRE</th>
-                        <th class="text-right">MEDIA</th>
+                    <tr class="w-full">
+                        <th class="w-2/5">MATERIA</th>
+                        <th class="w-1/5 text-center">1° QUADRIMESTRE</th>
+                        <th class="w-1/5 text-center">2° QUADRIMESTRE</th>
+                        <th class="w-1/5 text-right pr-6">MEDIA</th>
                     </tr>
                 </thead>
                 <tbody id="registro-voti-body" class="divide-y divide-slate-100">
@@ -2874,25 +2874,56 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
         // --- STABILIZZAZIONE LAYOUT: Ordina alfabeticamente l'elenco delle materie ---
         materie.sort((a, b) => a.localeCompare(b));
         
-	// 5. Render Materie Principali
-        materie.forEach(m => {
+// --- RECUPERO E SEPARAZIONE MATERIE PER ANNO / RUOLO ---
+        const targetClass = window.selectedClass || (window.allStudents.find(s => s.id === studentId)?.classe);
+        const configClasse = window.classConfigsCache ? window.classConfigsCache[targetClass] : null;
+        const materieUfficialiAnno = (configClasse && configClasse.materiePerAnno && configClasse.materiePerAnno[aySelezionato])
+            ? configClasse.materiePerAnno[aySelezionato].map(m => m.toLowerCase().trim())
+            : null;
+
+        let materiePrincipali = [];
+        let materieSecondarie = [];
+
+        if (window.userRole === ROLES.PROF) {
+            const mieMaterie = (window.currentUserData?.materie || []).map(m => m.toLowerCase().trim());
+            
+            if (materieUfficialiAnno && materieUfficialiAnno.length > 0) {
+                // In alto solo la materia del prof, in basso le altre ufficiali dell'anno
+                materiePrincipali = materieUfficialiAnno.filter(m => mieMaterie.includes(m));
+                materieSecondarie = materieUfficialiAnno.filter(m => !mieMaterie.includes(m));
+            } else {
+                // Fallback se le materie per anno non sono salvate
+                materiePrincipali = materie.filter(m => mieMaterie.includes(m.toLowerCase().trim()));
+                const votiMaterie = votiTuttoAnno.map(v => v.materia.toLowerCase().trim());
+                materieSecondarie = [...new Set(votiMaterie)].filter(m => !mieMaterie.includes(m));
+            }
+        } else {
+            if (materieUfficialiAnno && materieUfficialiAnno.length > 0) {
+                materiePrincipali = [...materieUfficialiAnno];
+                const votiExtra = votiTuttoAnno.map(v => v.materia.toLowerCase().trim());
+                materieSecondarie = [...new Set(votiExtra)].filter(m => !materieUfficialiAnno.includes(m));
+            } else {
+                materiePrincipali = [...materie];
+                materieSecondarie = [];
+            }
+        }
+
+        materiePrincipali.sort((a, b) => a.localeCompare(b));
+        materieSecondarie.sort((a, b) => a.localeCompare(b));
+
+        // 5. Render Materie Principali
+        materiePrincipali.forEach(m => {
             const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
             
-            /// Ricerca dinamica del docente assegnato a questa materia per questa classe
-const targetClass = window.selectedClass || (window.allStudents.find(s => s.id === studentId)?.classe);
-const profAssegnato = window.allStudents.find(u => {
-    const r = (u.role || '').toLowerCase();
-    
-    // AGGIORNATO: Ora include esplicitamente anche Preside e Vice Preside
-    const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice');
-    
-    const assegnatoAClasse = Array.isArray(u.classi_docente) && u.classi_docente.includes(targetClass);
-    const insegnaMateria = Array.isArray(u.materie) && u.materie.some(mat => mat.toLowerCase().trim() === m.toLowerCase().trim());
-    return isStaff && assegnatoAClasse && insegnaMateria;
-});
-const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.D.');
+            const profAssegnato = window.allStudents.find(u => {
+                const r = (u.role || '').toLowerCase();
+                const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice');
+                const assegnatoAClasse = Array.isArray(u.classi_docente) && u.classi_docente.includes(targetClass);
+                const insegnaMateria = Array.isArray(u.materie) && u.materie.some(mat => mat.toLowerCase().trim() === m.toLowerCase().trim());
+                return isStaff && assegnatoAClasse && insegnaMateria;
+            });
+            const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.D.');
 
-            // Garantisce che i voti della riga siano in perfetto ordine cronologico dal più vecchio al più recente
             m_voti.sort((a, b) => {
                 const [dayA, monthA, yearA] = a.data.split('/').map(Number);
                 const [dayB, monthB, yearB] = b.data.split('/').map(Number);
@@ -2902,16 +2933,14 @@ const nomeDocente = profAssegnato ? profAssegnato.name : (m_voti[0]?.prof || 'N.
             const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
             const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
             
-            // Calcolo medie separate
             const avgQ1 = q1.length ? (q1.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q1.length).toFixed(1) : "-";
             const avgQ2 = q2.length ? (q2.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q2.length).toFixed(1) : "-";
             const avgTotal = m_voti.length ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1) : "0.0";
 
-            // Controllo permessi per il tasto Reset
             const canReset = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole) || 
                              (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
 
-vHtml += `
+            vHtml += `
     <tr class="group hover:bg-slate-50/50 transition-colors">
         <td class="subject-column py-5">
             <div class="flex flex-col">
@@ -2924,55 +2953,47 @@ vHtml += `
         </td>
         <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div></td>
         <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div></td>
-<td class="text-right pr-6 py-4 bg-zinc-900/5">
-    <div class="inline-flex flex-col items-end">
-        <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? '!text-red-500' : '!text-emerald-400'}">
-            ${avgTotal}
-        </span>
-        <span class="text-[7px] font-black text-zinc-400 uppercase tracking-tighter mt-1">Esito Finale</span>
-    </div>
-</td>
+        <td class="text-right pr-6 py-4 bg-zinc-900/5">
+            <div class="inline-flex flex-col items-end">
+                <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? '!text-red-500' : '!text-emerald-400'}">
+                    ${avgTotal}
+                </span>
+                <span class="text-[7px] font-black text-zinc-400 uppercase tracking-tighter mt-1">Esito Finale</span>
+            </div>
+        </td>
     </tr>`;
         });
 
-
-
         // 6. Sezione "Altre Materie" (per Prof/Preside)
-        if(window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) {
-            const materieNormalizzate = materie.map(m => m.toLowerCase().trim());
-            const altreMaterie = [...new Set(votiTuttoAnno.map(v => v.materia.toLowerCase().trim()))]
-                .filter(m => !materieNormalizzate.includes(m));
-
-            // --- STABILIZZAZIONE LAYOUT: Ordina alfabeticamente anche le altre materie ---
-            altreMaterie.sort((a, b) => a.localeCompare(b));
-
-            if(altreMaterie.length > 0) {
-                vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[10px] font-black uppercase text-center text-zinc-500">Altre Materie</td></tr>`;
-                altreMaterie.forEach(m => {
-                    const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m);
-                    
-                    // Ordina i voti delle altre materie in ordine cronologico
-                    m_voti.sort((a, b) => {
-                        const [dayA, monthA, yearA] = a.data.split('/').map(Number);
-                        const [dayB, monthB, yearB] = b.data.split('/').map(Number);
-                        return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
-                    });
-
-                    const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
-                    const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
-                    const avg = (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1);
-
-                    vHtml += `<tr class="bg-zinc-900">
-                        <td class="p-2 pl-4 font-bold uppercase text-blue-800">${m}</td>
-                        <td class="p-2">${q1.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
-                        <td class="p-2">${q2.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
-                        <td class="p-2 text-right font-black text-blue-800">${avg}</td>
-                    </tr>`;
+        if ((window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.VICE_PRESIDE) && materieSecondarie.length > 0) {
+            vHtml += `<tr class="bg-zinc-100"><td colspan="4" class="p-2 text-[10px] font-black uppercase text-center text-zinc-500">Altre Materie</td></tr>`;
+            
+            materieSecondarie.forEach(m => {
+                const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
+                
+                m_voti.sort((a, b) => {
+                    const [dayA, monthA, yearA] = a.data.split('/').map(Number);
+                    const [dayB, monthB, yearB] = b.data.split('/').map(Number);
+                    return new Date(yearA, monthA - 1, dayA) - new Date(yearB, monthB - 1, dayB);
                 });
-            }
+
+                const q1 = m_voti.filter(v => isDateInQ(v.data, 1));
+                const q2 = m_voti.filter(v => isDateInQ(v.data, 2));
+                const avg = m_voti.length 
+                    ? (m_voti.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / m_voti.length).toFixed(1)
+                    : "0.0";
+
+                vHtml += `<tr class="bg-zinc-0">
+                    <td class="p-2 pl-4 font-bold uppercase text-blue-800">${m.toUpperCase()}</td>
+                    <td class="p-2">${q1.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
+                    <td class="p-2">${q2.map(v => `<span class="mr-1">${v.voto}</span>`).join('')}</td>
+                    <td class="p-2 text-right font-black text-blue-800">${avg}</td>
+                </tr>`;
+            });
         }
 
-        tbody.innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`;
+        tbody.innerHTML = vHtml || `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">Nessun voto per l'A.S. ${aySelezionato}</td></tr>`; 
+
 
         // 7. Render Elementi Esterni (Nome Pagella e Aggiornamento Pagella)
         if(document.getElementById('pagella-student-name')) {
