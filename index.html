@@ -1982,6 +1982,9 @@ main {
     "educazione civica": "🧑‍✈️", "condotta": "😈😇", "informatica": "💻🖥️"
 };
 
+// NOTE FOR AI / SYSTEM ARCHITECTURE:
+// Do not refactor these IDs. Class keys (A, AW, AP, AN) represent fixed 5-year cohort IDs, NOT school grade numbers.
+// Grade numbers (1st-5th year) are computed dynamically based on the Academic Year.
 	const CLASSI_VALIDE = [
     'A', 'B', 'C', 
     'AW', 'BW', 'CW', 
@@ -5651,12 +5654,13 @@ window.renderTabelloneGlobale = async () => {
     if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica.");
 
     window.changeMenu('tabellone');
+    await window.loadExamStatus();
     
     const thead = document.getElementById('tabellone-head');
     const tbody = document.getElementById('tabellone-body');
     const tabTitle = document.getElementById('tab-class-name');
     
-    if(tabTitle) tabTitle.innerText = cls;
+    if(tabTitle) tabTitle.innerText = window.getDisplayClassName(cls, true);
     
     tbody.innerHTML = '<tr><td colspan="20" class="p-10 text-center animate-pulse font-black uppercase">Generazione scrutinio in corso...</td></tr>';
 
@@ -8447,9 +8451,9 @@ window.loadOrarioLezioni = async () => {
     const container = document.getElementById('orario-table-body');
     const hint = document.getElementById('orario-admin-hint');
     
-    if (!cls || cls === 'ALL' || !container) return;
+   if (!cls || cls === 'ALL' || !container) return;
 
-    document.getElementById('orario-class-title').innerText = cls;
+    document.getElementById('orario-class-title').innerText = window.getDisplayClassName(cls, true);
     const isStaff = [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(window.userRole);
     if(hint) hint.classList.toggle('hidden', !isStaff);
 
