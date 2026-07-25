@@ -3130,7 +3130,7 @@ function renderVotoTag(v, studentId) {
                 quad: quadrimestre,
                 anno: annoScolastico,
                 nonValutato: nv,
-                emoji: nv ? "🔵" : "📝"
+                emoji: nv ? "🔵" : (LISTA_MATERIE[m.toLowerCase()] || "📝")
             };
             
             await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
@@ -3842,10 +3842,13 @@ window.editVoto = async (idRicevuto, studentId) => {
     const nuovoArgomento = prompt("Modifica l'argomento:", vecchioVoto.argomento || "");
     if (nuovoArgomento === null) return;
 
+    const nuovoNV = confirm("Segnare come 'Non Valutato' (il voto non farà media)?");
+
     // --- AGGIORNAMENTO LOCALE ---
     listaVoti[indiceVoto].voto = nuovoVotoVal;
     listaVoti[indiceVoto].data = nuovaData;
     listaVoti[indiceVoto].argomento = nuovoArgomento;
+    listaVoti[indiceVoto].nonValutato = nuovoNV;
     
     // Ricalcolo quadrimestre
     if (nuovaData.includes('/')) {
@@ -8212,9 +8215,9 @@ window.prepareMassGradesList = () => {
 
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
     
-    // Mese di default: quello selezionato nel calendario dell'agenda o quello attuale
-    const currentCalDate = new Date(document.getElementById('global-calendar').value);
-    const defaultMonth = currentCalDate.getMonth();
+    // Mese di default: usa quello selezionato nel modulo se già presente, altrimenti quello del calendario globale
+    const masterMonthSelect = document.getElementById('mass-master-month');
+    const defaultMonth = masterMonthSelect ? parseInt(masterMonthSelect.value) : new Date(document.getElementById('global-calendar').value).getMonth();
 
     let headerHtml = "";
 
@@ -8407,7 +8410,7 @@ window.submitQuickMassGrades = async () => {
                 argomento: `Prova ${type} (Generata)`,
                 quad: quad,
                 anno: ay,
-                emoji: type === 'Scritto' ? "📝" : "🗣️"
+                emoji: LISTA_MATERIE[sub.toLowerCase()] || (type === 'Scritto' ? "📝" : "🗣️")
             })
         }, { merge: true });
 
