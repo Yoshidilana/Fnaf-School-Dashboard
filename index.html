@@ -941,9 +941,15 @@ main {
                     class="bg-white border-2 border-zinc-200 rounded-xl px-3 py-2 text-[10px] font-black uppercase text-zinc-900 outline-none focus:border-red-600 shadow-sm">
                 </select>
             </div>
+                </div>
+        <div class="flex items-center gap-2">
+            <!-- Generatore Rapido Spostato Qui -->
+            <button id="btn-mass-global" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
+                🎲 Generatore Rapido
+            </button>
+            <!-- Aggiornato bottone -->
+            <button onclick="window.changeMenu('classi')" class="bg-zinc-100 text-zinc-700 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-200">Indietro</button>
         </div>
-        <!-- Aggiornato bottone -->
-        <button onclick="window.changeMenu('classi')" class="bg-zinc-100 text-zinc-700 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-200">Indietro</button>
     </div>
 
     <!-- Container con classi aggiornate -->
@@ -972,12 +978,18 @@ main {
             <!-- Aggiunto !text-zinc-900 -->
             <h2 class="text-2xl font-black italic uppercase !text-zinc-900">
                 Tabellone Medie Classe <span id="tab-class-name" class="text-red-600">--</span>
-            </h2>
+                        </h2>
         </div>
-        <!-- Bottone corretto -->
-        <button onclick="window.changeMenu('classi')" class="!bg-zinc-100 !text-zinc-900 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:!bg-zinc-200">
-            Indietro
-        </button>
+        <div class="flex items-center gap-2">
+            <!-- Generatore Rapido Spostato Qui -->
+            <button id="btn-mass-tabellone" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
+                🎲 Generatore Rapido
+            </button>
+            <!-- Bottone corretto -->
+            <button onclick="window.changeMenu('classi')" class="!bg-zinc-100 !text-zinc-900 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:!bg-zinc-200">
+                Indietro
+            </button>
+        </div>
     </div>
     
     <div class="registry-container">
@@ -1505,11 +1517,7 @@ main {
         <!-- Qui verrà iniettato il tasto Reset solo per gli Admin -->
         <div id="admin-reset-container"></div>
         
-        <!-- Pulsante Generatore Rapido per Docenti -->
-        <button id="admin-random-grade-btn" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
-            🎲 Generatore Rapido
-        </button>
-    </div>
+            </div>
 
     <!-- Pulsante Medie-->
     <button onclick="window.toggleMedieQuad()" class="bg-zinc-800 text-zinc-400 text-[9px] font-black uppercase px-3 py-1 rounded-lg hover:text-white transition-all border border-zinc-700">
@@ -2276,13 +2284,16 @@ toggle('home-btn-pagella', isStudente);
     toggle('btn-add-note', canEmitNotes);
     toggle('note-date-container', canEmitNotes);
 
-    // --- MOSTRA PANNELLO VOTI E POPOLA MATERIE ---
+        // --- MOSTRA PANNELLO VOTI E POPOLA MATERIE ---
         if (isStaffDidattico) {
         toggle('prof-grade-panel', true);
         window.configuraPannelloVotiDocente();
-        toggle('admin-random-grade-btn',  isStaffDidattico);
+        toggle('btn-mass-global', isStaffDidattico);
+        toggle('btn-mass-tabellone', isStaffDidattico);
     } else {
         toggle('prof-grade-panel', false);
+        toggle('btn-mass-global', false);
+        toggle('btn-mass-tabellone', false);
     }
     
     // Bacheca: Admin, Presidi, Segreteria, Tecnici e Bidelli possono scrivere circolari
@@ -5526,16 +5537,7 @@ rowsHtml += `
     <tr class="hover:bg-slate-50 transition-colors">
         <td class="p-4 font-black uppercase border-r border-slate-100 bg-slate-50/30 text-slate-700">${student.name}</td>
         <td class="p-4 flex flex-wrap gap-2">
-            ${studentGrades.map(v => {
-                const val = window.parseVotoScolastico(v.voto);
-                const colorClass = v.nonValutato 
-                    ? 'bg-blue-50 text-blue-600 border-blue-200'
-                    : (val < 6 ? 'bg-red-50 text-red-600 border-red-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200');
-                return `
-                    <span class="global-grade-badge border ${colorClass}">
-                        ${v.voto}
-                    </span>`;
-            }).join('') || '<span class="text-slate-300 italic text-[9px]">Nessun voto</span>'}
+            ${studentGrades.map(v => renderVotoTag(v, student.id)).join('') || '<span class="text-slate-300 italic text-[9px]">Nessun voto</span>'}
         </td>
         <td class="p-4 text-right">
             <span class="text-base font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-blue-600'}">
@@ -5753,18 +5755,22 @@ tbody.innerHTML = allData.map(s => {
                 contaMaterie++;
             }
 
-            // Generazione HTML per tutti i voti nella casella
+                        // Generazione HTML per tutti i voti nella casella (Con Tooltip e Gestione)
             const votiHtml = votiDettaglio.map(v => {
                 const val = window.parseVotoScolastico(v.voto);
                 let colorClass = val < 6 ? 'text-red-500' : 'text-green-500';
                 if (v.nonValutato) colorClass = 'text-blue-500';
                 
-                // Prendiamo solo Giorno/Mese per non occupare troppo spazio
                 const dataBreve = v.data ? v.data.substring(0, 5) : '--/--';
-
                 const bgClass = v.nonValutato ? 'bg-blue-900/20 border-blue-500/30' : 'bg-black/20 border-white/5';
+
+                const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.ADMIN].includes(window.userRole) 
+                    ? `onclick="window.editVoto('${v.id}', '${s.id}')" oncontextmenu="window.deleteVoto('${v.id}', '${s.id}'); return false;"` 
+                    : "";
+
                 return `
-                    <div class="flex flex-col items-center justify-center min-w-[28px] p-1 ${bgClass} rounded border shadow-inner">
+                    <div class="flex flex-col items-center justify-center min-w-[28px] p-1 ${bgClass} rounded border shadow-inner cursor-pointer transition-transform hover:scale-110"
+                         title="${v.data} - ${v.argomento || 'Valutazione'}" ${handlers}>
                         <span class="text-[6px] text-zinc-500 font-black leading-none mb-0.5">${dataBreve}</span>
                         <span class="text-[10px] font-black ${colorClass} leading-none">${v.voto}</span>
                     </div>
