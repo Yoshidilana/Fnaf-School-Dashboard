@@ -583,7 +583,7 @@ main {
                 <span class="text-lg">👔</span> GESTIONE STAFF
             </button>
 
-            <button onclick="window.changeMenu('classi')" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
+                        <button onclick="window.resetClassSelection()" id="menu-classi" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
                 <span class="text-lg">🏫</span> HUB CLASSI
             </button>
 
@@ -662,7 +662,7 @@ main {
 </button>
     
     <!-- Visibile solo a Staff/Admin/Ospiti -->
-    <button id="home-btn-classi" onclick="window.changeMenu('classi')" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
+        <button id="home-btn-classi" onclick="window.resetClassSelection()" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
         <span class="text-3xl block mb-2">🏫</span>
         <span class="font-black uppercase text-[10px]">Hub Classi</span>
     </button>
