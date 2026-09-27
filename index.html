@@ -2928,7 +2928,7 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
         materiePrincipali.sort((a, b) => a.localeCompare(b));
         materieSecondarie.sort((a, b) => a.localeCompare(b));
 
-        // 5. Render Materie Principali
+// 5. Render Materie Principali (Versione Compatta per Staff e Studenti)
         materiePrincipali.forEach(m => {
             const m_voti = votiTuttoAnno.filter(v => v.materia.toLowerCase().trim() === m.toLowerCase().trim());
             
@@ -2962,24 +2962,24 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
                              (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
 
             vHtml += `
-    <tr class="group hover:bg-slate-50/50 transition-colors">
-        <td class="subject-column py-5">
+    <tr class="group hover:bg-slate-50/50 transition-colors border-b border-zinc-100">
+        <td class="subject-column py-2 px-3">
             <div class="flex flex-col">
-                <div class="flex items-center gap-2">
-                    <span class="text-[13px] font-extrabold text-slate-800 uppercase tracking-tight">${m.toUpperCase()}</span>
-                    ${canReset ? `<button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all">🗑️</button>` : ''}
+                <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-black text-slate-800 uppercase tracking-tight">${m.toUpperCase()}</span>
+                    ${canReset ? `<button onclick="window.deleteAllGradesBySubject('${studentId}', '${m}')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all text-xs" title="Elimina tutti i voti di questa materia">🗑️</button>` : ''}
                 </div>
-                <span class="text-[10px] text-slate-400 font-semibold uppercase">👨‍🏫 ${nomeDocente}</span>
+                <span class="text-[9px] text-slate-400 font-bold uppercase leading-none mt-0.5">👨‍🏫 ${nomeDocente}</span>
             </div>
         </td>
-        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div></td>
-        <td class="text-center p-4"><div class="flex flex-wrap justify-center gap-2">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-200">-</span>'}</div></td>
-        <td class="text-right pr-6 py-4 bg-zinc-900/5">
+        <td class="text-center p-2"><div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-300 text-xs">-</span>'}</div></td>
+        <td class="text-center p-2"><div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-300 text-xs">-</span>'}</div></td>
+        <td class="text-right pr-4 py-2 bg-zinc-900/5">
             <div class="inline-flex flex-col items-end">
-                <span class="media-badge-large ${parseFloat(avgTotal) < 6 ? '!text-red-500' : '!text-emerald-400'}">
+                <span class="text-xs font-black px-2 py-0.5 rounded-md ${parseFloat(avgTotal) < 6 ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
                     ${avgTotal}
                 </span>
-                <span class="text-[7px] font-black text-zinc-400 uppercase tracking-tighter mt-1">Esito Finale</span>
+                <span class="text-[6px] font-black text-zinc-400 uppercase tracking-tighter mt-0.5">Esito Finale</span>
             </div>
         </td>
     </tr>`;
