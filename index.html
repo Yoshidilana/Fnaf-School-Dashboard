@@ -1446,103 +1446,103 @@ main {
 </div>
 		
 
-            <!-- VIEW: REGISTRO RIMODERNATO -->
-<div id="view-registro" class="tab-content space-y-6">
-<!-- Inserire questo blocco in cima a view-registro, view-note e view-pagella -->
-<div class="student-nav-bar flex flex-wrap items-center justify-between gap-4 mb-6 bg-blue-900 p-4 rounded-2xl shadow-lg">
-    <div class="flex items-center gap-3">
-        <button onclick="window.changeMenu('classi')" class="btn-back-to-hub hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
-            ⬅️ Torna all'Hub Classe
-        </button>
-        <button onclick="window.changeMenu('studenti')" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
-            👥 Elenco Studenti
-        </button>
-        <!-- MODIFICATO QUI: da changeMenu a resetClassSelection -->
-        <button onclick="window.resetClassSelection()" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all">
-            🏫 Cambia Classe
-        </button>
-    <button onclick="window.selectAndGoToProfile(window.selectedStudentId)" class="btn-staff-nav hidden bg-red-700/20 hover:bg-red-700 text-red-500 hover:text-white px-3 py-2 rounded-xl text-[9px] font-black uppercase transition-all border border-red-700/30">
-    👤 Profilo Studente
-</button>
-    </div>
+<!-- VIEW: REGISTRO RIMODERNATO (COMPATTO) -->
+<div id="view-registro" class="tab-content space-y-3">
 
-    
-    <div class="flex items-center gap-3 bg-white/5 p-1 rounded-xl border border-white/10">
-        <span class="text-[8px] font-black text-zinc-500 uppercase ml-2">Passa a:</span>
-        <select onchange="window.quickSwitchStudent(this.value)" 
-    class="quick-student-switcher bg-blue-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer p-2 rounded-lg">
-</select>
-    </div>
-</div>
-
-    <!-- Header Studente (Card) -->
-    <div id="student-header" class="hidden bg-red-600 p-6 rounded-[24px] border border-zinc-800 shadow-sm flex justify-between items-center">
-        <div class="flex items-center gap-4">
-             <img id="res-student-avatar" src="" class="w-14 h-14 rounded-2xl object-cover border-2 border-zinc-100 shadow-sm bg-zinc-50">
-        <div>
-            <span id="res-student-role" class="text-[8px] font-black uppercase tracking-widest text-red-600 bg-zinc-900 px-2 py-1 rounded-md">---</span>
-            <h2 id="res-student-name" class="text-2xl font-black uppercase text-zinc-100 tracking-tighter">Dati Studente</h2>
-        </div>
-    </div>
-<div class="text-right res-media-container p-4 rounded-2xl min-w-[130px] border-l-4 border-red-600">
-    <p class="text-[8px] uppercase font-black text-zinc-500 mb-1 tracking-widest">Media Globale</p>
-    <p id="res-student-media" class="text-3xl font-black text-white drop-shadow-md">0.0</p>
-</div>
-    </div>
-
-    <!-- Pannello Inserimento Voto (Solo Prof) -->
-    <div id="prof-grade-panel" class="hidden bg-red-700 p-4 rounded-2xl border border-zinc-200 shadow-sm flex flex-wrap gap-4 items-end">
-        <div class="flex-1 min-w-[150px]">
-            <label class="modal-label">Data e Materia</label>
-            <div class="flex gap-2">
-                <input type="date" class="shared-calendar modal-input !py-2">
-                <select id="input-grade-subject" class="modal-input !py-2"></select>
-            </div>
-        </div>
-        <div class="w-32">
-            <label class="modal-label">Voto</label>
-            <select id="input-grade-val" class="modal-input !py-2"></select>
-        </div>
-        <div class="flex items-center gap-2 mb-2">
-            <input type="checkbox" id="input-grade-nv" class="w-4 h-4 accent-blue-600 cursor-pointer">
-            <label for="input-grade-nv" class="text-[9px] font-black uppercase text-zinc-200 cursor-pointer">Non Valutato</label>
-        </div>
-        <button onclick="window.submitGrade()" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase transition-all shadow-md">Registra</button>
-    </div>
-
-
-<!-- Barra dei controlli sopra la tabella -->
-<div class="flex justify-between items-center px-4 mb-2">
-    <div class="flex items-center gap-2">
-        <!-- Qui verrà iniettato il tasto Reset solo per gli Admin -->
-        <div id="admin-reset-container"></div>
+    <!-- Top Bar: Info Studente + Navigazione + Switcher -->
+    <div class="student-nav-bar flex flex-wrap items-center justify-between gap-3 bg-blue-900 p-3 rounded-2xl shadow-md border border-blue-800">
         
+        <!-- Sinistra: Info Studente (Avatar, Nome, Media) + Pulsanti Navigazione -->
+        <div class="flex items-center gap-3">
+            <!-- Header Studente Integrato (Gli ID servono al JS per popolare senza toccare i file script) -->
+            <div id="student-header" class="flex items-center gap-3 pr-3 border-r border-blue-800">
+                <img id="res-student-avatar" src="" class="w-9 h-9 rounded-xl object-cover border border-white/20 bg-zinc-800 shadow-sm">
+                <div class="flex flex-col">
+                    <span id="res-student-role" class="hidden">---</span>
+                    <h2 id="res-student-name" class="text-xs font-black uppercase text-white tracking-tight leading-none">Dati Studente</h2>
+                    <div class="flex items-center gap-1 mt-0.5">
+                        <span class="text-[8px] uppercase font-bold text-blue-200">Media:</span>
+                        <span id="res-student-media" class="text-xs font-black text-emerald-400">0.0</span>
+                    </div>
+                </div>
             </div>
 
-    <!-- Pulsante Medie-->
-    <button onclick="window.toggleMedieQuad()" class="bg-zinc-800 text-zinc-400 text-[9px] font-black uppercase px-3 py-1 rounded-lg hover:text-white transition-all border border-zinc-700">
-        📊 <span id="btn-text-medie">Mostra Medie Quadrimestri</span>
-    </button>
-</div>
+            <!-- Pulsanti Navigazione Compatti -->
+            <div class="flex items-center gap-1.5">
+                <button onclick="window.changeMenu('classi')" title="Torna all'Hub Classe" class="btn-back-to-hub hidden bg-red-700/30 hover:bg-red-700 text-red-200 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border border-red-500/30">
+                    ⬅️ Hub
+                </button>
+                <button onclick="window.changeMenu('studenti')" title="Elenco Studenti" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all">
+                    👥 Studenti
+                </button>
+                <button onclick="window.resetClassSelection()" title="Cambia Classe" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all">
+                    🏫 Classe
+                </button>
+                <button onclick="window.selectAndGoToProfile(window.selectedStudentId)" title="Profilo Studente" class="btn-staff-nav hidden bg-red-700/30 hover:bg-red-700 text-red-200 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border border-red-500/30">
+                    👤 Profilo
+                </button>
+            </div>
+        </div>
 
-    <!-- Tabella Registro -->
-    <div class="registry-container">
+        <!-- Destra: Switcher Rapido -->
+        <div class="flex items-center gap-2 bg-blue-950/50 px-2 py-1 rounded-xl border border-white/10">
+            <span class="text-[8px] font-black text-blue-300 uppercase">Passa a:</span>
+            <select onchange="window.quickSwitchStudent(this.value)" 
+                    class="quick-student-switcher bg-blue-800 text-white text-[10px] font-black uppercase outline-none cursor-pointer px-2 py-1 rounded-lg border border-blue-700">
+            </select>
+        </div>
+    </div>
+
+    <!-- Pannello Inserimento Voto Prof + Reset Admin (Ingombro ridotto) -->
+    <div id="prof-grade-panel" class="hidden bg-red-700 p-3 rounded-xl border border-red-800 shadow-sm flex flex-wrap gap-3 items-center justify-between">
+        <div class="flex flex-wrap items-center gap-3 flex-1">
+            <div class="flex items-center gap-2">
+                <input type="date" class="shared-calendar modal-input !py-1 !px-2 text-xs">
+                <select id="input-grade-subject" class="modal-input !py-1 !px-2 text-xs"></select>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="text-[9px] font-black uppercase text-red-100">Voto:</span>
+                <select id="input-grade-val" class="modal-input !py-1 !px-2 text-xs w-20"></select>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <input type="checkbox" id="input-grade-nv" class="w-3.5 h-3.5 accent-blue-600 cursor-pointer">
+                <label for="input-grade-nv" class="text-[9px] font-black uppercase text-red-100 cursor-pointer">N.V.</label>
+            </div>
+            <button onclick="window.submitGrade()" class="bg-red-900 hover:bg-red-950 text-white px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border border-red-600/50 shadow">
+                Registra
+            </button>
+        </div>
+
+        <!-- Contenitore Reset Voti spostato qui dentro a destra -->
+        <div id="admin-reset-container" class="flex items-center"></div>
+    </div>
+
+    <!-- Controlli Tabella (Medie Quadrimestri) -->
+    <div class="flex justify-end items-center px-1">
+        <button onclick="window.toggleMedieQuad()" class="bg-zinc-800 text-zinc-300 text-[9px] font-black uppercase px-2.5 py-1 rounded-lg hover:text-white transition-all border border-zinc-700">
+            📊 <span id="btn-text-medie">Mostra Medie Quadrimestri</span>
+        </button>
+    </div>
+
+    <!-- Tabella Registro (Design Snello e Compatto) -->
+    <div class="registry-container border border-zinc-200 rounded-xl overflow-hidden bg-white shadow-sm">
         <div class="overflow-x-auto">
-<table class="w-full text-left registry-table border-collapse">
+            <table class="w-full text-left registry-table border-collapse text-[11px]">
                 <thead>
-                    <tr class="w-full">
-                        <th class="w-2/5">MATERIA</th>
-                        <th class="w-1/5 text-center">1° QUADRIMESTRE</th>
-                        <th class="w-1/5 text-center">2° QUADRIMESTRE</th>
-                        <th class="w-1/5 text-right pr-6">MEDIA</th>
+                    <tr class="bg-zinc-900 text-white uppercase text-[9px] font-black tracking-wider border-b border-zinc-800">
+                        <th class="p-2.5 w-2/5 border-r border-zinc-800">Materia</th>
+                        <th class="p-2.5 w-1/5 text-center border-r border-zinc-800">1° Quadrimestre</th>
+                        <th class="p-2.5 w-1/5 text-center border-r border-zinc-800">2° Quadrimestre</th>
+                        <th class="p-2.5 w-1/5 text-right pr-4">Media</th>
                     </tr>
                 </thead>
-                <tbody id="registro-voti-body" class="divide-y divide-slate-100">
+                <tbody id="registro-voti-body" class="divide-y divide-zinc-100">
                     <!-- Righe popolate via JS -->
                 </tbody>
             </table>
         </div>
     </div>
+
 </div>
 
 
