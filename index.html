@@ -3171,10 +3171,14 @@ await setDoc(agendaRef, {
     }) 
 }, { merge: true });
             
-            document.getElementById('input-grade-val').value = "";
+                        document.getElementById('input-grade-val').value = "";
             document.getElementById('input-grade-nv').checked = false;
             alert("Voto registrato nel profilo e in agenda!");
             loadStudentRecords(window.selectedStudentId);
+
+            // Refresh viste globali se attive
+            if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+            if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
         };
 
         window.openModal = (type) => {
@@ -3926,9 +3930,12 @@ window.editVoto = async (idRicevuto, studentId) => {
         }
     }
 
-    // --- INSERIMENTO O AGGIORNAMENTO NEL NUOVO DOCUMENTO AGENDA V2 ---
+        // --- INSERIMENTO O AGGIORNAMENTO NEL NUOVO DOCUMENTO AGENDA V2 ---
+    const studentObj = window.allStudents.find(s => s.id === studentId);
+    const realName = studentObj ? studentObj.name : (vecchioVoto.studente || "Studente");
+
     const entryNuovaAgenda = {
-        studente: document.getElementById('res-student-name')?.innerText || vecchioVoto.studente || "Studente",
+        studente: realName.toUpperCase(),
         studenteId: studentId,
         voto: nuovoVotoVal,
         materia: vecchioVoto.materia,
