@@ -2959,8 +2959,8 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
             const avgQ2 = q2Validi.length ? (q2Validi.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / q2Validi.length).toFixed(1) : "-";
             const avgTotal = mValidi.length ? (mValidi.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / mValidi.length).toFixed(1) : "0.0";
 
-            const canReset = [ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole) || 
-                             (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
+const canReset = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole) || 
+                 (window.userRole === ROLES.PROF && (window.currentUserData?.materie || []).map(x => x.toLowerCase()).includes(m.toLowerCase()));
 
             vHtml += `
     <tr class="group hover:bg-slate-50/50 transition-colors border-b border-zinc-100">
@@ -3105,9 +3105,9 @@ function renderVotoTag(v, studentId) {
     const valNum = window.parseVotoScolastico(v.voto);
     let statusClass = valNum >= 6 ? "grade-positive" : (valNum > 0 ? "grade-negative" : "grade-neutral");
     if (v.nonValutato) statusClass = "grade-nv";
-    const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.ADMIN].includes(window.userRole) 
-        ? `onclick="window.editVoto('${v.id}', '${studentId}')" oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"` 
-        : "";
+const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole) 
+    ? `onclick="window.editVoto('${v.id}', '${studentId}')" oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"` 
+    : "";
 
     return `<span class="grade-badge inline-flex items-center justify-center font-black cursor-pointer transition-transform hover:scale-110 active:scale-90 ${statusClass}" title="${v.data} - ${v.argomento || ''}" ${handlers}>${v.voto}</span>`;
 }
@@ -5800,9 +5800,9 @@ tbody.innerHTML = allData.map(s => {
                 const dataBreve = v.data ? v.data.substring(0, 5) : '--/--';
                 const bgClass = v.nonValutato ? 'bg-blue-900/20 border-blue-500/30' : 'bg-black/20 border-white/5';
 
-                const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.ADMIN].includes(window.userRole) 
-                    ? `onclick="window.editVoto('${v.id}', '${s.id}')" oncontextmenu="window.deleteVoto('${v.id}', '${s.id}'); return false;"` 
-                    : "";
+const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole) 
+    ? `onclick="window.editVoto('${v.id}', '${student.id}')" oncontextmenu="window.deleteVoto('${v.id}', '${student.id}'); return false;"` 
+    : "";
 
                 return `
                     <div class="flex flex-col items-center justify-center min-w-[28px] p-1 ${bgClass} rounded border shadow-inner cursor-pointer transition-transform hover:scale-110"
@@ -7973,9 +7973,9 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
     // 1. Recupera l'anno (formatta come richiesto dal tuo helper)
     const ay = document.getElementById('current-academic-year')?.innerText.replace('A.S. ', '').trim() || "";
     
-    if (![ROLES.ADMIN, ROLES.PRESIDE].includes(window.userRole)) {
-        return alert("⚠️ Azione non autorizzata.");
-    }
+if (![ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole)) {
+    return alert("⚠️ Azione non autorizzata.");
+}
 
     if (!confirm(`⚠️ ATTENZIONE: Sei sicuro di voler ELIMINARE TUTTI i voti dell'A.S. ${ay}?`)) return;
 
