@@ -3665,16 +3665,10 @@ if (currentIdCheck === MY_ID || window.userRole === 'Admin') {
 
 
 window.changeMenu = (menu) => {
-    // Reset della selezione studente quando si esce dalle viste specifiche (solo per Staff/Admin)
-    // Impedisce che rientrando nel registro si veda ancora l'ultimo studente selezionato
     const studentViews = ['registro', 'note', 'pagella'];
-    if (!studentViews.includes(menu) && window.userRole !== 'studente') {
-        window.selectedStudentId = null;
-    }
 
-    if (studentViews.includes(menu) && !window.selectedStudentId) {
-        window.clearStudentViews();
-    }
+    // Se entriamo in una vista studente e abbiamo già un ID selezionato (es. venendo dal profilo)
+    // forziamo l'attivazione della UI
     // --- PEZZO AGGIUNTO (Blocco 5) ---
     if (menu === 'studenti') {
         if (typeof window.renderStudentList === 'function') window.renderStudentList();
