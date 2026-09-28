@@ -8389,7 +8389,7 @@ window.submitQuickMassGrades = async () => {
     const rows = document.querySelectorAll('.mass-row');
     if (rows.length === 0) return;
 
-    // --- RICERCA DOCENTE ASSEGNATO (SPOSTATA PRIMA DELL'ORARIO) ---
+    // --- RICERCA DOCENTE ASSEGNATO ---
     const profAssegnato = window.allStudents.find(u => {
         const r = (u.role || '').toLowerCase();
         const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice');
@@ -8404,7 +8404,7 @@ window.submitQuickMassGrades = async () => {
     // Recuperiamo l'orario usando il finalProfId CORRETTO
     const infoOrario = window.getProfDaysForSubject(finalProfId, sub, targetClass);
 
-    if (!confirm(`Stai per registrare ${rows.length} valutazioni individuali per la classe ${targetClass}.\nDocente Firmatario: ${finalProfName}\nProcedere?`)) return;
+    if (!confirm(`Stai per registrare le valutazioni individuali per la classe ${targetClass}.\nDocente Firmatario: ${finalProfName}\nProcedere?`)) return;
 
     const btn = document.getElementById('modal-confirm');
     btn.disabled = true;
@@ -8412,73 +8412,84 @@ window.submitQuickMassGrades = async () => {
 
     // Mappa per raggruppare firme e voti giornalieri per data
     const agendaUpdatesByDate = {};
+    let totalVotesSaved = 0;
 
     for (const row of rows) {
         const sid = row.dataset.sid;
-        const grade = row.querySelector('.mass-grade').value;
-        const dateVal = row.querySelector('.mass-date').value; // Formato YYYY-MM-DD
-
-        if (!grade || !dateVal) continue;
-
-        const [yyyy, mm, dd] = dateVal.split('-');
-        const dateIta = `${dd}/${mm}/${yyyy}`;
-        const quad = (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2;
-        
-        // Trova il nome dello studente corrispondente alla riga
         const studentObj = window.allStudents.find(s => s.id === sid);
         const studentName = studentObj ? studentObj.name : "Studente Sconosciuto";
 
-        // 1. SALVATAGGIO NEL RECORD PERSONALE DELLO STUDENTE (VOTI)
-        const recordRef = window.getRecordDocRef(sid, ay, 'voti');
-        await setDoc(recordRef, {
-            voti: arrayUnion({
-                id: crypto.randomUUID(),
+        // Selezioniamo TUTTI gli slot (multi-voto) presenti nella riga dello studente
+        const slots = row.querySelectorAll('.mass-slot');
+
+        for (const slot of slots) {
+            const gradeInput = slot.querySelector('.mass-grade');
+            const dateInput = slot.querySelector('.mass-date');
+
+            if (!gradeInput || !dateInput) continue;
+
+            const grade = gradeInput.value.trim();
+            const dateVal = dateInput.value; // Formato YYYY-MM-DD
+
+            if (!grade || !dateVal) continue;
+
+            const [yyyy, mm, dd] = dateVal.split('-');
+            const dateIta = `${dd}/${mm}/${yyyy}`;
+            const quad = (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2;
+
+            // 1. SALVATAGGIO NEL RECORD PERSONALE DELLO STUDENTE (VOTI)
+            const recordRef = window.getRecordDocRef(sid, ay, 'voti');
+            await setDoc(recordRef, {
+                voti: arrayUnion({
+                    id: crypto.randomUUID(),
+                    voto: grade.toString(),
+                    materia: sub.toLowerCase(),
+                    data: dateIta,
+                    prof: finalProfName,
+                    profId: finalProfId,
+                    argomento: `Prova ${type}`,
+                    quad: quad,
+                    anno: ay,
+                    emoji: LISTA_MATERIE[sub.toLowerCase()] || (type === 'Scritto' ? "📝" : "🗣️")
+                })
+            }, { merge: true });
+
+            totalVotesSaved++;
+
+            // Prepara la struttura di raggruppamento temporanea per l'agenda giornaliera
+            if (!agendaUpdatesByDate[dateVal]) {
+                const localDateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+                const localDayOfWeek = localDateObj.getDay();
+
+                const oraDaOrario = (infoOrario && infoOrario.ore && infoOrario.ore[localDayOfWeek]) 
+                    ? infoOrario.ore[localDayOfWeek] 
+                    : "1";
+
+                agendaUpdatesByDate[dateVal] = {
+                    firme: {
+                        ora: oraDaOrario.toString(),
+                        tipo: "Verifica", 
+                        materia: sub.toUpperCase(), 
+                        argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
+                        prof: finalProfName, 
+                        profId: finalProfId
+                    },
+                    votiGiornalieri: []
+                };
+            }
+
+            // Aggiungi il voto dell'evento specifico all'elenco giornaliero per quella data
+            agendaUpdatesByDate[dateVal].votiGiornalieri.push({
+                studente: studentName.toUpperCase(),
+                studenteId: sid,
                 voto: grade.toString(),
                 materia: sub.toLowerCase(),
-                data: dateIta,
-                prof: finalProfName,
-                profId: finalProfId,
-                argomento: `Prova ${type}`,
-                quad: quad,
-                anno: ay,
-                emoji: LISTA_MATERIE[sub.toLowerCase()] || (type === 'Scritto' ? "📝" : "🗣️")
-            })
-        }, { merge: true });
-
-        // Prepara la struttura di raggruppamento temporanea per l'agenda giornaliera
-        if (!agendaUpdatesByDate[dateVal]) {
-            const localDateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
-            const localDayOfWeek = localDateObj.getDay();
-
-            // Estrae l'ora reale dall'orario. Se non esiste per quel giorno, usa la prima ora ("1")
-            const oraDaOrario = (infoOrario && infoOrario.ore && infoOrario.ore[localDayOfWeek]) 
-                ? infoOrario.ore[localDayOfWeek] 
-                : "1";
-
-            agendaUpdatesByDate[dateVal] = {
-                firme: {
-                    ora: oraDaOrario.toString(),
-                    tipo: "Verifica", 
-                    materia: sub.toUpperCase(), 
-                    argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
-                    prof: finalProfName, 
-                    profId: finalProfId
-                },
-                votiGiornalieri: []
-            };
+                argomento: `Prova ${type}`
+            });
         }
-
-        // Aggiungi il voto di questo specifico studente all'elenco giornaliero di questa data
-        agendaUpdatesByDate[dateVal].votiGiornalieri.push({
-            studente: studentName.toUpperCase(),
-            studenteId: sid,
-            voto: grade.toString(),
-            materia: sub.toLowerCase(),
-            argomento: `Prova ${type}`
-        });
     }
 
-    // 2. SALVATAGGIO IN AGENDA (FIRME + DAILY_VOTI INSIEME!)
+    // 2. SALVATAGGIO IN AGENDA (FIRME + DAILY_VOTI INSIEME)
     for (const d of Object.keys(agendaUpdatesByDate)) {
         const agendaRef = window.getAgendaDocRef(targetClass, d);
         const dataGiorno = agendaUpdatesByDate[d];
@@ -8489,7 +8500,7 @@ window.submitQuickMassGrades = async () => {
         }, { merge: true });
     }
 
-    alert(`✅ Operazione completata!\n${rows.length} voti registrati a nome di: ${finalProfName}`);
+    alert(`✅ Operazione completata!\n${totalVotesSaved} voti totali registrati a nome di: ${finalProfName}`);
     window.closeModal();
     if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
     else window.handleClassChange();
