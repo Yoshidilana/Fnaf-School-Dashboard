@@ -3951,8 +3951,12 @@ window.editVoto = async (idRicevuto, studentId) => {
         }
     }
 
-    alert("✅ Aggiornamento completato!");
+        alert("✅ Aggiornamento completato!");
     if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
+    
+    // Refresh viste globali se attive
+    if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+    if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
 };
 
 window.deleteNote = async (idx, studentId) => {
@@ -5260,8 +5264,12 @@ window.deleteVoto = async (idRicevuto, studentId) => {
             console.error("Errore pulizia agenda:", agendaError);
         }
 
-        alert("✅ Voto eliminato correttamente.");
+                alert("✅ Voto eliminato correttamente.");
         if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
+
+        // Refresh viste globali se attive
+        if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+        if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
 
     } catch (error) {
         console.error("Errore eliminazione:", error);
@@ -7718,8 +7726,12 @@ window.deleteAllGradesBySubject = async (studentId, subject) => {
             }
         }
 
-        alert(`✅ Pulizia completata: rimossi ${votiDaEliminare.length} voti di ${subjectUpper}.`);
+                alert(`✅ Pulizia completata: rimossi ${votiDaEliminare.length} voti di ${subjectUpper}.`);
         if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
+
+        // Refresh viste globali se attive
+        if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+        if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
 
     } catch (error) {
         console.error("Errore durante il reset della materia:", error);
@@ -7985,8 +7997,12 @@ window.deleteAllGradesAllSubjects = async (studentId) => {
         // Ora basta scrivere un array vuoto nel documento dell'anno specifico
         await setDoc(recordRef, { voti: [] }, { merge: true });
 
-        alert(`🗑️ Voti dell'A.S. ${ay} eliminati correttamente.`);
+                alert(`🗑️ Voti dell'A.S. ${ay} eliminati correttamente.`);
         if (typeof loadStudentRecords === 'function') loadStudentRecords(studentId);
+
+        // Refresh viste globali se attive
+        if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+        if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
 
     } catch (error) {
         console.error("Errore:", error);
@@ -8556,10 +8572,15 @@ window.submitQuickMassGrades = async () => {
         }, { merge: true });
     }
 
-    alert(`✅ Operazione completata!\n${totalVotesSaved} voti totali registrati a nome di: ${finalProfName}`);
+        alert(`✅ Operazione completata!\n${totalVotesSaved} voti totali registrati a nome di: ${finalProfName}`);
     window.closeModal();
+    
     if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
     else window.handleClassChange();
+
+    // Refresh immediato delle tabelle collettive
+    if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+    if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
 };
 
 // --- SISTEMA ORARIO SETTIMANALE ---
