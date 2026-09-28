@@ -2902,29 +2902,40 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
         let materiePrincipali = [];
         let materieSecondarie = [];
 
-        if (window.userRole === ROLES.PROF) {
-            const mieMaterie = (window.currentUserData?.materie || []).map(m => m.toLowerCase().trim());
-            
-            if (materieUfficialiAnno && materieUfficialiAnno.length > 0) {
-                // In alto solo la materia del prof, in basso le altre ufficiali dell'anno
-                materiePrincipali = materieUfficialiAnno.filter(m => mieMaterie.includes(m));
-                materieSecondarie = materieUfficialiAnno.filter(m => !mieMaterie.includes(m));
-            } else {
-                // Fallback se le materie per anno non sono salvate
-                materiePrincipali = materie.filter(m => mieMaterie.includes(m.toLowerCase().trim()));
-                const votiMaterie = votiTuttoAnno.map(v => v.materia.toLowerCase().trim());
-                materieSecondarie = [...new Set(votiMaterie)].filter(m => !mieMaterie.includes(m));
-            }
-        } else {
-            if (materieUfficialiAnno && materieUfficialiAnno.length > 0) {
-                materiePrincipali = [...materieUfficialiAnno];
-                const votiExtra = votiTuttoAnno.map(v => v.materia.toLowerCase().trim());
-                materieSecondarie = [...new Set(votiExtra)].filter(m => !materieUfficialiAnno.includes(m));
-            } else {
-                materiePrincipali = [...materie];
-                materieSecondarie = [];
-            }
+const isDocenteOAreaDirigenziale = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
+
+if (isDocenteOAreaDirigenziale) {
+    // Recupera le materie assegnate all'utente loggato (anche se è un Preside che insegna)
+    const mieMaterie = (window.currentUserData?.materie || []).map(m => m.toLowerCase().trim());
+    
+    if (materieUfficialiAnno && materieUfficialiAnno.length > 0) {
+        // Visualizza in alto le proprie materie, il resto va in "Altre Materie"
+        materiePrincipali = materieUfficialiAnno.filter(m => mieMaterie.includes(m));
+        materieSecondarie = materieUfficialiAnno.filter(m => !mieMaterie.includes(m));
+        
+        // Se il Preside/Vice non ha materie assegnate come docente, 
+        // le materie principali risulterebbero vuote. In quel caso mostriamo tutto normalmente.
+        if (materiePrincipali.length === 0) {
+            materiePrincipali = [...materieUfficialiAnno];
+            materieSecondarie = [];
         }
+    } else {
+        // Fallback se le materie ufficiali non sono configurate
+        materiePrincipali = materie.filter(m => mieMaterie.includes(m.toLowerCase().trim()));
+        const votiMaterie = votiTuttoAnno.map(v => v.materia.toLowerCase().trim());
+        materieSecondarie = [...new Set(votiMaterie)].filter(m => !mieMaterie.includes(m));
+    }
+} else {
+    // Studenti e Ospiti vedono tutto insieme come primario
+    if (materieUfficialiAnno && materieUfficialiAnno.length > 0) {
+        materiePrincipali = [...materieUfficialiAnno];
+        const votiExtra = votiTuttoAnno.map(v => v.materia.toLowerCase().trim());
+        materieSecondarie = [...new Set(votiExtra)].filter(m => !materieUfficialiAnno.includes(m));
+    } else {
+        materiePrincipali = [...materie];
+        materieSecondarie = [];
+    }
+}
 
         materiePrincipali.sort((a, b) => a.localeCompare(b));
         materieSecondarie.sort((a, b) => a.localeCompare(b));
