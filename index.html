@@ -2046,8 +2046,9 @@ main {
         window.userRole = 'ospite'; 
         window.currentUserData = null;
         window.selectedClass = null;
-        window.selectedStudentId = null;
+                window.selectedStudentId = null;
         window.allStudents = [];
+        window.showMedieQuad = false;
 
         // --- DATE & ACADEMIC YEAR (Versione Corretta Locale) ---
 const inputCal = document.getElementById('global-calendar');
@@ -2972,8 +2973,18 @@ if (classConfig.materiePerAnno && classConfig.materiePerAnno[ay]) {
                 <span class="text-[9px] text-slate-400 font-bold uppercase leading-none mt-0.5">👨‍🏫 ${nomeDocente}</span>
             </div>
         </td>
-        <td class="text-center p-2"><div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-300 text-xs">-</span>'}</div></td>
-        <td class="text-center p-2"><div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-300 text-xs">-</span>'}</div></td>
+                <td class="text-center p-2">
+            <div class="flex flex-wrap justify-center gap-1.5">${q1.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-300 text-xs">-</span>'}</div>
+            <div class="media-quad-box ${window.showMedieQuad ? '' : 'hidden'} mt-2 pt-1 border-t border-zinc-100">
+                <span class="text-[10px] font-black ${(avgQ1 !== '-' && parseFloat(avgQ1) < 6) ? 'text-red-500' : 'text-emerald-600'}">Media: ${avgQ1}</span>
+            </div>
+        </td>
+        <td class="text-center p-2">
+            <div class="flex flex-wrap justify-center gap-1.5">${q2.map(v => renderVotoTag(v, studentId)).join('') || '<span class="text-slate-300 text-xs">-</span>'}</div>
+            <div class="media-quad-box ${window.showMedieQuad ? '' : 'hidden'} mt-2 pt-1 border-t border-zinc-100">
+                <span class="text-[10px] font-black ${(avgQ2 !== '-' && parseFloat(avgQ2) < 6) ? 'text-red-500' : 'text-emerald-600'}">Media: ${avgQ2}</span>
+            </div>
+        </td>
         <td class="text-right pr-4 py-2 bg-zinc-900/5">
             <div class="inline-flex flex-col items-end">
                 <span class="text-xs font-black px-2 py-0.5 rounded-md ${parseFloat(avgTotal) < 6 ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'}">
@@ -7578,16 +7589,21 @@ window.getTrienniumCredits = async (studentId, startYear) => {
 };
 
 window.toggleMedieQuad = () => {
+    window.showMedieQuad = !window.showMedieQuad;
     const boxes = document.querySelectorAll('.media-quad-box');
     const btnText = document.getElementById('btn-text-medie');
     
-    window.showMedieQuad = !window.showMedieQuad; // Inverte lo stato
-
     boxes.forEach(box => {
-        box.classList.toggle('hidden', !window.showMedieQuad);
+        if (window.showMedieQuad) {
+            box.classList.remove('hidden');
+        } else {
+            box.classList.add('hidden');
+        }
     });
 
-    btnText.innerText = window.showMedieQuad ? "Nascondi Medie Quadrimestri" : "Mostra Medie Quadrimestri";
+    if (btnText) {
+        btnText.innerText = window.showMedieQuad ? "Nascondi Medie Quadrimestri" : "Mostra Medie Quadrimestri";
+    }
 };
 
 // Mappa globale temporanea per le materie della classe aperta nel modal
