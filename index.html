@@ -3691,6 +3691,11 @@ window.changeMenu = (menu) => {
     if (['registro', 'note', 'pagella'].includes(menu)) {
         window.updateQuickStudentSwitchers();
     }
+
+        if (window.selectedStudentId) {
+            window.selectStudent(window.selectedStudentId);
+        }
+
 	if (menu === 'chat-staff') {
     window.loadStaffChat();
 }
@@ -3959,7 +3964,9 @@ window.editVoto = async (idRicevuto, studentId) => {
     }
 
         alert("✅ Aggiornamento completato!");
-    if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
+if (typeof loadStudentRecords === "function" && window.selectedStudentId) {
+    loadStudentRecords(window.selectedStudentId);
+}
     
     // Refresh viste globali se attive
     if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
@@ -5272,7 +5279,9 @@ window.deleteVoto = async (idRicevuto, studentId) => {
         }
 
                 alert("✅ Voto eliminato correttamente.");
-        if (typeof loadStudentRecords === "function") loadStudentRecords(studentId);
+if (typeof loadStudentRecords === "function" && window.selectedStudentId) {
+    loadStudentRecords(window.selectedStudentId);
+}
 
         // Refresh viste globali se attive
         if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
