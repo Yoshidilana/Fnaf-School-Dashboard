@@ -8203,10 +8203,9 @@ window.prepareMassGradesList = () => {
     const maxV = parseInt(document.getElementById('quick-mass-max').value);
     const students = window.allStudents.filter(s => s.classe === window.selectedClass);
 
-    // --- NUOVA LOGICA IDENTIFICAZIONE DOCENTE PER ADMIN ---
-    let teacherIdToSearch = window.currentUserId; // Di base usa l'utente loggato
+    // --- LOGICA IDENTIFICAZIONE DOCENTE PER ADMIN ---
+    let teacherIdToSearch = window.currentUserId; 
 
-    // Se chi preme è un Admin, cerchiamo il prof "titolare" della materia in questa classe
     if (window.userRole === 'admin') {
         const assignedTeacher = window.allStudents.find(u => {
             const r = (u.role || '').toLowerCase();
@@ -8218,15 +8217,15 @@ window.prepareMassGradesList = () => {
         
         if (assignedTeacher) {
             teacherIdToSearch = assignedTeacher.id;
-            console.log(`[ADMIN-MODE] Cerco orario del prof titolare: ${assignedTeacher.name}`);
         }
     }
     
-        // --- LOGICA ORARIO (GIORNI SELEZIONATI DA CHECKBOX) ---
+    // --- LOGICA ORARIO (GIORNI SELEZIONATI DA CHECKBOX) ---
     const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
     const giorniValidi = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
     const giorniFermi = giorniValidi.length > 0 ? giorniValidi : [1, 2, 3, 4, 5, 6];
-    const voteCount = parseInt(document.getElementById('quick-mass-count').value) || 1;
+    
+    const voteCount = parseInt(document.getElementById('quick-mass-count')?.value) || 1;
     
     const listContainer = document.getElementById('mass-students-list');
     const step1 = document.getElementById('mass-step-1');
@@ -8241,46 +8240,79 @@ window.prepareMassGradesList = () => {
     confirmBtn.onclick = window.submitQuickMassGrades;
 
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
-    const masterMonthSelect = document.getElementById('mass-master-month');
-    const defaultMonth = masterMonthSelect ? parseInt(masterMonthSelect.value) : new Date(document.getElementById('global-calendar').value).getMonth();
+    const globalCalendarVal = document.getElementById('global-calendar')?.value;
+    const currentMonthIdx = globalCalendarVal ? new Date(globalCalendarVal).getMonth() : new Date().getMonth();
 
-    let headerHtml = "";
+    // Controlliamo se ci sono già dei selettori esistenti per non sovrascrivere le scelte dell'utente
+    const existingControls = document.querySelectorAll('.mass-master-control');
+    const currentControlValues = Array.from(existingControls).map(ctrl => ctrl.value);
 
-    if (type === 'Scritto' || type === 'Pratico') {
-        const commonDate = window.generateRandomValidDateString(defaultMonth, giorniFermi); 
-        headerHtml = `
-            <div class="p-3 bg-red-900/20 border border-red-900/30 rounded-xl mb-4">
-                <label class="modal-label !text-red-400">Data Unica Prova ${type}</label>
-                <input type="date" id="mass-common-date" value="${commonDate}" 
-                       onchange="document.querySelectorAll('.mass-date').forEach(i => i.value = this.value)"
-                       class="modal-input !py-2 bg-zinc-800 border-zinc-700 text-white rounded-lg w-full mt-1 outline-none">
-            </div>
-        `;
-    } else {
-        headerHtml = `
-            <div class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4">
-                <label class="modal-label">Mese per Interrogazioni (Orale)</label>
-                <select id="mass-master-month" class="modal-input !py-2" onchange="window.regenMassDatesByMonth(this.value)">
-                    ${monthNames.map((name, idx) => {
-                        if (idx === 6 || idx === 7) return ''; 
-                        return `<option value="${idx}" ${idx === defaultMonth ? 'selected' : ''}>${name.toUpperCase()}</option>`;
-                    }).join('')}
-                </select>
-            </div>
-        `;
+    // --- GENERAZIONE HEADER (UN CONTROLLO PER CIASCUN VOTO SELEZIONATO) ---
+    let headerHtml = `<div class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4 flex flex-col gap-3">`;
+    const activeVoteConfig = [];
+
+    for (let v = 0; v < voteCount; v++) {
+        // Se l'utente ha già scelto un mese/data per questo voto teniamo quello, altrimenti ne calcoliamo uno di partenza
+        let savedVal = currentControlValues[v];
+
+        if (type === 'Scritto' || type === 'Pratico') {
+            let defaultDate = savedVal;
+            if (!defaultDate) {
+                let targetMonth = (currentMonthIdx + v) % 12;
+                if (targetMonth === 6 || targetMonth === 7) targetMonth = 8;
+                defaultDate = window.generateRandomValidDateString(targetMonth, giorniFermi);
+            }
+            activeVoteConfig.push(defaultDate);
+
+            headerHtml += `
+                <div class="flex flex-col gap-1">
+                    <label class="modal-label !text-red-400 font-bold">Data Prova ${type} (Voto ${v + 1})</label>
+                    <input type="date" value="${defaultDate}" data-vote-idx="${v}"
+                           onchange="window.updateMassSlotDatesByVoteIndex(${v}, this.value)"
+                           class="mass-master-control modal-input !py-2 bg-zinc-800 border-zinc-700 text-white rounded-lg w-full outline-none">
+                </div>
+            `;
+        } else {
+            let targetMonth = savedVal !== undefined ? parseInt(savedVal) : (currentMonthIdx + v) % 12;
+            if (savedVal === undefined && (targetMonth === 6 || targetMonth === 7)) targetMonth = 8;
+            
+            activeVoteConfig.push(targetMonth);
+
+            headerHtml += `
+                <div class="flex flex-col gap-1">
+                    <label class="modal-label font-bold text-zinc-300">Mese per Interrogazioni - Voto ${v + 1}</label>
+                    <select data-vote-idx="${v}" onchange="window.regenMassSlotDatesByMonth(${v}, this.value)" 
+                            class="mass-master-control modal-input !py-2 bg-zinc-800 border-zinc-700 text-white rounded-lg w-full outline-none">
+                        ${monthNames.map((name, idx) => {
+                            if (idx === 6 || idx === 7) return ''; 
+                            return `<option value="${idx}" ${idx === targetMonth ? 'selected' : ''}>${name.toUpperCase()}</option>`;
+                        }).join('')}
+                    </select>
+                </div>
+            `;
+        }
     }
+    headerHtml += `</div>`;
 
+    // --- GENERAZIONE RIGHE STUDENTI ---
     listContainer.innerHTML = headerHtml + students.map((s) => {
         let studentSlotsHtml = "";
-        for(let i=0; i < voteCount; i++) {
+
+        for (let i = 0; i < voteCount; i++) {
             let base = Math.floor(Math.random() * (maxV - minV + 1)) + minV;
             const mods = ["", "+", "-", "½"];
             let mod = base === 10 ? "" : mods[Math.floor(Math.random() * mods.length)];
             const finalGrade = base + mod;
-            const studentDate = window.generateRandomValidDateString(defaultMonth, giorniFermi);
+            
+            let studentDate;
+            if (type === 'Scritto' || type === 'Pratico') {
+                studentDate = activeVoteConfig[i];
+            } else {
+                studentDate = window.generateRandomValidDateString(activeVoteConfig[i], giorniFermi);
+            }
 
             studentSlotsHtml += `
-                <div class="flex gap-2 mt-1 mass-slot">
+                <div class="flex gap-2 mt-1 mass-slot" data-vote-idx="${i}">
                     <input type="text" value="${finalGrade}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-[10px] font-black p-1 rounded-lg">
                     <input type="date" value="${studentDate}" class="mass-date flex-1 bg-zinc-800 border border-zinc-700 text-white text-[10px] p-1 rounded-lg outline-none">
                 </div>
@@ -8296,6 +8328,30 @@ window.prepareMassGradesList = () => {
             </div>
         `;
     }).join('');
+};
+
+// --- AGGIORNO SOLO LO SLOT DEL VOTO SELEZIONATO SE SI CAMBIA IL MESE ---
+window.regenMassSlotDatesByMonth = (voteIndex, newMonth) => {
+    const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
+    const giorniValidi = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
+    const giorniFermi = giorniValidi.length > 0 ? giorniValidi : [1, 2, 3, 4, 5, 6];
+
+    document.querySelectorAll(`.mass-slot[data-vote-idx="${voteIndex}"]`).forEach(slot => {
+        const dateInput = slot.querySelector('.mass-date');
+        if (dateInput) {
+            dateInput.value = window.generateRandomValidDateString(parseInt(newMonth), giorniFermi);
+        }
+    });
+};
+
+// --- AGGIORNO LA DATA UNICA PER GLI SCRITTI/PRATICI ---
+window.updateMassSlotDatesByVoteIndex = (voteIndex, newDate) => {
+    document.querySelectorAll(`.mass-slot[data-vote-idx="${voteIndex}"]`).forEach(slot => {
+        const dateInput = slot.querySelector('.mass-date');
+        if (dateInput) {
+            dateInput.value = newDate;
+        }
+    });
 };
 
 // --- AGGIORNAMENTO DELLA FUNZIONE GENERATRICE DI DATE ---
