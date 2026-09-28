@@ -5812,7 +5812,7 @@ tbody.innerHTML = allData.map(s => {
                 const bgClass = v.nonValutato ? 'bg-blue-900/20 border-blue-500/30' : 'bg-black/20 border-white/5';
 
 const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole) 
-    ? `onclick="window.editVoto('${v.id}', '${student.id}')" oncontextmenu="window.deleteVoto('${v.id}', '${student.id}'); return false;"` 
+    ? `onclick="window.editVoto('${v.id}', '${s.id}')" oncontextmenu="window.deleteVoto('${v.id}', '${s.id}'); return false;"` 
     : "";
 
                 return `
