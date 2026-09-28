@@ -8430,7 +8430,7 @@ window.submitQuickMassGrades = async () => {
                 data: dateIta,
                 prof: finalProfName,
                 profId: finalProfId,
-                argomento: `Prova ${type} (Generata)`,
+                argomento: `Prova ${type}`,
                 quad: quad,
                 anno: ay,
                 emoji: LISTA_MATERIE[sub.toLowerCase()] || (type === 'Scritto' ? "📝" : "🗣️")
@@ -8466,7 +8466,7 @@ window.submitQuickMassGrades = async () => {
             studenteId: sid,
             voto: grade.toString(),
             materia: sub.toLowerCase(),
-            argomento: `Prova ${type} (Generata)`
+            argomento: `Prova ${type}`
         });
     }
 
