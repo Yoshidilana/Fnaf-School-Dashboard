@@ -8882,19 +8882,6 @@ window.jumpToEvent = async (direction) => {
     }
 };
 
-window.regenMassDatesByMonth = (newMonth) => {
-    const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
-    const giorniValidi = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-    const giorniFermi = giorniValidi.length > 0 ? giorniValidi : [1, 2, 3, 4, 5, 6];
-
-    // Seleziona tutti gli input data degli studenti e rigenerali casualmente
-    document.querySelectorAll('.mass-row').forEach(row => {
-        const dateInput = row.querySelector('.mass-date');
-        if (dateInput) {
-            dateInput.value = window.generateRandomValidDateString(parseInt(newMonth), giorniFermi);
-        }
-    });
-};
 
     window.addEventListener('load', () => {
         console.log("%cFazbear Classroom OS v4.0", "color: #dc2626; font-size: 16px; font-weight: 900;");
