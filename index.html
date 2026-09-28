@@ -8099,7 +8099,7 @@ window.openQuickMassGradesModal = () => {
                 </div>
             </div>
 
-            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                        <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
                 <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">3. Giorni Disponibili per Lezione</p>
                 <div class="grid grid-cols-3 gap-2">
                     <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
@@ -8127,6 +8127,17 @@ window.openQuickMassGradesModal = () => {
                         <span class="text-xs font-bold text-zinc-300">Sab</span>
                     </label>
                 </div>
+            </div>
+
+            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
+                <label class="modal-label">4. Numero di Voti per Studente</label>
+                <select id="quick-mass-count" class="modal-input !py-2">
+                    <option value="1">1 Voto (Standard)</option>
+                    <option value="2">2 Voti (Multi-voto)</option>
+                    <option value="3">3 Voti (Multi-voto)</option>
+                    <option value="4">4 Voti (Multi-voto)</option>
+                    <option value="5">5 Voti (Multi-voto)</option>
+                </select>
             </div>
 
             <button onclick="window.prepareMassGradesList()" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px]">Prepara Elenco Studenti →</button>
@@ -8211,10 +8222,11 @@ window.prepareMassGradesList = () => {
         }
     }
     
-    // --- LOGICA ORARIO (GIORNI SELEZIONATI DA CHECKBOX) ---
+        // --- LOGICA ORARIO (GIORNI SELEZIONATI DA CHECKBOX) ---
     const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
     const giorniValidi = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
     const giorniFermi = giorniValidi.length > 0 ? giorniValidi : [1, 2, 3, 4, 5, 6];
+    const voteCount = parseInt(document.getElementById('quick-mass-count').value) || 1;
     
     const listContainer = document.getElementById('mass-students-list');
     const step1 = document.getElementById('mass-step-1');
@@ -8224,21 +8236,11 @@ window.prepareMassGradesList = () => {
     step1.classList.add('hidden');
     step2.classList.remove('hidden');
     confirmBtn.classList.remove('hidden');
-    confirmBtn.disabled = false; // Riabilita il tasto per il nuovo utilizzo
+    confirmBtn.disabled = false;
     confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
     confirmBtn.onclick = window.submitQuickMassGrades;
 
-    // Genera la data comune basandosi sui giorni selezionati
-    const commonDate = window.generateRandomValidDateString(undefined, giorniValidi); 
-    
-    // --- NUOVA LOGICA: DETERMINAZIONE DEI DUE MESI CONSECUTIVI ---
-    const startingMonths = [8, 9, 10, 11, 0, 1, 2, 3]; 
-    const firstMonth = startingMonths[Math.floor(Math.random() * startingMonths.length)];
-    const secondMonth = (firstMonth === 11) ? 0 : firstMonth + 1;
-
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
-    
-    // Mese di default: usa quello selezionato nel modulo se già presente, altrimenti quello del calendario globale
     const masterMonthSelect = document.getElementById('mass-master-month');
     const defaultMonth = masterMonthSelect ? parseInt(masterMonthSelect.value) : new Date(document.getElementById('global-calendar').value).getMonth();
 
@@ -8260,31 +8262,37 @@ window.prepareMassGradesList = () => {
                 <label class="modal-label">Mese per Interrogazioni (Orale)</label>
                 <select id="mass-master-month" class="modal-input !py-2" onchange="window.regenMassDatesByMonth(this.value)">
                     ${monthNames.map((name, idx) => {
-                        // Mostriamo solo i mesi scolastici (Settembre-Giugno)
                         if (idx === 6 || idx === 7) return ''; 
                         return `<option value="${idx}" ${idx === defaultMonth ? 'selected' : ''}>${name.toUpperCase()}</option>`;
                     }).join('')}
                 </select>
-                <p class="text-[8px] text-zinc-500 mt-2 uppercase font-bold">Cambiando il mese, verranno rigenerate date casuali diverse per ogni studente.</p>
             </div>
         `;
     }
 
     listContainer.innerHTML = headerHtml + students.map((s) => {
-        // Generazione voto casuale
-        let base = Math.floor(Math.random() * (maxV - minV + 1)) + minV;
-        const mods = ["", "+", "-", "½"];
-        let mod = base === 10 ? "" : mods[Math.floor(Math.random() * mods.length)];
-        const finalGrade = base + mod;
+        let studentSlotsHtml = "";
+        for(let i=0; i < voteCount; i++) {
+            let base = Math.floor(Math.random() * (maxV - minV + 1)) + minV;
+            const mods = ["", "+", "-", "½"];
+            let mod = base === 10 ? "" : mods[Math.floor(Math.random() * mods.length)];
+            const finalGrade = base + mod;
+            const studentDate = window.generateRandomValidDateString(defaultMonth, giorniFermi);
 
-        // Generazione data casuale nel mese scelto
-        const studentDate = window.generateRandomValidDateString(defaultMonth, giorniFermi);
+            studentSlotsHtml += `
+                <div class="flex gap-2 mt-1 mass-slot">
+                    <input type="text" value="${finalGrade}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-[10px] font-black p-1 rounded-lg">
+                    <input type="date" value="${studentDate}" class="mass-date flex-1 bg-zinc-800 border border-zinc-700 text-white text-[10px] p-1 rounded-lg outline-none">
+                </div>
+            `;
+        }
 
         return `
-            <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex items-center gap-3" data-sid="${s.id}">
-                <div class="flex-1"><p class="text-[10px] font-black text-white uppercase truncate">${s.name}</p></div>
-                <input type="text" value="${finalGrade}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-xs font-black p-1.5 rounded-lg">
-                <input type="date" value="${studentDate}" class="mass-date bg-zinc-800 border border-zinc-700 text-white text-[10px] p-1.5 rounded-lg outline-none">
+            <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex flex-col gap-2" data-sid="${s.id}">
+                <p class="text-[10px] font-black text-white uppercase truncate border-b border-zinc-800 pb-1">${s.name}</p>
+                <div class="grid grid-cols-1 gap-1">
+                    ${studentSlotsHtml}
+                </div>
             </div>
         `;
     }).join('');
