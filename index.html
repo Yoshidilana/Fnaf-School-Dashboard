@@ -2356,60 +2356,184 @@ main {
     }
 
     #view-chat-staff {
-        width: min(100%, 76rem);
-        height: min(82vh, 58rem);
-        min-height: 26rem;
+        width: 100%;
+        max-width: 110rem;
+        height: min(calc(100vh - 10rem), 58rem);
+        min-height: 34rem;
+        flex: 0 0 auto;
+        gap: 1.25rem;
+        padding: 0.25rem 0 1rem;
+        color: #292322;
+    }
+
+    #view-chat-staff .staff-room-hero {
+        position: relative;
+        display: flex;
+        min-height: 8rem;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 1.25rem;
         overflow: hidden;
-        border: 1px solid #e7e0da;
-        border-radius: 26px;
-        background: #fff;
-        box-shadow: 0 22px 55px rgba(41, 30, 24, 0.12);
-    }
-
-    #view-chat-staff .staff-chat-header {
-        border-bottom: 1px solid #eee7e2;
+        padding: 1.5rem 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 24px;
         background:
-            radial-gradient(circle at 92% 0%, rgba(220, 38, 38, 0.1), transparent 34%),
-            linear-gradient(135deg, #fff, #faf7f4);
+            radial-gradient(circle at 86% 10%, rgba(248, 113, 113, 0.2), transparent 24%),
+            linear-gradient(110deg, #181414 0%, #351719 58%, #581c20 100%);
+        box-shadow: 0 14px 32px rgba(41, 30, 24, 0.15);
+        color: #fff;
     }
 
-    #view-chat-staff .staff-chat-icon {
+    #view-chat-staff .staff-room-hero::after {
+        position: absolute;
+        top: -5rem;
+        right: 17%;
+        width: 15rem;
+        height: 15rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        content: "";
+        box-shadow: 0 0 0 2.5rem rgba(255, 255, 255, 0.025);
+        pointer-events: none;
+    }
+
+    #view-chat-staff .staff-room-mark,
+    #view-chat-staff .staff-room-title,
+    #view-chat-staff .staff-chat-live {
+        position: relative;
+        z-index: 1;
+    }
+
+    #view-chat-staff .staff-room-mark {
         display: grid;
-        width: 3rem;
-        height: 3rem;
+        width: 3.7rem;
+        height: 3.7rem;
         flex: 0 0 auto;
         place-items: center;
-        border: 1px solid #fecaca;
-        border-radius: 16px;
-        background: #fff1f2;
-        font-size: 1.35rem;
-        box-shadow: 0 5px 14px rgba(185, 28, 28, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fecaca;
+        font-size: 1.7rem;
     }
 
-    #view-chat-staff .staff-chat-header h2 {
-        color: #292322;
-        letter-spacing: -0.04em;
+    #view-chat-staff .staff-room-title {
+        flex: 1;
     }
 
-    #view-chat-staff .staff-chat-header p {
-        color: #78716c;
+    #view-chat-staff .staff-room-kicker {
+        color: #fca5a5;
+        font-size: 0.6rem;
+        font-weight: 900;
+        letter-spacing: 0.17em;
+    }
+
+    #view-chat-staff .staff-room-title h2 {
+        margin-top: 0.25rem;
+        color: #fff;
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: -0.055em;
+        line-height: 1.05;
+    }
+
+    #view-chat-staff .staff-room-title p {
+        margin-top: 0.3rem;
+        color: #d6c6c4;
+        font-size: 0.75rem;
     }
 
     #view-chat-staff .staff-chat-live {
+        display: inline-flex;
         flex: 0 0 auto;
-        padding: 0.55rem 0.8rem;
-        border: 1px solid #bbf7d0;
+        align-items: center;
+        gap: 0.55rem;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid rgba(187, 247, 208, 0.25);
         border-radius: 999px;
-        background: #f0fdf4;
-        color: #166534;
+        background: rgba(20, 83, 45, 0.38);
+        color: #dcfce7;
+        font-size: 0.61rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    #view-chat-staff .staff-chat-live-dot {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.13);
+    }
+
+    #view-chat-staff .staff-chat-workspace {
+        display: grid;
+        min-width: 0;
+        min-height: 0;
+        flex: 1;
+        grid-template-rows: auto minmax(0, 1fr) auto;
+        overflow: hidden;
+        border: 1px solid #e7e0da;
+        border-radius: 24px;
+        background: #fff;
+        box-shadow: 0 12px 30px rgba(41, 30, 24, 0.08);
+    }
+
+    #view-chat-staff .staff-chat-channelbar {
+        display: flex;
+        min-height: 4.6rem;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem 1.35rem;
+        border-bottom: 1px solid #eee7e2;
+        background: linear-gradient(110deg, #fff, #faf8f6);
+    }
+
+    #view-chat-staff .staff-chat-channel-icon {
+        display: grid;
+        width: 2.6rem;
+        height: 2.6rem;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid #fecaca;
+        border-radius: 13px;
+        background: #fff1f2;
+        color: #b91c1c;
+        font-size: 1.15rem;
+        font-weight: 900;
+    }
+
+    #view-chat-staff .staff-chat-channelbar > div:nth-child(2) > span {
+        color: #a8a29e;
+        font-size: 0.53rem;
+        font-weight: 900;
+        letter-spacing: 0.15em;
+    }
+
+    #view-chat-staff .staff-chat-channelbar h3 {
+        margin-top: 0.1rem;
+        color: #292322;
+        font-size: 0.9rem;
+        font-weight: 900;
+    }
+
+    #view-chat-staff .staff-chat-channel-note {
+        margin-left: auto;
+        color: #a8a29e;
+        font-size: 0.63rem;
     }
 
     #staff-chat-messages {
-        gap: 0.65rem;
-        padding: clamp(1rem, 3vw, 2rem);
-        background-color: #f7f5f2 !important;
-        background-image: radial-gradient(#d6d3d1 0.65px, transparent 0.65px);
-        background-size: 18px 18px;
+        min-height: 0;
+        overflow-y: auto;
+        gap: 0.5rem;
+        padding: 1.25rem 1.5rem;
+        background:
+            radial-gradient(#e7e0da 0.55px, transparent 0.55px),
+            #fffdfb !important;
+        background-size: 19px 19px;
     }
 
     #staff-chat-messages > div {
@@ -2442,6 +2566,10 @@ main {
         overflow-wrap: anywhere;
     }
 
+    #staff-chat-messages .max-w-\[75\%\] {
+        max-width: 80%;
+    }
+
     #staff-chat-messages > div > span {
         border-color: #e7e0da !important;
         background: #fff !important;
@@ -2449,71 +2577,86 @@ main {
         box-shadow: 0 3px 10px rgba(41, 30, 24, 0.06);
     }
 
+    #staff-chat-messages .group button {
+        opacity: 0;
+        transition: opacity 150ms ease, color 150ms ease, background-color 150ms ease;
+    }
+
+    #staff-chat-messages .group:hover button,
+    #staff-chat-messages .group:focus-within button {
+        opacity: 1;
+    }
+
     #view-chat-staff .staff-chat-compose {
+        padding: 0.9rem 1.25rem 1rem;
         border-top: 1px solid #eee7e2;
         background: linear-gradient(180deg, #fff, #faf8f6);
     }
 
+    #view-chat-staff .staff-chat-compose-box {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.75rem;
+        padding: 0.4rem;
+        border: 1px solid #e7e0da;
+        border-radius: 17px;
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(41, 30, 24, 0.05);
+    }
+
     #staff-chat-input {
-        min-height: 3.25rem;
-        max-height: 9rem;
-        border: 1px solid #e7e0da !important;
-        background: #fff !important;
+        width: 100%;
+        min-height: 3rem;
+        max-height: 8rem;
+        flex: 1;
+        padding: 0.7rem 0.8rem;
+        border: 0 !important;
+        background: transparent !important;
         color: #292322 !important;
-        box-shadow: 0 3px 10px rgba(41, 30, 24, 0.04);
+        outline: none !important;
+        box-shadow: none !important;
+        resize: vertical;
     }
 
     #staff-chat-input::placeholder {
         color: #a8a29e !important;
     }
 
+    #view-chat-staff .staff-chat-compose-box:focus-within {
+        border-color: #fca5a5;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08), 0 4px 14px rgba(41, 30, 24, 0.05);
+    }
+
     #view-chat-staff .staff-chat-send {
         display: grid;
-        width: 3.25rem;
-        height: 3.25rem;
+        width: 3rem;
+        height: 3rem;
         flex: 0 0 auto;
         place-items: center;
-        border-radius: 16px;
+        border-radius: 13px;
         background: #b91c1c !important;
-        box-shadow: 0 6px 16px rgba(185, 28, 28, 0.2);
+        color: #fff !important;
+        box-shadow: 0 5px 12px rgba(185, 28, 28, 0.18);
+        transition: transform 150ms ease, background-color 150ms ease;
     }
 
     #view-chat-staff .staff-chat-send:hover {
-        background: #991b1b !important;
         transform: translateY(-1px);
+        background: #991b1b !important;
     }
 
     #view-chat-staff .staff-chat-hint {
+        margin: 0.45rem 0.35rem 0;
         color: #a8a29e;
+        font-size: 0.58rem;
+    }
+
+    #view-chat-staff .staff-chat-hint span {
+        padding: 0 0.25rem;
+        color: #d6d3d1;
     }
 
     @media (max-width: 640px) {
-        #view-chat-staff {
-            width: 100%;
-            height: calc(100dvh - 7rem);
-            min-height: 24rem;
-            border-radius: 20px;
-        }
-
-        #view-chat-staff .staff-chat-icon {
-            width: 2.6rem;
-            height: 2.6rem;
-            border-radius: 13px;
-        }
-
-        #view-chat-staff .staff-chat-live {
-            padding: 0.45rem 0.6rem;
-            font-size: 8px;
-        }
-
-        #staff-chat-messages {
-            padding: 1rem 0.75rem;
-        }
-
-        #staff-chat-messages .max-w-\[75\%\] {
-            max-width: 84%;
-        }
-
         #view-esami,
         #view-appello,
         #view-studenti,
@@ -3246,39 +3389,51 @@ main {
 </div>
 
 		<!-- VIEW: CHAT STAFF (SALA DOCENTI) -->
-<div id="view-chat-staff" class="tab-content hidden flex-col h-[calc(100vh-120px)] max-w-5xl mx-auto">
-    <div class="staff-chat-header p-5 sm:p-6 flex justify-between items-center gap-4">
-        <div class="flex items-center gap-4">
-            <div class="staff-chat-icon" aria-hidden="true">💬</div>
+<div id="view-chat-staff" class="tab-content hidden flex-col mx-auto">
+    <header class="staff-room-hero">
+        <div class="staff-room-mark" aria-hidden="true">✉</div>
+        <div class="staff-room-title">
+            <span class="staff-room-kicker">SPAZIO RISERVATO ALLO STAFF</span>
+            <h2>Sala Docenti</h2>
+            <p>Confrontati con i colleghi e resta aggiornato.</p>
+        </div>
+        <div class="staff-chat-live">
+            <span class="staff-chat-live-dot"></span>
+            Canale attivo
+        </div>
+    </header>
+
+    <section class="staff-chat-workspace" aria-label="Conversazione della Sala Docenti">
+        <div class="staff-chat-channelbar">
+            <div class="staff-chat-channel-icon" aria-hidden="true">#</div>
             <div>
-                <h2 class="text-xl sm:text-2xl font-black uppercase italic leading-none">Sala Docenti</h2>
-                <p class="text-[9px] font-bold uppercase tracking-widest mt-2">Spazio riservato alla comunicazione dello staff</p>
+                <span>CONVERSAZIONE STAFF</span>
+                <h3>Canale generale</h3>
             </div>
+            <p class="staff-chat-channel-note">I messaggi si aggiornano in tempo reale</p>
         </div>
-        <div class="staff-chat-live flex items-center gap-2 text-[9px] font-black uppercase tracking-wider">
-            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live
-        </div>
-    </div>
 
-    <!-- Area Messaggi -->
-    <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 bg-zinc-900 custom-scroll flex flex-col">
-        <!-- I messaggi appariranno qui -->
-    </div>
-
-    <!-- Input Area -->
-    <div class="staff-chat-compose p-4 sm:p-5">
-        <div class="flex gap-3 items-end">
-            <textarea id="staff-chat-input" 
-                class="flex-1 p-3 bg-zinc-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-red-500 outline-none resize-none" 
-                placeholder="Scrivi un messaggio ai colleghi..." rows="1"
-                onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.sendStaffMessage(); }"></textarea>
-            <button onclick="window.sendStaffMessage()" 
-                class="staff-chat-send bg-zinc-900 text-white p-4 rounded-2xl hover:bg-red-700 transition-all shadow-md active:scale-95" aria-label="Invia messaggio" title="Invia messaggio">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
+        <div id="staff-chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scroll">
+            <!-- I messaggi appariranno qui -->
         </div>
-        <p class="staff-chat-hint mt-2 px-1 text-[9px] font-semibold">Invio per mandare · Shift + Invio per andare a capo</p>
-    </div>
+
+        <div class="staff-chat-compose">
+            <div class="staff-chat-compose-box">
+                <textarea id="staff-chat-input"
+                    placeholder="Scrivi un messaggio ai colleghi..."
+                    rows="1"
+                    aria-label="Messaggio per i colleghi"
+                    onkeydown="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); window.sendStaffMessage(); }"></textarea>
+                <button onclick="window.sendStaffMessage()"
+                    class="staff-chat-send"
+                    aria-label="Invia messaggio"
+                    title="Invia messaggio">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+            <p class="staff-chat-hint">Invio per mandare <span>·</span> Shift + Invio per andare a capo</p>
+        </div>
+    </section>
 </div>
 
 		<div id="view-sportello" class="tab-content hidden space-y-6">
@@ -8714,67 +8869,93 @@ window.goBackFromProfile = () => {
 
 	// --- SISTEMA CHAT STAFF ---
 let chatListener = null;
+let staffDirectoryListener = null;
+let staffChatMessages = [];
+let staffChatDirectory = new Map();
+
+function renderStaffChatMessages(scrollToLatest = true) {
+    const container = document.getElementById('staff-chat-messages');
+    if (!container) return;
+
+    const wasNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
+    let lastDate = "";
+
+    container.innerHTML = staffChatMessages.map((m, idx) => {
+        const msgDate = new Date(m.timestamp || Date.now()).toLocaleDateString('it-IT', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+        let dateSeparator = "";
+        if (msgDate !== lastDate) {
+            lastDate = msgDate;
+            dateSeparator = `<div class="w-full text-center my-4"><span class="bg-zinc-800 text-zinc-500 text-[8px] font-black uppercase px-4 py-1 rounded-full border border-zinc-700">${msgDate}</span></div>`;
+        }
+
+        const isMe = m.senderId === window.currentUserId;
+        const isAdmin = ['preside', 'admin', 'vicepreside'].includes(window.userRole);
+        const sender = staffChatDirectory.get(String(m.senderId));
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(m.senderName || 'Staff')}&background=7f1d1d&color=fff`;
+        const avatarUrl = sender
+            ? sender.avatar || sender.avatar_npc || fallbackAvatar
+            : m.senderAvatar || fallbackAvatar;
+
+        return dateSeparator + `
+            <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2 group mb-2">
+                ${!isMe ? `<img src="${avatarUrl}" alt="${m.senderName || 'Staff'}" class="w-8 h-8 rounded-full object-cover border border-zinc-700 shadow-md mb-1 shrink-0">` : ''}
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
+                    <div class="flex items-center gap-2 mb-1 px-1">
+                        ${!isMe ? `<span class="text-[8px] font-black uppercase text-zinc-500">${m.senderName || 'Staff'}</span>` : ''}
+                        <span class="text-[7px] text-zinc-500 font-bold">${m.time || ''}</span>
+                    </div>
+                    <div class="relative p-3 rounded-2xl text-sm font-medium shadow-sm ${isMe ? 'bg-red-700 text-white rounded-br-none' : 'bg-zinc-800 text-zinc-100 border border-zinc-700 rounded-bl-none'}">
+                        ${m.text || ''}
+                        ${(isMe || isAdmin) ? `
+                            <button onclick="window.deleteStaffMessage(${idx})"
+                                class="absolute -top-2 -right-2 bg-zinc-900 border border-zinc-700 rounded-full p-1 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity shadow-sm text-red-500 hover:text-red-400"
+                                aria-label="Elimina messaggio" title="Elimina messaggio">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+                ${isMe ? `<img src="${avatarUrl}" alt="${m.senderName || 'Staff'}" class="w-8 h-8 rounded-full object-cover border border-zinc-700 shadow-md mb-1 shrink-0">` : ''}
+            </div>
+        `;
+    }).join('');
+
+    if (scrollToLatest || wasNearBottom) container.scrollTop = container.scrollHeight;
+}
 
 window.loadStaffChat = () => {
     const container = document.getElementById('staff-chat-messages');
     if (!container) return;
 
     if (chatListener) chatListener();
+    if (staffDirectoryListener) staffDirectoryListener();
+    staffChatMessages = [];
+    staffChatDirectory = new Map();
+    container.innerHTML = "";
 
     const chatRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'staff_chat', 'messages');
-    
+    const assignmentsRef = collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments');
+
     chatListener = onSnapshot(chatRef, (d) => {
         const data = d.exists() ? d.data() : { list: [] };
-        const messages = data.list || [];
-        
-        let lastDate = ""; // <--- AGGIUNGI QUESTA RIGA QUI
+        staffChatMessages = Array.isArray(data.list) ? data.list : [];
+        renderStaffChatMessages();
+    }, (error) => {
+        console.error("Errore caricamento chat staff:", error);
+    });
 
-        container.innerHTML = messages.map((m, idx) => {
-            // --- LOGICA DATA SEPARATOR ---
-            const msgDate = new Date(m.timestamp || Date.now()).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
-            let dateSeparator = "";
-            if (msgDate !== lastDate) {
-                lastDate = msgDate;
-                dateSeparator = `<div class="w-full text-center my-4"><span class="bg-zinc-800 text-zinc-500 text-[8px] font-black uppercase px-4 py-1 rounded-full border border-zinc-700">${msgDate}</span></div>`;
-            }
-            // -----------------------------
-
-            const isMe = m.senderId === window.currentUserId;
-            const isAdmin = ['preside', 'admin', 'vicepreside'].includes(window.userRole);
-            const avatarUrl = m.senderAvatar || `https://ui-avatars.com/api/?name=${m.senderName}&background=7f1d1d&color=fff`;
-
-            return dateSeparator + ` <!-- <--- AGGIUNGI 'dateSeparator +' QUI -->
-                <div class="flex ${isMe ? 'justify-end' : 'justify-start'} items-end gap-2 group mb-2">
-                    
-                    <!-- Avatar per gli ALTRI (a sinistra) -->
-                    ${!isMe ? `<img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-zinc-700 shadow-md mb-1 shrink-0">` : ''}
-                    
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]">
-                        <div class="flex items-center gap-2 mb-1 px-1">
-                            ${!isMe ? `<span class="text-[8px] font-black uppercase text-zinc-500">${m.senderName}</span>` : ''}
-                            <span class="text-[7px] text-zinc-500 font-bold">${m.time}</span>
-                        </div>
-                        
-                        <div class="relative p-3 rounded-2xl text-sm font-medium shadow-sm 
-                            ${isMe ? 'bg-red-700 text-white rounded-br-none' : 'bg-zinc-800 text-zinc-100 border border-zinc-700 rounded-bl-none'}">
-                            ${m.text}
-                            
-                            ${(isMe || isAdmin) ? `
-                                <button onclick="window.deleteStaffMessage(${idx})" 
-                                    class="absolute -top-2 -right-2 bg-zinc-900 border border-zinc-700 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm text-red-500 hover:text-red-400">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
-                                </button>
-                            ` : ''}
-                        </div>
-                    </div>
-
-                    <!-- Avatar per ME (a destra) -->
-                    ${isMe ? `<img src="${avatarUrl}" class="w-8 h-8 rounded-full object-cover border border-zinc-700 shadow-md mb-1 shrink-0">` : ''}
-                </div>
-            `;
-        }).join('');
-
-        container.scrollTop = container.scrollHeight;
+    staffDirectoryListener = onSnapshot(assignmentsRef, (snapshot) => {
+        staffChatDirectory = new Map(snapshot.docs.map(userDoc => [
+            String(userDoc.id),
+            userDoc.data()
+        ]));
+        renderStaffChatMessages(false);
+    }, (error) => {
+        console.error("Errore aggiornamento profili chat staff:", error);
     });
 };
 
@@ -8786,7 +8967,8 @@ window.sendStaffMessage = async () => {
     const chatRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'staff_chat', 'messages');
     
     // Recuperiamo l'avatar attuale dell'utente loggato
-    const userAvatar = window.currentUserData.avatar || window.currentUserData.avatar_npc || "";
+    const latestUser = staffChatDirectory.get(String(window.currentUserId)) || window.currentUserData || {};
+    const userAvatar = latestUser.avatar || latestUser.avatar_npc || "";
 
     const newMessage = {
         text: text,
