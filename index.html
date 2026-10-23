@@ -269,6 +269,125 @@ main {
     background: #fff;
 }
 
+#view-agenda #agenda-main-grid {
+    align-items: start;
+    gap: 1.5rem;
+}
+
+#view-agenda #agenda-main-grid > div {
+    min-width: 0;
+}
+
+#view-agenda #agenda-main-grid .agenda-content-panel,
+#view-agenda #agenda-main-grid .agenda-side-panel {
+    height: fit-content;
+}
+
+#view-agenda #agenda-main-grid .agenda-side-panel > div:first-child {
+    padding: 1rem 1.25rem !important;
+}
+
+#modal-overlay.agenda-form-modal > .glass-light {
+    width: min(100%, 780px) !important;
+    max-width: min(100%, 780px) !important;
+    padding: clamp(1.25rem, 3vw, 2.25rem) !important;
+    border-radius: 28px !important;
+}
+
+#modal-overlay.agenda-form-modal #modal-title {
+    font-size: 1.35rem;
+}
+
+#modal-overlay.agenda-form-modal #modal-body {
+    padding: 0.25rem 0 0.5rem;
+}
+
+#modal-overlay.agenda-form-modal .agenda-form-intro {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid #f1d5d1;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #fff4f2, #fff);
+    color: #57534e;
+    font-size: 0.8rem;
+    line-height: 1.55;
+}
+
+#modal-overlay.agenda-form-modal .agenda-form-icon {
+    display: grid;
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid #fecaca;
+    border-radius: 15px;
+    background: #fff;
+    font-size: 1.4rem;
+}
+
+#modal-overlay.agenda-form-modal .agenda-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.1rem;
+}
+
+#modal-overlay.agenda-form-modal .agenda-form-field {
+    min-width: 0;
+}
+
+#modal-overlay.agenda-form-modal .agenda-form-field-wide {
+    grid-column: 1 / -1;
+}
+
+#modal-overlay.agenda-form-modal .agenda-form-field > .modal-label {
+    display: block;
+    margin: 0 0 0.5rem;
+    color: #44403c !important;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+#modal-overlay.agenda-form-modal #modal-body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+#modal-overlay.agenda-form-modal #modal-body select,
+#modal-overlay.agenda-form-modal #modal-body textarea {
+    width: 100%;
+    min-height: 3.15rem;
+    padding: 0.8rem 0.95rem;
+    border: 1px solid #e7e0da !important;
+    border-radius: 13px !important;
+    background: #fff !important;
+    color: #292322 !important;
+    font-size: 0.9rem;
+}
+
+#modal-overlay.agenda-form-modal #modal-body textarea {
+    min-height: 10rem;
+    line-height: 1.6;
+}
+
+#modal-overlay.agenda-form-modal #modal-body input::placeholder,
+#modal-overlay.agenda-form-modal #modal-body textarea::placeholder {
+    color: #a8a29e;
+}
+
+#modal-overlay.agenda-form-modal #modal-confirm {
+    min-height: 3.25rem;
+}
+
+@media (max-width: 640px) {
+    #modal-overlay.agenda-form-modal .agenda-form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #modal-overlay.agenda-form-modal .agenda-form-field-wide {
+        grid-column: auto;
+    }
+}
+
 /* Card Firme (Lezioni) - Ora in un elegante Rosso Scuro/Vino */
 .firme-card-modern {
     background: linear-gradient(135deg, rgba(127, 29, 29, 0.05), rgba(0, 0, 0, 0.02)) !important;
@@ -3534,23 +3653,12 @@ main {
     </div>
 
     <!-- Grid Riordinata -->
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <div id="agenda-main-grid" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         
         <!-- COLONNA SINISTRA (2/3): IL CUORE DEL GIORNO -->
-        <div class="xl:col-span-2 space-y-8">
+        <div class="xl:col-span-8 space-y-6">
             
-            <!-- 1. DIARIO LEZIONI (Firme) -->
-            <div class="agenda-content-panel space-y-4">
-                <div class="flex items-center gap-3 px-2">
-                    <span class="text-xl">📑</span>
-                    <h3 class="agenda-section-title text-[11px] font-black uppercase text-black tracking-[0.3em]">Lezioni</h3>
-                </div>
-                <div id="agenda-firme-list" class="space-y-4 min-h-[100px]">
-                    <!-- Popolato via JS -->
-                </div>
-            </div>
-
-            <!-- 2. SCADENZE E STUDIO (Compiti) -->
+            <!-- 1. SCADENZE E STUDIO (Compiti) -->
             <div class="agenda-content-panel space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <span class="text-xl">📘</span>
@@ -3560,24 +3668,23 @@ main {
                     <!-- Popolato via JS -->
                 </div>
             </div>
+
+            <!-- 2. DIARIO LEZIONI (Firme) -->
+            <div class="agenda-content-panel space-y-4">
+                <div class="flex items-center gap-3 px-2">
+                    <span class="text-xl">📑</span>
+                    <h3 class="agenda-section-title text-[11px] font-black uppercase text-black tracking-[0.3em]">Lezioni</h3>
+                </div>
+                <div id="agenda-firme-list" class="space-y-4 min-h-[100px]">
+                    <!-- Popolato via JS -->
+                </div>
+            </div>
         </div>
 
         <!-- COLONNA DESTRA (1/3): STATUS E LOG -->
-        <div class="space-y-6">
+        <div class="xl:col-span-4 space-y-6">
             
-            <!-- 3. STATUS ALUNNI (Presenze) - Spostato in alto per controllo rapido -->
-            <div class="agenda-side-panel overflow-hidden">
-                <div class="p-5 border-b border-black/20 bg-black/10">
-                    <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
-                        <span class="text-sm">👥</span> Appello e Status
-                    </h3>
-                </div>
-                <div id="agenda-attendance-info" class="p-5">
-                    <!-- Popolato via JS (Badge viola) -->
-                </div>
-            </div>
-
-            <!-- 4. EVENTI DEL GIORNO (Voti e Note) -->
+            <!-- 3. EVENTI DEL GIORNO (Voti e Note) -->
             <div class="agenda-side-panel overflow-hidden">
                 <div class="p-5 border-b border-black/20 bg-black/10">
                     <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
@@ -3586,6 +3693,18 @@ main {
                 </div>
                 <div id="agenda-daily-info" class="p-5 space-y-3">
                     <!-- Popolato via JS (Verde per voti, Rosso per note) -->
+                </div>
+            </div>
+
+            <!-- 4. STATUS ALUNNI (Presenze) -->
+            <div class="agenda-side-panel overflow-hidden">
+                <div class="p-5 border-b border-black/20 bg-black/10">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
+                        <span class="text-sm">👥</span> Appello e Status
+                    </h3>
+                </div>
+                <div id="agenda-attendance-info" class="p-5">
+                    <!-- Popolato via JS (Badge viola) -->
                 </div>
             </div>
         </div>
@@ -5405,9 +5524,14 @@ await setDoc(agendaRef, {
 
     const body = document.getElementById('modal-body');
     const confirm = document.getElementById('modal-confirm');
-    document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+    const overlay = document.getElementById('modal-overlay');
+    confirm.innerText = "Conferma";
+    overlay.classList.toggle('agenda-form-modal', type === 'firme' || type === 'compiti');
+    overlay.classList.replace('hidden', 'flex');
     
     if(type === 'firme') {
+        document.getElementById('modal-title').innerText = "Registra una lezione";
+        confirm.innerText = "Registra firma";
         // Generazione opzioni ore (1-12 per coprire attività pomeridiane/gite)
         let oreOptions = "";
         for(let i=1; i<=12; i++) {
@@ -5415,14 +5539,21 @@ await setDoc(agendaRef, {
         }
 
         body.innerHTML = `
-            <div class="space-y-4">
-                <div>
-                    <label class="modal-label">Dettagli Lezione</label>
-                    <div class="grid grid-cols-2 gap-3">
+            <div class="space-y-5">
+                <div class="agenda-form-intro">
+                    <span class="agenda-form-icon" aria-hidden="true">✍️</span>
+                    <p>Registra la lezione della classe selezionata. Scegli ora e tipologia, poi aggiungi materia e argomento.</p>
+                </div>
+                <div class="agenda-form-grid">
+                    <div class="agenda-form-field">
+                        <label class="modal-label" for="m-ora">Ora</label>
                         <select id="m-ora" class="modal-input">
                             ${oreOptions}
                             <option value="Extra">Extra/Serale</option>
                         </select>
+                    </div>
+                    <div class="agenda-form-field">
+                        <label class="modal-label" for="m-tipo">Tipologia</label>
                         <select id="m-tipo" class="modal-input">
                             <option value="Lezione">Lezione</option>
                             <option value="Supplenza">Supplenza</option>
@@ -5430,20 +5561,20 @@ await setDoc(agendaRef, {
                             <option value="Sorveglianza">Sorveglianza (Gita)</option>
                         </select>
                     </div>
-                </div>
-                <div>
-    <label class="modal-label">Materia</label>
-    <select id="m-mat" class="modal-input">
-        ${(window.currentUserData?.materie || ['Presidenza']).map(m => {
-            const cleanMat = m.toLowerCase().trim();
-            const emoji = LISTA_MATERIE[cleanMat] || "✒️"; // Usa la penna se non trova l'emoji
-            return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
-        }).join('')}
-    </select>
-</div>
-                <div>
-                    <label class="modal-label">Argomento trattato</label>
-                    <input id="m-arg" type="text" placeholder="Es: Spiegazione capitolo 4..." class="modal-input">
+                    <div class="agenda-form-field">
+                        <label class="modal-label" for="m-mat">Materia</label>
+                        <select id="m-mat" class="modal-input">
+                            ${(window.currentUserData?.materie || ['Presidenza']).map(m => {
+                                const cleanMat = m.toLowerCase().trim();
+                                const emoji = LISTA_MATERIE[cleanMat] || "✒️";
+                                return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="agenda-form-field">
+                        <label class="modal-label" for="m-arg">Argomento trattato</label>
+                        <input id="m-arg" type="text" placeholder="Es: Spiegazione capitolo 4..." class="modal-input">
+                    </div>
                 </div>
             </div>
         `;
@@ -5468,18 +5599,26 @@ await setDoc(agendaRef, {
         };
 
     } else if(type === 'compiti') {
+        document.getElementById('modal-title').innerText = "Assegna un compito";
+        confirm.innerText = "Assegna compito";
         const cap = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
         body.innerHTML = `
-            <div class="flex gap-4">
-                <div>
-                    <label class="modal-label">Materia di riferimento</label>
+            <div class="space-y-5">
+                <div class="agenda-form-intro">
+                    <span class="agenda-form-icon" aria-hidden="true">📚</span>
+                    <p>Inserisci i compiti o le scadenze da assegnare alla classe per la data selezionata.</p>
+                </div>
+                <div class="agenda-form-grid">
+                    <div class="agenda-form-field">
+                        <label class="modal-label" for="m-compiti-mat">Materia di riferimento</label>
                     <select id="m-compiti-mat" class="modal-input">
                         ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
                     </select>
-                </div>
-                <div>
-                    <label class="modal-label">Descrizione attività</label>
-                    <textarea id="m-compiti-txt" placeholder="Inserisci i compiti o le scadenze..." class="modal-input h-32 resize-none"></textarea>
+                    </div>
+                    <div class="agenda-form-field">
+                        <label class="modal-label" for="m-compiti-txt">Descrizione attività</label>
+                        <textarea id="m-compiti-txt" placeholder="Descrivi gli esercizi, le pagine da studiare o la scadenza..." class="modal-input resize-y"></textarea>
+                    </div>
                 </div>
             </div>
         `;
