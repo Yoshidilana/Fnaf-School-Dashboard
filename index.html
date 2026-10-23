@@ -2504,7 +2504,7 @@ main {
                 <span class="text-lg">👤</span>PROFILO
             </button>
 
-            <button onclick="window.mostraGestioneStaff()" id="menu-gestione-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
+            <button onclick="window.changeMenu('gestione-staff')" id="menu-gestione-staff" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
                 <span class="text-lg">👔</span> GESTIONE STAFF
             </button>
 
@@ -5625,6 +5625,12 @@ if (menu === 'home') {
         targetView.classList.remove('hidden');
         targetView.classList.add('active-view');
     }
+    if (menu === 'gestione-staff' && typeof window.mostraGestioneStaff === 'function') {
+        window.mostraGestioneStaff(false);
+    }
+    if (menu === 'presenze-studente' && typeof window.loadStudentAttendanceHistory === 'function') {
+        window.loadStudentAttendanceHistory();
+    }
 	if (menu === 'didattica') {
     window.loadDidattica();
 }
@@ -8419,10 +8425,11 @@ window.editSubjectComment = async (materia, quad) => {
         }
     };
 };
-	window.mostraGestioneStaff = async function() {
-    // Chiama il sistema ufficiale. 
-    // Lui cercherà "view-gestione-staff" e accenderà il tasto "menu-gestione-staff"
-    window.changeMenu('gestione-staff'); 
+	window.mostraGestioneStaff = async function(navigate = true) {
+    if (navigate && !document.getElementById('view-gestione-staff')?.classList.contains('active-view')) {
+        window.changeMenu('gestione-staff');
+        return;
+    }
 
     const container = document.getElementById('staff-list-container');
     if (!container) return;
