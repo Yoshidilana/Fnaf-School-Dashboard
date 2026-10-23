@@ -1167,7 +1167,531 @@ main {
         color: #71717a !important;
     }
 
+    /* Pannello amministrativo */
+    #view-hub {
+        width: 100%;
+        padding: clamp(0.75rem, 2vw, 1.5rem);
+        background:
+            radial-gradient(ellipse at 5% 0%, rgba(220, 38, 38, 0.08), transparent 34%),
+            #f7f5f2;
+    }
+
+    #view-hub > div:first-child {
+        padding: clamp(1.5rem, 4vw, 2.5rem) !important;
+        border: 1px solid rgba(248, 113, 113, 0.25) !important;
+        border-radius: 24px !important;
+        background: linear-gradient(115deg, #211919, #3b1c1c 58%, #211919) !important;
+        box-shadow: 0 18px 42px rgba(41, 30, 24, 0.14) !important;
+    }
+
+    #view-hub > div:first-child p {
+        color: #fbbf24 !important;
+    }
+
+    #view-hub #admin-stats-grid > div {
+        min-height: 104px;
+        padding: 1.1rem !important;
+        border: 1px solid #e8e0da !important;
+        border-radius: 18px !important;
+        background: #fff !important;
+        box-shadow: 0 8px 22px rgba(41, 30, 24, 0.06) !important;
+    }
+
+    #view-hub #admin-stats-grid > div p:first-child {
+        color: #78716c !important;
+        opacity: 1 !important;
+    }
+
+    #view-hub #admin-stats-grid > div p:last-child {
+        color: #292322 !important;
+    }
+
+    #view-hub .grid > div > .p-6 {
+        border: 1px solid #e8e0da !important;
+        border-radius: 20px !important;
+        background: #fff !important;
+        box-shadow: 0 8px 22px rgba(41, 30, 24, 0.06) !important;
+    }
+
+    #view-hub .grid > div > .p-6 h3 {
+        color: #3b302b !important;
+    }
+
+    #view-hub #global-search-input {
+        border: 1px solid #e7e0da !important;
+        border-radius: 13px !important;
+        background: #faf9f7 !important;
+        color: #292322 !important;
+    }
+
+    #view-hub #global-search-input::placeholder {
+        color: #8a8178 !important;
+    }
+
+    #view-hub #admin-audit-logs {
+        border: 1px solid #e7e0da !important;
+        background: #211c1c !important;
+    }
+
+    /* Profilo personale e profilo consultato */
+    #view-profilo,
+    #view-profilo-target {
+        width: 100%;
+        background:
+            radial-gradient(ellipse at 95% 0%, rgba(245, 158, 11, 0.08), transparent 30%),
+            #f7f5f2;
+        border-radius: 24px;
+    }
+
+    #view-profilo > div:nth-of-type(2),
+    #view-profilo-target > div:nth-of-type(2) {
+        padding: clamp(1rem, 3vw, 2rem) !important;
+        border: 1px solid #e7e0da !important;
+        border-left: 5px solid #dc2626 !important;
+        border-radius: 22px !important;
+        background: linear-gradient(145deg, #fff, #fbf8f5) !important;
+        box-shadow: 0 12px 30px rgba(41, 30, 24, 0.08) !important;
+    }
+
+    #view-profilo #profilo-nome,
+    #view-profilo-target #target-profile-name {
+        color: #292322 !important;
+    }
+
+    #view-profilo #profilo-sottotitolo,
+    #view-profilo-target #target-profile-sub {
+        color: #78716c !important;
+        letter-spacing: 0.16em;
+    }
+
+    #view-profilo #profilo-media,
+    #view-profilo-target #target-profile-media {
+        color: #b91c1c !important;
+    }
+
+    #view-profilo > div:first-child button,
+    #view-profilo-target > div:first-child button {
+        border: 1px solid #e7e0da !important;
+        border-radius: 11px !important;
+        background: #fff !important;
+        color: #57534e !important;
+        box-shadow: 0 4px 12px rgba(41, 30, 24, 0.05);
+    }
+
+    #view-profilo > div:nth-of-type(2) > div > div:last-child,
+    #view-profilo-target #target-media-box {
+        border: 1px solid #eee2d8 !important;
+        border-radius: 18px !important;
+        background: linear-gradient(145deg, #fff7ed, #fff) !important;
+    }
+
+    #view-profilo > div:nth-of-type(3) > div,
+    #view-profilo-target #target-student-lists .grid > div,
+    #view-profilo-target #target-staff-info .grid > div,
+    #view-profilo-target #target-staff-evaluations {
+        border: 1px solid #e7e0da !important;
+        border-radius: 20px !important;
+        background: #fff !important;
+        box-shadow: 0 8px 22px rgba(41, 30, 24, 0.06) !important;
+    }
+
+    #view-profilo > div:nth-of-type(3) h3,
+    #view-profilo-target #target-student-lists .grid > div h3,
+    #view-profilo-target #target-staff-info h3,
+    #view-profilo-target #target-staff-evaluations h3 {
+        color: #3b302b !important;
+        border-color: #eee7e2 !important;
+    }
+
+    #view-profilo #profilo-voti-list > div,
+    #view-profilo #profilo-note-list > div,
+    #view-profilo-target #target-voti-list > div,
+    #view-profilo-target #target-note-list > div {
+        border: 1px solid #eee7e2 !important;
+        border-radius: 14px !important;
+        background: #faf8f6 !important;
+        color: #292322 !important;
+    }
+
+    #view-profilo #profilo-voti-list p,
+    #view-profilo #profilo-note-list p,
+    #view-profilo-target #target-voti-list p,
+    #view-profilo-target #target-note-list p {
+        color: #57534e !important;
+    }
+
+    /* Note e navigazione tra le sezioni studente */
+    #view-note {
+        width: 100%;
+        padding: clamp(0.75rem, 2vw, 1.5rem);
+        border-radius: 22px;
+        background: #f7f5f2;
+    }
+
+    #view-note > .flex:first-child {
+        padding: 1rem 1.25rem !important;
+        border: 1px solid #e7e0da !important;
+        border-radius: 18px !important;
+        background: linear-gradient(110deg, #fff, #fff7f5) !important;
+        box-shadow: 0 8px 20px rgba(41, 30, 24, 0.05) !important;
+    }
+
+    #view-note > .flex:first-child h2 {
+        color: #292322 !important;
+    }
+
+    #view-note #note-date-container input {
+        border: 1px solid #e7e0da !important;
+        border-radius: 10px !important;
+        background: #faf8f6 !important;
+        color: #3b302b !important;
+    }
+
+    #view-note #btn-add-note {
+        border-radius: 10px !important;
+        background: #b91c1c !important;
+        box-shadow: 0 4px 10px rgba(185, 28, 28, 0.15);
+    }
+
+    #view-note .student-nav-bar,
+    #view-registro .student-nav-bar,
+    #view-pagella .student-nav-bar {
+        padding: 0.8rem 1rem !important;
+        border: 1px solid #e7e0da !important;
+        border-radius: 16px !important;
+        background: #fff !important;
+        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.05) !important;
+    }
+
+    #view-note .student-nav-bar button,
+    #view-registro .student-nav-bar button,
+    #view-pagella .student-nav-bar button {
+        border: 1px solid #eee7e2;
+        border-radius: 10px;
+        background: #faf8f6 !important;
+        color: #57534e !important;
+    }
+
+    #view-note .student-nav-bar button:hover,
+    #view-registro .student-nav-bar button:hover,
+    #view-pagella .student-nav-bar button:hover {
+        border-color: #fca5a5;
+        background: #fff1f2 !important;
+        color: #b91c1c !important;
+    }
+
+    #view-note .quick-student-switcher,
+    #view-pagella .quick-student-switcher,
+    #view-registro .quick-student-switcher {
+        border: 1px solid #e7e0da !important;
+        border-radius: 9px !important;
+        background: #faf8f6 !important;
+        color: #292322 !important;
+    }
+
+    #view-note .student-nav-bar > div:last-child,
+    #view-pagella .student-nav-bar > div:last-child,
+    #view-registro .student-nav-bar > div:last-child {
+        border-color: #eee7e2 !important;
+        background: #faf8f6 !important;
+    }
+
+    #view-note #notes-list-global {
+        gap: 0.75rem;
+        padding: 0.25rem;
+    }
+
+    #view-note .note-card {
+        padding: 1rem 1.15rem !important;
+        border: 1px solid #e7e0da !important;
+        border-left-width: 5px !important;
+        border-radius: 16px !important;
+        background: linear-gradient(135deg, #fff, #faf8f6) !important;
+        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.06) !important;
+    }
+
+    #view-note .note-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 24px rgba(41, 30, 24, 0.1) !important;
+    }
+
+    /* Pagella */
+    #view-pagella {
+        width: 100%;
+        padding: clamp(0.75rem, 2vw, 1.5rem) !important;
+        border-radius: 22px;
+        background:
+            radial-gradient(ellipse at 100% 0%, rgba(220, 38, 38, 0.07), transparent 32%),
+            #f7f5f2;
+    }
+
+    #pagella-selection-screen > div:first-child h2 {
+        color: #292322 !important;
+    }
+
+    #pagella-selection-screen > div:first-child p {
+        color: #78716c !important;
+    }
+
+    #pagella-selection-screen button {
+        padding: 2rem !important;
+        border: 1px solid #e7e0da !important;
+        border-radius: 22px !important;
+        background: linear-gradient(145deg, #fff, #fbf6f3) !important;
+        box-shadow: 0 10px 26px rgba(41, 30, 24, 0.07) !important;
+    }
+
+    #pagella-selection-screen button span:last-child {
+        color: #3b302b !important;
+    }
+
+    #pagella-selection-screen button:hover {
+        transform: translateY(-3px);
+        border-color: #fca5a5 !important;
+        box-shadow: 0 16px 30px rgba(127, 29, 29, 0.12) !important;
+    }
+
+    #pagella-document-screen > div:nth-child(2) {
+        padding: clamp(1.25rem, 4vw, 3rem) !important;
+        border: 1px solid #e7e0da !important;
+        border-radius: 22px !important;
+        background: #fff !important;
+        color: #292322 !important;
+        box-shadow: 0 16px 40px rgba(41, 30, 24, 0.1) !important;
+    }
+
+    #pagella-document-screen > div:nth-child(2) h1,
+    #pagella-document-screen > div:nth-child(2) h3 {
+        color: #3b302b !important;
+    }
+
+    #pagella-document-screen > div:nth-child(2) p,
+    #pagella-document-screen > div:nth-child(2) td,
+    #pagella-document-screen > div:nth-child(2) th {
+        color: #57534e !important;
+    }
+
+    #pagella-document-screen #pagella-table-body tr {
+        border-color: #eee7e2 !important;
+    }
+
+    #pagella-document-screen #pagella-table-body tr:nth-child(even) {
+        background: #faf8f6 !important;
+    }
+
+    #pagella-document-screen #pagella-comment-box {
+        border-color: #e7e0da !important;
+        border-radius: 14px !important;
+        background: #faf8f6 !important;
+        color: #57534e !important;
+    }
+
+    #view-pagella #pagella-credits-box {
+        border: 1px solid #f0dfc5 !important;
+        border-radius: 16px !important;
+        background: #fffaf0 !important;
+    }
+
+    #view-pagella #pagella-credits-box input {
+        border: 1px solid #e7e0da !important;
+        border-radius: 9px !important;
+        background: #fff !important;
+        color: #292322 !important;
+    }
+
+    /* Registri voti e tabellone */
+    #view-registro {
+        width: 100%;
+        padding: clamp(0.5rem, 1.5vw, 1rem);
+        border-radius: 20px;
+        background: #f7f5f2;
+    }
+
+    #view-registro .student-nav-bar {
+        color: #292322 !important;
+    }
+
+    #view-registro #student-header {
+        border-color: #eee7e2 !important;
+    }
+
+    #view-registro #res-student-name,
+    #view-registro #student-header .text-blue-200,
+    #view-registro #student-header .text-blue-300 {
+        color: #57534e !important;
+    }
+
+    #view-registro #res-student-media {
+        color: #15803d !important;
+    }
+
+    #view-registro .student-nav-bar > div:last-child > span {
+        color: #78716c !important;
+    }
+
+    #view-registro #prof-grade-panel {
+        padding: 0.9rem 1rem !important;
+        border: 1px solid #f0d6d6 !important;
+        border-radius: 16px !important;
+        background: linear-gradient(110deg, #fff, #fff5f4) !important;
+        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.05) !important;
+    }
+
+    #view-registro #prof-grade-panel label,
+    #view-registro #prof-grade-panel span {
+        color: #57534e !important;
+    }
+
+    #view-registro .registry-container,
+    #view-registro-classe .registry-container,
+    #view-tabellone .registry-container {
+        border: 1px solid #e7e0da !important;
+        border-radius: 18px !important;
+        background: #fff !important;
+        box-shadow: 0 10px 26px rgba(41, 30, 24, 0.07) !important;
+    }
+
+    #view-registro .registry-table thead th,
+    #view-registro-classe .registry-table thead th,
+    #view-tabellone #tabellone-head th {
+        border-color: #e7e0da !important;
+        border-bottom: 2px solid #dc2626 !important;
+        background: #f5f1ed !important;
+        color: #3b302b !important;
+        letter-spacing: 0.08em;
+    }
+
+    #view-registro .registry-table tbody tr,
+    #view-registro-classe .registry-table tbody tr,
+    #view-tabellone #tabellone-body tr {
+        border-color: #eee7e2 !important;
+        background: #fff !important;
+        transition: background 160ms ease;
+    }
+
+    #view-registro .registry-table tbody tr:nth-child(even),
+    #view-registro-classe .registry-table tbody tr:nth-child(even),
+    #view-tabellone #tabellone-body tr:nth-child(even) {
+        background: #faf8f6 !important;
+    }
+
+    #view-registro .registry-table tbody tr:hover,
+    #view-registro-classe .registry-table tbody tr:hover,
+    #view-tabellone #tabellone-body tr:hover {
+        background: #fff1f2 !important;
+    }
+
+    #view-registro > div:nth-of-type(3) button {
+        border: 1px solid #e7e0da !important;
+        border-radius: 10px !important;
+        background: #fff !important;
+        color: #57534e !important;
+    }
+
+    #view-registro > div:nth-of-type(3) button:hover {
+        border-color: #fca5a5 !important;
+        color: #b91c1c !important;
+    }
+
+    #view-registro .registry-table td,
+    #view-registro-classe .registry-table td,
+    #view-tabellone #tabellone-body td {
+        border-color: #eee7e2 !important;
+        color: #3b302b !important;
+    }
+
+    #view-registro-classe,
+    #view-tabellone {
+        width: 100%;
+        padding: clamp(0.75rem, 2vw, 1.5rem) !important;
+        border-radius: 22px;
+        background: #f7f5f2 !important;
+    }
+
+    #view-registro-classe > div:first-child,
+    #view-tabellone > div:first-child {
+        padding: 1.1rem 1.25rem;
+        border: 1px solid #e7e0da;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.05);
+    }
+
+    #view-registro-classe h2,
+    #view-tabellone h2 {
+        color: #292322 !important;
+    }
+
+    #view-registro-classe #reg-global-info {
+        color: #b91c1c !important;
+    }
+
+    #view-registro-classe #reg-global-subject-select {
+        border: 1px solid #e7e0da !important;
+        background: #faf8f6 !important;
+        color: #3b302b !important;
+    }
+
+    #view-registro-classe > div:first-child button,
+    #view-tabellone > div:first-child button {
+        border: 1px solid #e7e0da !important;
+        border-radius: 10px !important;
+        background: #faf8f6 !important;
+        color: #57534e !important;
+    }
+
+    #view-registro-classe > div:first-child button:hover,
+    #view-tabellone > div:first-child button:hover {
+        background: #fff1f2 !important;
+        color: #b91c1c !important;
+    }
+
+    #view-registro-classe #reg-global-body td:first-child,
+    #view-tabellone #tabellone-body td:first-child {
+        background: #f7f3ef !important;
+        color: #292322 !important;
+    }
+
+    #view-tabellone #tabellone-body td > div > div {
+        border-color: #e7e0da !important;
+        background: #fff !important;
+        box-shadow: 0 2px 6px rgba(41, 30, 24, 0.06) !important;
+    }
+
+    #view-tabellone #tabellone-body td span.text-zinc-500 {
+        color: #78716c !important;
+    }
+
     @media (max-width: 640px) {
+        #view-hub,
+        #view-profilo,
+        #view-profilo-target,
+        #view-note,
+        #view-pagella,
+        #view-registro,
+        #view-registro-classe,
+        #view-tabellone {
+            padding: 0.65rem !important;
+        }
+
+        #view-profilo > div:nth-of-type(3) > div,
+        #view-profilo-target #target-student-lists .grid > div {
+            height: auto !important;
+            min-height: 260px;
+            padding: 1rem !important;
+        }
+
+        #pagella-document-screen > div:nth-child(2) {
+            padding: 1rem !important;
+        }
+
+        #view-registro-classe > div:first-child,
+        #view-tabellone > div:first-child {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
         .agenda-nav-row {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -1486,7 +2010,7 @@ main {
         </nav>
     </div>
     <div class="px-8 mt-auto pt-6 border-t border-zinc-800">
-        <p class="text-[8px] font-bold text-zinc-600 uppercase">Fazbear Classroom v4.0</p>
+        <p class="text-[8px] font-bold text-zinc-600 uppercase">Fazbear Classroom v5.0</p>
     </div>
 </aside>
 
@@ -9881,7 +10405,7 @@ window.jumpToEvent = async (direction) => {
 
 
     window.addEventListener('load', () => {
-        console.log("%cFazbear Classroom OS v4.0", "color: #dc2626; font-size: 16px; font-weight: 900;");
+        console.log("%cFazbear Classroom OS v5.0", "color: #dc2626; font-size: 16px; font-weight: 900;");
         
         // Forza l'aggiornamento del contesto data se non inizializzato
         if (typeof window.updateDateContext === 'function') {
