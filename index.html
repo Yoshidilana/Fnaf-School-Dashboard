@@ -1825,6 +1825,542 @@ main {
         color: #fff !important;
         box-shadow: 0 8px 18px rgba(127, 29, 29, 0.24) !important;
     }
+
+    /* Commissione esami: restyling esclusivamente visivo */
+    #view-esami {
+        width: 100%;
+        padding: clamp(0.75rem, 2vw, 1.5rem) !important;
+        background:
+            radial-gradient(ellipse at 100% 0%, rgba(245, 158, 11, 0.1), transparent 32%),
+            #f7f5f2;
+    }
+
+    #view-esami > div:first-child {
+        padding: clamp(1.1rem, 3vw, 1.75rem) !important;
+        border: 1px solid #eadfcf !important;
+        border-radius: 22px !important;
+        background: linear-gradient(120deg, #fffaf0, #fff) !important;
+        box-shadow: 0 10px 26px rgba(41, 30, 24, 0.07) !important;
+    }
+
+    #view-esami > div:first-child h2 {
+        color: #292322 !important;
+    }
+
+    #view-esami > div:first-child h2 span {
+        color: #b91c1c !important;
+    }
+
+    #view-esami #exam-class-info {
+        color: #78716c !important;
+    }
+
+    #view-esami > div:first-child button {
+        border: 1px solid #e7e0da !important;
+        border-radius: 11px !important;
+        background: #fff !important;
+        color: #57534e !important;
+        box-shadow: 0 3px 10px rgba(41, 30, 24, 0.05) !important;
+    }
+
+    #view-esami > div:first-child button:hover {
+        border-color: #fca5a5 !important;
+        background: #fff1f2 !important;
+        color: #b91c1c !important;
+    }
+
+    #view-esami #exam-config-panel {
+        border: 1px solid #e7e0da !important;
+        border-radius: 20px !important;
+        background: #fff !important;
+        box-shadow: 0 10px 26px rgba(41, 30, 24, 0.07) !important;
+    }
+
+    #view-esami #exam-config-panel h3 {
+        color: #3b302b !important;
+    }
+
+    #view-esami #exam-subjects-checklist label {
+        border: 1px solid #eee7e2;
+        border-radius: 11px;
+        background: #faf8f6 !important;
+        color: #3b302b !important;
+    }
+
+    #view-esami > div:nth-of-type(3) {
+        padding: 0 !important;
+    }
+
+    #view-esami > div:nth-of-type(3) > div {
+        border: 1px solid #e7e0da !important;
+        border-radius: 20px !important;
+        background: #fff !important;
+        box-shadow: 0 10px 26px rgba(41, 30, 24, 0.07) !important;
+    }
+
+    #view-esami > div:nth-of-type(3) > div > div:first-child {
+        border-color: #eee7e2 !important;
+        background: #faf8f6 !important;
+        color: #3b302b !important;
+    }
+
+    #view-esami #exam-class-title {
+        border-color: #f2dfb3 !important;
+        background: #fff7dc !important;
+        color: #785b19 !important;
+    }
+
+    #view-esami #exam-grades-body {
+        background: #fff !important;
+    }
+
+    #view-esami #exam-grades-body > div {
+        padding: clamp(0.85rem, 2vw, 1.25rem) !important;
+        border-color: #eee7e2 !important;
+        background: #fff !important;
+    }
+
+    #view-esami #exam-grades-body > div:nth-child(even) {
+        background: #fcfaf8 !important;
+    }
+
+    #view-esami #exam-grades-body > div:hover {
+        background: #fffaf0 !important;
+    }
+
+    #view-esami #exam-grades-body > div > div:first-child span:first-child {
+        color: #292322 !important;
+    }
+
+    #view-esami #exam-grades-body > div > div:first-child span:last-child {
+        color: #a16207 !important;
+    }
+
+    #view-esami #exam-grades-body > div > div:nth-child(2) > div {
+        border-color: #eee7e2 !important;
+        border-radius: 12px !important;
+        background: #faf8f6 !important;
+        box-shadow: none !important;
+    }
+
+    #view-esami #exam-grades-body > div > div:nth-child(2) > div span {
+        border-color: #eee7e2 !important;
+        color: #57534e !important;
+    }
+
+    #view-esami #exam-grades-body input {
+        border-color: #e7e0da !important;
+        border-radius: 8px !important;
+        background: #fff !important;
+        color: #292322 !important;
+    }
+
+    #view-esami #exam-grades-body input:focus {
+        border-color: #f87171 !important;
+        outline: 2px solid rgba(248, 113, 113, 0.16);
+    }
+
+    #view-esami #exam-grades-body > div > div:last-child > div {
+        border-color: #eee1c7 !important;
+        background: #fffaf0 !important;
+        box-shadow: none !important;
+    }
+
+    #view-esami #exam-grades-body > div > div:last-child span:first-child {
+        color: #292322 !important;
+        text-shadow: none !important;
+    }
+
+    #view-esami #exam-grades-body > div > div:last-child span:last-child {
+        color: #78716c !important;
+    }
+
+    /* Appello e presenze */
+    #view-appello {
+        width: 100%;
+        padding: clamp(0.75rem, 2vw, 1.5rem) !important;
+        border: 0 !important;
+        border-radius: 22px !important;
+        background: #f7f5f2 !important;
+        box-shadow: none !important;
+    }
+
+    #view-appello > div:first-child {
+        padding: 1rem 1.1rem;
+        border: 1px solid #e7e0da !important;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.05);
+    }
+
+    #view-appello h3 {
+        color: #292322 !important;
+    }
+
+    #view-appello h3 span {
+        color: #b91c1c !important;
+    }
+
+    #view-appello > div:first-child p {
+        color: #78716c !important;
+    }
+
+    #view-appello > div:first-child > div:nth-child(2) {
+        border: 1px solid #e7e0da !important;
+        border-radius: 13px !important;
+        background: #faf8f6 !important;
+        box-shadow: none !important;
+    }
+
+    #view-appello #attendance-local-calendar {
+        color: #3b302b !important;
+    }
+
+    #view-appello > div:first-child button {
+        border-radius: 10px;
+    }
+
+    #view-appello > div:first-child button[onclick*="navAttendanceDate"] {
+        background: #fff !important;
+        color: #57534e !important;
+        border: 1px solid #e7e0da;
+    }
+
+    #view-appello > div:first-child button[onclick*="updateAttendanceDate"] {
+        background: #f5f1ed !important;
+        color: #57534e !important;
+    }
+
+    #view-appello > div:first-child button[onclick*="saveAttendance"] {
+        background: linear-gradient(100deg, #b91c1c, #dc2626) !important;
+        box-shadow: 0 6px 14px rgba(185, 28, 28, 0.18) !important;
+    }
+
+    #view-appello > div.overflow-x-auto {
+        overflow: auto;
+        border: 1px solid #e7e0da;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 8px 22px rgba(41, 30, 24, 0.06);
+    }
+
+    #view-appello table {
+        min-width: 620px;
+    }
+
+    #view-appello thead tr {
+        border-color: #eee7e2 !important;
+        background: #faf8f6;
+    }
+
+    #view-appello thead th {
+        padding: 0.85rem 0.75rem !important;
+        color: #57534e !important;
+        letter-spacing: 0.08em;
+    }
+
+    #view-appello tbody tr {
+        border-color: #eee7e2 !important;
+        background: #fff;
+        transition: background 150ms ease;
+    }
+
+    #view-appello tbody tr:nth-child(even) {
+        background: #fcfaf8;
+    }
+
+    #view-appello tbody tr:hover {
+        background: #fff1f2;
+    }
+
+    #view-appello tbody td {
+        padding: 0.65rem !important;
+        color: #3b302b !important;
+    }
+
+    #view-appello tbody td:first-child {
+        padding-left: 1rem !important;
+    }
+
+    #view-appello .att-status,
+    #view-appello .att-entry,
+    #view-appello .att-exit {
+        min-height: 34px;
+        border: 1px solid #e7e0da !important;
+        border-radius: 9px !important;
+        background: #fff !important;
+        color: #3b302b !important;
+        padding: 0.4rem 0.55rem !important;
+    }
+
+    #view-appello .att-status:focus,
+    #view-appello .att-entry:focus,
+    #view-appello .att-exit:focus {
+        border-color: #f87171 !important;
+        outline: 2px solid rgba(248, 113, 113, 0.15);
+    }
+
+    /* Elenco studenti e personale */
+    #view-studenti,
+    #view-gestione-staff {
+        width: 100%;
+        padding: clamp(0.75rem, 2vw, 1.5rem) !important;
+        border-radius: 22px;
+        background:
+            radial-gradient(ellipse at 100% 0%, rgba(220, 38, 38, 0.07), transparent 34%),
+            #f7f5f2;
+    }
+
+    #view-studenti > div:first-child button {
+        border: 1px solid #e7e0da !important;
+        border-radius: 11px !important;
+        background: #fff !important;
+        color: #57534e !important;
+    }
+
+    #view-studenti > div:first-child button:hover {
+        border-color: #fca5a5 !important;
+        background: #fff1f2 !important;
+        color: #b91c1c !important;
+    }
+
+    #view-studenti h2,
+    #view-gestione-staff > div:first-child h2 {
+        color: #292322 !important;
+        letter-spacing: -0.03em;
+    }
+
+    #view-gestione-staff > div:first-child p {
+        color: #b91c1c !important;
+    }
+
+    #view-gestione-staff > div:first-child > div:last-child {
+        border: 1px solid #f4dada;
+        border-radius: 14px !important;
+        background: #fff !important;
+        box-shadow: 0 4px 12px rgba(41, 30, 24, 0.05);
+    }
+
+    #grid-studenti > div[onclick],
+    #staff-list-container > div {
+        min-width: 0;
+        padding: 1rem !important;
+        border: 1px solid #e7e0da !important;
+        border-radius: 17px !important;
+        background: linear-gradient(145deg, #fff, #fbf8f5) !important;
+        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.06) !important;
+        transition: transform 170ms ease, border-color 170ms ease, box-shadow 170ms ease;
+    }
+
+    #grid-studenti > div[onclick]:hover,
+    #staff-list-container > div:hover {
+        transform: translateY(-2px);
+        border-color: #fca5a5 !important;
+        box-shadow: 0 12px 24px rgba(127, 29, 29, 0.1) !important;
+    }
+
+    #grid-studenti > div[onclick] img,
+    #staff-list-container > div img,
+    #grid-studenti > div[onclick] > div:first-child > div {
+        border: 2px solid #f3e8e4 !important;
+        box-shadow: 0 3px 8px rgba(41, 30, 24, 0.08);
+    }
+
+    #grid-studenti > div[onclick] p,
+    #staff-list-container > div p:first-child {
+        color: #292322 !important;
+        line-height: 1.35;
+    }
+
+    #staff-list-container > div p:last-child {
+        color: #b91c1c !important;
+    }
+
+    /* Modali comuni */
+    #modal-overlay {
+        padding: clamp(0.75rem, 3vw, 1.5rem) !important;
+        background: rgba(24, 20, 20, 0.58) !important;
+        backdrop-filter: blur(7px);
+    }
+
+    #modal-overlay > .glass-light {
+        width: min(100%, 560px) !important;
+        max-height: min(88vh, 820px);
+        overflow: auto;
+        padding: clamp(1.2rem, 4vw, 2rem) !important;
+        border: 1px solid rgba(255, 255, 255, 0.75) !important;
+        border-radius: 24px !important;
+        background: linear-gradient(155deg, #fff, #faf7f4) !important;
+        box-shadow: 0 24px 70px rgba(24, 20, 20, 0.28) !important;
+    }
+
+    #modal-overlay #modal-title {
+        color: #292322 !important;
+        font-size: 1.1rem;
+        letter-spacing: -0.02em;
+    }
+
+    #modal-overlay > .glass-light > div:first-child {
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #eee7e2;
+    }
+
+    #modal-overlay > .glass-light > div:first-child button {
+        display: grid;
+        width: 2.15rem;
+        height: 2.15rem;
+        place-items: center;
+        border: 1px solid #e7e0da;
+        border-radius: 10px;
+        background: #fff !important;
+        color: #78716c !important;
+        transition: all 150ms ease;
+    }
+
+    #modal-overlay > .glass-light > div:first-child button:hover {
+        border-color: #fecaca;
+        background: #fff1f2 !important;
+        color: #b91c1c !important;
+    }
+
+    #modal-overlay #modal-confirm {
+        min-height: 46px;
+        border-radius: 12px !important;
+        background: linear-gradient(100deg, #b91c1c, #dc2626) !important;
+        box-shadow: 0 8px 18px rgba(127, 29, 29, 0.2) !important;
+    }
+
+    #modal-overlay #modal-body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    #modal-overlay #modal-body select,
+    #modal-overlay #modal-body textarea {
+        border: 1px solid #4b3b3b !important;
+        border-radius: 10px !important;
+        background: #151212 !important;
+        color: #f4f4f5 !important;
+    }
+
+    #modal-overlay #modal-body .mass-config-card .mass-config-heading {
+        color: #fbbf24 !important;
+    }
+
+    #modal-overlay #modal-body .mass-config-card .modal-label,
+    #modal-overlay #modal-body .mass-config-card label {
+        color: #e4e4e7 !important;
+    }
+
+    #modal-overlay #modal-body .mass-row .mass-grade,
+    #modal-overlay #modal-body .mass-row .mass-date {
+        border: 1px solid #4b3b3b !important;
+        border-radius: 9px !important;
+        background: #151212 !important;
+        color: #f4f4f5 !important;
+    }
+
+    #modal-overlay #modal-body .mass-config-card .modal-input {
+        max-width: 100%;
+        outline: none;
+    }
+
+    #modal-overlay #modal-body input:focus,
+    #modal-overlay #modal-body select:focus,
+    #modal-overlay #modal-body textarea:focus {
+        border-color: #f87171 !important;
+        box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12);
+    }
+
+    #modal-overlay #modal-body label {
+        color: #57534e;
+    }
+
+    #modal-overlay #modal-body button {
+        border-radius: 10px;
+        transition: filter 150ms ease, transform 150ms ease;
+    }
+
+    #modal-overlay #modal-body button:hover {
+        filter: brightness(0.96);
+    }
+
+    #calendar-modal {
+        padding: clamp(0.75rem, 3vw, 1.5rem) !important;
+        background: rgba(24, 20, 20, 0.62) !important;
+        backdrop-filter: blur(7px);
+    }
+
+    #calendar-modal > div {
+        max-height: 90vh;
+        overflow: auto;
+        border: 1px solid #e7e0da !important;
+        border-radius: 22px !important;
+        background: linear-gradient(155deg, #fff, #faf7f4) !important;
+        color: #292322 !important;
+        box-shadow: 0 24px 70px rgba(24, 20, 20, 0.28) !important;
+    }
+
+    #calendar-modal h3 {
+        color: #292322 !important;
+    }
+
+    #calendar-modal p,
+    #calendar-modal h4,
+    #calendar-modal span,
+    #calendar-modal label {
+        color: #57534e !important;
+    }
+
+    #calendar-modal hr {
+        border-color: #eee7e2 !important;
+    }
+
+    #calendar-modal > div > div.bg-\[\#23272a\],
+    #calendar-modal #cal-blocked-list {
+        border: 1px solid #e7e0da !important;
+        border-radius: 13px !important;
+        background: #faf8f6 !important;
+    }
+
+    #calendar-modal input {
+        border: 1px solid #e7e0da !important;
+        border-radius: 9px !important;
+        background: #fff !important;
+        color: #292322 !important;
+    }
+
+    @media (max-width: 640px) {
+        #view-esami,
+        #view-appello,
+        #view-studenti,
+        #view-gestione-staff {
+            padding: 0.65rem !important;
+        }
+
+        #view-esami > div:first-child {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        #view-esami #exam-grades-body > div {
+            align-items: stretch !important;
+        }
+
+        #view-esami #exam-grades-body > div > div:first-child {
+            width: 100%;
+        }
+
+        #view-appello > div:first-child {
+            align-items: stretch;
+        }
+
+        #view-appello > div:first-child > div:nth-child(2) {
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #modal-overlay > .glass-light {
+            border-radius: 19px !important;
+        }
+    }
 </style>
 
 <button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden">
