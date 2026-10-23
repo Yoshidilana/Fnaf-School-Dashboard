@@ -3172,11 +3172,12 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
         // Rendering Firme
         const safeCap = (str) => str ? (str.charAt(0).toUpperCase() + str.slice(1).toLowerCase()) : "";
 const firmeHtml = (data.firme || [])
-    .sort((a, b) => String(a.ora).localeCompare(String(b.ora), undefined, { numeric: true }))
-    .map((f, idx) => {
-        const visualizzaOra = isNaN(f.ora) ? f.ora : `${f.ora}°`;
+            .map((f, originalIdx) => ({ firma: f, originalIdx }))
+            .sort((a, b) => String(a.firma.ora).localeCompare(String(b.firma.ora), undefined, { numeric: true }))
+            .map(({ firma: f, originalIdx }) => {
+                const visualizzaOra = isNaN(f.ora) ? f.ora : `${f.ora}°`;
         
-        return `
+                return `
         <!-- Card principale con colore vivo (Azzurro/Blu) e bordi decisi -->
         <div class="p-4 bg-blue-600 border-2 border-zinc-950 rounded-2xl flex items-center gap-4 mb-3 shadow-md"> 
             
@@ -3208,8 +3209,8 @@ const firmeHtml = (data.firme || [])
             <!-- Bottoni Azione -->
             <div class="flex gap-1 ml-2 shrink-0">
                 ${isAdmin || (role === 'prof' && f.profId === window.currentUserId) ? `
-                    <button onclick="window.editFirma(${idx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">✏️</button>
-                    <button onclick="window.deleteFirma(${idx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-red-700 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">🗑️</button>
+                    <button onclick="window.editFirma(${originalIdx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">✏️</button>
+                    <button onclick="window.deleteFirma(${originalIdx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-red-700 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">🗑️</button>
                 ` : ''}
             </div>
         </div>`;
