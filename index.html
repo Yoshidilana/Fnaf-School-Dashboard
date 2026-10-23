@@ -1064,15 +1064,6 @@ main {
     </div>
 </div>
 
-    <!-- Selettore Classi Docente -->
-    <div id="prof-class-switcher-container" class="hidden filter-container flex items-center gap-2 px-3 border border-zinc-200 rounded-lg bg-zinc-50">
-        <span class="text-[9px] font-black text-red-600 uppercase">Classe:</span>
-        <!-- Cambiato text-white in text-zinc-900 -->
-        <select id="prof-class-select" onchange="window.filterByClass(this.value)" class="text-[10px] bg-transparent outline-none font-bold text-zinc-900">
-            <!-- Popolato via JS -->
-        </select>
-    </div>
-
     <!-- Current Date Display -->
     <div class="filter-container flex items-center gap-2 px-4 py-2 border border-zinc-500 rounded-lg bg-red-50">
         <span class="text-xs">📅</span>
@@ -2761,9 +2752,6 @@ function applyRoleUI() {
     const config = window.classConfigsCache[window.selectedClass] || { startYear: null };
     const grade = window.calculateClassGrade(ay, config.startYear);
     const isMaturita = grade === 5;
-    const isProf = type === ROLES.PROF;
-    const classiAssegnate = window.currentUserData?.classe; // Può essere stringa o array
-
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
     let miaClasse = window.currentUserData?.classe;
 if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaClasse.trim() === "")) {
@@ -2892,26 +2880,6 @@ toggle('btn-add-didattica', isStaffDidattico || type === ROLES.ADMIN);
     document.querySelectorAll('.student-nav-bar').forEach(nav => {
         nav.classList.toggle('hidden', isStudente);
     });
-
-if (isProf && window.currentUserData?.classi_docente && window.currentUserData.classi_docente.length > 0) {
-    const classiAssegnate = window.currentUserData.classi_docente; // Legge dal nuovo campo
-    const switcher = document.getElementById('prof-class-switcher-container');
-    const select = document.getElementById('prof-class-select');
-    
-    if (switcher && select) {
-        switcher.classList.remove('hidden');
-        select.innerHTML = classiAssegnate.map(c => 
-            `<option value="${c}" ${window.selectedClass === c ? 'selected' : ''}>${c}</option>`
-        ).join('');
-        
-        if (!window.selectedClass) {
-            window.selectedClass = classiAssegnate[0];
-            window.handleClassChange(classiAssegnate[0]);
-        }
-    }
-} else {
-    document.getElementById('prof-class-switcher-container')?.classList.add('hidden');
-}
 
 // --- INIZIALIZZAZIONE AUTOMATICA ---
 if (isStudente) {
