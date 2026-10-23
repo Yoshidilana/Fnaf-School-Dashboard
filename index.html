@@ -997,6 +997,86 @@ main {
         #class-hub-screen .class-hub-actions > button,
         #view-bacheca .bacheca-card { transition: none; }
     }
+
+    #modal-body .mass-config-card {
+        padding: 1rem;
+        border: 1px solid #3f3434;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #211c1c, #181515);
+    }
+
+    #modal-body .mass-config-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 0.75rem;
+        color: #fbbf24;
+        font-size: 0.65rem;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    #modal-body .mass-config-card .modal-input {
+        border: 1px solid #4b3b3b !important;
+        border-radius: 10px !important;
+        background: #151212 !important;
+        color: #f4f4f5 !important;
+    }
+
+    #modal-body .mass-day-option {
+        border: 1px solid #3f3434;
+        border-radius: 10px;
+        background: #171414;
+        transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    #modal-body .mass-day-option:has(input:checked) {
+        border-color: rgba(248, 113, 113, 0.65);
+        background: rgba(127, 29, 29, 0.2);
+    }
+
+    #modal-body .mass-schedule-status {
+        min-height: 1.25rem;
+        color: #a1a1aa;
+        font-size: 0.68rem;
+        line-height: 1.5;
+    }
+
+    #modal-body .mass-history-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        padding: 0.8rem;
+        border: 1px solid rgba(245, 158, 11, 0.24);
+        border-radius: 12px;
+        background: rgba(245, 158, 11, 0.07);
+    }
+
+    #modal-body .mass-row {
+        border: 1px solid #3f3434 !important;
+        border-radius: 14px !important;
+        background: linear-gradient(145deg, #211c1c, #181515) !important;
+    }
+
+    #modal-body .mass-row .mass-grade,
+    #modal-body .mass-row .mass-date {
+        border: 1px solid #4b3b3b !important;
+        border-radius: 9px !important;
+        background: #151212 !important;
+    }
+
+    #modal-body .mass-row .mass-history-note {
+        color: #a1a1aa;
+        font-size: 0.65rem;
+    }
+
+    #modal-body .mass-prepare-button {
+        border-radius: 12px;
+        background: linear-gradient(100deg, #b91c1c, #dc2626) !important;
+        color: #fff !important;
+        box-shadow: 0 8px 18px rgba(127, 29, 29, 0.24) !important;
+    }
 </style>
 
 <button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden">
@@ -8619,18 +8699,19 @@ window.openQuickMassGradesModal = () => {
     const confirm = document.getElementById('modal-confirm');
     const title = document.getElementById('modal-title');
     
-    title.innerText = "Generatore Voti Classe";
+    title.innerText = "Generatore Rapido · Voti Classe";
     document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
     confirm.disabled = false; 
+    window.massScheduleConfig = null;
     const materieDocente = window.currentUserData?.materie || [];
     const isAdmin = window.userRole === 'admin';
 
     body.innerHTML = `
-        <div id="mass-step-1" class="space-y-4">
-            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
-                <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">1. Configurazione Prova</p>
+        <div id="mass-step-1" class="space-y-3">
+            <div class="mass-config-card">
+                <p class="mass-config-heading"><span>01</span> Configura la prova</p>
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="quick-mass-sub" class="modal-input !py-2">
+                    <select id="quick-mass-sub" onchange="window.clearMassScheduleSelection()" class="modal-input !py-2">
                         ${(isAdmin ? Object.keys(LISTA_MATERIE) : materieDocente).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
                     </select>
                     <select id="quick-mass-type" class="modal-input !py-2">
@@ -8638,11 +8719,18 @@ window.openQuickMassGradesModal = () => {
                         <option value="Orale" selected>Orale</option>
                         <option value="Pratico">Pratico</option>
                     </select>
+                    <label class="mass-history-option col-span-2">
+                        <input type="checkbox" id="quick-mass-use-history" checked class="mt-1 accent-amber-500">
+                        <span>
+                            <span class="block text-xs font-black text-zinc-100">Usa lo storico dei voti</span>
+                            <span class="mt-1 block text-[10px] leading-relaxed text-zinc-400">Stima voti coerenti con quelli già ottenuti in questa materia, includendo gli anni precedenti del ciclo.</span>
+                        </span>
+                    </label>
                 </div>
             </div>
 
-            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
-                <label class="modal-label">2. Range Valutazioni Casuali</label>
+            <div class="mass-config-card">
+                <p class="mass-config-heading"><span>02</span> Intervallo voti</p>
                 <div class="flex items-center gap-4">
                     <input type="range" id="quick-mass-min" min="2" max="10" value="4" class="flex-1 accent-red-600" oninput="this.nextElementSibling.innerText = this.value">
                     <span class="text-xs font-black text-white w-4">4</span>
@@ -8652,38 +8740,42 @@ window.openQuickMassGradesModal = () => {
                 </div>
             </div>
 
-                        <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
-                <p class="text-[9px] text-zinc-500 font-black uppercase mb-2">3. Giorni Disponibili per Lezione</p>
+            <div class="mass-config-card">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <p class="mass-config-heading !mb-0"><span>03</span> Giorni disponibili</p>
+                    <button type="button" onclick="window.applyMassScheduleDays()" class="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[9px] font-black uppercase text-amber-300 transition-colors hover:bg-amber-500/20">📅 Usa orario docente</button>
+                </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="1" checked class="accent-red-600">
+                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="1" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
                         <span class="text-xs font-bold text-zinc-300">Lun</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="2" checked class="accent-red-600">
+                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="2" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
                         <span class="text-xs font-bold text-zinc-300">Mar</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="3" checked class="accent-red-600">
+                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="3" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
                         <span class="text-xs font-bold text-zinc-300">Mer</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="4" checked class="accent-red-600">
+                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="4" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
                         <span class="text-xs font-bold text-zinc-300">Gio</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="5" checked class="accent-red-600">
+                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="5" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
                         <span class="text-xs font-bold text-zinc-300">Ven</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2 bg-zinc-950 rounded-lg border border-zinc-800 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="6" checked class="accent-red-600">
+                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
+                        <input type="checkbox" name="mass-days" value="6" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
                         <span class="text-xs font-bold text-zinc-300">Sab</span>
                     </label>
                 </div>
+                <p id="mass-schedule-status" class="mass-schedule-status mt-2">Seleziona i giorni manualmente oppure usa l’orario del docente per questa classe.</p>
             </div>
 
-            <div class="p-3 bg-zinc-900 rounded-xl border border-zinc-800">
-                <label class="modal-label">4. Numero di Voti per Studente</label>
+            <div class="mass-config-card">
+                <p class="mass-config-heading"><span>04</span> Numero di voti per studente</p>
                 <select id="quick-mass-count" class="modal-input !py-2">
                     <option value="1">1 Voto (Standard)</option>
                     <option value="2">2 Voti (Multi-voto)</option>
@@ -8693,12 +8785,12 @@ window.openQuickMassGradesModal = () => {
                 </select>
             </div>
 
-            <button onclick="window.prepareMassGradesList()" class="w-full bg-white text-black py-3 rounded-xl font-black uppercase text-[10px]">Prepara Elenco Studenti →</button>
+            <button onclick="window.prepareMassGradesList()" class="mass-prepare-button w-full py-3 font-black uppercase text-[10px]">Prepara e rivedi i voti →</button>
         </div>
         <div id="mass-step-2" class="hidden space-y-4">
             <div class="flex justify-between items-center">
-                <p class="text-[9px] text-zinc-500 font-black uppercase">4. Revisione Individuale</p>
-                <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-500 font-bold uppercase">Rigenera Casuali 🎲</button>
+                <p class="text-[9px] text-zinc-300 font-black uppercase">05 · Revisione individuale</p>
+                <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-400 font-bold uppercase">Rigenera voti 🎲</button>
             </div>
             <div id="mass-students-list" class="max-h-[400px] overflow-y-auto space-y-2 pr-2 custom-scroll"></div>
         </div>
@@ -8747,50 +8839,199 @@ window.getProfDaysForSubject = (profId, materia, cls) => {
     return result;
 };
 
-window.prepareMassGradesList = () => {
+window.getMassGradeTeacher = (materia, cls) => {
+    if (window.userRole === 'admin') {
+        const assignedTeacher = window.allStudents.find(user => {
+            const role = (user.role || '').toLowerCase();
+            const isTeacher = role.includes('prof') || role.includes('docente') || role.includes('preside');
+            const teachesClass = Array.isArray(user.classi_docente) && user.classi_docente.includes(cls);
+            const teachesSubject = Array.isArray(user.materie) && user.materie.some(subject =>
+                subject.toLowerCase().trim() === materia.toLowerCase().trim()
+            );
+            return isTeacher && teachesClass && teachesSubject;
+        });
+        if (assignedTeacher) return { id: assignedTeacher.id, name: assignedTeacher.name };
+    }
+
+    return {
+        id: window.currentUserId,
+        name: window.currentUserData?.name || window.userName || 'Docente'
+    };
+};
+
+window.clearMassScheduleSelection = () => {
+    window.massScheduleConfig = null;
+    const status = document.getElementById('mass-schedule-status');
+    if (status) status.innerText = 'Giorni selezionati manualmente. Puoi riapplicare l’orario del docente.';
+};
+
+window.applyMassScheduleDays = async () => {
+    const materia = document.getElementById('quick-mass-sub')?.value;
+    const cls = window.selectedClass;
+    const status = document.getElementById('mass-schedule-status');
+
+    if (!materia || !cls || cls === 'ALL') {
+        alert('Seleziona prima una classe e una materia.');
+        return;
+    }
+
+    const teacher = window.getMassGradeTeacher(materia, cls);
+    if (!teacher.id) {
+        alert('Non è stato possibile identificare il docente della materia.');
+        return;
+    }
+
+    try {
+        const config = window.classConfigsCache[cls] || {};
+        const ayKey = document.getElementById('current-academic-year').innerText
+            .replace('A.S. ', '').trim().replace('/', '-');
+        if (!config.orariPerAnno?.[ayKey]) {
+            const metadataRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
+            const metadataSnap = await getDoc(metadataRef);
+            const metadata = metadataSnap.exists() ? metadataSnap.data() : {};
+            window.classConfigsCache[cls] = {
+                ...config,
+                ...metadata,
+                orariPerAnno: metadata.orariPerAnno || config.orariPerAnno || {}
+            };
+        }
+
+        const schedule = window.getProfDaysForSubject(teacher.id, materia, cls);
+        if (schedule.giorni.length === 0) {
+            window.massScheduleConfig = null;
+            if (status) status.innerText = 'Nessuna lezione di questa materia trovata nell’orario della classe.';
+            alert(`Nessuna lezione di ${materia} assegnata a ${teacher.name} nell’orario della classe ${cls} per l’A.S. corrente.`);
+            return;
+        }
+
+        document.querySelectorAll('input[name="mass-days"]').forEach(input => {
+            input.checked = schedule.giorni.includes(Number(input.value));
+        });
+        window.massScheduleConfig = { cls, materia, teacherId: teacher.id, ...schedule };
+
+        const dayNames = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+        const daySummary = schedule.giorni.map(day => {
+            const hour = schedule.ore[day];
+            return `${dayNames[day]}${hour ? ` · ${hour}ª ora` : ''}`;
+        }).join(', ');
+        if (status) status.innerText = `Orario di ${teacher.name}: ${daySummary}. Le date generate cadranno nei giorni di lezione.`;
+    } catch (error) {
+        console.error('Errore caricamento orario per il generatore voti:', error);
+        if (status) status.innerText = 'Impossibile caricare l’orario della classe.';
+        alert('Errore durante il caricamento dell’orario del docente. Riprova o seleziona i giorni manualmente.');
+    }
+};
+
+window.loadMassGradeHistory = async (students, materia, currentAy) => {
+    const currentStartYear = parseInt(currentAy.split('/')[0], 10);
+    const classStartYear = parseInt(window.classConfigsCache[window.selectedClass]?.startYear, 10);
+    const yearsToRead = Number.isFinite(classStartYear)
+        ? Math.min(5, Math.max(1, currentStartYear - classStartYear + 1))
+        : 5;
+    const academicYears = Array.from({ length: yearsToRead }, (_, index) => {
+        const startYear = currentStartYear - index;
+        return `${startYear}/${startYear + 1}`;
+    });
+
+    const histories = await Promise.all(students.map(async student => {
+        const snapshots = await Promise.all(academicYears.map(year =>
+            getDoc(window.getRecordDocRef(student.id, year, 'voti'))
+        ));
+        const grades = snapshots.flatMap(snapshot => {
+            if (!snapshot.exists()) return [];
+            return (snapshot.data().voti || [])
+                .filter(voto =>
+                    voto.materia?.toLowerCase().trim() === materia.toLowerCase().trim() &&
+                    !voto.nonValutato
+                )
+                .map(voto => window.parseVotoScolastico(voto.voto))
+                .filter(voto => Number.isFinite(voto) && voto >= 2 && voto <= 10);
+        });
+        return [student.id, grades];
+    }));
+
+    return new Map(histories);
+};
+
+window.generateMassGrade = (history, minValue, maxValue) => {
+    const min = Math.min(minValue, maxValue);
+    const max = Math.max(minValue, maxValue);
+    if (!history?.length) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    const average = history.reduce((sum, grade) => sum + grade, 0) / history.length;
+    const variation = (Math.random() + Math.random() - 1) * 1.5;
+    const base = Math.round(Math.max(min, Math.min(max, average + variation)));
+    const modifiers = ['', '+', '-', '½'];
+    const possibleGrades = modifiers.filter(modifier => {
+        if (!modifier) return true;
+        return window.parseVotoScolastico(`${base}${modifier}`) >= min &&
+            window.parseVotoScolastico(`${base}${modifier}`) <= max;
+    });
+    const modifier = possibleGrades[Math.floor(Math.random() * possibleGrades.length)];
+
+    return {
+        grade: `${base}${modifier}`,
+        average: average.toFixed(1),
+        count: history.length
+    };
+};
+
+window.prepareMassGradesList = async () => {
     const type = document.getElementById('quick-mass-type').value;
     const subSelect = document.getElementById('quick-mass-sub');
     const sub = subSelect.value;
-    
-    const minV = parseInt(document.getElementById('quick-mass-min').value);
-    const maxV = parseInt(document.getElementById('quick-mass-max').value);
+    const minV = parseInt(document.getElementById('quick-mass-min').value, 10);
+    const maxV = parseInt(document.getElementById('quick-mass-max').value, 10);
     const students = window.allStudents.filter(s => s.classe === window.selectedClass);
-
-    // --- LOGICA IDENTIFICAZIONE DOCENTE PER ADMIN ---
-    let teacherIdToSearch = window.currentUserId; 
-
-    if (window.userRole === 'admin') {
-        const assignedTeacher = window.allStudents.find(u => {
-            const r = (u.role || '').toLowerCase();
-            const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside');
-            const inClass = Array.isArray(u.classi_docente) && u.classi_docente.includes(window.selectedClass);
-            const teachesSub = Array.isArray(u.materie) && u.materie.some(m => m.toLowerCase().trim() === sub.toLowerCase().trim());
-            return isStaff && inClass && teachesSub;
-        });
-        
-        if (assignedTeacher) {
-            teacherIdToSearch = assignedTeacher.id;
-        }
-    }
-    
-    // --- LOGICA ORARIO (GIORNI SELEZIONATI DA CHECKBOX) ---
     const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
     const giorniValidi = Array.from(checkedBoxes).map(cb => parseInt(cb.value));
-    const giorniFermi = giorniValidi.length > 0 ? giorniValidi : [1, 2, 3, 4, 5, 6];
-    
+    const modalConfirm = document.getElementById('modal-confirm');
+    if (students.length === 0) {
+        alert('Non ci sono studenti nella classe selezionata.');
+        return;
+    }
+    if (giorniValidi.length === 0) {
+        alert('Seleziona almeno un giorno di lezione.');
+        return;
+    }
+
+    const teacher = window.getMassGradeTeacher(sub, window.selectedClass);
+    const historyEnabled = document.getElementById('quick-mass-use-history').checked;
+    const currentAy = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    let gradeHistory = new Map();
+
+    if (historyEnabled) {
+        const prepareButton = document.querySelector('.mass-prepare-button');
+        if (prepareButton) {
+            prepareButton.disabled = true;
+            prepareButton.innerText = 'Caricamento dello storico...';
+        }
+        try {
+            gradeHistory = await window.loadMassGradeHistory(students, sub, currentAy);
+        } catch (error) {
+            console.error('Errore caricamento storico voti:', error);
+            alert('Non è stato possibile caricare lo storico dei voti. Riprova oppure disattiva l’opzione “Usa lo storico dei voti”.');
+            if (prepareButton) {
+                prepareButton.disabled = false;
+                prepareButton.innerText = 'Prepara e rivedi i voti →';
+            }
+            return;
+        }
+        if (prepareButton) {
+            prepareButton.disabled = false;
+            prepareButton.innerText = 'Prepara e rivedi i voti →';
+        }
+    }
+
+    const giorniFermi = giorniValidi;
     const voteCount = parseInt(document.getElementById('quick-mass-count')?.value) || 1;
     
     const listContainer = document.getElementById('mass-students-list');
     const step1 = document.getElementById('mass-step-1');
     const step2 = document.getElementById('mass-step-2');
-    const confirmBtn = document.getElementById('modal-confirm');
-
-    step1.classList.add('hidden');
-    step2.classList.remove('hidden');
-    confirmBtn.classList.remove('hidden');
-    confirmBtn.disabled = false;
-    confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
-    confirmBtn.onclick = window.submitQuickMassGrades;
+    const confirmBtn = modalConfirm;
 
     const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
     const globalCalendarVal = document.getElementById('global-calendar')?.value;
@@ -8801,7 +9042,7 @@ window.prepareMassGradesList = () => {
     const currentControlValues = Array.from(existingControls).map(ctrl => ctrl.value);
 
     // --- GENERAZIONE HEADER (UN CONTROLLO PER CIASCUN VOTO SELEZIONATO) ---
-    let headerHtml = `<div class="p-3 bg-zinc-900 border border-zinc-800 rounded-xl mb-4 flex flex-col gap-3">`;
+    let headerHtml = `<div class="mass-config-card mb-3 flex flex-col gap-3"><p class="mass-config-heading">🗓️ Date delle prove</p>`;
     const activeVoteConfig = [];
 
     for (let v = 0; v < voteCount; v++) {
@@ -8814,6 +9055,10 @@ window.prepareMassGradesList = () => {
                 let targetMonth = (currentMonthIdx + v) % 12;
                 if (targetMonth === 6 || targetMonth === 7) targetMonth = 8;
                 defaultDate = window.generateRandomValidDateString(targetMonth, giorniFermi);
+            }
+            if (!defaultDate) {
+                alert('Non ci sono date valide nel mese selezionato per i giorni di lezione scelti.');
+                return;
             }
             activeVoteConfig.push(defaultDate);
 
@@ -8847,15 +9092,31 @@ window.prepareMassGradesList = () => {
     }
     headerHtml += `</div>`;
 
+    if (type !== 'Scritto' && type !== 'Pratico') {
+        const unavailableMonth = activeVoteConfig.find(month =>
+            !window.generateRandomValidDateString(month, giorniFermi)
+        );
+        if (unavailableMonth !== undefined) {
+            alert(`Non ci sono date valide a ${monthNames[unavailableMonth]} per i giorni di lezione scelti.`);
+            return;
+        }
+    }
+
     // --- GENERAZIONE RIGHE STUDENTI ---
-    listContainer.innerHTML = headerHtml + students.map((s) => {
+    const rowsHtml = students.map((s) => {
         let studentSlotsHtml = "";
+        const history = gradeHistory.get(s.id) || [];
+        let historyNote = historyEnabled
+            ? 'Nessuno storico disponibile: voto casuale nel range scelto.'
+            : 'Storico disattivato: voto casuale nel range scelto.';
+        if (history.length > 0) {
+            const average = (history.reduce((sum, grade) => sum + grade, 0) / history.length).toFixed(1);
+            historyNote = `Media storica ${sub}: ${average} · ${history.length} ${history.length === 1 ? 'voto' : 'voti'}`;
+        }
 
         for (let i = 0; i < voteCount; i++) {
-            let base = Math.floor(Math.random() * (maxV - minV + 1)) + minV;
-            const mods = ["", "+", "-", "½"];
-            let mod = base === 10 ? "" : mods[Math.floor(Math.random() * mods.length)];
-            const finalGrade = base + mod;
+            const generated = window.generateMassGrade(history, minV, maxV);
+            const finalGrade = typeof generated === 'number' ? generated : generated.grade;
             
             let studentDate;
             if (type === 'Scritto' || type === 'Pratico') {
@@ -8863,24 +9124,39 @@ window.prepareMassGradesList = () => {
             } else {
                 studentDate = window.generateRandomValidDateString(activeVoteConfig[i], giorniFermi);
             }
+            if (!studentDate) {
+                alert('Non ci sono date valide nel periodo selezionato per i giorni di lezione scelti.');
+                return null;
+            }
 
             studentSlotsHtml += `
                 <div class="flex gap-2 mt-1 mass-slot" data-vote-idx="${i}">
-                    <input type="text" value="${finalGrade}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-[10px] font-black p-1 rounded-lg">
-                    <input type="date" value="${studentDate}" class="mass-date flex-1 bg-zinc-800 border border-zinc-700 text-white text-[10px] p-1 rounded-lg outline-none">
+                    <input type="text" value="${finalGrade}" aria-label="Voto per ${s.name}" class="mass-grade w-12 bg-zinc-800 border border-zinc-700 text-white text-center text-[10px] font-black p-1 rounded-lg">
+                    <input type="date" value="${studentDate}" aria-label="Data della prova per ${s.name}" class="mass-date flex-1 bg-zinc-800 border border-zinc-700 text-white text-[10px] p-1 rounded-lg outline-none">
                 </div>
             `;
         }
 
         return `
-            <div class="mass-row p-3 bg-zinc-900/50 border border-zinc-800 rounded-xl flex flex-col gap-2" data-sid="${s.id}">
+            <div class="mass-row p-3 flex flex-col gap-2" data-sid="${s.id}">
                 <p class="text-[10px] font-black text-white uppercase truncate border-b border-zinc-800 pb-1">${s.name}</p>
+                <p class="mass-history-note">${historyNote}</p>
                 <div class="grid grid-cols-1 gap-1">
                     ${studentSlotsHtml}
                 </div>
             </div>
         `;
-    }).join('');
+    }).filter(Boolean).join('');
+
+    if (students.length > 0 && !rowsHtml) return;
+
+    listContainer.innerHTML = headerHtml + rowsHtml;
+    step1.classList.add('hidden');
+    step2.classList.remove('hidden');
+    confirmBtn.classList.remove('hidden');
+    confirmBtn.disabled = false;
+    confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
+    confirmBtn.onclick = window.submitQuickMassGrades;
 };
 
 // --- AGGIORNO SOLO LO SLOT DEL VOTO SELEZIONATO SE SI CAMBIA IL MESE ---
@@ -8892,7 +9168,12 @@ window.regenMassSlotDatesByMonth = (voteIndex, newMonth) => {
     document.querySelectorAll(`.mass-slot[data-vote-idx="${voteIndex}"]`).forEach(slot => {
         const dateInput = slot.querySelector('.mass-date');
         if (dateInput) {
-            dateInput.value = window.generateRandomValidDateString(parseInt(newMonth), giorniFermi);
+            const date = window.generateRandomValidDateString(parseInt(newMonth), giorniFermi);
+            if (!date) {
+                alert('Non ci sono date valide nel mese selezionato per i giorni di lezione scelti.');
+                return;
+            }
+            dateInput.value = date;
         }
     });
 };
@@ -8911,44 +9192,30 @@ window.updateMassSlotDatesByVoteIndex = (voteIndex, newDate) => {
 window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = []) => {
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const yearStart = parseInt(ay.split('/')[0]);
-    let found = false;
-    let attempts = 0;
-    let randomDate;
-
     if (!window.blockedDates) window.blockedDates = [];
 
-    // Se il docente ha dei giorni specifici, usiamo solo quelli. Altrimenti da Lunedì (1) a Sabato (6)
     const validDays = (allowedWeekdays && allowedWeekdays.length > 0) ? allowedWeekdays : [1, 2, 3, 4, 5, 6];
-
-    while (!found && attempts < 1000) {
-        let start, end;
-        if (targetMonth !== null) {
-            const year = (targetMonth >= 8) ? yearStart : (yearStart + 1);
-            start = new Date(year, targetMonth, 1);
-            end = new Date(year, targetMonth + 1, 0);
-        } else {
-            start = new Date(yearStart, 8, 15);
-            end = new Date(yearStart + 1, 5, 10);
-        }
-
-        // Generiamo un timestamp casuale tra i due limiti
-        const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
-        randomDate = new Date(randomTimestamp);
-        randomDate.setHours(12, 0, 0, 0); // Impostiamo a mezzogiorno locale per evitare qualsiasi sfasamento di fuso orario
-
-        const dayOfWeek = randomDate.getDay(); // 0 = Domenica, 1 = Lunedì...
-        
-        // CONDIZIONI DI VALIDITÀ:
-        // 1. Non deve essere Domenica (0)
-        // 2. Il giorno deve essere tra quelli consentiti dal docente (validDays)
-        // 3. Non deve essere una data bloccata
-        if (dayOfWeek !== 0 && validDays.includes(dayOfWeek) && !window.isRegistrationBlocked(randomDate)) {
-            found = true;
-        }
-        attempts++;
+    let start;
+    let end;
+    if (targetMonth !== null) {
+        const year = (targetMonth >= 8) ? yearStart : (yearStart + 1);
+        start = new Date(year, targetMonth, 1, 12);
+        end = new Date(year, targetMonth + 1, 0, 12);
+    } else {
+        start = new Date(yearStart, 8, 15, 12);
+        end = new Date(yearStart + 1, 5, 10, 12);
     }
 
-    // FORMATTAZIONE LOCALE SICURA (Evita il bug di toISOString che torna indietro al giorno prima)
+    const validDates = [];
+    for (const candidate = new Date(start); candidate <= end; candidate.setDate(candidate.getDate() + 1)) {
+        const dayOfWeek = candidate.getDay();
+        if (dayOfWeek !== 0 && validDays.includes(dayOfWeek) && !window.isRegistrationBlocked(candidate)) {
+            validDates.push(new Date(candidate));
+        }
+    }
+    if (validDates.length === 0) return null;
+
+    const randomDate = validDates[Math.floor(Math.random() * validDates.length)];
     const yyyy = randomDate.getFullYear();
     const mm = String(randomDate.getMonth() + 1).padStart(2, '0');
     const dd = String(randomDate.getDate()).padStart(2, '0');
@@ -8958,35 +9225,7 @@ window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = []
 
 window.setRandomValidDate = () => {
     const input = document.getElementById('quick-mass-date');
-    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    const yearStart = parseInt(ay.split('/')[0]);
-    
-    let found = false;
-    let attempts = 0;
-    let randomDate;
-
-    while (!found && attempts < 50) {
-        // Sceglie un giorno a caso tra Settembre e Giugno
-        const start = new Date(yearStart, 8, 15);
-        const end = new Date(yearStart + 1, 5, 10);
-        
-        const randomTimestamp = start.getTime() + Math.random() * (end.getTime() - start.getTime());
-        randomDate = new Date(randomTimestamp);
-        randomDate.setHours(12, 0, 0, 0); // Fissiamo a mezzogiorno locale per neutralizzare il fuso orario
-        
-        // Verifica se la data è bloccata (Domenica o Festività)
-        if (randomDate.getDay() !== 0 && !window.isRegistrationBlocked(randomDate)) {
-            found = true;
-        }
-        attempts++;
-    }
-
-    // Formattazione locale manuale per evitare lo sfasamento di toISOString()
-    const yyyy = randomDate.getFullYear();
-    const mm = String(randomDate.getMonth() + 1).padStart(2, '0');
-    const dd = String(randomDate.getDate()).padStart(2, '0');
-
-    input.value = `${yyyy}-${mm}-${dd}`;
+    if (input) input.value = window.generateRandomValidDateString() || '';
 };
 
 window.submitQuickMassGrades = async () => {
@@ -8998,17 +9237,9 @@ window.submitQuickMassGrades = async () => {
     const rows = document.querySelectorAll('.mass-row');
     if (rows.length === 0) return;
 
-    // --- RICERCA DOCENTE ASSEGNATO ---
-    const profAssegnato = window.allStudents.find(u => {
-        const r = (u.role || '').toLowerCase();
-        const isStaff = r.includes('prof') || r.includes('docente') || r.includes('preside') || r.includes('vice');
-        const assegnatoAClasse = Array.isArray(u.classi_docente) && u.classi_docente.includes(targetClass);
-        const insegnaMateria = Array.isArray(u.materie) && u.materie.some(mat => mat.toLowerCase().trim() === sub.toLowerCase().trim());
-        return isStaff && assegnatoAClasse && insegnaMateria;
-    });
-
-    const finalProfName = profAssegnato ? profAssegnato.name : window.currentUserData.name;
-    const finalProfId = profAssegnato ? profAssegnato.id : window.currentUserId;
+    const docente = window.getMassGradeTeacher(sub, targetClass);
+    const finalProfName = docente.name;
+    const finalProfId = docente.id;
 
     // Recuperiamo l'orario usando il finalProfId CORRETTO
     const infoOrario = window.getProfDaysForSubject(finalProfId, sub, targetClass);
