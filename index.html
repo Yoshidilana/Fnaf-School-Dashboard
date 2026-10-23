@@ -70,12 +70,13 @@ main {
     background: #f4f4f5; /* Grigio chiarissimo al posto del marrone scuro */
     border: 1px solid #e4e4e7; /* Bordo grigio chiaro */
     color: #18181b; /* Testo quasi nero */
-    padding: 8px 16px;
-    font-size: 10px;
+    padding: 7px 10px;
+    font-size: 9px;
     font-weight: 800;
     text-transform: uppercase;
-    border-radius: 12px;
+    border-radius: 10px;
     transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .nav-pill:hover {
@@ -84,6 +85,19 @@ main {
     border-color: #ef4444;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.agenda-quick-nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 760px;
+}
+
+.agenda-quick-nav .nav-pill {
+    padding: 7px 9px;
 }
 
 /* Card Firme (Lezioni) - Ora in un elegante Rosso Scuro/Vino */
@@ -1829,7 +1843,7 @@ main {
             <span class="text-3xl">📅</span>
         </div>
         <div class="flex flex-col">
-            <label class="text-[9px] font-black uppercase text-zinc-550 tracking-[0.2em] mb-1">Registro di Classe</label>
+            <label class="text-[9px] font-black uppercase text-zinc-550 tracking-[0.2em] mb-1">Agenda classe</label>
 
             <!-- Data: testo nero, focus rosso -->
             <input type="date" id="global-calendar" onchange="window.updateDateContext()" 
@@ -1848,26 +1862,26 @@ main {
 <button onclick="window.changeMenu('classi')" class="btn-staff-nav hidden bg-red-500 hover:bg-zinc-200 text-white hover:text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-red-500 shadow-sm">
                     ⬅ Hub
                 </button>
-                <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" class="bg-red-500 hover:bg-zinc-200 text-white hover:text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-red-500 shadow-sm">
-                    🏫 Cambia
+                <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" title="Cambia classe" aria-label="Cambia classe" class="bg-red-500 hover:bg-zinc-200 text-white hover:text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-red-500 shadow-sm">
+                    🏫 Classe
                 </button>
             </div>
         </div>
     </div>
 
 <!-- Navigazione Rapida (Pills) - Versione Rosso Soft -->
-<div class="flex items-center gap-2 p-2 rounded-2xl border border-red-200" style="background: rgba(220, 38, 38, 0.04) !important;">
+<div class="agenda-quick-nav p-2 rounded-2xl border border-red-200" style="background: rgba(220, 38, 38, 0.04) !important;">
     <!-- NUOVI PULSANTI SMART -->
-    <button onclick="window.jumpToEvent('prev')" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">◀ Evento Prec.</button>
-    <button onclick="navDate('day', -1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Ieri</button>
-    <button onclick="navDate('week', -1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Sett. Prec.</button>
+    <button onclick="window.jumpToEvent('prev')" title="Vai all'evento precedente" aria-label="Vai all'evento precedente" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">◀ Evento prec.</button>
+    <button onclick="navDate('day', -1)" title="Vai al giorno precedente" aria-label="Vai al giorno precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Ieri</button>
+    <button onclick="navDate('week', -1)" title="Vai alla settimana precedente" aria-label="Vai alla settimana precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−7g</button>
     
-    <button onclick="navDate('month', -1)" 
+    <button onclick="navDate('month', -1)" title="Vai al mese precedente" aria-label="Vai al mese precedente"
         class="px-3 py-2 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[10px] font-black rounded-lg border !border-red-200 transition-all">
         -1M
     </button>
 
-    <button onclick="navDate('year', -1)" 
+    <button onclick="navDate('year', -1)" title="Vai all'anno precedente" aria-label="Vai all'anno precedente"
         class="px-2 py-1 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[9px] font-black uppercase rounded-md border !border-red-200 transition-all">
         -1A
     </button>
@@ -1875,17 +1889,17 @@ main {
     <!-- Separatore Rosso -->
     <div class="w-[1px] h-4 bg-red-300 mx-1"></div>
     
-    <button onclick="navDate('day', 1)" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300 font-black">Domani</button>
+    <button onclick="navDate('day', 1)" title="Vai al giorno successivo" aria-label="Vai al giorno successivo" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300 font-black">Domani</button>
     <!-- NUOVI PULSANTI SMART -->
-    <button onclick="window.jumpToEvent('next')" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">Prossimo Evento ▶</button>
-    <button onclick="navDate('week', 1)" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Prossima</button>
+    <button onclick="window.jumpToEvent('next')" title="Vai al prossimo evento" aria-label="Vai al prossimo evento" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">Evento succ. ▶</button>
+    <button onclick="navDate('week', 1)" title="Vai alla settimana successiva" aria-label="Vai alla settimana successiva" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+7g</button>
     
-    <button onclick="navDate('month', 1)" 
+    <button onclick="navDate('month', 1)" title="Vai al mese successivo" aria-label="Vai al mese successivo"
         class="px-3 py-2 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[10px] font-black rounded-lg border !border-red-200 transition-all">
         +1M
     </button>
 
-    <button onclick="navDate('year', 1)" 
+    <button onclick="navDate('year', 1)" title="Vai all'anno successivo" aria-label="Vai all'anno successivo"
         class="px-2 py-1 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[9px] font-black uppercase rounded-md border !border-red-200 transition-all">
         +1A
     </button>
@@ -1904,15 +1918,15 @@ main {
                         <span class="w-2 h-2 bg-black rounded-full animate-pulse"></span> Terminale Comunicazioni
                     </p>
                     <div id="prof-actions-agenda" class="flex gap-2">
-                        <button onclick="window.openModal('firme')" class="bg-black text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-black hover:bg-zinc-900">✍️ Firma</button>
-                        <button onclick="window.openModal('compiti')" class="bg-blue-600 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-blue-700 hover:bg-blue-700">📚 Compiti</button>
+                        <button onclick="window.openModal('firme')" title="Registra una firma di lezione" aria-label="Registra una firma di lezione" class="bg-black text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-black hover:bg-zinc-900">✍️ Firma</button>
+                                <button onclick="window.openModal('compiti')" title="Assegna un compito" aria-label="Assegna un compito" class="bg-blue-600 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all border border-blue-700 hover:bg-blue-700">📚 Compiti</button>
                     </div>
                 </div>
                 <textarea id="input-testo-avviso" 
                     class="w-full p-4 bg-black text-sm font-medium text-white placeholder:text-zinc-500 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black transition-all resize-none border-none" 
                     placeholder="Scrivi un avviso per la classe..." rows="2"></textarea>
             </div>
-            <button onclick="window.addAvviso(document.getElementById('input-testo-avviso').value, window.selectedClass)" 
+            <button onclick="window.addAvviso(document.getElementById('input-testo-avviso').value, window.selectedClass)" title="Invia l'avviso alla classe" aria-label="Invia l'avviso alla classe"
                 class="w-full md:w-auto bg-black text-white text-[10px] font-black px-8 py-5 rounded-2xl uppercase hover:bg-zinc-900 transition-all shadow-lg shrink-0 border border-black">
                 Invia Messaggio
             </button>
@@ -1929,7 +1943,7 @@ main {
             <div class="space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <span class="text-xl">📑</span>
-                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Diario di Bordo (Lezioni)</h3>
+                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Lezioni</h3>
                 </div>
                 <div id="agenda-firme-list" class="space-y-4 min-h-[100px]">
                     <!-- Popolato via JS -->
@@ -1940,7 +1954,7 @@ main {
             <div class="space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <span class="text-xl">📘</span>
-                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Lavoro a Casa e Scadenze</h3>
+                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Compiti e scadenze</h3>
                 </div>
                 <div id="agenda-compiti-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Popolato via JS -->
@@ -3165,7 +3179,7 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
                     <p class="text-[10px] font-black text-amber-900 uppercase mb-1 tracking-tighter">📢 Comunicazione Agenda</p>
                     <p class="text-xs text-amber-950 font-medium leading-tight">${com.testo}</p>
                     <p class="text-[9px] text-amber-700 mt-2 italic font-bold">- Inviato da: ${com.autore}</p>
-                    ${(isBoss || isOwner) ? `<button onclick="window.deleteAvviso(${idx}, '${cls}')" class="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-1.5 rounded-lg transition-all shadow-sm border border-red-100">🗑️</button>` : ''}
+                    ${(isBoss || isOwner) ? `                    <button onclick="window.deleteAvviso(${idx}, '${cls}')" title="Elimina questa comunicazione" aria-label="Elimina questa comunicazione" class="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-red-600 p-1.5 rounded-lg transition-all shadow-sm border border-red-100">🗑️</button>` : ''}
                 </div>`;
         }).join('');
 
@@ -3179,29 +3193,28 @@ const firmeHtml = (data.firme || [])
         
                 return `
         <!-- Card principale con colore vivo (Azzurro/Blu) e bordi decisi -->
-        <div class="p-4 bg-blue-600 border-2 border-zinc-950 rounded-2xl flex items-center gap-4 mb-3 shadow-md"> 
+        <div class="firme-card-modern p-3 flex items-center gap-3 mb-3"> 
             
             <!-- Badge Ora: Sfondo Bianco e Testo Nero Pieno per risaltare -->
-            <div class="w-14 h-14 bg-red-600 border-2 border-zinc-950 rounded-xl flex flex-col items-center justify-center shrink-0 shadow-sm"> 
-                <span class="text-sm font-black text-zinc-950 leading-none">${visualizzaOra}</span>
-                <span class="text-[7px] uppercase font-black text-zinc-950 opacity-80 mt-0.5">Ora</span>
+            <div class="hour-badge-modern shrink-0"> 
+                <span class="text-sm font-black leading-none">${visualizzaOra}</span>
             </div>
 
             <!-- Contenuto Centrale -->
             <div class="flex-1 min-w-0">
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-1">
-                    <h4 class="text-[11px] font-black uppercase tracking-tight text-zinc-950">
+                    <h4 class="text-[10px] font-black uppercase tracking-tight text-zinc-950">
                         <span>${f.materia.toUpperCase()}</span> 
                         <span class="mx-1 text-white opacity-60">|</span> 
                         <span class="text-red-950 font-black">${f.tipo || 'Lezione'}</span>
                     </h4>
                     
                     <!-- Badge Prof: Giallo Vivo con Testo Nero ad alto contrasto -->
-                    <span class="text-[9px] font-black bg-yellow-400 px-2 py-1 rounded-lg text-zinc-950 border border-zinc-950 uppercase">
+                    <span class="text-[8px] font-black bg-yellow-100 px-2 py-1 rounded-lg text-zinc-950 border border-yellow-300 uppercase">
                         Prof: ${f.prof.toUpperCase()}
                     </span>
                 </div>
-                <p class="text-xs text-white font-bold uppercase opacity-90 leading-snug">
+                <p class="text-[11px] text-zinc-800 font-semibold leading-snug">
                     ${f.argomento || "Nessun argomento registrato"}
                 </p>
             </div>
@@ -3209,8 +3222,8 @@ const firmeHtml = (data.firme || [])
             <!-- Bottoni Azione -->
             <div class="flex gap-1 ml-2 shrink-0">
                 ${isAdmin || (role === 'prof' && f.profId === window.currentUserId) ? `
-                    <button onclick="window.editFirma(${originalIdx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">✏️</button>
-                    <button onclick="window.deleteFirma(${originalIdx}, '${cls}')" class="p-2 bg-zinc-950 hover:bg-red-700 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">🗑️</button>
+                    <button onclick="window.editFirma(${originalIdx}, '${cls}')" title="Modifica questa firma" aria-label="Modifica questa firma" class="p-2 bg-zinc-950 hover:bg-zinc-900 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">✏️</button>
+                    <button onclick="window.deleteFirma(${originalIdx}, '${cls}')" title="Elimina questa firma" aria-label="Elimina questa firma" class="p-2 bg-zinc-950 hover:bg-red-700 border border-zinc-950 text-white rounded-xl text-xs transition-all active:scale-90">🗑️</button>
                 ` : ''}
             </div>
         </div>`;
@@ -3231,7 +3244,7 @@ return `
             <span class="text-[9px] font-black uppercase bg-blue-100 px-2 py-0.5 rounded" style="color: #1e3a8a !important;">${c.materia}</span>
             
             ${canDeleteCompito ? `
-                <button onclick="window.deleteCompito(${idx}, '${cls}')" 
+                <button onclick="window.deleteCompito(${idx}, '${cls}')" title="Elimina questo compito" aria-label="Elimina questo compito"
                         class="opacity-0 group-hover:opacity-100 text-blue-500 hover:text-red-600 transition-all p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
