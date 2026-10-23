@@ -88,16 +88,185 @@ main {
 }
 
 .agenda-quick-nav {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
     width: 100%;
-    max-width: 760px;
+    max-width: 520px;
+    padding: 10px;
+    border: 1px solid #f1d4d4;
+    border-radius: 18px;
+    background: linear-gradient(145deg, #fffafa, #fff4f2);
 }
 
-.agenda-quick-nav .nav-pill {
-    padding: 7px 9px;
+.agenda-nav-row {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: center;
+    gap: 6px;
+}
+
+.agenda-nav-row.events {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.agenda-nav-row .nav-pill,
+.agenda-nav-row button {
+    min-height: 34px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    font-size: 8px;
+}
+
+.agenda-nav-row .nav-pill {
+    width: 100%;
+}
+
+#view-agenda .agenda-content-panel {
+    min-width: 0;
+    padding: clamp(0.85rem, 2vw, 1.3rem);
+    border: 1px solid #e9e5e2;
+    border-radius: 22px;
+    background: linear-gradient(160deg, #ffffff, #faf8f6);
+    box-shadow: 0 8px 24px rgba(41, 27, 20, 0.06);
+}
+
+#view-agenda .agenda-teacher-panel {
+    border-color: #f0d6b4 !important;
+    background: linear-gradient(135deg, #fff9ed, #fff) !important;
+    box-shadow: 0 8px 22px rgba(90, 60, 20, 0.07) !important;
+}
+
+#view-agenda .agenda-teacher-panel textarea {
+    min-height: 76px;
+    background: #fff !important;
+    border: 1px solid #eadfce !important;
+    color: #292321 !important;
+}
+
+#view-agenda .agenda-teacher-panel textarea::placeholder {
+    color: #8a8178 !important;
+}
+
+#view-agenda .agenda-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid #eee7e2;
+    color: #292321;
+    letter-spacing: 0.12em;
+}
+
+#view-agenda .agenda-side-panel {
+    border-color: #e9e5e2 !important;
+    border-radius: 22px !important;
+    background: linear-gradient(160deg, #fff, #faf8f6) !important;
+    box-shadow: 0 8px 24px rgba(41, 27, 20, 0.06) !important;
+}
+
+#view-agenda .agenda-side-panel > div:first-child {
+    border-bottom: 1px solid #eee7e2 !important;
+    background: #faf6f2 !important;
+}
+
+#view-agenda .agenda-side-panel > div:first-child h3 {
+    color: #292321 !important;
+}
+
+#view-agenda #agenda-daily-info,
+#view-agenda #agenda-attendance-info {
+    padding: 0.8rem !important;
+}
+
+#view-agenda #agenda-daily-info > div,
+#view-agenda #agenda-attendance-info > div {
+    border-radius: 14px !important;
+    box-shadow: 0 3px 10px rgba(41, 27, 20, 0.07) !important;
+}
+
+#view-agenda #agenda-daily-info > div.bg-green-600 {
+    background: #f0fdf4 !important;
+    border: 1px solid #bbf7d0 !important;
+}
+
+#view-agenda #agenda-daily-info > div.bg-red-600 {
+    background: #fff1f2 !important;
+    border: 1px solid #fecdd3 !important;
+}
+
+#view-agenda #agenda-daily-info > div.bg-green-600 span,
+#view-agenda #agenda-daily-info > div.bg-red-600 p,
+#view-agenda #agenda-daily-info > div.bg-green-600 p {
+    color: #292321 !important;
+}
+
+#view-agenda #agenda-daily-info > div.bg-green-600 span.bg-zinc-950,
+#view-agenda #agenda-daily-info > div.bg-red-600 span.bg-zinc-950 {
+    background: #fff !important;
+    border: 1px solid #e7e5e4 !important;
+}
+
+#view-agenda #agenda-attendance-info > div.bg-zinc-950\/40 {
+    background: #fff !important;
+    border: 1px solid #eee7e2 !important;
+}
+
+#view-agenda #agenda-attendance-info span.text-white {
+    color: #292321 !important;
+}
+
+#view-agenda #agenda-attendance-info span.bg-yellow-400 {
+    background: #fff7dc !important;
+    border-color: #f2dfa1 !important;
+    color: #6d5414 !important;
+}
+
+#view-agenda #agenda-attendance-info > div.py-6,
+#view-agenda #agenda-daily-info > div.py-6,
+#view-agenda #agenda-daily-info > div.py-10 {
+    background: #faf8f6 !important;
+    border: 1px dashed #ddd4ce !important;
+    box-shadow: none !important;
+}
+
+#view-agenda #agenda-attendance-info > div.py-6 p,
+#view-agenda #agenda-daily-info > div.py-6 p,
+#view-agenda #agenda-daily-info > div.py-10 p {
+    color: #78716c !important;
+}
+
+#view-agenda .agenda-side-panel .status-pill {
+    min-width: 68px;
+}
+
+#view-agenda .firme-card-modern {
+    padding: 1rem !important;
+    border-radius: 18px !important;
+    background: linear-gradient(135deg, #fff, #fff8f6) !important;
+    box-shadow: 0 4px 14px rgba(41, 27, 20, 0.06);
+}
+
+#view-agenda .firme-card-modern h4 span,
+#view-agenda .firme-card-modern p {
+    color: #292321 !important;
+}
+
+#view-agenda .firme-card-modern h4 span.mx-1 {
+    color: #d6c7c0 !important;
+}
+
+#view-agenda .compito-card {
+    padding: 1rem !important;
+    border-radius: 16px !important;
+    background: linear-gradient(145deg, #f5f9ff, #fff) !important;
+}
+
+#view-agenda .compito-card button {
+    opacity: 1;
+    padding: 0.35rem;
+    border-radius: 0.6rem;
+    background: #fff;
 }
 
 /* Card Firme (Lezioni) - Ora in un elegante Rosso Scuro/Vino */
@@ -999,6 +1168,47 @@ main {
     }
 
     @media (max-width: 640px) {
+        .agenda-nav-row {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        #view-agenda .agenda-header-glow {
+            align-items: stretch;
+            padding: 1rem;
+            border-radius: 22px;
+        }
+
+        #view-agenda .agenda-header-glow > div:first-child {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        #view-agenda #global-calendar {
+            font-size: 1.15rem;
+        }
+
+        #view-agenda .agenda-quick-nav {
+            max-width: none;
+        }
+
+        #view-agenda .firme-card-modern {
+            align-items: flex-start;
+            gap: 0.65rem;
+            padding: 0.8rem !important;
+        }
+
+        #view-agenda .hour-badge-modern {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+        }
+
+        #view-agenda .firme-card-modern > div:nth-child(2) > div:first-child {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+
         #view-classi { padding: 0.75rem !important; }
         #class-selection-screen { padding: 0.75rem; }
         #class-hub-screen { padding: 0.75rem; }
@@ -1837,7 +2047,7 @@ main {
 <div id="view-agenda" class="tab-content hidden space-y-6 max-w-full overflow-x-hidden">
     
   <!-- Header Agenda: Centro di Comando -->
-<div class="agenda-header-glow p-6 rounded-[32px] flex flex-col lg:flex-row items-center justify-between gap-6 bg-white border border-zinc-100">
+<div class="agenda-header-glow p-5 rounded-[28px] flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5 bg-white border border-zinc-100">
     <div class="flex items-center gap-5 w-full lg:w-auto">
         <div class="p-4 bg-red-600/10 rounded-2xl border border-red-600/20 shadow-inner">
             <span class="text-3xl">📅</span>
@@ -1869,45 +2079,29 @@ main {
         </div>
     </div>
 
-<!-- Navigazione Rapida (Pills) - Versione Rosso Soft -->
-<div class="agenda-quick-nav p-2 rounded-2xl border border-red-200" style="background: rgba(220, 38, 38, 0.04) !important;">
-    <!-- NUOVI PULSANTI SMART -->
-    <button onclick="window.jumpToEvent('prev')" title="Vai all'evento precedente" aria-label="Vai all'evento precedente" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">◀ Evento prec.</button>
-    <button onclick="navDate('day', -1)" title="Vai al giorno precedente" aria-label="Vai al giorno precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">Ieri</button>
-    <button onclick="navDate('week', -1)" title="Vai alla settimana precedente" aria-label="Vai alla settimana precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−7g</button>
-    
-    <button onclick="navDate('month', -1)" title="Vai al mese precedente" aria-label="Vai al mese precedente"
-        class="px-3 py-2 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[10px] font-black rounded-lg border !border-red-200 transition-all">
-        -1M
-    </button>
-
-    <button onclick="navDate('year', -1)" title="Vai all'anno precedente" aria-label="Vai all'anno precedente"
-        class="px-2 py-1 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[9px] font-black uppercase rounded-md border !border-red-200 transition-all">
-        -1A
-    </button>
-    
-    <!-- Separatore Rosso -->
-    <div class="w-[1px] h-4 bg-red-300 mx-1"></div>
-    
-    <button onclick="navDate('day', 1)" title="Vai al giorno successivo" aria-label="Vai al giorno successivo" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300 font-black">Domani</button>
-    <!-- NUOVI PULSANTI SMART -->
-    <button onclick="window.jumpToEvent('next')" title="Vai al prossimo evento" aria-label="Vai al prossimo evento" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">Evento succ. ▶</button>
-    <button onclick="navDate('week', 1)" title="Vai alla settimana successiva" aria-label="Vai alla settimana successiva" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+7g</button>
-    
-    <button onclick="navDate('month', 1)" title="Vai al mese successivo" aria-label="Vai al mese successivo"
-        class="px-3 py-2 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[10px] font-black rounded-lg border !border-red-200 transition-all">
-        +1M
-    </button>
-
-    <button onclick="navDate('year', 1)" title="Vai all'anno successivo" aria-label="Vai all'anno successivo"
-        class="px-2 py-1 !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white text-[9px] font-black uppercase rounded-md border !border-red-200 transition-all">
-        +1A
-    </button>
+<!-- Navigazione rapida organizzata per intervallo -->
+<div class="agenda-quick-nav">
+    <div class="agenda-nav-row events">
+        <button onclick="window.jumpToEvent('prev')" title="Vai all'evento precedente" aria-label="Vai all'evento precedente" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">◀ Evento prec.</button>
+        <button onclick="window.jumpToEvent('next')" title="Vai al prossimo evento" aria-label="Vai al prossimo evento" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">Evento succ. ▶</button>
+    </div>
+    <div class="agenda-nav-row">
+        <button onclick="navDate('day', -1)" title="Vai al giorno precedente" aria-label="Vai al giorno precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">◀ Ieri</button>
+        <button onclick="navDate('day', 1)" title="Vai al giorno successivo" aria-label="Vai al giorno successivo" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300">Domani ▶</button>
+        <button onclick="navDate('week', -1)" title="Vai alla settimana precedente" aria-label="Vai alla settimana precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−7g</button>
+        <button onclick="navDate('week', 1)" title="Vai alla settimana successiva" aria-label="Vai alla settimana successiva" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+7g</button>
+    </div>
+    <div class="agenda-nav-row">
+        <button onclick="navDate('month', -1)" title="Vai al mese precedente" aria-label="Vai al mese precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−1 mese</button>
+        <button onclick="navDate('month', 1)" title="Vai al mese successivo" aria-label="Vai al mese successivo" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+1 mese</button>
+        <button onclick="navDate('year', -1)" title="Vai all'anno precedente" aria-label="Vai all'anno precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−1 anno</button>
+        <button onclick="navDate('year', 1)" title="Vai all'anno successivo" aria-label="Vai all'anno successivo" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+1 anno</button>
+    </div>
 </div>
 </div>
 
 <!-- Pannello Azioni Docente -->
-    <div id="prof-comm-panel" class="hidden bg-amber-600 p-6 rounded-[28px] shadow-xl border border-black/20 relative overflow-hidden">
+    <div id="prof-comm-panel" class="agenda-teacher-panel hidden p-5 rounded-[24px] shadow-sm border relative overflow-hidden">
         <div class="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
             <span class="text-6xl font-black italic text-black">STAFF</span>
         </div>
@@ -1940,10 +2134,10 @@ main {
         <div class="xl:col-span-2 space-y-8">
             
             <!-- 1. DIARIO LEZIONI (Firme) -->
-            <div class="space-y-4">
+            <div class="agenda-content-panel space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <span class="text-xl">📑</span>
-                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Lezioni</h3>
+                    <h3 class="agenda-section-title text-[11px] font-black uppercase text-black tracking-[0.3em]">Lezioni</h3>
                 </div>
                 <div id="agenda-firme-list" class="space-y-4 min-h-[100px]">
                     <!-- Popolato via JS -->
@@ -1951,10 +2145,10 @@ main {
             </div>
 
             <!-- 2. SCADENZE E STUDIO (Compiti) -->
-            <div class="space-y-4">
+            <div class="agenda-content-panel space-y-4">
                 <div class="flex items-center gap-3 px-2">
                     <span class="text-xl">📘</span>
-                    <h3 class="text-[11px] font-black uppercase text-black tracking-[0.3em]">Compiti e scadenze</h3>
+                    <h3 class="agenda-section-title text-[11px] font-black uppercase text-black tracking-[0.3em]">Compiti e scadenze</h3>
                 </div>
                 <div id="agenda-compiti-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Popolato via JS -->
@@ -1966,7 +2160,7 @@ main {
         <div class="space-y-6">
             
             <!-- 3. STATUS ALUNNI (Presenze) - Spostato in alto per controllo rapido -->
-            <div class="bg-purple-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
+            <div class="agenda-side-panel overflow-hidden">
                 <div class="p-5 border-b border-black/20 bg-black/10">
                     <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
                         <span class="text-sm">👥</span> Appello e Status
@@ -1978,7 +2172,7 @@ main {
             </div>
 
             <!-- 4. EVENTI DEL GIORNO (Voti e Note) -->
-            <div class="bg-blue-600 rounded-[28px] border-2 border-zinc-950 shadow-md overflow-hidden">
+            <div class="agenda-side-panel overflow-hidden">
                 <div class="p-5 border-b border-black/20 bg-black/10">
                     <h3 class="text-[10px] font-black uppercase tracking-widest flex items-center gap-2 text-zinc-950">
                         <span class="text-sm">🎯</span> Log Valutazioni e Note
