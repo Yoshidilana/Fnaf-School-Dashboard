@@ -47,6 +47,347 @@ main {
     border-color: var(--border-color) !important;
 }
 
+.portal-header {
+    position: relative;
+    z-index: 50;
+    display: flex;
+    min-height: 88px !important;
+    height: auto !important;
+    gap: clamp(0.75rem, 1.8vw, 1.75rem);
+    padding: 0.8rem clamp(1rem, 2.4vw, 2rem) !important;
+    border-bottom: 1px solid #ece7e3 !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    box-shadow: 0 6px 22px rgba(41, 30, 24, 0.06);
+}
+
+.portal-brand {
+    flex: 0 0 auto;
+    gap: 0.85rem !important;
+    min-width: max-content;
+}
+
+.portal-brand > button {
+    display: grid;
+    width: 2.65rem;
+    height: 2.65rem;
+    margin: 0 !important;
+    place-items: center;
+    border: 1px solid #f0d6d1;
+    border-radius: 14px !important;
+    background: #fff5f3 !important;
+    color: #b91c1c !important;
+    font-size: 1.15rem;
+    box-shadow: none !important;
+}
+
+.portal-brand > button:hover {
+    background: #fee2e2 !important;
+    transform: translateY(-1px);
+}
+
+.portal-brand > div:nth-child(2) {
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #fff7ed, #fff1f2);
+    box-shadow: inset 0 0 0 1px #f3e8df;
+}
+
+.portal-brand > div:nth-child(2) img {
+    height: 2.35rem;
+}
+
+.portal-brand h1 {
+    color: #292322 !important;
+    font-size: 1.05rem !important;
+    letter-spacing: -0.045em !important;
+}
+
+.portal-brand h1 span {
+    color: #b91c1c !important;
+}
+
+.portal-brand #current-academic-year {
+    margin-top: 0.35rem;
+    color: #a16207 !important;
+    font-size: 0.58rem;
+    letter-spacing: 0.16em;
+}
+
+.portal-header-context {
+    flex: 1 1 auto;
+    justify-content: center;
+    gap: 0.75rem !important;
+    min-width: 0;
+}
+
+.portal-quick-date {
+    min-height: 44px;
+    padding: 0.35rem 0.45rem 0.35rem 0.8rem !important;
+    border: 1px solid #f1d59a !important;
+    border-radius: 15px !important;
+    background: linear-gradient(135deg, #fffaf0, #fff5db) !important;
+    box-shadow: 0 3px 10px rgba(161, 98, 7, 0.08) !important;
+}
+
+.portal-quick-date input {
+    width: 3.4rem !important;
+    color: #292322 !important;
+}
+
+.portal-quick-date select {
+    color: #44403c !important;
+}
+
+.portal-quick-date button {
+    min-width: 2.7rem;
+    min-height: 2rem;
+    border-radius: 10px !important;
+    background: #292322 !important;
+    color: #fff !important;
+}
+
+.portal-quick-date button:hover {
+    background: #b91c1c !important;
+}
+
+.portal-date-chip {
+    min-height: 42px;
+    padding: 0.55rem 0.9rem !important;
+    border: 1px solid #e9e2dc !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(41, 30, 24, 0.04);
+}
+
+.portal-date-chip > span:first-child {
+    font-size: 0.9rem;
+}
+
+.portal-date-chip #current-date-display {
+    color: #57534e !important;
+    font-size: 0.6rem !important;
+    letter-spacing: 0.08em;
+}
+
+.portal-user-actions {
+    flex: 0 0 auto;
+    gap: 0.65rem !important;
+}
+
+.portal-user-actions #notif-bell {
+    border: 1px solid #eee7e2;
+    background: #fff !important;
+}
+
+.portal-user-actions #user-profile {
+    min-height: 48px;
+    padding: 0.3rem 0.8rem 0.3rem 0.35rem !important;
+    border: 1px solid #e9e2dc !important;
+    border-radius: 15px !important;
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(41, 30, 24, 0.04);
+}
+
+.portal-user-actions #user-profile #user-name {
+    color: #292322 !important;
+}
+
+.portal-user-actions #user-profile #user-role-label {
+    color: #a16207 !important;
+}
+
+.portal-user-actions > div > button[title="Esci"] {
+    display: grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    border: 1px solid #eee7e2;
+    border-radius: 13px;
+    background: #fff !important;
+    color: #78716c !important;
+}
+
+.portal-user-actions > div > button[title="Esci"]:hover {
+    border-color: #fecaca;
+    background: #fff1f2 !important;
+    color: #b91c1c !important;
+}
+
+.portal-login {
+    flex: 0 0 auto;
+    padding: 0.7rem 1.15rem !important;
+    border: 1px solid #991b1b !important;
+    border-radius: 13px !important;
+    background: linear-gradient(135deg, #b91c1c, #dc2626) !important;
+    box-shadow: 0 5px 12px rgba(185, 28, 28, 0.16) !important;
+}
+
+.portal-login:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 7px 16px rgba(185, 28, 28, 0.22) !important;
+}
+
+.portal-sidebar {
+    width: 17.5rem !important;
+    min-width: 17.5rem;
+    padding: 1.25rem 0.85rem 1rem !important;
+    border-right: 1px solid #302625 !important;
+    background: linear-gradient(180deg, #241d1b 0%, #191514 58%, #151212 100%) !important;
+    box-shadow: 8px 0 28px rgba(41, 30, 24, 0.1) !important;
+}
+
+.portal-sidebar > div:first-child {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.portal-sidebar nav {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 0.3rem !important;
+    min-height: 0;
+}
+
+.portal-sidebar .portal-nav-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0 0 0.7rem !important;
+    padding: 0.6rem 0.85rem 0.9rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+    color: #a8a29e !important;
+    font-size: 0.61rem;
+    letter-spacing: 0.2em;
+}
+
+.portal-sidebar .portal-nav-title::before {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #ef4444;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.65);
+    content: "";
+}
+
+.portal-sidebar .sidebar-item {
+    position: relative;
+    min-height: 46px;
+    gap: 0.85rem !important;
+    padding: 0.65rem 0.85rem !important;
+    border: 1px solid transparent;
+    border-radius: 13px !important;
+    color: #c8bfbb !important;
+    font-size: 0.65rem;
+    letter-spacing: 0.075em;
+    text-align: left;
+}
+
+.portal-sidebar .sidebar-item > span:first-child {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.055);
+    font-size: 1rem;
+    transition: inherit;
+}
+
+.portal-sidebar .sidebar-item:hover {
+    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.075) !important;
+    color: #fff !important;
+    transform: translateX(2px);
+}
+
+.portal-sidebar .sidebar-item.active {
+    border-color: rgba(248, 113, 113, 0.25) !important;
+    background: linear-gradient(100deg, #b91c1c, #991b1b) !important;
+    color: #fff !important;
+    box-shadow: 0 6px 15px rgba(127, 29, 29, 0.25) !important;
+}
+
+.portal-sidebar .sidebar-item.active > span:first-child {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.portal-sidebar > div:last-child {
+    margin: 1rem 0 0 !important;
+    padding: 1rem 0.85rem 0.25rem !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.portal-sidebar > div:last-child p {
+    color: #8a7e79 !important;
+    font-size: 0.58rem;
+    letter-spacing: 0.13em;
+}
+
+@media (max-width: 1050px) {
+    .portal-header {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .portal-header-context {
+        order: 3;
+        flex-basis: 100%;
+        justify-content: flex-start;
+    }
+
+    .portal-user-actions {
+        margin-left: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    .portal-header {
+        gap: 0.75rem;
+        padding: 0.65rem 0.8rem !important;
+    }
+
+    .portal-brand {
+        gap: 0.55rem !important;
+        min-width: 0;
+    }
+
+    .portal-brand h1 {
+        font-size: 0.9rem !important;
+    }
+
+    .portal-brand > div:nth-child(2) {
+        width: 2.35rem;
+        height: 2.35rem;
+    }
+
+    .portal-brand > div:nth-child(2) img {
+        height: 1.95rem;
+    }
+
+    .portal-header-context {
+        flex-wrap: wrap;
+    }
+
+    .portal-date-chip {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .portal-sidebar {
+        width: min(17.5rem, 82vw) !important;
+        min-width: min(17.5rem, 82vw);
+    }
+}
+
 /* Glass-light isolato per mantenere lo stesso colore senza rompere il layout delle card */
 .glass-light {
     background: #f9fafb !important;
@@ -739,7 +1080,7 @@ main {
     transition: margin-left 0.3s ease-in-out;
 }
 .sidebar-hidden #main-sidebar {
-    margin-left: -288px; /* Nasconde la sidebar facendola scivolare */
+    margin-left: -17.5rem; /* Nasconde la sidebar facendola scivolare */
     display: flex !important; /* Sovrascrive il display: none originale */
 }
 
@@ -2831,8 +3172,8 @@ main {
 </div>
 
 <!-- Top Bar -->
-<header class="w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-800 bg-[#18181b] z-50">
-    <div class="flex items-center gap-4">
+<header class="portal-header w-full h-20 min-h-[80px] flex shrink-0 items-center justify-between px-6 border-b border-zinc-800 bg-[#18181b] z-50">
+    <div class="portal-brand flex items-center gap-4">
 
 <button onclick="window.toggleSidebarManual()" class="p-2 mr-2 bg-red-800 hover:bg-red-700 text-white rounded-lg transition-all">
     ☰
@@ -2854,8 +3195,8 @@ main {
 </button>
 
 <!-- Central Filters -->
-<div class="flex items-center gap-3">
-    <div class="flex items-center gap-2 px-3 py-1.5 border-2 border-zinc-950 bg-amber-500 shadow-md rounded-2xl group">
+<div class="portal-header-context flex items-center gap-3">
+    <div class="portal-quick-date flex items-center gap-2 px-3 py-1.5 border-2 border-zinc-950 bg-amber-500 shadow-md rounded-2xl group">
         <input type="number" id="quick-year-filter" placeholder="2025" 
                class="text-[11px] bg-transparent w-14 text-center outline-none font-black text-zinc-950 placeholder-zinc-700 border-r border-zinc-950/30 pr-1" 
                onkeypress="if(event.key === 'Enter') window.vaiADataRapida()">
@@ -2878,7 +3219,7 @@ main {
 </div>
 
     <!-- Current Date Display -->
-    <div class="filter-container flex items-center gap-2 px-4 py-2 border border-zinc-500 rounded-lg bg-red-50">
+    <div class="portal-date-chip filter-container flex items-center gap-2 px-4 py-2 border border-zinc-500 rounded-lg bg-red-50">
         <span class="text-xs">📅</span>
         <!-- Cambiato text-blue-500 in text-blue-700 per contrasto migliore su bianco -->
         <span id="current-date-display" class="text-[10px] font-black uppercase text-blue-700">Seleziona Data</span>
@@ -2886,7 +3227,7 @@ main {
 </div>
 
     <!-- User Actions -->
-<div class="flex items-center gap-4">
+<div class="portal-user-actions flex items-center gap-4">
     <div id="notif-bell" class="relative cursor-pointer hidden p-2.5 hover:bg-zinc-100 rounded-xl transition-all active:scale-90" onclick="window.toggleNotifPanel()">
         <span class="text-xl">🔔</span>
         <span id="notif-count" class="absolute top-1.5 right-1.5 bg-red-600 text-white text-[7px] w-4 h-4 flex items-center justify-center rounded-full font-black border-2 border-white shadow-sm">0</span>
@@ -2917,7 +3258,7 @@ main {
 
 <!-- Login (resta fuori dal flex del profilo) -->
 <button id="login-btn" onclick="window.loginDiscord()" 
-    class="group relative px-6 py-2.5 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-xl overflow-hidden transition-all hover:bg-red-700 active:scale-95 shadow-lg shadow-zinc-200">
+    class="portal-login group relative px-6 py-2.5 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-xl overflow-hidden transition-all hover:bg-red-700 active:scale-95 shadow-lg shadow-zinc-200">
     <span class="relative z-10">Accedi</span>
     <div class="absolute inset-0 bg-gradient-to-r from-red-600 to-red-800 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 </button>
@@ -2927,11 +3268,11 @@ main {
     <div class="flex flex-1 bg-zinc-700">
 
         <!-- Sidebar Ristilizzata -->
-<aside id="main-sidebar" class="w-72 border-r border-zinc-800 bg-[#18181b] flex flex-col shrink-0 py-6 z-40 shadow-xl">
+<aside id="main-sidebar" class="portal-sidebar w-72 border-r border-zinc-800 bg-[#18181b] flex flex-col shrink-0 py-6 z-40 shadow-xl">
     <div class="px-6 mb-8">
 <body class="sidebar-hidden">
         <nav class="flex-1 space-y-1">
-            <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4">Menù Principale</p>
+            <p class="portal-nav-title text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-4">Menù Principale</p>
             
             <button onclick="window.apriProfiloPersonale()" id="menu-profilo" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
                 <span class="text-lg">👤</span>PROFILO
