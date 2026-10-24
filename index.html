@@ -1947,6 +1947,490 @@ main {
         background: #211c1c !important;
     }
 
+    #view-hub.admin-dashboard {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        width: 100%;
+        max-width: 1440px;
+        padding: clamp(0.85rem, 2.2vw, 1.8rem) !important;
+        background:
+            radial-gradient(ellipse at 5% 0%, rgba(220, 38, 38, 0.08), transparent 32%),
+            #f7f5f2;
+    }
+
+    #view-hub .admin-hero {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        overflow: hidden;
+        padding: clamp(1.4rem, 3vw, 2.4rem) !important;
+        border: 1px solid #ead8cf !important;
+        border-radius: 26px !important;
+        background:
+            radial-gradient(circle at 90% 12%, rgba(245, 158, 11, 0.17), transparent 24%),
+            linear-gradient(120deg, #241c1a, #48201e 58%, #251917) !important;
+        box-shadow: 0 16px 36px rgba(57, 32, 27, 0.14) !important;
+    }
+
+    #view-hub .admin-hero::after {
+        position: absolute;
+        right: 9%;
+        bottom: -5.5rem;
+        width: 14rem;
+        height: 14rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        box-shadow: 0 0 0 1.5rem rgba(255, 255, 255, 0.025), 0 0 0 3rem rgba(255, 255, 255, 0.02);
+        content: "";
+        pointer-events: none;
+    }
+
+    #view-hub .admin-hero-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 1.15rem;
+        min-width: 0;
+    }
+
+    #view-hub .admin-hero-icon {
+        display: grid;
+        width: 4rem;
+        height: 4rem;
+        flex: 0 0 auto;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.09);
+        font-size: 1.8rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    #view-hub .admin-hero-eyebrow {
+        margin-bottom: 0.4rem;
+        color: #fbbf24 !important;
+        font-size: 0.62rem;
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+    }
+
+    #view-hub .admin-hero h1 {
+        color: #fff !important;
+        font-size: clamp(1.45rem, 3vw, 2.2rem);
+        line-height: 1.1;
+    }
+
+    #view-hub .admin-hero .admin-hero-description {
+        margin-top: 0.55rem;
+        color: #e7d8d2 !important;
+        font-size: 0.74rem;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    #view-hub .admin-hero-year {
+        position: relative;
+        z-index: 1;
+        flex: 0 0 auto;
+        padding: 0.65rem 0.9rem;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 13px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #fff !important;
+        font-size: 0.65rem;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    #view-hub .admin-section-label {
+        margin: 0 0 0.65rem 0.15rem;
+        color: #78716c !important;
+        font-size: 0.59rem;
+        font-weight: 900;
+        letter-spacing: 0.17em;
+        text-transform: uppercase;
+    }
+
+    #view-hub #admin-stats-grid {
+        gap: 0.8rem;
+    }
+
+    #view-hub #admin-stats-grid > div {
+        position: relative;
+        min-height: 116px;
+        overflow: hidden;
+        padding: 1.1rem 1.15rem !important;
+        border: 1px solid #e9e2dc !important;
+        border-radius: 19px !important;
+        background: linear-gradient(145deg, #fff, #fcfaf8) !important;
+        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.045) !important;
+    }
+
+    #view-hub #admin-stats-grid > div::after {
+        position: absolute;
+        top: -1.1rem;
+        right: -0.9rem;
+        width: 4.7rem;
+        height: 4.7rem;
+        border: 10px solid rgba(185, 28, 28, 0.045);
+        border-radius: 50%;
+        content: "";
+        pointer-events: none;
+    }
+
+    #view-hub #admin-stats-grid > div:nth-child(2)::after {
+        border-color: rgba(5, 150, 105, 0.07);
+    }
+
+    #view-hub #admin-stats-grid > div:nth-child(3)::after {
+        border-color: rgba(37, 99, 235, 0.07);
+    }
+
+    #view-hub #admin-stats-grid > div:nth-child(4)::after {
+        border-color: rgba(217, 119, 6, 0.08);
+    }
+
+    #view-hub #admin-stats-grid > div p:first-child {
+        color: #78716c !important;
+        font-size: 0.58rem;
+        letter-spacing: 0.13em;
+        opacity: 1 !important;
+    }
+
+    #view-hub #admin-stats-grid > div p:last-child {
+        margin-top: 0.45rem;
+        color: #292322 !important;
+        font-size: 1.9rem;
+        line-height: 1;
+    }
+
+    #view-hub .admin-dashboard-grid {
+        align-items: start;
+        gap: 1.1rem;
+    }
+
+    #view-hub .admin-panel {
+        min-width: 0;
+        padding: 1.1rem !important;
+        border: 1px solid #e9e2dc !important;
+        border-radius: 21px !important;
+        background: #fff !important;
+        box-shadow: 0 8px 22px rgba(41, 30, 24, 0.05) !important;
+    }
+
+    #view-hub .admin-panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #f0ebe6;
+    }
+
+    #view-hub .admin-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: #292322 !important;
+        font-size: 0.68rem;
+        font-weight: 900;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    #view-hub .admin-panel-icon {
+        display: grid;
+        width: 2rem;
+        height: 2rem;
+        place-items: center;
+        border-radius: 10px;
+        background: #fff1ee;
+        font-size: 0.9rem;
+    }
+
+    #view-hub .admin-action-button {
+        min-height: 38px;
+        padding: 0.55rem 0.85rem !important;
+        border: 1px solid #e9e2dc !important;
+        border-radius: 11px !important;
+        background: #fff !important;
+        color: #57534e !important;
+        font-size: 0.59rem;
+        font-weight: 900;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        transition: all 150ms ease;
+    }
+
+    #view-hub .admin-action-button:hover {
+        border-color: #fecaca !important;
+        background: #fff1f2 !important;
+        color: #b91c1c !important;
+    }
+
+    #view-hub .admin-action-button-primary {
+        border-color: #b91c1c !important;
+        background: linear-gradient(110deg, #b91c1c, #dc2626) !important;
+        color: #fff !important;
+        box-shadow: 0 5px 12px rgba(185, 28, 28, 0.14);
+    }
+
+    #view-hub .admin-action-button-primary:hover {
+        background: #991b1b !important;
+        color: #fff !important;
+    }
+
+    #view-hub .admin-search-wrap {
+        position: relative;
+        margin-bottom: 0.9rem;
+    }
+
+    #view-hub .admin-search-icon {
+        position: absolute;
+        top: 50%;
+        left: 0.95rem;
+        z-index: 1;
+        transform: translateY(-50%);
+        color: #a8a29e;
+        pointer-events: none;
+    }
+
+    #view-hub #global-search-input {
+        width: 100%;
+        min-height: 48px;
+        padding: 0.8rem 1rem 0.8rem 2.75rem !important;
+        border: 1px solid #e7e0da !important;
+        border-radius: 14px !important;
+        background: #faf9f7 !important;
+        color: #292322 !important;
+        font-size: 0.72rem;
+        font-weight: 700;
+        outline: none;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    #view-hub #global-search-input:focus {
+        border-color: #fca5a5 !important;
+        box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08);
+    }
+
+    #view-hub #global-search-input::placeholder {
+        color: #a8a29e !important;
+    }
+
+    #view-hub #global-search-results {
+        overflow: hidden;
+        border: 1px solid #e9e2dc !important;
+        border-radius: 15px !important;
+        background: #fff !important;
+        box-shadow: 0 16px 32px rgba(41, 30, 24, 0.16) !important;
+    }
+
+    #view-hub #global-search-results > div {
+        border-color: #f0ebe6 !important;
+        transition: background-color 130ms ease;
+    }
+
+    #view-hub #global-search-results > div:hover {
+        background: #fff6f3 !important;
+    }
+
+    #view-hub .admin-user-list {
+        margin-top: 0.9rem;
+        overflow: hidden;
+        border: 1px solid #e9e2dc;
+        border-radius: 16px;
+        background: #fff;
+    }
+
+    #view-hub .admin-user-list > div:first-child {
+        padding: 0.85rem 1rem !important;
+        border-color: #eee7e2 !important;
+        background: #faf8f6 !important;
+    }
+
+    #view-hub .admin-user-list .hub-filter-btn {
+        padding: 0.45rem 0.65rem !important;
+        border: 1px solid #e7e0da !important;
+        border-radius: 999px !important;
+        background: #fff !important;
+        color: #78716c !important;
+        font-size: 0.55rem !important;
+        letter-spacing: 0.05em;
+    }
+
+    #view-hub .admin-user-list .hub-filter-btn:hover {
+        border-color: #fca5a5 !important;
+        background: #fff5f2 !important;
+        color: #b91c1c !important;
+    }
+
+    #view-hub .admin-user-list .hub-filter-btn.active {
+        border-color: #b91c1c !important;
+        background: #b91c1c !important;
+        color: #fff !important;
+        box-shadow: 0 3px 8px rgba(185, 28, 28, 0.16);
+    }
+
+    #view-hub .admin-user-list > div:last-child {
+        max-height: 560px;
+    }
+
+    #view-hub .admin-user-list table {
+        min-width: 680px;
+    }
+
+    #view-hub .admin-user-list thead {
+        background: #f7f4f1 !important;
+    }
+
+    #view-hub .admin-user-list th {
+        padding: 0.85rem 1rem !important;
+        color: #78716c !important;
+        font-size: 0.56rem;
+        letter-spacing: 0.13em;
+    }
+
+    #view-hub .admin-user-list tbody tr {
+        border-color: #f0ebe6 !important;
+    }
+
+    #view-hub .admin-user-list tbody tr:hover {
+        background: #fff8f6 !important;
+    }
+
+    #view-hub .admin-user-list tbody td {
+        padding: 0.75rem 0.9rem !important;
+        color: #57534e !important;
+    }
+
+    #view-hub .admin-user-list tbody td p:first-child {
+        color: #292322 !important;
+        font-size: 0.65rem;
+    }
+
+    #view-hub .admin-user-list tbody td p:last-child {
+        color: #a8a29e !important;
+        font-size: 0.55rem;
+    }
+
+    #view-hub .admin-user-list .user-role-badge {
+        display: inline-flex;
+        padding: 0.35rem 0.55rem;
+        border: 1px solid #eee7e2 !important;
+        border-radius: 999px !important;
+        background: #faf8f6 !important;
+        color: #57534e !important;
+        font-size: 0.52rem;
+        letter-spacing: 0.05em;
+    }
+
+    #view-hub .admin-user-list .user-class-badge {
+        border-color: #f2d9d4 !important;
+        border-radius: 8px !important;
+        background: #fff5f2 !important;
+        color: #9f2923 !important;
+    }
+
+    #view-hub .admin-side-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    #view-hub .admin-maintenance-button {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        width: 100%;
+        min-height: 54px;
+        margin-top: 0.6rem;
+        padding: 0.7rem 0.8rem !important;
+        border: 1px solid #eee7e2 !important;
+        border-radius: 13px !important;
+        background: #fff !important;
+        color: #44403c !important;
+        text-align: left;
+        transition: all 150ms ease;
+    }
+
+    #view-hub .admin-maintenance-button:hover {
+        transform: translateY(-1px);
+        border-color: #f5d48e !important;
+        background: #fffbeb !important;
+    }
+
+    #view-hub .admin-maintenance-icon {
+        display: grid;
+        width: 2.1rem;
+        height: 2.1rem;
+        flex: 0 0 auto;
+        place-items: center;
+        border-radius: 10px;
+        background: #fff4d6;
+        font-size: 0.95rem;
+    }
+
+    #view-hub .admin-maintenance-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    #view-hub .admin-maintenance-copy strong {
+        color: #44403c;
+        font-size: 0.61rem;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    #view-hub .admin-maintenance-copy span {
+        color: #a8a29e;
+        font-size: 0.55rem;
+        font-weight: 600;
+    }
+
+    #view-hub #admin-audit-logs {
+        max-height: 250px;
+        border: 1px solid #eee7e2 !important;
+        border-radius: 13px !important;
+        background: #26201e !important;
+        color: #d6d3d1 !important;
+    }
+
+    #view-hub #admin-audit-logs p {
+        color: #d6d3d1 !important;
+    }
+
+    @media (max-width: 640px) {
+        #view-hub .admin-hero {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        #view-hub .admin-hero-content {
+            align-items: flex-start;
+        }
+
+        #view-hub .admin-hero-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 15px;
+            font-size: 1.35rem;
+        }
+
+        #view-hub .admin-user-list {
+            overflow-x: auto;
+        }
+    }
+
     /* Profilo personale e profilo consultato */
     #view-profilo,
     #view-profilo-target {
@@ -4805,74 +5289,90 @@ main {
 </div>
 
 <!-- VIEW: HUB (Pannello Admin Potenziato) -->
-<div id="view-hub" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4">
-    <!-- Header Admin già modificato -->
-    <div class="p-8 rounded-3xl border-2 border-zinc-950 shadow-xl bg-emerald-900">
-        <h1 class="text-3xl font-black uppercase text-white flex items-center gap-3">
-            <span>⚙️</span> Amministrazione Sistema
-        </h1>
-        <p class="text-red-500 text-[10px] font-bold uppercase mt-2 tracking-widest">Controllo Totale Fazbear School System</p>
+<div id="view-hub" class="admin-dashboard tab-content hidden space-y-6 max-w-7xl mx-auto p-4">
+    <div class="admin-hero">
+        <div class="admin-hero-content">
+            <div class="admin-hero-icon" aria-hidden="true">⚙️</div>
+            <div>
+                <p class="admin-hero-eyebrow">Fazbear Classroom · Area riservata</p>
+                <h1 class="font-black uppercase">Centro di amministrazione</h1>
+                <p class="admin-hero-description">Gestisci utenti, monitora l’attività e consulta lo stato del sistema.</p>
+            </div>
+        </div>
+        <span id="admin-dashboard-year" class="admin-hero-year">A.S. --</span>
     </div>
 
-    <!-- STATISTICHE RAPIDE - Colori Vivi con Bordi Decisi -->
+    <section aria-label="Statistiche scolastiche">
+    <p class="admin-section-label">Panoramica scolastica</p>
     <div id="admin-stats-grid" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-red-700 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
-            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Studenti Totali</p>
+        <div>
+            <p class="text-[9px] font-black uppercase tracking-wider">Studenti totali</p>
             <p id="stat-total-students" class="text-3xl font-black text-white mt-1">--</p>
         </div>
-        <div class="bg-green-600 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
-            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Media Scolastica</p>
+        <div>
+            <p class="text-[9px] font-black uppercase tracking-wider">Media scolastica</p>
             <p id="stat-global-media" class="text-3xl font-black text-white mt-1">--</p>
         </div>
-        <div class="bg-blue-600 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
-            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Staff Attivo</p>
+        <div>
+            <p class="text-[9px] font-black uppercase tracking-wider">Staff attivo</p>
             <p id="stat-total-staff" class="text-3xl font-black text-white mt-1">--</p>
         </div>
-        <div class="bg-amber-500 p-4 rounded-2xl border-2 border-zinc-950 shadow-md">
-            <p class="text-[9px] font-black text-zinc-950 uppercase tracking-wider opacity-80">Note Emesse</p>
+        <div>
+            <p class="text-[9px] font-black uppercase tracking-wider">Note emesse</p>
             <p id="stat-total-notes" class="text-3xl font-black text-zinc-950 mt-1">--</p>
         </div>
     </div>
+    </section>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="admin-dashboard-grid grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Gestione Utenti -->
         <div class="lg:col-span-2 space-y-4">
-            <div class="p-6 rounded-2xl bg-sky-950 border-2 border-zinc-950 shadow-md">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-black uppercase text-red-500 text-xs tracking-wide">👥 Gestione Database Utenti</h3>
+            <div class="admin-panel">
+                <div class="admin-panel-heading">
+                    <h3 class="admin-panel-title"><span class="admin-panel-icon">👥</span> Gestione utenti</h3>
                     <div class="flex gap-2">
-                        <button onclick="window.hubManager.mostraListaUtenti()" class="bg-zinc-950 hover:bg-zinc-800 border border-zinc-950 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all active:scale-90">Lista</button>
-                        <button onclick="window.hubManager.nuovoUtente()" class="bg-red-600 hover:bg-red-700 border border-zinc-950 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all active:scale-90">Nuovo +</button>
+                        <button onclick="window.hubManager.mostraListaUtenti()" class="admin-action-button" title="Carica e visualizza tutti gli utenti">Elenco</button>
+                        <button onclick="window.hubManager.nuovoUtente()" class="admin-action-button admin-action-button-primary">+ Nuovo utente</button>
                     </div>
                 </div>
                 
-                <!-- Ricerca Globale ad Alto Contrasto -->
-                <div class="relative mb-4">
+                <div class="admin-search-wrap">
+                    <span class="admin-search-icon" aria-hidden="true">⌕</span>
                     <input type="text" id="global-search-input" oninput="window.hubManager.ricercaGlobale(this.value)" 
-                        placeholder="Cerca studente o docente in tutta la scuola..." 
-                        class="w-full p-4 bg-black/40 border-2 border-zinc-950 rounded-2xl text-xs font-black text-white placeholder-zinc-500 outline-none focus:border-red-500 transition-colors uppercase">
-                    <div id="global-search-results" class="absolute top-full left-0 w-full bg-zinc-900 border-2 border-zinc-950 rounded-2xl mt-2 shadow-2xl z-50 hidden max-h-60 overflow-y-auto p-2"></div>
+                        placeholder="Cerca per nome o ID: risultati rapidi e filtro elenco" 
+                        aria-label="Cerca utenti per nome o ID"
+                        autocomplete="off">
+                    <div id="global-search-results" class="absolute top-full left-0 w-full mt-2 z-50 hidden max-h-72 overflow-y-auto p-2"></div>
                 </div>
 
+                <p class="mb-2 text-[0.58rem] font-bold text-stone-400">La ricerca apre i profili rapidi e filtra l’elenco utenti quando è caricato.</p>
                 <div id="hub-dynamic-content" class="hidden"></div>
             </div>
         </div>
 
         <!-- Manutenzione e Log -->
-        <div class="space-y-6">
-            <!-- Box Manutenzione con Bottoni Gialli Accesi -->
-            <div class="p-6 rounded-2xl bg-amber-900 border-2 border-zinc-950 shadow-md">
-                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2">🛠️ Manutenzione AS</h3>
-                <button onclick="window.hubManager.calcolaStatistiche()" class="w-full p-3 bg-yellow-400 hover:bg-yellow-500 border border-zinc-950 text-zinc-950 rounded-xl text-[9px] font-black uppercase mb-2 transition-all active:scale-95">Aggiorna Statistiche</button>
-                <button onclick="alert('Funzione di backup database attivata')" class="w-full p-3 bg-yellow-400 hover:bg-yellow-500 border border-zinc-950 text-zinc-950 rounded-xl text-[9px] font-black uppercase transition-all active:scale-95">Esporta Backup JSON</button>
+        <div class="admin-side-stack">
+            <div class="admin-panel">
+                <div class="admin-panel-heading">
+                    <h3 class="admin-panel-title"><span class="admin-panel-icon">🛠️</span> Strumenti sistema</h3>
+                </div>
+                <button onclick="window.hubManager.calcolaStatistiche()" class="admin-maintenance-button">
+                    <span class="admin-maintenance-icon">↻</span>
+                    <span class="admin-maintenance-copy"><strong>Aggiorna statistiche</strong><span>Ricalcola i dati dell’anno scolastico selezionato</span></span>
+                </button>
+                <button onclick="window.hubManager.mostraListaUtenti()" class="admin-maintenance-button">
+                    <span class="admin-maintenance-icon">👤</span>
+                    <span class="admin-maintenance-copy"><strong>Ricarica elenco utenti</strong><span>Sincronizza i dati dal database</span></span>
+                </button>
             </div>
 
-            <!-- Box Log Attività -->
-            <div class="p-6 rounded-2xl bg-blue-900 border-2 border-zinc-950 shadow-md">
-                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2">📜 Log Attività Recenti</h3>
-                <div id="admin-audit-logs" class="space-y-2 max-h-48 overflow-y-auto text-[10px] font-mono text-green-400 bg-black/30 p-3 rounded-xl border border-zinc-950">
-                    <p class="font-bold">> Sistema inizializzato...</p>
-                    <p class="font-bold">> Admin loggato...</p>
+            <div class="admin-panel">
+                <div class="admin-panel-heading">
+                    <h3 class="admin-panel-title"><span class="admin-panel-icon">📜</span> Stato del pannello</h3>
+                </div>
+                <div id="admin-audit-logs" class="space-y-2 max-h-48 overflow-y-auto text-[10px] font-mono p-3">
+                    <p class="font-bold">&gt; Area amministrativa pronta.</p>
+                    <p class="font-bold">&gt; Elenco utenti sincronizzato in tempo reale.</p>
                 </div>
             </div>
         </div>
@@ -5142,8 +5642,12 @@ function getRoleType(roleStr) {
     onSnapshot(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'), (snap) => {
         window.allStudents = [];
         snap.forEach(d => window.allStudents.push({id: d.id, ...d.data()}));
+        window.allUsers = window.allStudents;
         if(window.selectedClass) renderStudentList();
         applyRoleUI(); // Riapplica dopo aver caricato gli studenti
+        if (document.getElementById('view-hub')?.classList.contains('active-view') && window.hubManager) {
+            window.hubManager.calcolaStatistiche();
+        }
     });
     listenNotifications();
     checkAuth();
@@ -8975,16 +9479,11 @@ window.hubManager = {
             
             // Contenitore principale scuro con bordi definiti per integrarsi nell'interfaccia
             let html = `
-                <div class="bg-zinc-900 border-2 border-zinc-950 rounded-2xl overflow-hidden shadow-md mt-4">
+                <div class="admin-user-list mt-4">
                     <div class="p-4 border-b border-zinc-950 bg-zinc-950/40 space-y-3">
-                        <div class="flex flex-col md:flex-row gap-3 justify-between items-center">
-                            <!-- Input di ricerca visibile: Testo Bianco su Sfondo Nero -->
-                            <input type="text" id="hub-user-search" placeholder="Cerca per nome o ID..." 
-                                   class="bg-black/50 border-2 border-zinc-950 rounded-xl px-3 py-2 text-[10px] text-white font-black placeholder-zinc-500 outline-none focus:border-red-600 w-full md:w-1/3 uppercase"
-                                   oninput="window.hubManager.filtraUtenti()">
-                            
-                            <!-- Pulsanti Filtro ad Alto Contrasto -->
-                            <div class="flex flex-wrap gap-1 justify-center">
+                        <div class="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
+                            <p class="admin-section-label !mb-0">Filtra per categoria</p>
+                            <div class="flex flex-wrap gap-1.5">
                                 <button onclick="window.hubManager.setFiltroRuolo('all')" class="hub-filter-btn active bg-red-600 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Tutti</button>
                                 <button onclick="window.hubManager.setFiltroRuolo('dirigenza')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Dirigenza</button>
                                 <button onclick="window.hubManager.setFiltroRuolo('prof')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Docenti</button>
@@ -9049,6 +9548,7 @@ window.hubManager = {
 
             html += `</tbody></table></div></div>`;
             container.innerHTML = html;
+            this.setFiltroRuolo(this.currentRoleFilter || 'all');
         } catch (e) {
             container.innerHTML = `<p class="text-red-500 p-4 text-[10px] font-black uppercase">Errore: ${e.message}</p>`;
         }
@@ -9248,7 +9748,7 @@ modificaUtente: function(id) {
     },
 
     filtraUtenti: function() {
-        const searchInput = document.getElementById('hub-user-search');
+        const searchInput = document.getElementById('global-search-input');
         const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
         const cat = this.currentRoleFilter || 'all';
 
@@ -9274,25 +9774,33 @@ modificaUtente: function(id) {
     ricercaGlobale: function(query) {
         const resultsDiv = document.getElementById('global-search-results');
         if (!resultsDiv) return;
-        if (!query || query.length < 2) { resultsDiv.classList.add('hidden'); return; }
+        const normalizedQuery = String(query || '').trim().toLowerCase();
+        this.filtraUtenti();
+        if (normalizedQuery.length < 2) {
+            resultsDiv.classList.add('hidden');
+            resultsDiv.innerHTML = '';
+            return;
+        }
 
-        const filtered = (window.allStudents || []).filter(u => 
-            u.name.toLowerCase().includes(query.toLowerCase()) || u.id.includes(query)
-        );
+        const filtered = (window.allStudents || []).filter(u => {
+            const name = String(u.name || '').toLowerCase();
+            const id = String(u.id || '').toLowerCase();
+            return name.includes(normalizedQuery) || id.includes(normalizedQuery);
+        }).slice(0, 8);
 
+        resultsDiv.classList.remove('hidden');
         if (filtered.length > 0) {
-            resultsDiv.classList.remove('hidden');
             resultsDiv.innerHTML = filtered.map(u => `
                 <div onclick="window.selectAndGoToProfile('${u.id}'); document.getElementById('global-search-results').classList.add('hidden');" 
-                     class="p-3 hover:bg-red-50 cursor-pointer border-b border-zinc-50 flex justify-between items-center">
+                     class="p-3 cursor-pointer border-b border-zinc-50 flex justify-between items-center">
                     <div>
-                        <p class="text-[10px] font-black uppercase text-zinc-800">${u.name}</p>
-                        <p class="text-[8px] text-zinc-400 uppercase">${u.role} - ${u.classe || 'No Classe'}</p>
+                        <p class="text-[10px] font-black uppercase text-zinc-800">${u.name || 'N.D.'}</p>
+                        <p class="text-[8px] text-zinc-400 uppercase">${u.role || 'Utente'} - ${u.classe || 'No Classe'}</p>
                     </div>
                     <span class="text-zinc-300">→</span>
                 </div>`).join('');
         } else {
-            resultsDiv.innerHTML = '<p class="p-4 text-[10px] text-zinc-400 italic">Nessun risultato</p>';
+            resultsDiv.innerHTML = '<p class="p-4 text-[10px] text-stone-500 italic">Nessun utente trovato</p>';
         }
     },
 
@@ -9304,10 +9812,21 @@ calcolaStatistiche: async function() {
     const annoCartella = aySelezionato.replace('/', '_');
     
     // Filtriamo sia "studente" che "studentessa" per non escludere le ragazze
-    const students = (window.allStudents || []).filter(s => {
-        const ruolo = (s.role || '').toLowerCase().trim();
-        return ruolo === 'studente' || ruolo === 'studentessa';
-    });
+    const users = window.allStudents || [];
+    const students = users.filter(s => getRoleType(s.role) === ROLES.STUDENTE);
+    const staffCount = users.filter(u => {
+        const roleType = getRoleType(u.role);
+        return roleType !== ROLES.STUDENTE && roleType !== ROLES.OSPITE;
+    }).length;
+
+    const yearBadge = document.getElementById('admin-dashboard-year');
+    if (yearBadge) yearBadge.innerText = `A.S. ${aySelezionato}`;
+    if (document.getElementById('stat-total-students')) {
+        document.getElementById('stat-total-students').innerText = students.length;
+    }
+    if (document.getElementById('stat-total-staff')) {
+        document.getElementById('stat-total-staff').innerText = staffCount;
+    }
 
     for (const s of students) {
         // ASSICURATI che l'ID dentro window.allStudents sia memorizzato nel campo .id
@@ -9342,7 +9861,6 @@ calcolaStatistiche: async function() {
 
     const globalMedia = totalGrades > 0 ? (gradesSum / totalGrades).toFixed(1) : "0.0";
     
-    if(document.getElementById('stat-total-students')) document.getElementById('stat-total-students').innerText = students.length;
     if(document.getElementById('stat-global-media')) document.getElementById('stat-global-media').innerText = globalMedia;
     if(document.getElementById('stat-total-notes')) document.getElementById('stat-total-notes').innerText = totalNotes;
 }
