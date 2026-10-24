@@ -2441,27 +2441,6 @@ main {
         border-radius: 24px;
     }
 
-    #view-profilo > div:nth-of-type(2),
-    #view-profilo-target > div:nth-of-type(2) {
-        padding: clamp(1rem, 3vw, 2rem) !important;
-        border: 1px solid #e7e0da !important;
-        border-left: 5px solid #dc2626 !important;
-        border-radius: 22px !important;
-        background: linear-gradient(145deg, #fff, #fbf8f5) !important;
-        box-shadow: 0 12px 30px rgba(41, 30, 24, 0.08) !important;
-    }
-
-    #view-profilo #profilo-nome,
-    #view-profilo-target #target-profile-name {
-        color: #292322 !important;
-    }
-
-    #view-profilo #profilo-sottotitolo,
-    #view-profilo-target #target-profile-sub {
-        color: #78716c !important;
-        letter-spacing: 0.16em;
-    }
-
     #view-profilo #profilo-media,
     #view-profilo-target #target-profile-media {
         color: #b91c1c !important;
@@ -2478,13 +2457,6 @@ main {
 
     #view-profilo > div:first-child > button > span:last-child {
         color: #57534e !important;
-    }
-
-    #view-profilo > div:nth-of-type(2) > div > div:last-child,
-    #view-profilo-target #target-media-box {
-        border: 1px solid #eee2d8 !important;
-        border-radius: 18px !important;
-        background: linear-gradient(145deg, #fff7ed, #fff) !important;
     }
 
     #view-profilo > div:nth-of-type(3) > div,
@@ -3889,6 +3861,587 @@ main {
             border-radius: 19px !important;
         }
     }
+    .profile-view {
+        display: flex;
+        flex-direction: column;
+        gap: 1.15rem !important;
+        width: 100%;
+        max-width: 1440px !important;
+        min-height: 100%;
+        padding: clamp(0.8rem, 2.4vw, 1.8rem) !important;
+        border-radius: 26px;
+        background:
+            radial-gradient(ellipse at 94% 4%, rgba(245, 158, 11, 0.09), transparent 28%),
+            #f6f3ef !important;
+    }
+
+    .profile-return-row {
+        display: flex;
+        align-items: center;
+        min-height: 2.5rem;
+    }
+
+    .profile-return-button {
+        align-items: center;
+        gap: 0.6rem !important;
+        padding: 0.55rem 0.85rem !important;
+        border: 1px solid #e8dfd8 !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+        color: #57534e !important;
+        box-shadow: 0 3px 9px rgba(41, 30, 24, 0.045);
+        transition: all 160ms ease;
+    }
+
+    .profile-return-button:hover {
+        transform: translateX(-2px);
+        border-color: #f2c6bd !important;
+        background: #fff7f4 !important;
+        color: #a32923 !important;
+    }
+
+    .profile-hero {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        padding: clamp(1.35rem, 3vw, 2.4rem) !important;
+        border: 1px solid #49332f !important;
+        border-radius: 27px !important;
+        background:
+            radial-gradient(circle at 88% 8%, rgba(245, 158, 11, 0.18), transparent 24%),
+            linear-gradient(118deg, #211b1a 0%, #38211f 57%, #241919 100%) !important;
+        box-shadow: 0 16px 34px rgba(41, 30, 24, 0.15) !important;
+    }
+
+    .profile-hero::after {
+        position: absolute;
+        z-index: -1;
+        right: 7%;
+        bottom: -7rem;
+        width: 17rem;
+        height: 17rem;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+        box-shadow: 0 0 0 1.6rem rgba(255, 255, 255, 0.025), 0 0 0 3.2rem rgba(255, 255, 255, 0.018);
+        content: "";
+        pointer-events: none;
+    }
+
+    .profile-hero-content {
+        position: relative;
+        z-index: 1;
+        align-items: center !important;
+        gap: 1.75rem !important;
+    }
+
+    .profile-hero-content > div:first-child {
+        align-items: center;
+        gap: clamp(1rem, 2.5vw, 1.7rem) !important;
+        min-width: 0;
+    }
+
+    .profile-avatar-frame {
+        position: relative;
+        flex: 0 0 auto;
+        padding: 5px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 24px;
+        background: linear-gradient(145deg, rgba(255,255,255,.24), rgba(255,255,255,.04));
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+    }
+
+    .profile-avatar {
+        display: block;
+        width: clamp(5.5rem, 10vw, 7.5rem) !important;
+        height: clamp(5.5rem, 10vw, 7.5rem) !important;
+        border: 3px solid #fff !important;
+        border-radius: 19px !important;
+        background: #e7e5e4;
+        object-fit: cover;
+    }
+
+    .profile-online-indicator {
+        position: absolute;
+        right: 0.4rem;
+        bottom: 0.4rem;
+        width: 0.85rem;
+        height: 0.85rem;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        background: #22c55e;
+    }
+
+    .profile-identity {
+        min-width: 0;
+    }
+
+    .profile-eyebrow {
+        color: #fbbf24 !important;
+        font-size: 0.6rem;
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+    }
+
+    .profile-identity h1 {
+        margin-top: 0.45rem !important;
+        color: #fff !important;
+        font-size: clamp(1.6rem, 4vw, 3.15rem);
+        line-height: 1.04;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-badges {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .profile-role-badge,
+    .profile-primary-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 1.7rem;
+        padding: 0.38rem 0.65rem;
+        border: 1px solid rgba(255, 255, 255, 0.17);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #fff !important;
+        font-size: 0.58rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .profile-role-badge:empty {
+        display: none;
+    }
+
+    .profile-role-badge.is-staff {
+        border-color: rgba(251, 191, 36, 0.4);
+        background: rgba(245, 158, 11, 0.14) !important;
+        color: #fde68a !important;
+    }
+
+    .profile-role-badge.is-student {
+        border-color: rgba(248, 113, 113, 0.4);
+        background: rgba(220, 38, 38, 0.16) !important;
+        color: #fecaca !important;
+    }
+
+    .profile-primary-badge {
+        border-color: rgba(245, 158, 11, 0.42);
+        background: rgba(245, 158, 11, 0.12);
+        color: #fde68a !important;
+    }
+
+    .profile-subtitle {
+        margin-top: 0.7rem !important;
+        color: #d6c8c2 !important;
+        font-size: 0.62rem;
+        letter-spacing: 0.15em !important;
+        line-height: 1.6;
+    }
+
+    .profile-metric-card {
+        display: flex;
+        min-width: 150px;
+        min-height: 126px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 1.2rem 1.35rem 1.45rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        border-radius: 20px !important;
+        background: rgba(255, 255, 255, 0.09) !important;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(8px);
+    }
+
+    .profile-personal-metric {
+        min-width: 170px;
+    }
+
+    .profile-metric-label {
+        color: #e7d8d2 !important;
+        font-size: 0.56rem !important;
+        font-weight: 900;
+        letter-spacing: 0.14em;
+    }
+
+    .profile-metric-value {
+        color: #fff !important;
+        font-size: clamp(2rem, 4vw, 2.85rem) !important;
+        font-weight: 900;
+        line-height: 1.1;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-metric-institutional {
+        font-size: clamp(1rem, 2vw, 1.45rem) !important;
+        line-height: 1.3;
+    }
+
+    .profile-metric-unavailable {
+        color: #d6c8c2 !important;
+    }
+
+    .profile-metric-value.is-insufficient {
+        color: #b91c1c !important;
+    }
+
+    #view-profilo #profilo-media,
+    #view-profilo-target #target-profile-media {
+        color: #fff !important;
+    }
+
+    #view-profilo #profilo-media.is-insufficient {
+        color: #fecaca !important;
+    }
+
+    .profile-metric-track {
+        position: absolute;
+        right: 1rem;
+        bottom: 0.85rem;
+        left: 1rem;
+        height: 4px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.17);
+    }
+
+    .profile-metric-progress {
+        min-width: 0;
+        border-radius: inherit;
+        background: linear-gradient(90deg, #fbbf24, #f87171) !important;
+    }
+
+    .profile-content {
+        min-width: 0;
+    }
+
+    .profile-personal-content {
+        gap: 1rem !important;
+    }
+
+    .profile-panel {
+        min-width: 0;
+        padding: clamp(1rem, 2vw, 1.4rem) !important;
+        border: 1px solid #e8e0da !important;
+        border-radius: 20px !important;
+        background: #fff !important;
+        box-shadow: 0 7px 20px rgba(41, 30, 24, 0.055) !important;
+    }
+
+    .profile-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 2rem;
+        padding-bottom: 0.75rem;
+        border-color: #eee7e2 !important;
+        color: #3b302b !important;
+        font-size: 0.67rem !important;
+        letter-spacing: 0.12em;
+    }
+
+    .profile-record-panel {
+        height: 430px !important;
+    }
+
+    .profile-record-panel > div[id$="-list"] {
+        min-height: 0;
+        padding-right: 0.25rem;
+    }
+
+    .profile-record-panel > div[id$="-list"] > div {
+        margin-bottom: 0.6rem;
+        padding: 0.8rem 0.9rem;
+        border: 1px solid #eee7e2 !important;
+        border-radius: 13px !important;
+        background: #faf8f6 !important;
+        color: #292322 !important;
+    }
+
+    .profile-record-panel > div[id$="-list"] p {
+        color: #57534e !important;
+    }
+
+    .profile-grades-panel .profile-panel-title span {
+        background: #fff1ee !important;
+    }
+
+    .profile-notes-panel .profile-panel-title span {
+        background: #fff5df !important;
+    }
+
+    .profile-shortcuts {
+        gap: 0.7rem !important;
+    }
+
+    .profile-shortcuts > button {
+        min-height: 86px;
+        padding: 0.85rem !important;
+        border: 1px solid #e9e2dc !important;
+        border-bottom: 3px solid #e9c5bb !important;
+        border-radius: 15px !important;
+        background: #fff !important;
+        color: #57534e !important;
+        box-shadow: 0 4px 12px rgba(41, 30, 24, 0.045) !important;
+        transition: all 160ms ease;
+    }
+
+    .profile-shortcuts > button:hover {
+        transform: translateY(-2px);
+        border-bottom-color: #b91c1c !important;
+        background: #fff8f6 !important;
+    }
+
+    .profile-shortcuts > button span:last-child {
+        color: #57534e !important;
+    }
+
+    .profile-staff-details-panel,
+    .profile-staff-status-panel,
+    .profile-evaluations-panel,
+    .profile-personal-info-panel,
+    .profile-shortcuts-panel {
+        height: auto !important;
+    }
+
+    .profile-staff-details-panel #target-staff-details > p {
+        gap: 1rem;
+        padding: 0.75rem 0 !important;
+        border-color: #f0ebe6 !important;
+    }
+
+    .profile-staff-details-panel #target-staff-details b {
+        color: #78716c !important;
+        font-size: 0.58rem !important;
+        letter-spacing: 0.08em;
+    }
+
+    .profile-staff-details-panel #target-staff-details span {
+        color: #292322 !important;
+        font-size: 0.72rem;
+        text-align: right;
+    }
+
+    .profile-staff-status-panel {
+        background: linear-gradient(145deg, #fffaf0, #fff) !important;
+    }
+
+    .profile-staff-status-panel .profile-panel-title {
+        color: #92400e !important;
+    }
+
+    .profile-staff-status-panel .profile-panel-copy {
+        color: #78716c !important;
+        line-height: 1.6;
+    }
+
+    .profile-service-rating {
+        border: 1px solid #f0e4d3;
+        background: #fffbf2;
+    }
+
+    .profile-service-rating > p {
+        color: #78716c !important;
+    }
+
+    .profile-service-rating .text-zinc-600 {
+        color: #78716c !important;
+    }
+
+    .profile-personal-info-panel .profile-section-dot,
+    .profile-shortcuts-panel .profile-section-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+        background: #b91c1c;
+        box-shadow: 0 0 0 4px #fff1ee;
+    }
+
+    .profile-personal-info-panel [class*="p-4 bg-zinc-900"],
+    .profile-personal-info-panel [class*="p-4 bg-purple-950"],
+    .profile-personal-info-panel [class*="p-4 bg-red-900"] {
+        border: 1px solid #eee7e2 !important;
+        border-radius: 13px !important;
+        background: #faf8f6 !important;
+    }
+
+    .profile-personal-info-panel [class*="p-4"] p:first-child {
+        color: #78716c !important;
+    }
+
+    .profile-personal-info-panel [class*="p-4"] p:last-child {
+        color: #292322 !important;
+    }
+
+    .profile-shortcut-action,
+    .profile-shortcuts-panel button {
+        min-height: 48px;
+        padding: 0.75rem 0.9rem !important;
+        border: 1px solid #eee7e2 !important;
+        border-radius: 12px !important;
+        background: #faf8f6 !important;
+        color: #44403c !important;
+        transition: all 150ms ease;
+    }
+
+    .profile-shortcut-action:hover,
+    .profile-shortcuts-panel button:hover {
+        border-color: #f2c6bd !important;
+        background: #fff5f2 !important;
+        color: #a32923 !important;
+    }
+
+    .profile-evaluations-panel #staff-notes-list > div {
+        padding: 0.9rem !important;
+        border: 1px solid #eee7e2 !important;
+        border-radius: 14px !important;
+        background: #faf8f6 !important;
+    }
+
+    .profile-evaluations-panel #staff-notes-list > p,
+    .profile-record-panel .border-dashed {
+        padding: 1.5rem 1rem !important;
+        border: 1px dashed #e7d9ca !important;
+        border-radius: 14px !important;
+        background: #fcfaf7;
+        color: #78716c !important;
+    }
+
+    .profile-staff-subdetail {
+        min-height: 80px;
+        border: 1px solid #eee7e2;
+        background: #faf8f6;
+    }
+
+    .profile-staff-subdetail p:first-child {
+        color: #78716c !important;
+    }
+
+    .profile-staff-subdetail p:last-child {
+        color: #292322 !important;
+    }
+
+    .profile-evaluation-entry {
+        border-color: #eee7e2 !important;
+        background: #faf8f6 !important;
+    }
+
+    .profile-evaluation-entry.is-praise {
+        border-left: 3px solid #d97706 !important;
+    }
+
+    .profile-evaluation-entry.is-warning {
+        border-left: 3px solid #dc2626 !important;
+    }
+
+    .profile-evaluation-entry p {
+        color: #57534e !important;
+    }
+
+    .profile-evaluation-entry > div:first-child > span:last-child,
+    .profile-evaluation-entry p:last-child span {
+        color: #78716c !important;
+    }
+
+    .profile-evaluation-entry.is-praise > div:first-child > span:first-child {
+        color: #b45309 !important;
+    }
+
+    .profile-evaluation-entry.is-warning > div:first-child > span:first-child {
+        color: #b91c1c !important;
+    }
+
+    .profile-extra-skills-panel > .grid > div {
+        border: 1px solid #eee7e2 !important;
+        border-radius: 14px !important;
+        background: #faf8f6 !important;
+    }
+
+    .profile-extra-skills-panel > .grid > div p:first-child {
+        color: #78716c !important;
+    }
+
+    .profile-extra-skills-panel > .grid > div p:last-child {
+        color: #292322 !important;
+    }
+
+    .profile-guest-card h3 {
+        color: #292322 !important;
+    }
+
+    .profile-guest-card p {
+        color: #78716c !important;
+    }
+
+    #view-profilo-target .profile-student-content #target-student-lists {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+        .profile-view {
+            padding: 0.7rem !important;
+            border-radius: 18px;
+        }
+
+        .profile-hero {
+            padding: 1.1rem !important;
+            border-radius: 20px !important;
+        }
+
+        .profile-hero-content,
+        .profile-hero-content > div:first-child {
+            align-items: center !important;
+        }
+
+        .profile-hero-content > div:first-child {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .profile-identity h1 {
+            font-size: clamp(1.4rem, 8vw, 2rem);
+        }
+
+        .profile-eyebrow {
+            font-size: 0.52rem;
+            letter-spacing: 0.13em;
+        }
+
+        .profile-subtitle {
+            font-size: 0.55rem !important;
+            letter-spacing: 0.08em !important;
+        }
+
+        .profile-metric-card,
+        .profile-personal-metric {
+            width: 100%;
+            min-width: 0;
+            min-height: 106px;
+        }
+
+        .profile-record-panel {
+            height: auto !important;
+            min-height: 280px;
+        }
+
+        .profile-shortcuts {
+            grid-template-columns: minmax(0, 1fr) !important;
+        }
+
+        .profile-shortcuts > button {
+            min-height: 62px;
+        }
+    }
 </style>
 
 <button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden">
@@ -4492,55 +5045,57 @@ main {
 </div>
 
 <!-- VIEW: PROFILO TARGET (STUDENTI & STAFF) -->
-<div id="view-profilo-target" class="tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
-    <div class="flex justify-start mb-2">
-        <button onclick="window.goBackFromProfile()" class="group flex items-center gap-2 bg-yellow-500 border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+<div id="view-profilo-target" class="profile-view profile-view-target tab-content hidden space-y-6 max-w-7xl mx-auto p-4 md:p-6">
+    <div class="profile-return-row">
+        <button onclick="window.goBackFromProfile()" class="profile-return-button group flex items-center gap-2">
             <span class="text-lg group-hover:-translate-x-1 transition-transform">⬅️</span>
-            <span class="text-[10px] font-black uppercase text-zinc-500">Torna all'elenco</span>
+            <span class="text-[10px] font-black uppercase">Torna all'elenco</span>
         </button>
     </div>
 
-    <!-- Profilo Card: Sfondo chiaro, bordo rosso -->
-    <div class="bg-blue-600 p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-sm border border-zinc-100">
-        <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+    <div class="profile-hero profile-hero-target">
+        <div class="profile-hero-content flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
             <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left w-full">
-                <div class="relative group">
-                    <img id="target-profile-avatar" src="" class="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-zinc-100 shadow-md object-cover bg-zinc-100 transition-transform group-hover:scale-105">
+                <div class="profile-avatar-frame relative group">
+                    <img id="target-profile-avatar" src="" class="profile-avatar w-24 h-24 md:w-32 md:h-32 object-cover transition-transform group-hover:scale-105">
+                    <span class="profile-online-indicator" aria-label="Profilo attivo"></span>
                 </div>
-                <div class="flex-1">
-                    <span id="target-profile-class-badge" class="px-3 py-1 bg-red-700 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Caricamento...</span>
-                    <h1 id="target-profile-name" class="text-3xl md:text-5xl font-black text-zinc-900 mt-2 leading-none uppercase tracking-tighter">NOME</h1>
-                    <p id="target-profile-sub" class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Membro della Fazbear School</p>
+                <div class="profile-identity flex-1">
+                    <p class="profile-eyebrow">Fazbear Classroom · Profilo consultato</p>
+                    <h1 id="target-profile-name" class="text-3xl md:text-5xl font-black mt-2 leading-none uppercase tracking-tighter">NOME</h1>
+                    <div class="profile-badges">
+                        <span id="target-profile-class-badge" class="profile-primary-badge">Caricamento...</span>
+                    </div>
+                    <p id="target-profile-sub" class="profile-subtitle text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Membro della Fazbear School</p>
                 </div>
             </div>
 
-            <!-- Box Media: Sfondo grigio molto chiaro -->
-            <div id="target-media-box" class="w-full md:w-48 bg-blue-900 p-6 rounded-3xl border border-zinc-100 text-center shadow-inner relative overflow-hidden flex-shrink-0">
-                <p class="text-[10px] font-black text-!zinc-400 uppercase mb-1 tracking-widest">Media Personale</p>
-                <p id="target-profile-media" class="text-5xl font-black text-red-600 relative z-10">0.0</p>
-                <div class="absolute bottom-0 left-0 w-full h-2 bg-zinc-200">
-                    <div id="target-media-progress-bar" class="h-full bg-gradient-to-r from-red-600 to-red-800 transition-all duration-1000" style="width: 0%"></div>
+            <div id="target-media-box" class="profile-metric-card w-full md:w-48 text-center relative overflow-hidden flex-shrink-0">
+                <p class="profile-metric-label text-[10px] font-black uppercase mb-1 tracking-widest">Media Personale</p>
+                <p id="target-profile-media" class="profile-metric-value text-5xl font-black relative z-10">0.0</p>
+                <div class="profile-metric-track">
+                    <div id="target-media-progress-bar" class="profile-metric-progress h-full transition-all duration-1000" style="width: 0%"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Sezione Info Staff (Nascosta di default) -->
-    <div id="target-staff-info" class="hidden space-y-6"> <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-green-800 p-6 rounded-3xl border border-zinc-100 shadow-sm">
-            <h3 class="text-[10px] font-black uppercase text-zinc-400 mb-4">Dettagli Professionali</h3>
+    <div id="target-staff-info" class="profile-content hidden space-y-6"> <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="profile-panel profile-staff-details-panel p-6 rounded-3xl">
+            <h3 class="profile-panel-title text-[10px] font-black uppercase mb-4">Dettagli Professionali</h3>
             <div id="target-staff-details" class="space-y-2">
                 </div>
         </div>
-        <div class="bg-yellow-900 p-6 rounded-3xl text-white shadow-xl">
-            <h3 class="text-[10px] font-black uppercase text-red-500 mb-4">Status Sistema</h3>
-            <p class="text-xs font-bold mb-4">L'utente è un membro verificato dello Staff. Dispone di permessi di accesso ai registri.</p>
-            <div id="staff-stars-count" class="flex gap-2 text-lg"></div>
+        <div class="profile-panel profile-staff-status-panel p-6 rounded-3xl">
+            <h3 class="profile-panel-title text-[10px] font-black uppercase mb-4">Status Sistema</h3>
+            <p class="profile-panel-copy text-xs font-bold mb-4">Membro dello staff scolastico con accesso ai registri secondo il proprio incarico.</p>
+            <div id="staff-stars-count" class="flex flex-wrap gap-2 text-lg"></div>
         </div>
     </div>
 
-    <div id="target-staff-evaluations" class="bg-red-800 p-6 rounded-3xl border border-zinc-100 shadow-sm">
-        <h3 class="text-[10px] font-black uppercase text-zinc-400 mb-4 border-b pb-2">🏅 Fascicolo Note di Servizio</h3>
+    <div id="target-staff-evaluations" class="profile-panel profile-evaluations-panel p-6 rounded-3xl">
+        <h3 class="profile-panel-title text-[10px] font-black uppercase mb-4 border-b pb-2">🏅 Fascicolo Note di Servizio</h3>
         <div id="staff-notes-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scroll">
             </div>
         <div id="admin-actions-prof" class="mt-4 hidden">
@@ -4549,8 +5104,8 @@ main {
 </div>
 
 <!-- Sezione Liste (Visibile solo per Studenti) -->
-<div id="target-student-lists" class="space-y-6">
-    <div class="grid grid-cols-3 gap-4">
+<div id="target-student-lists" class="profile-content profile-student-content space-y-6">
+    <div class="profile-shortcuts grid grid-cols-3 gap-4">
         <!-- Bottoni: sfondo chiaro, bordo grigio, testo scuro -->
         <button onclick="window.changeMenu('registro')" class="group bg-red-500 p-4 rounded-2xl border-b-4 border-zinc-200 hover:border-red-600 transition-all shadow-sm">
             <span class="block text-lg mb-1">📊</span>
@@ -4566,17 +5121,17 @@ main {
         </button>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+    <div class="profile-record-grid grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <!-- Box Voti -->
-        <div class="bg-red-800 p-6 rounded-3xl border border-zinc-200 shadow-sm flex flex-col h-[450px]">
-            <h3 class="font-black uppercase text-zinc-900 text-xs mb-4 border-b border-zinc-100 pb-3 flex items-center gap-2">
+        <div class="profile-panel profile-record-panel profile-grades-panel p-6 rounded-3xl flex flex-col h-[450px]">
+            <h3 class="profile-panel-title font-black uppercase text-xs mb-4 border-b pb-3 flex items-center gap-2">
                 <span class="bg-red-100 p-1 rounded-lg">🎯</span> Ultimi Voti
             </h3>
             <div id="target-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scroll flex-grow"></div>
         </div>
         
         <!-- Box Note -->
-        <div class="bg-blue-800 p-6 rounded-3xl border border-zinc-200 shadow-sm flex flex-col h-[450px]">
+        <div class="profile-panel profile-record-panel profile-notes-panel p-6 rounded-3xl flex flex-col h-[450px]">
             <h3 class="font-black uppercase text-zinc-900 text-xs mb-4 border-b border-zinc-100 pb-3 flex items-center gap-2">
                 <span class="bg-amber-100 p-1 rounded-lg">⚠️</span> Note
             </h3>
@@ -4791,44 +5346,48 @@ main {
 </div>
 
 		<!-- VIEW: PROFILO PERSONALE -->
-<div id="view-profilo" class="tab-content space-y-6 max-w-7xl mx-auto p-4">
+<div id="view-profilo" class="profile-view profile-view-personal tab-content space-y-6 max-w-7xl mx-auto p-4">
     <!-- PULSANTE TORNA ALLA HOME AGGIUNTO QUI -->
-    <div class="flex justify-start mb-2">
-        <button onclick="window.changeMenu('home')" class="group flex items-center gap-2 bg-green-600 border border-zinc-200 px-4 py-2 rounded-xl shadow-sm hover:border-red-600 transition-all">
+    <div class="profile-return-row">
+        <button onclick="window.changeMenu('home')" class="profile-return-button group flex items-center gap-2">
             <span class="text-lg group-hover:-translate-x-1 transition-transform">🏠</span>
             <span class="text-[10px] font-black uppercase text-zinc-100">Torna alla Home</span>
         </button>
     </div>
 
-    <div class="glass-light p-6 md:p-8 rounded-3xl border-l-8 border-red-700 shadow-xl bg-white/50 backdrop-blur-md">
-        <div class="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+    <div class="profile-hero profile-hero-personal">
+        <div class="profile-hero-content flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
             
             <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left w-full">
-                <div class="relative group">
-                    <img id="profilo-avatar" src="" class="w-24 h-24 md:w-32 md:h-32 rounded-3xl border-4 border-white shadow-lg object-cover bg-zinc-200 transition-transform group-hover:scale-105">
-                    <div class="absolute -bottom-2 -right-2 bg-green-500 w-5 h-5 border-4 border-white rounded-full"></div>
+                <div class="profile-avatar-frame relative group">
+                    <img id="profilo-avatar" src="" class="profile-avatar w-24 h-24 md:w-32 md:h-32 object-cover transition-transform group-hover:scale-105">
+                    <span class="profile-online-indicator" aria-label="Profilo attivo"></span>
                 </div>
-                <div class="flex-1">
-                    <span id="profilo-classe-badge" class="px-3 py-1 bg-zinc-900 text-white text-[10px] font-black uppercase rounded-full shadow-sm">Classe -</span>
-                    <h1 id="profilo-nome" class="text-3xl md:text-5xl font-black text-zinc-550 mt-2 leading-none uppercase tracking-tighter">Caricamento...</h1>
-                    <p id="profilo-sottotitolo" class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Fazbear School System II</p>
+                <div class="profile-identity flex-1">
+                    <p class="profile-eyebrow">Fazbear Classroom · Area personale</p>
+                    <h1 id="profilo-nome" class="text-3xl md:text-5xl font-black mt-2 leading-none uppercase tracking-tighter">Caricamento...</h1>
+                    <div class="profile-badges">
+                        <span id="profilo-ruolo-testo" class="profile-role-badge"></span>
+                        <span id="profilo-classe-badge" class="profile-primary-badge">Classe -</span>
+                    </div>
+                    <p id="profilo-sottotitolo" class="profile-subtitle text-[10px] font-bold uppercase mt-2 tracking-[0.3em]">Fazbear School System II</p>
                 </div>
             </div>
 
-            <div class="bg-yellow-800 p-4 rounded-xl border border-zinc-100 text-center min-w-[140px] relative overflow-hidden flex-shrink-0">
-    <p class="text-[9px] font-black text-zinc-400 uppercase mb-1">Media Personale</p>
-    <p id="profilo-media" class="...">0.0</p>
-                <div class="absolute bottom-0 left-0 w-full h-1 bg-zinc-200">
-                    <div id="media-progress-bar" class="h-full bg-red-600 transition-all duration-1000" style="width: 0%"></div>
+            <div class="profile-metric-card profile-personal-metric text-center min-w-[140px] relative overflow-hidden flex-shrink-0">
+                <p class="profile-metric-label">Media Personale</p>
+                <p id="profilo-media" class="profile-metric-value">0.0</p>
+                <div class="profile-metric-track">
+                    <div id="media-progress-bar" class="profile-metric-progress transition-all duration-1000" style="width: 0%"></div>
                 </div>
             </div>
         </div>
     </div>
 
-<div id="profilo-content-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+<div id="profilo-content-grid" class="profile-content profile-personal-content grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
     <!-- Box Voti -->
-    <div class="bg-green-900 p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
-        <h3 class="font-black uppercase text-zinc-100 text-xs mb-4 border-b pb-3 flex items-center gap-2">
+    <div class="profile-panel profile-record-panel profile-grades-panel p-6 rounded-3xl flex flex-col h-[450px]">
+        <h3 class="profile-panel-title font-black uppercase text-xs mb-4 border-b pb-3 flex items-center gap-2">
             <span class="bg-red-900/30 p-1 rounded-lg">🎯</span> Ultimi Voti
         </h3>
         <div id="profilo-voti-list" class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
@@ -4836,8 +5395,8 @@ main {
     </div>
 
     <!-- Box Note -->
-    <div class="bg-amber-900 p-6 rounded-3xl border border-zinc-800 flex flex-col h-[450px]">
-        <h3 class="font-black uppercase text-zinc-100 text-xs mb-4 border-b pb-3 flex items-center gap-2">
+    <div class="profile-panel profile-record-panel profile-notes-panel p-6 rounded-3xl flex flex-col h-[450px]">
+        <h3 class="profile-panel-title font-black uppercase text-xs mb-4 border-b pb-3 flex items-center gap-2">
             <span class="bg-amber-900/30 p-1 rounded-lg">⚠️</span> Note
         </h3>
         <div id="profilo-note-list" class="space-y-4 overflow-y-auto pr-2 custom-scrollbar flex-grow">
@@ -7996,8 +8555,9 @@ if (badgeEl) {
 
 // Ruolo e Colori (Ripristinato esattamente come lo avevi tu)
 if (ruoloEl) {
-    // Usiamo le variabili isStaff e ruoloEffettivo che hai già nel tuo codice
     ruoloEl.innerText = ruoloEffettivo.toUpperCase();
+    ruoloEl.classList.toggle('is-staff', isStaff);
+    ruoloEl.classList.toggle('is-student', !isStaff && !isOspite);
     ruoloEl.style.backgroundColor = isStaff ? "#f59e0b" : "#b91c1c";
     ruoloEl.style.color = "white";
 }
@@ -8014,7 +8574,7 @@ const barraEl = document.getElementById('media-progress-bar'); // La barra che a
 if (isStaff) {
     if (mediaEl) {
         mediaEl.innerText = ruoloEffettivo; 
-        mediaEl.className = "text-xl font-black text-zinc-400 leading-tight uppercase";
+        mediaEl.className = "profile-metric-value profile-metric-institutional";
         
         const labelMedia = mediaEl.parentElement.querySelector('p');
         if (labelMedia) labelMedia.innerText = "RUOLO ISTITUZIONALE";
@@ -8025,7 +8585,7 @@ if (isStaff) {
 } else if (isOspite) {
     if (mediaEl) {
         mediaEl.innerText = "---";
-        mediaEl.className = "text-4xl font-black text-zinc-300";
+        mediaEl.className = "profile-metric-value profile-metric-unavailable";
         
         const labelMedia = mediaEl.parentElement.querySelector('p');
         if (labelMedia) labelMedia.innerText = "ACCESSO LIMITATO";
@@ -8041,7 +8601,7 @@ if (isStaff) {
 
     if (mediaEl) {
         mediaEl.innerText = media;
-        mediaEl.className = `text-4xl font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+        mediaEl.className = `profile-metric-value ${parseFloat(media) < 6 ? 'is-insufficient' : ''}`;
         
         const labelMedia = mediaEl.parentElement.querySelector('p');
         if (labelMedia) labelMedia.innerText = "MEDIA PERSONALE";
@@ -8075,47 +8635,47 @@ if (gridContenuti) {
             if (Array.isArray(materieDocente)) materieDocente = materieDocente.join(', ');
             
             infoSpecifica = `
-                <div class="p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
-                    <p class="text-[8px] font-black text-zinc-500 uppercase tracking-widest mb-1">Materie Insegnate</p>
-                    <p class="text-[10px] font-bold text-zinc-200 uppercase leading-tight">${materieDocente}</p>
+                <div class="profile-staff-subdetail p-4 rounded-2xl">
+                    <p class="text-[8px] font-black uppercase tracking-widest mb-1">Materie Insegnate</p>
+                    <p class="text-[10px] font-bold uppercase leading-tight">${materieDocente}</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('agenda')" class="w-full p-4 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase border border-zinc-800 hover:border-red-600 transition-all flex justify-between items-center shadow-lg">
+                <button onclick="window.changeMenu('agenda')" class="profile-shortcut-action w-full p-4 rounded-2xl font-black text-[10px] uppercase flex justify-between items-center">
                     <span>Agenda Classi</span> <span class="text-sm">📋</span>
                 </button>`;
         } else if (roleStr.includes('counselor')) {
             infoSpecifica = `
-                <div class="p-4 bg-purple-950 bg-opacity-20 rounded-2xl border border-purple-900 border-opacity-40">
-                    <p class="text-[8px] font-black text-purple-300 uppercase tracking-widest mb-1">Settore Operativo</p>
-                    <p class="text-[10px] font-bold text-purple-300 uppercase">Supporto e Ascolto</p>
+                <div class="profile-staff-subdetail p-4 rounded-2xl">
+                    <p class="text-[8px] font-black uppercase tracking-widest mb-1">Settore Operativo</p>
+                    <p class="text-[10px] font-bold uppercase">Supporto e Ascolto</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('sportello')" class="w-full p-4 bg-purple-900 text-white rounded-2xl font-black text-[10px] uppercase border border-purple-700 hover:bg-purple-800 transition-all flex justify-between items-center shadow-lg">
+                <button onclick="window.changeMenu('sportello')" class="profile-shortcut-action w-full p-4 rounded-2xl font-black text-[10px] uppercase flex justify-between items-center">
                     <span>Sportello Ascolto</span> <span class="text-sm">🧠</span>
                 </button>`;
         } else {
             infoSpecifica = `
-                <div class="p-4 bg-red-900 rounded-2xl border border-zinc-800">
-                    <p class="text-[8px] font-black text-zinc-100 uppercase tracking-widest mb-1">Settore Operativo</p>
-                    <p class="text-[10px] font-bold text-zinc-200 uppercase">${ruoloEffettivo}</p>
+                <div class="profile-staff-subdetail p-4 rounded-2xl">
+                    <p class="text-[8px] font-black uppercase tracking-widest mb-1">Settore Operativo</p>
+                    <p class="text-[10px] font-bold uppercase">${ruoloEffettivo}</p>
                 </div>`;
             bottoniExtra = `
-                <button onclick="window.changeMenu('hub')" class="w-full p-4 bg-amber-900 text-white rounded-2xl font-black text-[10px] uppercase border border-zinc-800 hover:border-red-600 transition-all flex justify-between items-center shadow-lg">
+                <button onclick="window.changeMenu('hub')" class="profile-shortcut-action w-full p-4 rounded-2xl font-black text-[10px] uppercase flex justify-between items-center">
                     <span>Pannello di Controllo</span> <span class="text-sm">⚙️</span>
                 </button>`;
         }
 
         gridContenuti.innerHTML = `
             <!-- AREA PERSONALE -->
-            <div class="bg-red-800 p-6 rounded-3xl border border-zinc-800 border-opacity-80 shadow-md">
-                <h3 class="font-black uppercase text-red-100 text-[10px] mb-4 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-red-900 rounded-full"></span> Area Personale
+            <div class="profile-panel profile-personal-info-panel p-6 rounded-3xl">
+                <h3 class="profile-panel-title font-black uppercase text-[10px] mb-4 flex items-center gap-2">
+                    <span class="profile-section-dot"></span> Area Personale
                 </h3>
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         ${infoSpecifica}
-                        <div class="p-4 bg-red-900 rounded-2xl border border-zinc-800">
-                            <p class="text-[8px] font-black text-zinc-100 uppercase tracking-widest mb-1">Valutazione Servizio</p>
+                        <div class="profile-service-rating p-4 rounded-2xl">
+                            <p class="text-[8px] font-black uppercase tracking-widest mb-1">Valutazione Servizio</p>
                             <div class="flex gap-1 items-center min-h-[15px]">
                                 ${stelle > 0 ? `<span class="text-xs">${"⭐".repeat(stelle)}</span>` : ""}
                                 ${ammonizioni > 0 ? `<span class="text-xs">${"⚠️".repeat(ammonizioni)}</span>` : (stelle === 0 ? '<span class="text-[10px] font-bold text-zinc-600 uppercase">N/D</span>' : "")}
@@ -8126,23 +8686,23 @@ if (gridContenuti) {
             </div>
 
             <!-- STRUMENTI RAPIDI -->
-            <div class="bg-amber-800 p-6 rounded-3xl border border-zinc-800 border-opacity-80 shadow-md">
-                <h3 class="font-black uppercase text-zinc-100 text-[10px] mb-4 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-amber-900 rounded-full"></span> Strumenti Rapidi
+            <div class="profile-panel profile-shortcuts-panel p-6 rounded-3xl">
+                <h3 class="profile-panel-title font-black uppercase text-[10px] mb-4 flex items-center gap-2">
+                    <span class="profile-section-dot"></span> Strumenti Rapidi
                 </h3>
                 <div class="flex flex-col gap-3">
                     ${bottoniExtra}
-<button onclick="window.smartNavigateToRegistry()" class="w-full p-4 bg-amber-900 border border-zinc-800 text-zinc-200 rounded-2xl font-black text-[10px] uppercase hover:border-zinc-600 transition-all flex justify-between items-center">
+<button onclick="window.smartNavigateToRegistry()" class="profile-shortcut-action w-full p-4 rounded-2xl font-black text-[10px] uppercase flex justify-between items-center">
     <span>Registro di Classe</span> <span class="text-sm">📊</span>
 </button>
                 </div>
             </div>
 
             <!-- FASCICOLO NOTE DI SERVIZIO -->
-            <div class="bg-blue-800 p-6 rounded-3xl border border-zinc-800 border-opacity-80 shadow-md col-span-full">
+            <div class="profile-panel profile-evaluations-panel p-6 rounded-3xl col-span-full">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="font-black uppercase text-zinc-100 text-[10px] flex items-center gap-2">
-                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> Fascicolo Note di Servizio
+                    <h3 class="profile-panel-title font-black uppercase text-[10px] flex items-center gap-2">
+                        <span class="profile-section-dot"></span> Fascicolo Note di Servizio
                     </h3>
                     ${(window.userRole === 'Preside' || window.userRole === 'Admin') ? `
                         <button onclick="window.apriModalValutaProf('${targetId}')" class="text-[9px] font-black text-red-500 uppercase hover:text-red-400 transition-colors">
@@ -8152,7 +8712,7 @@ if (gridContenuti) {
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[350px] overflow-y-auto pr-2 custom-scroll">
                     ${valutazioni.slice().reverse().map(v => `
-                        <div class="p-4 ${v.tipo === 'stella' ? 'bg-red-950 bg-opacity-20 border-amber-900 border-opacity-40' : 'bg-red-950 bg-opacity-20 border-red-900 border-opacity-40'} border rounded-2xl relative group">
+                        <div class="profile-evaluation-entry p-4 ${v.tipo === 'stella' ? 'is-praise' : 'is-warning'} border rounded-2xl relative group">
                             <div class="flex justify-between items-center mb-2">
                                 <span class="text-[8px] font-black uppercase ${v.tipo === 'stella' ? 'text-amber-400' : 'text-red-400'} tracking-widest">
                                     ${v.tipo === 'stella' ? '🌟 Elogio' : '⚠️ Richiamo'}
@@ -8174,14 +8734,14 @@ if (gridContenuti) {
     
     if (mediaEl) {
         mediaEl.innerText = "N.D.";
-        mediaEl.className = "text-4xl font-black text-zinc-400";
+        mediaEl.className = "profile-metric-value profile-metric-unavailable";
         const labelMedia = mediaEl.parentElement.querySelector('p');
         if (labelMedia) labelMedia.innerText = "STATO REGISTRAZIONE";
     }
 
     if (gridContenuti) {
         gridContenuti.innerHTML = `
-            <div class="glass-light p-8 rounded-3xl border border-zinc-100 shadow-sm col-span-full text-center">
+            <div class="profile-panel profile-guest-card p-8 rounded-3xl col-span-full text-center">
                 <span class="text-4xl block mb-4">🚪</span>
                 <h3 class="font-black uppercase text-zinc-800 text-lg mb-2">Profilo non configurato</h3>
                 <p class="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
@@ -8195,16 +8755,16 @@ if (gridContenuti) {
     // STUDENTE: Fix del "muro di voti" in modalità scura coerente
     if (gridContenuti) {
         gridContenuti.innerHTML = `
-            <div class="bg-cyan-900 p-6 rounded-2xl border border-zinc-950 shadow-md flex flex-col h-[400px]">
-                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2 flex-shrink-0 flex items-center gap-1.5">🎯 Ultimi Voti</h3>
+            <div class="profile-panel profile-record-panel profile-grades-panel p-6 rounded-2xl flex flex-col h-[400px]">
+                <h3 class="profile-panel-title font-black uppercase text-xs mb-4 border-b pb-2 flex-shrink-0 flex items-center gap-1.5">🎯 Ultimi Voti</h3>
                 <div id="profilo-voti-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow text-white"></div>
             </div>
-            <div class="bg-yellow-700 p-6 rounded-2xl border border-zinc-950 shadow-md flex flex-col h-[400px]">
-                <h3 class="font-black uppercase text-white text-xs mb-4 border-b border-zinc-950 pb-2 flex-shrink-0 flex items-center gap-1.5">⚠️ Note</h3>
+            <div class="profile-panel profile-record-panel profile-notes-panel p-6 rounded-2xl flex flex-col h-[400px]">
+                <h3 class="profile-panel-title font-black uppercase text-xs mb-4 border-b pb-2 flex-shrink-0 flex items-center gap-1.5">⚠️ Note</h3>
                 <div id="profilo-note-list" class="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-grow text-white"></div>
             </div>
-            <div class="bg-red-700 p-6 rounded-2xl border border-zinc-950 shadow-md flex flex-col col-span-full mt-4">
-                <h3 class="font-black uppercase text-red-500 text-xs mb-4 border-b border-zinc-950 pb-2 flex items-center gap-1.5">🏆 Abilità Extra (Discord Bot)</h3>
+            <div class="profile-panel profile-extra-skills-panel p-6 rounded-2xl flex flex-col col-span-full mt-4">
+                <h3 class="profile-panel-title font-black uppercase text-xs mb-4 border-b pb-2 flex items-center gap-1.5">🏆 Abilità Extra (Discord Bot)</h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="p-4 bg-red-900 border border-zinc-950 rounded-xl text-center">
                         <p class="text-[9px] font-black text-zinc-500 uppercase tracking-wider">Esperienza Golf</p>
@@ -8588,6 +9148,11 @@ if (notesList) {
                 mediaEl.innerText = media;
                 const valoreMedia = parseFloat(media);
                 mediaEl.className = `text-5xl font-black ${valoreMedia < 6 ? 'text-red-600' : 'text-zinc-900'}`;
+            }
+            const mediaBar = document.getElementById('target-media-progress-bar');
+            if (mediaBar) {
+                mediaBar.style.width = `${Math.min(parseFloat(media) * 10, 100)}%`;
+                mediaBar.className = `profile-metric-progress h-full transition-all duration-1000 ${parseFloat(media) < 6 ? 'bg-red-600' : 'bg-green-500'}`;
             }
 
             if (typeof renderListaProfilo === 'function') {
