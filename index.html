@@ -4610,7 +4610,7 @@ main {
     <span class="text-lg">🎓</span> ESAMI DI STATO
 </button>
         
-        <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item w-full flex items-center gap-4 px-6 py-4">
+        <button onclick="window.changeMenu('note')" id="menu-note" class="sidebar-item hidden w-full flex items-center gap-4 px-6 py-4">
             <span class="text-lg">⚠️</span> NOTE
         </button>
 
@@ -6298,9 +6298,9 @@ toggle('home-btn-pagella', isStudente);
     // Solo i prof firmano e danno compiti (Counselor NO)
     toggle('prof-actions-agenda', isStaffDidattico); 
 
-    // Note e Colloqui: Visibile a Prof e Counselor
+    // La voce Note in sidebar è riservata agli studenti; lo staff accede alle note dal hub della classe.
     const canEmitNotes = isStaffDidattico || type === ROLES.COUNSELOR;
-    toggle('menu-note', isStudente || canEmitNotes);
+    toggle('menu-note', isStudente);
     toggle('btn-add-note', canEmitNotes);
     toggle('note-date-container', canEmitNotes);
 
