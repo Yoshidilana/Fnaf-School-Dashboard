@@ -4442,6 +4442,14 @@ main {
             min-height: 62px;
         }
     }
+
+    main > .tab-content:not(.active-view) {
+        display: none !important;
+    }
+
+    main > .tab-content.active-view {
+        display: flex !important;
+    }
 </style>
 
 <button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden">
