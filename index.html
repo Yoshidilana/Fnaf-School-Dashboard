@@ -2729,16 +2729,11 @@ main {
     }
 
     #view-registro #prof-grade-panel {
-        padding: 0.9rem 1rem !important;
-        border: 1px solid #f0d6d6 !important;
-        border-radius: 16px !important;
-        background: linear-gradient(110deg, #fff, #fff5f4) !important;
-        box-shadow: 0 6px 18px rgba(41, 30, 24, 0.05) !important;
+        padding: 0.25rem 0 !important;
     }
 
-    #view-registro #prof-grade-panel label,
-    #view-registro #prof-grade-panel span {
-        color: #57534e !important;
+    #modal-body .grade-modal-student {
+        color: #292322 !important;
     }
 
     #view-registro .registry-container,
@@ -5484,27 +5479,11 @@ main {
         </div>
     </div>
 
-    <!-- Pannello Inserimento Voto Prof + Reset Admin (Ingombro ridotto) -->
-    <div id="prof-grade-panel" class="hidden bg-red-700 p-3 rounded-xl border border-red-800 shadow-sm flex flex-wrap gap-3 items-center justify-between">
-        <div class="flex flex-wrap items-center gap-3 flex-1">
-            <div class="flex items-center gap-2">
-                <input type="date" class="shared-calendar modal-input !py-1 !px-2 text-xs">
-                <select id="input-grade-subject" class="modal-input !py-1 !px-2 text-xs"></select>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="text-[9px] font-black uppercase text-red-100">Voto:</span>
-                <select id="input-grade-val" class="modal-input !py-1 !px-2 text-xs w-20"></select>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <input type="checkbox" id="input-grade-nv" class="w-3.5 h-3.5 accent-blue-600 cursor-pointer">
-                <label for="input-grade-nv" class="text-[9px] font-black uppercase text-red-100 cursor-pointer">N.V.</label>
-            </div>
-            <button onclick="window.submitGrade()" class="bg-red-900 hover:bg-red-950 text-white px-4 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border border-red-600/50 shadow">
-                Registra
-            </button>
-        </div>
-
-        <!-- Contenitore Reset Voti spostato qui dentro a destra -->
+    <!-- Azioni voti docenti -->
+    <div id="prof-grade-panel" class="hidden flex flex-wrap items-center justify-between gap-3">
+        <button type="button" onclick="window.openModal('voto')" class="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-[10px] font-black uppercase text-red-800 shadow-sm transition hover:border-red-400 hover:bg-red-50">
+            <span aria-hidden="true">✏️</span> Registra un voto
+        </button>
         <div id="admin-reset-container" class="flex items-center"></div>
     </div>
 
@@ -7135,15 +7114,24 @@ const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].in
             const v = document.getElementById('input-grade-val').value;
             const m = document.getElementById('input-grade-subject').value;
             const nv = document.getElementById('input-grade-nv').checked;
-            const arg = prompt("Inserisci l'argomento del voto (opzionale):") || "Valutazione generale";
-            if(!v || !m || !window.selectedStudentId) return;
+            const arg = document.getElementById('input-grade-topic').value.trim() || "Valutazione generale";
+            const gradeDate = document.getElementById('input-grade-date').value;
+            if (!gradeDate || !m || !v || !window.selectedStudentId) {
+                alert("Completa data, materia, voto e seleziona uno studente prima di registrare.");
+                return;
+            }
+
             const inputCal = document.getElementById('global-calendar');
-            const dParts = inputCal.value.split('-');
+            if (inputCal.value !== gradeDate) {
+                inputCal.value = gradeDate;
+                await window.updateDateContext(gradeDate);
+            }
+
+            const dParts = gradeDate.split('-');
             const year = parseInt(dParts[0]);
             const month = parseInt(dParts[1]);
             const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-            const quadText = document.getElementById('period-indicator').innerText;
-            const quadrimestre = quadText.includes("1°") ? 1 : 2;
+            const quadrimestre = month >= 9 || month <= 1 ? 1 : 2;
             const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
             const ref = window.getRecordDocRef(window.selectedStudentId, annoScolastico, 'voti');
             const entry = { 
@@ -7163,7 +7151,7 @@ const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].in
             await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
             
             // Log Agenda
-            const agendaRef = window.getAgendaDocRef(window.selectedClass, inputCal.value);
+            const agendaRef = window.getAgendaDocRef(window.selectedClass, gradeDate);
             const studentName = window.allStudents.find(s => s.id === window.selectedStudentId)?.name || "Studente Ignoto";
 
 await setDoc(agendaRef, { 
@@ -7176,8 +7164,10 @@ await setDoc(agendaRef, {
     }) 
 }, { merge: true });
             
-                        document.getElementById('input-grade-val').value = "";
+            document.getElementById('input-grade-val').value = "";
             document.getElementById('input-grade-nv').checked = false;
+            document.getElementById('input-grade-topic').value = "";
+            window.closeModal();
             alert("Voto registrato nel profilo e in agenda!");
             loadStudentRecords(window.selectedStudentId);
 
@@ -7199,8 +7189,48 @@ await setDoc(agendaRef, {
     confirm.innerText = "Conferma";
     overlay.classList.toggle('agenda-form-modal', type === 'firme' || type === 'compiti');
     overlay.classList.replace('hidden', 'flex');
-    
-    if(type === 'firme') {
+
+    if (type === 'voto') {
+        const selectedStudent = window.allStudents.find(s => s.id === window.selectedStudentId);
+        document.getElementById('modal-title').innerText = "Registra un voto";
+        confirm.innerText = "Registra voto";
+        body.innerHTML = `
+            <div class="space-y-5">
+                <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
+                    <p class="text-[9px] font-black uppercase tracking-[0.16em] text-red-700">Studente selezionato</p>
+                    <p id="grade-modal-student" class="grade-modal-student mt-1 text-sm font-black"></p>
+                    <p class="mt-1 text-[10px] text-zinc-500">Data, materia, valutazione e argomento si registrano insieme.</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="modal-label" for="input-grade-date">Data</label>
+                        <input type="date" id="input-grade-date" class="modal-input" required>
+                    </div>
+                    <div>
+                        <label class="modal-label" for="input-grade-subject">Materia</label>
+                        <select id="input-grade-subject" class="modal-input" required></select>
+                    </div>
+                    <div>
+                        <label class="modal-label" for="input-grade-val">Voto</label>
+                        <select id="input-grade-val" class="modal-input" required></select>
+                    </div>
+                    <label for="input-grade-nv" class="flex items-center gap-2 self-end rounded-xl border border-zinc-200 bg-white px-3 py-3 text-xs font-bold text-zinc-700">
+                        <input type="checkbox" id="input-grade-nv" class="h-4 w-4 accent-red-700">
+                        Non valutato (N.V.)
+                    </label>
+                    <div class="sm:col-span-2">
+                        <label class="modal-label" for="input-grade-topic">Argomento <span class="font-medium normal-case text-zinc-400">(facoltativo)</span></label>
+                        <input type="text" id="input-grade-topic" class="modal-input" placeholder="Es. Verifica sul capitolo 4">
+                    </div>
+                </div>
+            </div>
+        `;
+        const studentLabel = document.getElementById('grade-modal-student');
+        if (studentLabel) studentLabel.textContent = selectedStudent?.name || "Seleziona uno studente dal registro";
+        document.getElementById('input-grade-date').value = document.getElementById('global-calendar').value;
+        window.configuraPannelloVotiDocente();
+        confirm.onclick = window.submitGrade;
+    } else if(type === 'firme') {
         document.getElementById('modal-title').innerText = "Registra una lezione";
         confirm.innerText = "Registra firma";
         // Generazione opzioni ore (1-12 per coprire attività pomeridiane/gite)
