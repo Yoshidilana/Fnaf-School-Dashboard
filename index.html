@@ -6253,7 +6253,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-presenze-studente', isStudente);
     toggle('home-profilo-btn', type !== ROLES.OSPITE);
     toggle('menu-chat-staff', isStaffGenerale);
-    toggle('menu-counselor', type === ROLES.COUNSELOR);
+    toggle('menu-counselor', type === ROLES.COUNSELOR || type === ROLES.ADMIN);
     toggle('hub-btn-registro-globale', isStaffDidattico);
     toggle('menu-hub', [ROLES.ADMIN, ROLES.TECNICO].includes(type));
 
@@ -7276,11 +7276,18 @@ await setDoc(agendaRef, {
                     <div class="agenda-form-field">
                         <label class="modal-label" for="m-mat">Materia</label>
                         <select id="m-mat" class="modal-input">
-                            ${(window.currentUserData?.materie || ['Presidenza']).map(m => {
-                                const cleanMat = m.toLowerCase().trim();
-                                const emoji = LISTA_MATERIE[cleanMat] || "✒️";
-                                return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
-                            }).join('')}
+                            ${(() => {
+                                const role = (window.userRole || '').toLowerCase();
+                                const subjects = (role === 'admin' || role === 'preside') 
+                                    ? Object.keys(LISTA_MATERIE) 
+                                    : (window.currentUserData?.materie || []);
+                                
+                                return (subjects.length > 0 ? subjects : ['Generale']).map(m => {
+                                    const cleanMat = m.toLowerCase().trim();
+                                    const emoji = LISTA_MATERIE[cleanMat] || "✒️";
+                                    return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
+                                }).join('');
+                            })()}
                         </select>
                     </div>
                     <div class="agenda-form-field">
@@ -7324,7 +7331,16 @@ await setDoc(agendaRef, {
                     <div class="agenda-form-field">
                         <label class="modal-label" for="m-compiti-mat">Materia di riferimento</label>
                     <select id="m-compiti-mat" class="modal-input">
-                        ${(window.currentUserData?.materie || ['Presidenza']).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+                        ${(() => {
+                            const role = (window.userRole || '').toLowerCase();
+                            const subjects = (role === 'admin' || role === 'preside') 
+                                ? Object.keys(LISTA_MATERIE) 
+                                : (window.currentUserData?.materie || []);
+                            
+                            return (subjects.length > 0 ? subjects : ['Generale']).map(m => 
+                                `<option value="${m}">${m.toUpperCase()}</option>`
+                            ).join('');
+                        })()}
                     </select>
                     </div>
                     <div class="agenda-form-field">
@@ -7367,7 +7383,7 @@ await setDoc(agendaRef, {
                 <select id="m-type" class="modal-input">
                     <option value="nota">Nota disciplinare</option>
                     ${['preside', 'vicepreside', 'prof', 'admin'].includes(currentRole) ? '<option value="mandato">Mandato presidenziale (urgente)</option>' : ''}
-                    ${currentRole === 'counselor' ? '<option value="colloquio">Colloquio di supporto</option>' : ''}
+                    ${['counselor', 'admin'].includes(currentRole) ? '<option value="colloquio">Colloquio di supporto</option>' : ''}
                 </select>
             </div>
             <div class="agenda-form-field agenda-form-field-wide">
