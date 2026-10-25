@@ -719,6 +719,12 @@ main {
     min-height: 3.25rem;
 }
 
+#modal-overlay.agenda-form-modal #modal-body label[for="input-grade-nv"] {
+    border-color: #e7e0da !important;
+    background: #fff !important;
+    color: #44403c !important;
+}
+
 @media (max-width: 640px) {
     #modal-overlay.agenda-form-modal .agenda-form-grid {
         grid-template-columns: minmax(0, 1fr);
@@ -7187,7 +7193,7 @@ await setDoc(agendaRef, {
     const confirm = document.getElementById('modal-confirm');
     const overlay = document.getElementById('modal-overlay');
     confirm.innerText = "Conferma";
-    overlay.classList.toggle('agenda-form-modal', type === 'firme' || type === 'compiti');
+    overlay.classList.toggle('agenda-form-modal', type === 'firme' || type === 'compiti' || type === 'voto');
     overlay.classList.replace('hidden', 'flex');
 
     if (type === 'voto') {
@@ -7196,29 +7202,34 @@ await setDoc(agendaRef, {
         confirm.innerText = "Registra voto";
         body.innerHTML = `
             <div class="space-y-5">
-                <div class="rounded-2xl border border-red-100 bg-red-50 p-4">
-                    <p class="text-[9px] font-black uppercase tracking-[0.16em] text-red-700">Studente selezionato</p>
-                    <p id="grade-modal-student" class="grade-modal-student mt-1 text-sm font-black"></p>
-                    <p class="mt-1 text-[10px] text-zinc-500">Data, materia, valutazione e argomento si registrano insieme.</p>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="agenda-form-intro">
+                    <span class="agenda-form-icon" aria-hidden="true">✏️</span>
                     <div>
+                        <p class="text-[9px] font-black uppercase tracking-[0.16em] text-red-700">Studente selezionato</p>
+                        <p id="grade-modal-student" class="grade-modal-student mt-1 text-sm font-black"></p>
+                        <p class="mt-1 text-[10px] text-zinc-500">Inserisci data, materia e valutazione; l'argomento è facoltativo.</p>
+                    </div>
+                </div>
+                <div class="agenda-form-grid">
+                    <div class="agenda-form-field">
                         <label class="modal-label" for="input-grade-date">Data</label>
                         <input type="date" id="input-grade-date" class="modal-input" required>
                     </div>
-                    <div>
+                    <div class="agenda-form-field">
                         <label class="modal-label" for="input-grade-subject">Materia</label>
                         <select id="input-grade-subject" class="modal-input" required></select>
                     </div>
-                    <div>
+                    <div class="agenda-form-field">
                         <label class="modal-label" for="input-grade-val">Voto</label>
                         <select id="input-grade-val" class="modal-input" required></select>
                     </div>
-                    <label for="input-grade-nv" class="flex items-center gap-2 self-end rounded-xl border border-zinc-200 bg-white px-3 py-3 text-xs font-bold text-zinc-700">
-                        <input type="checkbox" id="input-grade-nv" class="h-4 w-4 accent-red-700">
-                        Non valutato (N.V.)
-                    </label>
-                    <div class="sm:col-span-2">
+                    <div class="agenda-form-field flex items-end">
+                        <label for="input-grade-nv" class="flex min-h-[3.15rem] w-full items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700">
+                            <input type="checkbox" id="input-grade-nv" class="h-4 w-4 accent-red-700">
+                            Non valutato (N.V.)
+                        </label>
+                    </div>
+                    <div class="agenda-form-field agenda-form-field-wide">
                         <label class="modal-label" for="input-grade-topic">Argomento <span class="font-medium normal-case text-zinc-400">(facoltativo)</span></label>
                         <input type="text" id="input-grade-topic" class="modal-input" placeholder="Es. Verifica sul capitolo 4">
                     </div>
