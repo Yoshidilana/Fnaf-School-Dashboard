@@ -1788,223 +1788,6 @@ main {
         line-height: 1.6;
     }
 
-    #view-agenda .agenda-hero {
-        position: relative;
-        isolation: isolate;
-        overflow: hidden;
-        padding: clamp(1.4rem, 3vw, 2rem);
-        border: 1px solid rgba(248, 113, 113, 0.2) !important;
-        border-radius: 24px;
-        background: linear-gradient(115deg, #211919, #3b1c1c 58%, #211919) !important;
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.16) !important;
-    }
-
-    #view-agenda .agenda-hero::after {
-        content: "📅";
-        position: absolute;
-        z-index: -1;
-        top: 50%;
-        right: 1.5rem;
-        color: rgba(255, 255, 255, 0.08);
-        font-size: clamp(6rem, 12vw, 9rem);
-        transform: translateY(-50%) rotate(-10deg);
-        pointer-events: none;
-    }
-
-    #view-agenda .agenda-hero-main {
-        display: flex;
-        align-items: center;
-        gap: 1.1rem;
-        min-width: 230px;
-        position: relative;
-        z-index: 1;
-    }
-
-    #view-agenda .agenda-hero-icon {
-        display: grid;
-        width: 4.25rem;
-        height: 4.25rem;
-        flex: 0 0 auto;
-        place-items: center;
-        border: 1px solid rgba(248, 113, 113, 0.3);
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.08);
-        font-size: 2rem;
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    }
-
-    #view-agenda .agenda-eyebrow {
-        color: #fbbf24;
-        font-size: 0.62rem;
-        font-weight: 900;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-    }
-
-    #view-agenda .agenda-hero-heading h1 {
-        margin-top: 0.35rem;
-        color: #fff;
-        font-size: clamp(1.65rem, 3vw, 2.2rem);
-        font-weight: 900;
-        line-height: 1.05;
-        text-transform: uppercase;
-        font-style: italic;
-        letter-spacing: -0.04em;
-    }
-
-    #view-agenda .agenda-hero-heading h1 span {
-        color: #f87171;
-    }
-
-    #view-agenda .agenda-hero-heading > p:last-child {
-        margin-top: 0.55rem;
-        color: #d4d4d8;
-        font-size: 0.75rem;
-        line-height: 1.5;
-    }
-
-    #view-agenda .agenda-hero-controls {
-        display: grid;
-        grid-template-columns: minmax(220px, 0.8fr) minmax(320px, 1.2fr);
-        align-items: stretch;
-        gap: 0.8rem;
-        min-width: 0;
-        position: relative;
-        z-index: 1;
-    }
-
-    #view-agenda .agenda-date-card {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        min-width: 0;
-        padding: 0.85rem 1rem;
-        border: 1px solid rgba(255, 255, 255, 0.16);
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.09);
-        backdrop-filter: blur(8px);
-    }
-
-    #view-agenda .agenda-date-field,
-    #view-agenda .agenda-class-field {
-        display: flex;
-        flex-direction: column;
-        gap: 0.35rem;
-        min-width: 0;
-    }
-
-    #view-agenda .agenda-date-field {
-        flex: 1 1 auto;
-    }
-
-    #view-agenda .agenda-date-field label {
-        color: #fca5a5;
-        font-size: 0.58rem;
-        font-weight: 900;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-    }
-
-    #view-agenda #global-calendar {
-        width: 100%;
-        min-width: 0;
-        color: #fff !important;
-        font-size: 1rem;
-        font-weight: 900;
-        outline: none;
-        color-scheme: dark;
-    }
-
-    #view-agenda #global-calendar:focus-visible {
-        border-radius: 5px;
-        outline: 2px solid #fbbf24;
-        outline-offset: 3px;
-    }
-
-    #view-agenda .agenda-class-field {
-        flex: 0 0 auto;
-        padding-left: 1rem;
-        border-left: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    #view-agenda .agenda-period-indicator {
-        color: #fbbf24;
-        font-size: 0.56rem;
-        font-weight: 900;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-    }
-
-    #view-agenda .agenda-class-field h2 {
-        color: #fca5a5;
-        font-size: 0.68rem;
-        font-weight: 900;
-        line-height: 1.2;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }
-
-    #view-agenda #agenda-class-title {
-        color: #fff;
-    }
-
-    #view-agenda .agenda-class-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.35rem;
-    }
-
-    #view-agenda .agenda-class-actions button {
-        padding: 0.38rem 0.55rem;
-        border: 1px solid rgba(248, 113, 113, 0.35);
-        border-radius: 8px;
-        background: rgba(220, 38, 38, 0.22);
-        color: #fff;
-        font-size: 0.55rem;
-        font-weight: 900;
-        text-transform: uppercase;
-        transition: background 160ms ease, border-color 160ms ease;
-    }
-
-    #view-agenda .agenda-class-actions button:hover {
-        border-color: #f87171;
-        background: #b91c1c;
-    }
-
-    #view-agenda .agenda-quick-nav {
-        width: 100%;
-        max-width: none;
-        padding: 0.65rem;
-        border-color: rgba(248, 113, 113, 0.25);
-        background: rgba(255, 255, 255, 0.96);
-    }
-
-    #view-agenda .agenda-quick-nav .nav-pill {
-        min-height: 32px;
-        font-size: 0.55rem;
-    }
-
-    #view-agenda .agenda-class-actions button:focus-visible,
-    #view-agenda .agenda-quick-nav button:focus-visible {
-        outline: 2px solid #fbbf24;
-        outline-offset: 2px;
-    }
-
-    @media (max-width: 760px) {
-        #view-agenda .agenda-hero-controls {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
-        #view-agenda .agenda-date-card {
-            flex-wrap: wrap;
-        }
-
-        #view-agenda .agenda-class-field {
-            padding-left: 0;
-            border-left: 0;
-        }
-    }
-
     #view-bacheca #bacheca-admin-panel {
         padding: 1.25rem;
         border: 1px solid #e7e0da;
@@ -5431,36 +5214,38 @@ main {
 <!-- VIEW: AGENDA RIMODERNATA -->
 <div id="view-agenda" class="tab-content hidden space-y-6 max-w-full overflow-x-hidden">
     
-  <!-- Hero Agenda: mantiene i controlli e la navigazione della vista -->
-<div class="agenda-header-glow agenda-hero p-5 rounded-[28px] flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5">
-    <div class="agenda-hero-main">
-        <div class="agenda-hero-icon" aria-hidden="true">📅</div>
-        <div class="agenda-hero-heading">
-            <p class="agenda-eyebrow">Fazbear Classroom · Organizzazione</p>
-            <h1>Agenda <span>di classe</span></h1>
-            <p>Lezioni, compiti e aggiornamenti della giornata.</p>
+  <!-- Header Agenda: Centro di Comando -->
+<div class="agenda-header-glow p-5 rounded-[28px] flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-5 bg-white border border-zinc-100">
+    <div class="flex items-center gap-5 w-full lg:w-auto">
+        <div class="p-4 bg-red-600/10 rounded-2xl border border-red-600/20 shadow-inner">
+            <span class="text-3xl">📅</span>
+        </div>
+        <div class="flex flex-col">
+            <label class="text-[9px] font-black uppercase text-zinc-550 tracking-[0.2em] mb-1">Agenda classe</label>
+
+            <!-- Data: testo nero, focus rosso -->
+            <input type="date" id="global-calendar" onchange="window.updateDateContext()" 
+                class="bg-transparent text-2xl font-black text-zinc-550 outline-none cursor-pointer focus:text-red-600 transition-colors">
+        </div>
+        <div class="h-12 w-[1px] bg-zinc-200 hidden md:block mx-2"></div>
+        <div class="flex flex-col">
+            <span id="period-indicator" class="text-[9px] font-black uppercase text-red-600 tracking-tighter">Caricamento...</span>
+            <!-- Titolo classe: rosso -->
+            <h2 class="text-xl font-black uppercase italic text-red-600 leading-none">
+                Classe <span id="agenda-class-title" class="text-zinc-950">--</span>
+            </h2>
+            <div class="flex gap-2 mt-2">
+
+                <!-- Bottoni: sfondo chiaro, testo scuro -->
+<button onclick="window.changeMenu('classi')" class="btn-staff-nav hidden bg-red-500 hover:bg-zinc-200 text-white hover:text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-red-500 shadow-sm">
+                    ⬅ Hub
+                </button>
+                <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" title="Cambia classe" aria-label="Cambia classe" class="bg-red-500 hover:bg-zinc-200 text-white hover:text-zinc-900 px-3 py-1 rounded-lg text-[8px] font-black uppercase transition-all border border-red-500 shadow-sm">
+                    🏫 Classe
+                </button>
+            </div>
         </div>
     </div>
-
-    <div class="agenda-hero-controls">
-        <div class="agenda-date-card">
-            <div class="agenda-date-field">
-                <label for="global-calendar">Seleziona data</label>
-                <input type="date" id="global-calendar" onchange="window.updateDateContext()">
-            </div>
-            <div class="agenda-class-field">
-                <span id="period-indicator" class="agenda-period-indicator">Caricamento...</span>
-                <h2>Classe <span id="agenda-class-title">--</span></h2>
-                <div class="agenda-class-actions">
-                    <button onclick="window.changeMenu('classi')" class="btn-staff-nav hidden">
-                        ⬅ Hub
-                    </button>
-                    <button id="agenda-change-class-btn" onclick="window.resetClassSelection()" title="Cambia classe" aria-label="Cambia classe">
-                        🏫 Cambia classe
-                    </button>
-                </div>
-            </div>
-        </div>
 
 <!-- Navigazione rapida organizzata per intervallo -->
 <div class="agenda-quick-nav">
