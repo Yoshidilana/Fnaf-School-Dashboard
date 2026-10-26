@@ -2248,6 +2248,32 @@ main {
         background: #fff6f3 !important;
     }
 
+    #view-hub #global-search-results p,
+    #view-hub #global-search-results span {
+        color: #292322;
+    }
+
+    #view-hub #global-search-results div p:first-child {
+        color: #1c1917 !important;
+        font-weight: 800 !important;
+    }
+
+    #view-hub #global-search-results div p:last-child {
+        color: #78716c !important;
+    }
+
+    #view-hub #global-search-results div span {
+        color: #a8a29e !important;
+    }
+
+    #view-hub #global-search-results > div:hover div p:first-child {
+        color: #b91c1c !important;
+    }
+
+    #view-hub #global-search-results > div:hover div span {
+        color: #b91c1c !important;
+    }
+
     #view-hub .admin-user-list {
         margin-top: 0.9rem;
         overflow: hidden;
@@ -10243,26 +10269,26 @@ window.hubManager = {
             // Contenitore principale scuro con bordi definiti per integrarsi nell'interfaccia
             let html = `
                 <div class="admin-user-list mt-4">
-                    <div class="p-4 border-b border-zinc-950 bg-zinc-950/40 space-y-3">
+                    <div class="p-4 border-b border-stone-200 bg-stone-50/60 space-y-3">
                         <div class="flex flex-col md:flex-row gap-3 justify-between items-start md:items-center">
-                            <p class="admin-section-label !mb-0">Filtra per categoria</p>
+                            <p class="admin-section-label !mb-0 text-stone-600 font-bold">Filtra per categoria</p>
                             <div class="flex flex-wrap gap-1.5">
-                                <button onclick="window.hubManager.setFiltroRuolo('all')" class="hub-filter-btn active bg-red-600 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Tutti</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('dirigenza')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Dirigenza</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('prof')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Docenti</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('personale')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Personale</button>
-                                <button onclick="window.hubManager.setFiltroRuolo('studente')" class="hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Studenti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('all')" class="hub-filter-btn active bg-red-600 border border-red-700 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all">Tutti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('dirigenza')" class="hub-filter-btn bg-stone-100 border border-stone-200 text-stone-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-stone-200">Dirigenza</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('prof')" class="hub-filter-btn bg-stone-100 border border-stone-200 text-stone-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-stone-200">Docenti</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('personale')" class="hub-filter-btn bg-stone-100 border border-stone-200 text-stone-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-stone-200">Personale</button>
+                                <button onclick="window.hubManager.setFiltroRuolo('studente')" class="hub-filter-btn bg-stone-100 border border-stone-200 text-stone-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-stone-200">Studenti</button>
                             </div>
                         </div>
                     </div>
                     <div class="max-h-[500px] overflow-y-auto custom-scroll">
                         <table class="w-full text-left text-[10px]">
-                            <thead class="bg-zinc-950 text-white sticky top-0 z-20 border-b border-zinc-950">
+                            <thead class="bg-stone-100 text-stone-600 sticky top-0 z-20 border-b border-stone-200">
                                 <tr>
-                                    <th class="p-4 uppercase tracking-widest text-zinc-400">Utente</th>
-                                    <th class="p-4 uppercase tracking-widest text-zinc-400">Ruolo</th>
-                                    <th class="p-4 uppercase tracking-widest text-zinc-400">Classe / Insegnamento</th>
-                                    <th class="p-4 uppercase tracking-widest text-zinc-400 text-right">Azioni</th>
+                                    <th class="p-4 uppercase tracking-widest text-stone-500">Utente</th>
+                                    <th class="p-4 uppercase tracking-widest text-stone-500">Ruolo</th>
+                                    <th class="p-4 uppercase tracking-widest text-stone-500">Classe / Insegnamento</th>
+                                    <th class="p-4 uppercase tracking-widest text-stone-500 text-right">Azioni</th>
                                 </tr>
                             </thead>
                             <tbody id="hub-users-body">`;
@@ -10275,36 +10301,36 @@ window.hubManager = {
                 
                 // Separazione netta: se è prof dice "DOCENZE: classe", se è studente mostra la classe pulita
                 const displayClasse = (roleType === ROLES.STUDENTE) 
-                    ? `<span class="text-white font-black uppercase bg-zinc-950 px-2 py-1 rounded-md border border-zinc-800">${u.classe || '-'}</span>` 
-                    : (u.classi_docente ? `<span class="text-red-500 font-black uppercase tracking-tight">DOCENZE: ${u.classi_docente.join(', ')}</span>` : '<span class="text-zinc-600">-</span>');
+                    ? `<span class="user-class-badge px-2 py-1 rounded-md border border-stone-200 bg-stone-100 text-stone-700 text-[8px] font-black uppercase">${u.classe || '-'}</span>` 
+                    : (u.classi_docente ? `<span class="text-red-600 font-black uppercase tracking-tight">DOCENZE: ${u.classi_docente.join(', ')}</span>` : '<span class="text-stone-400">-</span>');
 
                 if (roleType === ROLES.OSPITE) return;
 
                 const foto = u.avatar || u.avatar_npc || `https://ui-avatars.com/api/?name=${u.name || 'U'}&background=random`;
 
                 html += `
-                    <tr class="border-b border-zinc-950 hover:bg-red-950/20 transition-colors user-row cursor-pointer" 
+                    <tr class="border-b border-stone-200/80 hover:bg-stone-50/80 transition-colors user-row cursor-pointer" 
                         data-role-cat="${this.getCategoriaRuolo(roleType)}"
                         data-search="${(u.name || '').toLowerCase()} ${id.toLowerCase()}"
                         onclick="window.hubManager.vaiAlProfilo('${id}', '${roleType}')">
                         <td class="p-3">
                             <div class="flex items-center gap-3">
-                                <img src="${foto}" class="w-8 h-8 rounded-lg object-cover border-2 border-zinc-950 shadow-sm">
+                                <img src="${foto}" class="w-8 h-8 rounded-lg object-cover border border-stone-200 shadow-sm">
                                 <div>
-                                    <p class="font-black text-white uppercase leading-none tracking-wide">${u.name || 'N.D.'}</p>
-                                    <p class="text-[7px] text-zinc-500 font-mono mt-1">${id}</p>
+                                    <p class="font-black text-stone-800 uppercase leading-none tracking-wide">${u.name || 'N.D.'}</p>
+                                    <p class="text-[7px] text-stone-400 font-mono mt-1">${id}</p>
                                 </div>
                             </div>
                         </td>
                         <td class="p-3">
-                            <span class="px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase border border-zinc-950 bg-zinc-950 text-white">
+                            <span class="user-role-badge px-2 py-0.5 rounded-[4px] text-[8px] font-black uppercase border border-stone-200 bg-stone-100 text-stone-600">
                                 ${role}
                             </span>
                         </td>
                         <td class="p-3 font-bold">${displayClasse}</td>
                         <td class="p-3 text-right" onclick="event.stopPropagation()">
-                            <button onclick="window.hubManager.modificaUtente('${id}')" class="text-zinc-400 hover:text-blue-400 p-2 text-xs transition-colors active:scale-90">✏️</button>
-                            <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-zinc-400 hover:text-red-500 p-2 text-xs transition-colors active:scale-90">🗑️</button>
+                            <button onclick="window.hubManager.modificaUtente('${id}')" class="text-stone-400 hover:text-blue-600 p-2 text-xs transition-colors active:scale-90">✏️</button>
+                            <button onclick="window.hubManager.eliminaUtente('${id}')" class="text-stone-400 hover:text-red-600 p-2 text-xs transition-colors active:scale-90">🗑️</button>
                         </td>
                     </tr>`;
             });
@@ -10502,10 +10528,10 @@ modificaUtente: function(id) {
             const onclickText = btn.getAttribute('onclick');
             const isActive = onclickText && onclickText.includes(`'${cat}'`);
             
-            // Classi corrette per il tema scuro ad alto contrasto
+            // Classi corrette per il tema ad alto contrasto
             btn.className = isActive ? 
-                "hub-filter-btn active bg-red-600 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all" : 
-                "hub-filter-btn bg-zinc-700 border border-zinc-950 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-zinc-600";
+                "hub-filter-btn active bg-red-600 border border-red-700 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all" : 
+                "hub-filter-btn bg-stone-100 border border-stone-200 text-stone-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-stone-200";
         });
         this.filtraUtenti();
     },
@@ -10555,15 +10581,15 @@ modificaUtente: function(id) {
         if (filtered.length > 0) {
             resultsDiv.innerHTML = filtered.map(u => `
                 <div onclick="window.selectAndGoToProfile('${u.id}'); document.getElementById('global-search-results').classList.add('hidden');" 
-                     class="p-3 cursor-pointer border-b border-zinc-50 flex justify-between items-center">
+                     class="p-3 cursor-pointer border-b border-stone-200/70 flex justify-between items-center hover:bg-red-50/50 rounded-lg transition-colors">
                     <div>
-                        <p class="text-[10px] font-black uppercase text-zinc-800">${u.name || 'N.D.'}</p>
-                        <p class="text-[8px] text-zinc-400 uppercase">${u.role || 'Utente'} - ${u.classe || 'No Classe'}</p>
+                        <p class="text-[10px] font-black uppercase text-stone-800">${u.name || 'N.D.'}</p>
+                        <p class="text-[8px] text-stone-500 font-bold uppercase">${u.role || 'Utente'} - ${u.classe || 'No Classe'}</p>
                     </div>
-                    <span class="text-zinc-300">→</span>
+                    <span class="text-stone-400 font-bold">→</span>
                 </div>`).join('');
         } else {
-            resultsDiv.innerHTML = '<p class="p-4 text-[10px] text-stone-500 italic">Nessun utente trovato</p>';
+            resultsDiv.innerHTML = '<p class="p-4 text-[10px] text-stone-500 italic font-medium">Nessun utente trovato</p>';
         }
     },
 
