@@ -5073,12 +5073,13 @@ main {
         <div class="overflow-x-auto">
 <table class="registry-table w-full table-fixed text-left text-[11px]">
                 <thead class="bg-zinc-0 text-zinc-600 font-black uppercase">
-                    <tr id="reg-global-head">
-                        <th class="w-1/4 p-4 border-r border-zinc-200">Studente</th>
-                        <th class="w-1/2 p-4">Voti</th>
-                        <th class="w-1/4 p-4 text-right">Media</th>
-                    </tr>
-                </thead>
+    <tr id="reg-global-head">
+        <th class="p-4 border-r border-zinc-200 w-1/4">Studente</th>
+        <th class="p-4 border-r border-zinc-200 text-center w-1/4">1° Quadrimestre</th>
+        <th class="p-4 border-r border-zinc-200 text-center w-1/4">2° Quadrimestre</th>
+        <th class="p-4 text-right w-1/4">Media Gen.</th>
+    </tr>
+</thead>
                 <tbody id="reg-global-body" class="divide-y divide-zinc-100 bg-white">
                     <!-- Il JS popolerà qui -->
                 </tbody>
@@ -9805,38 +9806,62 @@ window.filterByClass = (cls) => {
     const classStudents = window.allStudents.filter(s => s.classe === cls);
     let rowsHtml = "";
 
- for (const student of classStudents) {
-        const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
-        const recRef = window.getRecordDocRef(student.id, currentYear, 'voti');
-        const snap = await getDoc(recRef);
-        const data = snap.exists() ? snap.data() : { voti: [] };
-        const studentGrades = (data.voti || []).filter(v => 
-            v.materia.toLowerCase() === profSubject.toLowerCase() && 
-            v.anno === currentYear
-        ).sort((a, b) => {
-            const [da, ma, ya] = a.data.split('/').map(Number);
-            const [db, mb, yb] = b.data.split('/').map(Number);
-            return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
-        });
+for (const student of classStudents) {
+    const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
+    const recRef = window.getRecordDocRef(student.id, currentYear, 'voti');
+    const snap = await getDoc(recRef);
+    const data = snap.exists() ? snap.data() : { voti: [] };
+    
+    // Filtriamo i voti per materia e anno
+    const studentGrades = (data.voti || []).filter(v => 
+        v.materia.toLowerCase() === profSubject.toLowerCase() && 
+        v.anno === currentYear
+    );
 
-        const gradesValidi = studentGrades.filter(v => !v.nonValutato);
-        const media = gradesValidi.length > 0 
-            ? (gradesValidi.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / gradesValidi.length).toFixed(1) 
+    // Dividiamo i voti per quadrimestre
+    const q1Voti = studentGrades.filter(v => isDateInQ(v.data, 1));
+    const q2Voti = studentGrades.filter(v => isDateInQ(v.data, 2));
+
+    // Funzione interna veloce per calcolare la media
+    const calcolaMedia = (lista) => {
+        const validi = lista.filter(v => !v.nonValutato);
+        return validi.length > 0 
+            ? (validi.reduce((a, b) => a + window.parseVotoScolastico(b.voto), 0) / validi.length).toFixed(1) 
             : "0.0";
+    };
 
-rowsHtml += `
-    <tr class="hover:bg-slate-50 transition-colors">
-        <td class="p-4 font-black uppercase border-r border-slate-100 bg-slate-50/30 text-slate-700">${student.name}</td>
-        <td class="p-4 flex flex-wrap gap-2">
-            ${studentGrades.map(v => renderVotoTag(v, student.id)).join('') || '<span class="text-slate-300 italic text-[9px]">Nessun voto</span>'}
-        </td>
-        <td class="p-4 text-right">
-            <span class="text-base font-black ${parseFloat(media) < 6 ? 'text-red-600' : 'text-blue-600'}">
-                ${media}
-            </span>
-        </td>
-    </tr>`;
-    }
+    const mediaQ1 = calcolaMedia(q1Voti);
+    const mediaQ2 = calcolaMedia(q2Voti);
+    const mediaTotale = calcolaMedia(studentGrades);
+
+    rowsHtml += `
+        <tr class="hover:bg-slate-50 transition-colors border-b border-zinc-100">
+            <td class="p-4 font-black uppercase border-r border-slate-100 bg-slate-50/30 text-slate-700">${student.name}</td>
+            
+            <!-- Colonna 1° Quadrimestre -->
+            <td class="p-4 border-r border-slate-50">
+                <div class="flex flex-wrap justify-center gap-1.5 mb-2">
+                    ${q1Voti.map(v => renderVotoTag(v, student.id)).join('') || '<span class="text-zinc-300">-</span>'}
+                </div>
+                <div class="text-center text-[9px] font-black text-zinc-400 uppercase">Media: ${mediaQ1 !== "0.0" ? mediaQ1 : "-"}</div>
+            </td>
+
+            <!-- Colonna 2° Quadrimestre -->
+            <td class="p-4 border-r border-slate-50">
+                <div class="flex flex-wrap justify-center gap-1.5 mb-2">
+                    ${q2Voti.map(v => renderVotoTag(v, student.id)).join('') || '<span class="text-zinc-300">-</span>'}
+                </div>
+                <div class="text-center text-[9px] font-black text-zinc-400 uppercase">Media: ${mediaQ2 !== "0.0" ? mediaQ2 : "-"}</div>
+            </td>
+
+            <!-- Media Generale -->
+            <td class="p-4 text-right">
+                <span class="text-base font-black ${parseFloat(mediaTotale) < 6 && mediaTotale !== "0.0" ? 'text-red-600' : 'text-blue-600'}">
+                    ${mediaTotale}
+                </span>
+            </td>
+        </tr>`;
+}
     tbody.innerHTML = rowsHtml || '<tr><td colspan="10" class="p-10 text-center">Nessuno studente trovato.</td></tr>';
 };
 
