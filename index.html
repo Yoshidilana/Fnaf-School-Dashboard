@@ -5098,6 +5098,14 @@ main {
                         </h2>
         </div>
         <div class="flex items-center gap-2">
+            <div id="tabellone-subject-mode-container" class="hidden items-center gap-2">
+                <label for="tabellone-subject-mode" class="text-[9px] font-black uppercase text-zinc-500">Materie</label>
+                <select id="tabellone-subject-mode" onchange="window.renderTabelloneGlobale(this.value)"
+                    class="border border-zinc-200 rounded-xl px-3 py-2 text-[10px] font-black uppercase text-zinc-900 bg-white">
+                    <option value="all">Tutte</option>
+                    <option value="mine">Le mie</option>
+                </select>
+            </div>
             <!-- Generatore Rapido Spostato Qui -->
             <button id="btn-mass-tabellone" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
                 🎲 Generatore Rapido
@@ -9984,7 +9992,7 @@ for (const student of classStudents) {
 	// Cache globale per i voti del tabellone
 window.tabelloneCache = {};
 
-window.renderTabelloneGlobale = async () => {
+window.renderTabelloneGlobale = async (subjectMode) => {
     const cls = window.selectedClass;
     if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica.");
 
@@ -9994,6 +10002,24 @@ window.renderTabelloneGlobale = async () => {
     const thead = document.getElementById('tabellone-head');
     const tbody = document.getElementById('tabellone-body');
     const tabTitle = document.getElementById('tab-class-name');
+    const subjectModeContainer = document.getElementById('tabellone-subject-mode-container');
+    const subjectModeSelect = document.getElementById('tabellone-subject-mode');
+    if (subjectModeContainer) {
+        subjectModeContainer.classList.toggle('hidden', window.userRole !== ROLES.PROF);
+        subjectModeContainer.classList.toggle('flex', window.userRole === ROLES.PROF);
+    }
+    if (subjectMode && subjectModeSelect) subjectModeSelect.value = subjectMode;
+    let selectedSubjectMode = subjectModeSelect?.value || 'all';
+    if (window.userRole !== ROLES.PROF) selectedSubjectMode = 'all';
+    const mySubjects = [...new Set((window.currentUserData?.materie || [])
+        .map(m => String(m).trim().toUpperCase())
+        .filter(Boolean))].sort();
+
+    if (selectedSubjectMode === 'mine' && mySubjects.length === 0) {
+        alert("Non hai materie assegnate al tuo profilo.");
+        if (subjectModeSelect) subjectModeSelect.value = 'all';
+        return window.renderTabelloneGlobale('all');
+    }
     
     if(tabTitle) tabTitle.innerText = window.getDisplayClassName(cls, true);
     
@@ -10002,7 +10028,7 @@ window.renderTabelloneGlobale = async () => {
     const classStudents = window.allStudents.filter(s => s.classe === cls);
     const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
     
-    let materieSet = new Set();
+    let materieSet = new Set(selectedSubjectMode === 'mine' ? mySubjects : []);
     window.tabelloneCache = {}; // Reset cache
 
     const promesseStudenti = classStudents.map(async (student) => {
@@ -10021,6 +10047,7 @@ window.renderTabelloneGlobale = async () => {
 
         votiAnno.forEach(v => {
             const mat = v.materia.toUpperCase().trim();
+            if (selectedSubjectMode === 'mine' && !mySubjects.includes(mat)) return;
             materieSet.add(mat);
             if (!medieStudente[mat]) medieStudente[mat] = [];
             medieStudente[mat].push(window.parseVotoScolastico(v.voto));
