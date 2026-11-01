@@ -6317,6 +6317,10 @@ if (window.selectedClass || (window.userRole === 'studente' && window.currentUse
         window.renderTabelloneGlobale();
     }
 
+    if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) {
+    window.renderScrutinioFinale();
+}
+
 	if (document.getElementById('view-presenze-studente')?.classList.contains('active-view')) {
     window.loadStudentAttendanceHistory();
 }
