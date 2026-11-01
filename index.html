@@ -10002,15 +10002,23 @@ window.renderTabelloneGlobale = async (subjectMode) => {
     const thead = document.getElementById('tabellone-head');
     const tbody = document.getElementById('tabellone-body');
     const tabTitle = document.getElementById('tab-class-name');
-    const subjectModeContainer = document.getElementById('tabellone-subject-mode-container');
-    const subjectModeSelect = document.getElementById('tabellone-subject-mode');
-    if (subjectModeContainer) {
-        subjectModeContainer.classList.toggle('hidden', window.userRole !== ROLES.PROF);
-        subjectModeContainer.classList.toggle('flex', window.userRole === ROLES.PROF);
-    }
-    if (subjectMode && subjectModeSelect) subjectModeSelect.value = subjectMode;
-    let selectedSubjectMode = subjectModeSelect?.value || 'all';
-    if (window.userRole !== ROLES.PROF) selectedSubjectMode = 'all';
+const subjectModeContainer = document.getElementById('tabellone-subject-mode-container');
+const subjectModeSelect = document.getElementById('tabellone-subject-mode');
+
+// Definiamo chi ha il permesso di vedere il filtro (Prof, Preside, Vice e Admin)
+const isPowerUser = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
+
+if (subjectModeContainer) {
+    // Se l'utente è uno di questi ruoli, mostriamo il filtro, altrimenti lo nascondiamo
+    subjectModeContainer.classList.toggle('hidden', !isPowerUser);
+    subjectModeContainer.classList.toggle('flex', isPowerUser);
+}
+
+// Impostiamo la modalità: se non è uno dei ruoli sopra, forziamo "all" (tutte)
+if (subjectMode && subjectModeSelect) subjectModeSelect.value = subjectMode;
+let selectedSubjectMode = subjectModeSelect?.value || 'all';
+
+if (!isPowerUser) selectedSubjectMode = 'all';
     const mySubjects = [...new Set((window.currentUserData?.materie || [])
         .map(m => String(m).trim().toUpperCase())
         .filter(Boolean))].sort();
