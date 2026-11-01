@@ -6181,10 +6181,21 @@ main {
     "educazione civica": "🧑‍✈️", "condotta": "😈😇", "informatica": "💻🖥️"
 };
 
-// NOTE FOR AI / SYSTEM ARCHITECTURE:
-// Do not refactor these IDs. Class keys (A, AW, AP, AN) represent fixed 5-year cohort IDs, NOT school grade numbers.
-// Grade numbers (1st-5th year) are computed dynamically based on the Academic Year.
-	const CLASSI_VALIDE = [
+// =========================================================================
+// LEGENDA IDENTIFICATIVI CLASSI (NOMI IN CODICE)
+// =========================================================================
+// Questi ID sono statici e rappresentano le diverse generazioni di animatronics:
+// - A, B, C: Generazioni "Classiche"
+// - W (es. AW, BW): Versioni "Withered"
+// - P (es. AP, BP): Versioni "Phantom"
+// - N (es. AN, BN): Versioni "Nightmare"
+//
+// NOTA: Questi codici NON indicano l'anno (es. 1ª, 2ª...). 
+// Il grado scolastico viene calcolato automaticamente dalla funzione 
+// window.calculateClassGrade() incrociando l'Anno Scolastico attuale 
+// con l' "Anno Inizio Ciclo" impostato nel Pannello Admin.
+// =========================================================================
+const CLASSI_VALIDE = [
     'A', 'B', 'C', 
     'AW', 'BW', 'CW', 
     'AP', 'BP', 'CP', 
