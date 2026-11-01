@@ -2770,7 +2770,8 @@ main {
 
     #view-registro .registry-container,
     #view-registro-classe .registry-container,
-    #view-tabellone .registry-container {
+    #view-tabellone .registry-container,
+    #view-scrutinio .registry-container {
         border: 1px solid #e7e0da !important;
         border-radius: 18px !important;
         background: #fff !important;
@@ -2779,7 +2780,8 @@ main {
 
     #view-registro .registry-table thead th,
     #view-registro-classe .registry-table thead th,
-    #view-tabellone #tabellone-head th {
+    #view-tabellone #tabellone-head th,
+    #view-scrutinio #scrutinio-final-head th {
         border-color: #e7e0da !important;
         border-bottom: 2px solid #dc2626 !important;
         background: #f5f1ed !important;
@@ -2789,7 +2791,8 @@ main {
 
     #view-registro .registry-table tbody tr,
     #view-registro-classe .registry-table tbody tr,
-    #view-tabellone #tabellone-body tr {
+    #view-tabellone #tabellone-body tr,
+    #view-scrutinio #scrutinio-final-body tr {
         border-color: #eee7e2 !important;
         background: #fff !important;
         transition: background 160ms ease;
@@ -2797,13 +2800,15 @@ main {
 
     #view-registro .registry-table tbody tr:nth-child(even),
     #view-registro-classe .registry-table tbody tr:nth-child(even),
-    #view-tabellone #tabellone-body tr:nth-child(even) {
+    #view-tabellone #tabellone-body tr:nth-child(even),
+    #view-scrutinio #scrutinio-final-body tr:nth-child(even) {
         background: #faf8f6 !important;
     }
 
     #view-registro .registry-table tbody tr:hover,
     #view-registro-classe .registry-table tbody tr:hover,
-    #view-tabellone #tabellone-body tr:hover {
+    #view-tabellone #tabellone-body tr:hover,
+    #view-scrutinio #scrutinio-final-body tr:hover {
         background: #fff1f2 !important;
     }
 
@@ -2821,13 +2826,15 @@ main {
 
     #view-registro .registry-table td,
     #view-registro-classe .registry-table td,
-    #view-tabellone #tabellone-body td {
+    #view-tabellone #tabellone-body td,
+    #view-scrutinio #scrutinio-final-body td {
         border-color: #eee7e2 !important;
         color: #3b302b !important;
     }
 
     #view-registro-classe,
-    #view-tabellone {
+    #view-tabellone,
+    #view-scrutinio {
         width: 100%;
         padding: clamp(0.75rem, 2vw, 1.5rem) !important;
         border-radius: 22px;
@@ -2835,7 +2842,8 @@ main {
     }
 
     #view-registro-classe > div:first-child,
-    #view-tabellone > div:first-child {
+    #view-tabellone > div:first-child,
+    #view-scrutinio > div:first-child {
         padding: 1.1rem 1.25rem;
         border: 1px solid #e7e0da;
         border-radius: 18px;
@@ -2844,7 +2852,8 @@ main {
     }
 
     #view-registro-classe h2,
-    #view-tabellone h2 {
+    #view-tabellone h2,
+    #view-scrutinio h2 {
         color: #292322 !important;
     }
 
@@ -2859,7 +2868,8 @@ main {
     }
 
     #view-registro-classe > div:first-child button,
-    #view-tabellone > div:first-child button {
+    #view-tabellone > div:first-child button,
+    #view-scrutinio > div:first-child button {
         border: 1px solid #e7e0da !important;
         border-radius: 10px !important;
         background: #faf8f6 !important;
@@ -2867,13 +2877,15 @@ main {
     }
 
     #view-registro-classe > div:first-child button:hover,
-    #view-tabellone > div:first-child button:hover {
+    #view-tabellone > div:first-child button:hover,
+    #view-scrutinio > div:first-child button:hover {
         background: #fff1f2 !important;
         color: #b91c1c !important;
     }
 
     #view-registro-classe #reg-global-body td:first-child,
-    #view-tabellone #tabellone-body td:first-child {
+    #view-tabellone #tabellone-body td:first-child,
+    #view-scrutinio #scrutinio-final-body td:first-child {
         background: #f7f3ef !important;
         color: #292322 !important;
     }
@@ -2896,7 +2908,8 @@ main {
         #view-pagella,
         #view-registro,
         #view-registro-classe,
-        #view-tabellone {
+        #view-tabellone,
+        #view-scrutinio {
             padding: 0.65rem !important;
         }
 
@@ -2912,7 +2925,8 @@ main {
         }
 
         #view-registro-classe > div:first-child,
-        #view-tabellone > div:first-child {
+        #view-tabellone > div:first-child,
+        #view-scrutinio > div:first-child {
             align-items: flex-start;
             flex-direction: column;
             gap: 0.75rem;
@@ -5020,6 +5034,10 @@ main {
             <span class="text-4xl group-hover:scale-110 transition-transform">📋</span>
             <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Tabellone Scrutinio</span>
         </button>
+        <button id="hub-btn-scrutinio-finale" onclick="window.renderScrutinioFinale()" class="hidden p-8 bg-zinc-900 border-2 border-zinc-800 rounded-3xl hover:border-red-600 transition-all flex flex-col items-center gap-4 shadow-lg group">
+            <span class="text-4xl group-hover:scale-110 transition-transform">🧾</span>
+            <span class="font-black uppercase text-xs tracking-widest text-zinc-200">Scrutinio Finale</span>
+        </button>
 <button onclick="window.changeMenu('orario')" class="p-6 bg-zinc-900 border-2 border-zinc-800 rounded-2xl hover:border-red-600 transition-all shadow-sm group">
     <span class="text-3xl block mb-2">🕒</span>
     <span class="font-black uppercase text-[10px] text-zinc-200">Orario Lezioni</span>
@@ -5083,6 +5101,39 @@ main {
                 <tbody id="reg-global-body" class="divide-y divide-zinc-100 bg-white">
                     <!-- Il JS popolerà qui -->
                 </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW: SCRUTINIO FINALE PER STUDENTE E MATERIA -->
+<div id="view-scrutinio" class="tab-content hidden p-6 !bg-white">
+    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div>
+            <h2 class="text-2xl font-black italic uppercase text-zinc-900">
+                Scrutinio Finale <span id="scrutinio-class-name" class="text-red-600">--</span>
+            </h2>
+            <p id="scrutinio-academic-year" class="text-[10px] font-black uppercase tracking-widest text-zinc-500"></p>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="scrutinio-subject-mode-container" class="hidden items-center gap-2">
+                <label for="scrutinio-subject-mode" class="text-[9px] font-black uppercase text-zinc-500">Materie</label>
+                <select id="scrutinio-subject-mode" onchange="window.renderScrutinioFinale(this.value)"
+                    class="border border-zinc-200 rounded-xl px-3 py-2 text-[10px] font-black uppercase text-zinc-900 bg-white">
+                    <option value="all">Tutte</option>
+                    <option value="mine">Le mie</option>
+                </select>
+            </div>
+            <button onclick="window.changeMenu('classi')" class="bg-zinc-100 text-zinc-700 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-200">
+                Indietro
+            </button>
+        </div>
+    </div>
+    <div class="registry-container">
+        <div class="overflow-x-auto">
+            <table class="w-full min-w-max text-left text-[10px]">
+                <thead id="scrutinio-final-head" class="bg-zinc-100 text-zinc-700 font-black uppercase"></thead>
+                <tbody id="scrutinio-final-body" class="divide-y divide-zinc-100 bg-white"></tbody>
             </table>
         </div>
     </div>
@@ -6405,6 +6456,7 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-profilo', type !== ROLES.OSPITE);
     toggle('menu-classi', isStaffGenerale || type === ROLES.OSPITE);
     toggle('hub-btn-appello', isStaffDidattico); // Accendilo nell'Hub solo per lo Staff
+    toggle('hub-btn-scrutinio-finale', isStaffDidattico);
     toggle('menu-agenda', isStudente);
     toggle('menu-registro', isStudente);
     toggle('menu-pagella', isStudente);
@@ -7339,6 +7391,7 @@ await setDoc(agendaRef, {
             // Refresh viste globali se attive
             if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
             if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+            if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
         };
 
         window.openModal = (type) => {
@@ -8229,6 +8282,7 @@ if (typeof loadStudentRecords === "function" && window.selectedStudentId) {
     // Refresh viste globali se attive
     if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
     if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+    if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
 };
 
 window.deleteNote = async (idx, studentId) => {
@@ -9550,6 +9604,7 @@ if (typeof loadStudentRecords === "function" && window.selectedStudentId) {
         // Refresh viste globali se attive
         if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
         if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+        if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
 
     } catch (error) {
         console.error("Errore eliminazione:", error);
@@ -9991,6 +10046,183 @@ for (const student of classStudents) {
 
 	// Cache globale per i voti del tabellone
 window.tabelloneCache = {};
+
+window.renderScrutinioFinale = async (subjectMode) => {
+    const cls = window.selectedClass;
+    if (!cls || cls === 'ALL') {
+        alert("Seleziona prima una classe dal menu 'Classi'.");
+        return;
+    }
+
+    const staffRoles = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN];
+    if (!staffRoles.includes(window.userRole)) {
+        alert("❌ Accesso negato.");
+        return;
+    }
+
+    window.changeMenu('scrutinio');
+    const head = document.getElementById('scrutinio-final-head');
+    const body = document.getElementById('scrutinio-final-body');
+    const title = document.getElementById('scrutinio-class-name');
+    const yearLabel = document.getElementById('scrutinio-academic-year');
+    const modeContainer = document.getElementById('scrutinio-subject-mode-container');
+    const modeSelect = document.getElementById('scrutinio-subject-mode');
+    const canFilterSubjects = staffRoles.includes(window.userRole);
+
+    if (modeContainer) {
+        modeContainer.classList.toggle('hidden', !canFilterSubjects);
+        modeContainer.classList.toggle('flex', canFilterSubjects);
+    }
+    if (subjectMode && modeSelect) modeSelect.value = subjectMode;
+    let selectedMode = modeSelect?.value || 'all';
+    if (!canFilterSubjects) selectedMode = 'all';
+
+    if (title) title.innerText = window.getDisplayClassName(cls, true);
+    const academicYear = document.getElementById('current-academic-year')?.innerText
+        .replace('A.S. ', '').trim();
+    if (!academicYear) {
+        if (body) body.innerHTML = '<tr><td class="p-8 text-center text-red-600" colspan="20">Anno scolastico non disponibile.</td></tr>';
+        return;
+    }
+    if (yearLabel) yearLabel.innerText = `Anno scolastico ${academicYear}`;
+    if (body) body.innerHTML = '<tr><td class="p-8 text-center text-zinc-500" colspan="20">Caricamento scrutinio...</td></tr>';
+
+    try {
+        await window.loadExamStatus();
+        const currentUserSubjects = [...new Set((window.currentUserData?.materie || [])
+            .map(m => String(m).trim())
+            .filter(Boolean))];
+        const normalizedUserSubjects = new Set(currentUserSubjects.map(m => m.toLocaleUpperCase('it')));
+
+        if (selectedMode === 'mine' && normalizedUserSubjects.size === 0) {
+            alert("Non hai materie assegnate al tuo profilo.");
+            if (modeSelect) modeSelect.value = 'all';
+            return window.renderScrutinioFinale('all');
+        }
+
+        const classConfig = window.classConfigsCache?.[cls] || {};
+        const annualSubjects = classConfig.materiePerAnno?.[academicYear]
+            || classConfig.materiePerAnno?.[academicYear.replace('/', '-')]
+            || classConfig.materiePerAnno?.[academicYear.replace('/', '_')]
+            || classConfig.activeSubjects
+            || [];
+        const subjectLabels = new Map();
+        const addSubject = (value) => {
+            const label = String(value || '').trim();
+            if (!label || label.toLocaleUpperCase('it') === 'CONDOTTA') return;
+            const key = label.toLocaleUpperCase('it');
+            if (!subjectLabels.has(key)) subjectLabels.set(key, label);
+        };
+        annualSubjects.forEach(addSubject);
+
+        const classStudents = (window.allStudents || [])
+            .filter(student => student.classe === cls
+                && String(student.role || '').toLocaleLowerCase('it').includes('student'))
+            .sort((a, b) => String(a.name || '').localeCompare(String(b.name || ''), 'it'));
+
+        const studentRecords = await Promise.all(classStudents.map(async student => {
+            const gradesRef = window.getRecordDocRef(student.id, academicYear, 'voti');
+            const reportRef = window.getRecordDocRef(student.id, academicYear, 'pagella');
+            const [gradesSnap, reportSnap] = await Promise.all([getDoc(gradesRef), getDoc(reportRef)]);
+            const grades = gradesSnap.exists() ? (gradesSnap.data().voti || []) : [];
+            const report = reportSnap.exists() ? reportSnap.data() : {};
+            const academicYearKey = academicYear.replace('-', '/');
+            const gradesForYear = grades.filter(v => String(v.anno || '').replace('-', '/') === academicYearKey);
+            gradesForYear.forEach(v => addSubject(v.materia));
+            return { student, grades: gradesForYear, report };
+        }));
+
+        let subjectKeys = [...subjectLabels.keys()].sort((a, b) => a.localeCompare(b, 'it'));
+        if (selectedMode === 'mine') {
+            subjectKeys = subjectKeys.filter(key => normalizedUserSubjects.has(key));
+            currentUserSubjects.forEach(addSubject);
+            subjectKeys = [...new Set([
+                ...subjectKeys,
+                ...[...normalizedUserSubjects].filter(key => subjectLabels.has(key))
+            ])].sort((a, b) => a.localeCompare(b, 'it'));
+        }
+
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[char]);
+        const parseGradeDate = value => {
+            const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value || '');
+            if (!match) return 0;
+            return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1])).getTime();
+        };
+        const getFinalGrade = (studentData, subjectKey, quarter) => {
+            const quarterGrades = studentData.grades
+                .filter(v => String(v.materia || '').trim().toLocaleUpperCase('it') === subjectKey
+                    && isDateInQ(v.data, quarter))
+                .sort((a, b) => parseGradeDate(a.data) - parseGradeDate(b.data));
+
+            if (subjectKey === 'RELIGIONE') {
+                if (!quarterGrades.length) return '-';
+                const latest = quarterGrades[quarterGrades.length - 1].voto;
+                return (MAP_RELIGIONE[latest] || String(latest || '-')).toLocaleUpperCase('it');
+            }
+
+            const validGrades = quarterGrades.filter(v => !v.nonValutato);
+            if (!validGrades.length) return '-';
+            const average = validGrades.reduce((sum, grade) => sum + window.parseVotoScolastico(grade.voto), 0)
+                / validGrades.length;
+            return String(Math.round(average));
+        };
+        const gradeColor = (value, subjectKey) => {
+            if (value === '-') return 'text-zinc-400';
+            if (subjectKey === 'RELIGIONE') return value === 'INSUFFICIENTE' ? 'text-red-600' : 'text-emerald-700';
+            return Number.parseFloat(value) < 6 ? 'text-red-600' : 'text-emerald-700';
+        };
+
+        if (head) {
+            head.innerHTML = `
+                <tr>
+                    <th rowspan="2" class="p-3 border-r border-zinc-200 sticky left-0 bg-zinc-100 z-10">Studente</th>
+                    ${subjectKeys.map(key => `<th colspan="2" class="p-3 text-center border-r border-zinc-200">${escapeHtml(subjectLabels.get(key) || key)}</th>`).join('')}
+                    <th colspan="2" class="p-3 text-center border-r border-zinc-200">Condotta</th>
+                </tr>
+                <tr>
+                    ${subjectKeys.map(() => '<th class="p-2 text-center border-r border-zinc-200">1° Q</th><th class="p-2 text-center border-r border-zinc-200">2° Q</th>').join('')}
+                    <th class="p-2 text-center border-r border-zinc-200">1° Q</th>
+                    <th class="p-2 text-center border-r border-zinc-200">2° Q</th>
+                </tr>`;
+        }
+
+        if (!classStudents.length) {
+            if (body) body.innerHTML = '<tr><td class="p-8 text-center text-zinc-500" colspan="20">Nessuno studente trovato in questa classe.</td></tr>';
+            return;
+        }
+        if (!subjectKeys.length && selectedMode === 'mine') {
+            if (body) body.innerHTML = '<tr><td class="p-8 text-center text-zinc-500" colspan="20">Nessuna materia assegnata presente per questa classe.</td></tr>';
+            return;
+        }
+
+        if (body) {
+            body.innerHTML = studentRecords.map(studentData => {
+                const subjectCells = subjectKeys.map(key => [1, 2].map(quarter => {
+                    const value = getFinalGrade(studentData, key, quarter);
+                    return `<td class="p-3 text-center border-r border-zinc-100 font-black ${gradeColor(value, key)}">${escapeHtml(value)}</td>`;
+                }).join('')).join('');
+                const conductCells = [1, 2].map(quarter => {
+                    const value = String(studentData.report[`condotta_q${quarter}`] || '9');
+                    return `<td class="p-3 text-center border-r border-zinc-100 font-black ${gradeColor(value, 'CONDOTTA')}">${escapeHtml(value)}</td>`;
+                }).join('');
+                return `
+                    <tr class="border-b border-zinc-100 hover:bg-red-50/50">
+                        <td class="p-3 border-r border-zinc-200 sticky left-0 bg-white z-[1] font-black uppercase text-zinc-800">${escapeHtml(studentData.student.name || 'Studente')}</td>
+                        ${subjectCells}${conductCells}
+                    </tr>`;
+            }).join('');
+        }
+    } catch (error) {
+        console.error("Errore durante il caricamento dello scrutinio finale:", error);
+        if (body) body.innerHTML = '<tr><td class="p-8 text-center text-red-600" colspan="20">Errore durante il caricamento dello scrutinio.</td></tr>';
+    }
+};
 
 window.renderTabelloneGlobale = async (subjectMode) => {
     const cls = window.selectedClass;
@@ -12105,6 +12337,7 @@ window.deleteAllGradesBySubject = async (studentId, subject) => {
         // Refresh viste globali se attive
         if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
         if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+        if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
 
     } catch (error) {
         console.error("Errore durante il reset della materia:", error);
@@ -12376,6 +12609,7 @@ if (![ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole))
         // Refresh viste globali se attive
         if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
         if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+        if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
 
     } catch (error) {
         console.error("Errore:", error);
@@ -13105,6 +13339,7 @@ window.submitQuickMassGrades = async () => {
     // Refresh immediato delle tabelle collettive
     if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
     if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+    if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
 };
 
 // --- SISTEMA ORARIO SETTIMANALE ---
