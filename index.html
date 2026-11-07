@@ -9918,6 +9918,30 @@ window.filterByClass = (cls) => {
     }
 };
 
+    function getGradeDateSortValue(value) {
+        if (value instanceof Date && !Number.isNaN(value.getTime())) return value.getTime();
+        const text = String(value || '').trim();
+        let match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
+        if (match) {
+            const [, day, month, year] = match.map(Number);
+            const date = new Date(Date.UTC(year, month - 1, day));
+            if (date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day) {
+                return date.getTime();
+            }
+        }
+
+        match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(text);
+        if (match) {
+            const [, year, month, day] = match.map(Number);
+            const date = new Date(Date.UTC(year, month - 1, day));
+            if (date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day) {
+                return date.getTime();
+            }
+        }
+
+        return Number.POSITIVE_INFINITY;
+    }
+
 	window.renderGlobalClassRegistry = async (subjectOverride = null) => {
     const cls = window.selectedClass;
     if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica dal menu Classi");
@@ -9980,8 +10004,9 @@ for (const student of classStudents) {
     );
 
     // Dividiamo i voti per quadrimestre
-    const q1Voti = studentGrades.filter(v => isDateInQ(v.data, 1));
-    const q2Voti = studentGrades.filter(v => isDateInQ(v.data, 2));
+    const sortByGradeDate = (a, b) => getGradeDateSortValue(a.data) - getGradeDateSortValue(b.data);
+    const q1Voti = studentGrades.filter(v => isDateInQ(v.data, 1)).sort(sortByGradeDate);
+    const q2Voti = studentGrades.filter(v => isDateInQ(v.data, 2)).sort(sortByGradeDate);
 
     // Funzione interna veloce per calcolare la media
     const calcolaMedia = (lista) => {
