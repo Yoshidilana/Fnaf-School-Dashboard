@@ -14014,6 +14014,13 @@ window.setupMultiConfig = () => {
                                 <input type="number" class="m-multi-max modal-input !py-1.5 w-full text-center" value="9" min="2" max="10">
                             </div>
                         </div>
+                        <div>
+                            <label class="text-[8px] font-black uppercase text-zinc-400 block mb-1">Voti per studente</label>
+                            <select class="m-multi-count modal-input !py-1.5 w-full text-xs" required>
+                                <option value="" selected disabled>Seleziona il numero di voti</option>
+                                ${[1, 2, 3, 4, 5].map(count => `<option value="${count}">${count} ${count === 1 ? 'voto' : 'voti'}</option>`).join('')}
+                            </select>
+                        </div>
                     </div>
                 </div>
             `).join('')}
@@ -14033,25 +14040,72 @@ window.generateMultiGrades = async () => {
     const finalGrid = document.getElementById('multi-final-grid');
     const confirm = document.getElementById('modal-confirm');
 
+    if (students.length === 0) {
+        alert('Non ci sono studenti nella classe selezionata.');
+        return;
+    }
+
+    const configs = Array.from(configCards).map(card => ({
+        card,
+        sub: card.dataset.sub,
+        type: card.querySelector('.m-multi-type').value,
+        minV: Number(card.querySelector('.m-multi-min').value),
+        maxV: Number(card.querySelector('.m-multi-max').value),
+        voteCount: Number(card.querySelector('.m-multi-count').value)
+    }));
+    if (configs.some(config => !Number.isInteger(config.voteCount) || config.voteCount < 1 || config.voteCount > 5)) {
+        alert('Seleziona il numero di voti per ogni materia.');
+        return;
+    }
+    if (configs.some(config => !Number.isFinite(config.minV) || !Number.isFinite(config.maxV)
+        || config.minV < 2 || config.minV > 10 || config.maxV < 2 || config.maxV > 10)) {
+        alert('Inserisci un intervallo di voti valido tra 2 e 10 per ogni materia.');
+        return;
+    }
+
     // Mostriamo un caricamento perché il fetch dello storico è asincrono
     confirm.classList.remove('hidden');
     confirm.disabled = true;
-    confirm.innerText = "CALCOLO STORICO IN CORSO...";
+    confirm.innerText = "CARICAMENTO ORARI E STORICO...";
 
     let fullData = [];
 
-    for (const card of configCards) {
-        const sub = card.dataset.sub;
-        const type = card.querySelector('.m-multi-type').value;
-        const minV = parseInt(card.querySelector('.m-multi-min').value);
-        const maxV = parseInt(card.querySelector('.m-multi-max').value);
-        
-        const teacher = window.getMassGradeTeacher(sub, cls);
-        const schedule = window.getProfDaysForSubject(teacher.id, sub, cls);
-        // Recupera storico voti per coerenza (funzione già esistente nel tuo codice)
-        const history = await window.loadMassGradeHistory(students, sub, ay);
+    try {
+        await window.loadExamStatus();
+        for (const config of configs) {
+            const { sub, type, minV, maxV, voteCount } = config;
+            const teacher = window.getMassGradeTeacher(sub, cls);
+            if (!teacher.id) {
+                throw new Error(`Non è stato possibile identificare il docente di ${sub}.`);
+            }
+            const schedule = window.getProfDaysForSubject(teacher.id, sub, cls);
+            if (!schedule.giorni.length) {
+                throw new Error(`Nessuna lezione di ${sub} trovata nell'orario di ${cls} per ${teacher.name}.`);
+            }
+            if (!window.generateRandomValidDateString(null, schedule.giorni)) {
+                throw new Error(`Non ci sono date disponibili per ${sub} nei giorni previsti dall'orario.`);
+            }
+            const history = await window.loadMassGradeHistory(students, sub, ay);
+            const sharedDates = [];
+            if (type === 'Scritto' || type === 'Pratico') {
+                for (let index = 0; index < voteCount; index++) {
+                    const date = window.generateRandomValidDateString(null, schedule.giorni);
+                    if (!date) {
+                        throw new Error(`Non ci sono date valide per ${sub} nei giorni previsti dall'orario.`);
+                    }
+                    sharedDates.push(date);
+                }
+            }
 
-        fullData.push({ sub, type, minV, maxV, teacher, schedule, history });
+            fullData.push({ sub, type, minV, maxV, voteCount, teacher, schedule, history, sharedDates });
+        }
+    } catch (error) {
+        console.error('Errore preparazione generatore multi-materia:', error);
+        alert(error.message || 'Impossibile caricare orari e storico voti. Riprova.');
+        confirm.disabled = false;
+        confirm.innerText = 'Conferma';
+        confirm.classList.add('hidden');
+        return;
     }
 
     step2.classList.add('hidden');
@@ -14061,19 +14115,24 @@ window.generateMultiGrades = async () => {
 
     finalGrid.innerHTML = students.map(s => {
         let studentRows = fullData.map(d => {
-            const generated = window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
-            const grade = typeof generated === 'object' ? generated.grade : generated;
-            // Genera data casuale basata sull'orario della materia specifica
-            const date = window.generateRandomValidDateString(null, d.schedule.giorni);
+            return Array.from({ length: d.voteCount }, (_, index) => {
+                const generated = window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
+                const grade = typeof generated === 'object' ? generated.grade : generated;
+                const date = d.sharedDates[index]
+                    || window.generateRandomValidDateString(null, d.schedule.giorni);
+                if (!date) {
+                    throw new Error(`Non ci sono date valide per ${d.sub} nei giorni previsti dall'orario.`);
+                }
 
-            return `
-                <div class="flex items-center gap-2 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data" 
-                     data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
-                    <span class="text-[8px] font-black w-16 truncate text-zinc-500 uppercase">${d.sub}</span>
-                    <input type="text" value="${grade}" class="m-voto w-10 text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
-                    <input type="date" value="${date}" class="m-data flex-1 text-[9px] border border-zinc-200 bg-white rounded-md p-1 outline-none">
-                </div>
-            `;
+                return `
+                    <div class="flex items-center gap-2 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
+                         data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
+                        <span class="text-[8px] font-black w-16 truncate text-zinc-500 uppercase">${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}</span>
+                        <input type="text" value="${grade}" class="m-voto w-10 text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
+                        <input type="date" value="${date}" ${d.type === 'Scritto' || d.type === 'Pratico' ? 'onchange="window.syncMultiWrittenDate(this)"' : ''} class="m-data flex-1 text-[9px] border border-zinc-200 bg-white rounded-md p-1 outline-none">
+                    </div>
+                `;
+            }).join('');
         }).join('');
 
         return `
@@ -14087,6 +14146,20 @@ window.generateMultiGrades = async () => {
     }).join('');
 
     confirm.onclick = window.submitMultiGrades;
+};
+
+window.syncMultiWrittenDate = (input) => {
+    const changedRow = input.closest('.multi-row-data');
+    if (!changedRow) return;
+
+    document.querySelectorAll('.multi-row-data').forEach(row => {
+        if (row !== changedRow
+            && row.dataset.sub === changedRow.dataset.sub
+            && row.dataset.voteIdx === changedRow.dataset.voteIdx) {
+            const dateInput = row.querySelector('.m-data');
+            if (dateInput) dateInput.value = input.value;
+        }
+    });
 };
 
 window.submitMultiGrades = async () => {
