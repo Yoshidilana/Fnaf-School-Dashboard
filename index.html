@@ -8506,7 +8506,14 @@ window.renderPagella = async (voti, aySelezionato, recordData = null) => {
     if (editBtn) editBtn.classList.toggle('hidden', !isStaff);
 
     const votiAnno = voti.filter(v => (v.anno === aySelezionato));
-    const materie = [...new Set(votiAnno.map(v => v.materia.toLowerCase().trim()))];
+    const materieConfigurate = window.getAnnualClassSubjects(
+        student?.classe || window.selectedClass,
+        aySelezionato
+    );
+    const materie = [...new Set([
+        ...materieConfigurate,
+        ...votiAnno.map(v => v.materia)
+    ].map(m => String(m || '').toLowerCase().trim()).filter(Boolean))];
     
     // CHIAVI PULITE: Ora leggiamo direttamente da pagellaData usando i campi semplificati senza l'anno nel nome del campo
     const keyCommentiMaterie = `commenti_materie_q${currentQ}`;
@@ -10244,12 +10251,7 @@ window.renderScrutinioFinale = async (subjectMode) => {
             return window.renderScrutinioFinale('all');
         }
 
-        const classConfig = window.classConfigsCache?.[cls] || {};
-        const annualSubjects = classConfig.materiePerAnno?.[academicYear]
-            || classConfig.materiePerAnno?.[academicYear.replace('/', '-')]
-            || classConfig.materiePerAnno?.[academicYear.replace('/', '_')]
-            || classConfig.activeSubjects
-            || [];
+        const annualSubjects = window.getAnnualClassSubjects(cls, academicYear);
         const subjectLabels = new Map();
         const addSubject = (value) => {
             const label = String(value || '').trim();
@@ -10413,6 +10415,12 @@ if (!isPowerUser) selectedSubjectMode = 'all';
     const currentYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '');
     
     let materieSet = new Set(selectedSubjectMode === 'mine' ? mySubjects : []);
+    window.getAnnualClassSubjects(cls, currentYear).forEach(subject => {
+        const key = subject.toLocaleUpperCase('it');
+        if (selectedSubjectMode !== 'mine' || mySubjects.includes(key)) {
+            materieSet.add(key);
+        }
+    });
     window.tabelloneCache = {}; // Reset cache
 
     const promesseStudenti = classStudents.map(async (student) => {
@@ -11802,6 +11810,23 @@ window.configuraPannelloVotiDocente = () => {
 
 // Assicurati che la cache sia inizializzata globalmente
 window.classConfigsCache = window.classConfigsCache || {};
+
+window.getAnnualClassSubjects = (cls, academicYear) => {
+    const classConfig = window.classConfigsCache?.[cls] || {};
+    const yearKey = String(academicYear || '').replace(/[-_]/g, '/');
+    const annualConfig = classConfig.materiePerAnno || {};
+    const configuredYear = Object.keys(annualConfig)
+        .find(key => key.replace(/[-_]/g, '/') === yearKey);
+    const subjects = configuredYear !== undefined
+        ? annualConfig[configuredYear]
+        : classConfig.activeSubjects;
+
+    return Array.isArray(subjects)
+        ? [...new Set(subjects
+            .map(subject => String(subject || '').trim())
+            .filter(subject => subject && subject.toLocaleUpperCase('it') !== 'CONDOTTA'))]
+        : [];
+};
 
 window.loadExamStatus = async () => {
     const cls = window.selectedClass;
