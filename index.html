@@ -7510,16 +7510,21 @@ await setDoc(agendaRef, {
         };
 
         window.openModal = (type) => {
-    // Ora usiamo la costante globale che include tutte le 12 classi
+    // --- RESET PULSANTE CONFIRMA ---
+    const confirm = document.getElementById('modal-confirm');
+    confirm.disabled = false;           // Riabilita il pulsante
+    confirm.classList.remove('hidden'); // Assicurati che sia visibile
+    confirm.innerText = "Conferma";     // Testo di default
+    // -------------------------------
+
     if ((type === 'firme' || type === 'compiti') && !CLASSI_VALIDE.includes(window.selectedClass)) {
         alert("⚠️ Azione negata: Seleziona prima una classe specifica dal menu 'Classi'.");
         return;
     }
 
     const body = document.getElementById('modal-body');
-    const confirm = document.getElementById('modal-confirm');
     const overlay = document.getElementById('modal-overlay');
-    confirm.innerText = "Conferma";
+    
     overlay.classList.toggle('agenda-form-modal', type === 'firme' || type === 'compiti' || type === 'voto' || type === 'note');
     overlay.classList.replace('hidden', 'flex');
 
@@ -8197,10 +8202,16 @@ if (menu === 'classi') {
 };
 
         window.closeModal = () => {
-            const overlay = document.getElementById('modal-overlay');
-            overlay.classList.replace('flex', 'hidden');
-            overlay.classList.remove('quick-mass-grades-modal');
-        };
+    const overlay = document.getElementById('modal-overlay');
+    const confirm = document.getElementById('modal-confirm');
+    
+    overlay.classList.replace('flex', 'hidden');
+    overlay.classList.remove('quick-mass-grades-modal');
+    
+    // Reset preventivo per la prossima apertura
+    confirm.disabled = false;
+    confirm.innerText = "Conferma";
+};
 
         function isDateInQ(dateStr, q) {
             if(!dateStr) return false;
@@ -12860,6 +12871,13 @@ window.openQuickMassGradesModal = () => {
     
     title.innerText = "Generatore Rapido · Voti Classe";
     const overlay = document.getElementById('modal-overlay');
+    
+    // --- RESET STATO PULSANTE ---
+    confirm.disabled = false; 
+    confirm.innerText = "Conferma";
+    confirm.classList.add('hidden'); // Nascondi all'inizio (Step 1)
+    // ----------------------------
+
     overlay.classList.add('quick-mass-grades-modal');
     overlay.classList.replace('hidden', 'flex');
     confirm.disabled = false; 
@@ -13581,6 +13599,12 @@ window.openEditOrarioModal = async (ora, giorno) => {
     const body = document.getElementById('modal-body');
     const confirm = document.getElementById('modal-confirm');
     const title = document.getElementById('modal-title');
+    
+    // --- RESET STATO PULSANTE ---
+    confirm.disabled = false;
+    confirm.classList.remove('hidden');
+    confirm.innerText = "Assegna Lezione"; // Forza il testo corretto per l'orario
+    // ----------------------------
     
     title.innerText = `Assegna Lezione: ${ora}° Ora - ${giorno.toUpperCase()}`;
     document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
