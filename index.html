@@ -3535,6 +3535,85 @@ main {
         box-shadow: 0 24px 70px rgba(24, 20, 20, 0.28) !important;
     }
 
+    #modal-overlay.quick-mass-grades-modal > .glass-light {
+        width: min(96vw, 1600px) !important;
+        max-width: min(96vw, 1600px) !important;
+        max-height: 96vh;
+        padding: 0.75rem clamp(0.8rem, 2vw, 1.5rem) !important;
+    }
+
+    #modal-overlay.quick-mass-grades-modal > .glass-light > * + * {
+        margin-top: 0.75rem !important;
+    }
+
+    #modal-overlay.quick-mass-grades-modal > .glass-light > div:first-child {
+        padding-bottom: 0.5rem;
+    }
+
+    #modal-overlay.quick-mass-grades-modal #mass-step-2 > * + * {
+        margin-top: 0.6rem !important;
+    }
+
+    #modal-overlay.quick-mass-grades-modal #mass-step-2 > .mass-config-card {
+        padding: 0.6rem 0.8rem;
+    }
+
+    #modal-overlay.quick-mass-grades-modal #mass-step-2 > .mass-config-card .mass-config-heading {
+        margin-bottom: 0.4rem;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-date-controls {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr));
+        gap: 0.65rem;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-students-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+        gap: 0.5rem;
+        max-height: none;
+        overflow: visible;
+        padding-right: 0;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-row {
+        gap: 0.25rem;
+        padding: 0.5rem !important;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-row > p:first-child,
+    #modal-overlay.quick-mass-grades-modal .mass-history-note {
+        line-height: 1.2;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-history-note {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-slot {
+        margin-top: 0 !important;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-row .mass-grade,
+    #modal-overlay.quick-mass-grades-modal .mass-row .mass-date {
+        min-width: 0;
+        min-height: 2rem;
+        padding: 0.25rem !important;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-row .mass-grade {
+        width: 3rem;
+        flex: 0 0 3rem;
+    }
+
+    #modal-overlay.quick-mass-grades-modal .mass-row .mass-date {
+        width: 0;
+        flex: 1 1 0%;
+    }
+
     #modal-overlay #modal-title {
         color: #292322 !important;
         font-size: 1.1rem;
@@ -3589,8 +3668,8 @@ main {
         color: #57534e !important;
     }
 
-    #modal-overlay #modal-body .mass-row .mass-grade,
-    #modal-overlay #modal-body .mass-row .mass-date {
+    #modal-overlay.quick-mass-grades-modal #modal-body .mass-row input.mass-grade,
+    #modal-overlay.quick-mass-grades-modal #modal-body .mass-row input.mass-date {
         border: 1px solid #e0d6ce !important;
         border-radius: 10px !important;
         background: #fff !important;
@@ -8096,7 +8175,11 @@ if (menu === 'classi') {
    }
 };
 
-        window.closeModal = () => document.getElementById('modal-overlay').classList.replace('flex', 'hidden');
+        window.closeModal = () => {
+            const overlay = document.getElementById('modal-overlay');
+            overlay.classList.replace('flex', 'hidden');
+            overlay.classList.remove('quick-mass-grades-modal');
+        };
 
         function isDateInQ(dateStr, q) {
             if(!dateStr) return false;
@@ -12705,7 +12788,9 @@ window.openQuickMassGradesModal = () => {
     const title = document.getElementById('modal-title');
     
     title.innerText = "Generatore Rapido · Voti Classe";
-    document.getElementById('modal-overlay').classList.replace('hidden', 'flex');
+    const overlay = document.getElementById('modal-overlay');
+    overlay.classList.add('quick-mass-grades-modal');
+    overlay.classList.replace('hidden', 'flex');
     confirm.disabled = false; 
     window.massScheduleConfig = null;
     const materieDocente = window.currentUserData?.materie || [];
@@ -12797,7 +12882,7 @@ window.openQuickMassGradesModal = () => {
                 <p class="text-[9px] text-stone-500 font-black uppercase">05 · Revisione individuale</p>
                 <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700">Rigenera voti 🎲</button>
             </div>
-            <div id="mass-students-list" class="max-h-[400px] overflow-y-auto space-y-2 pr-2 custom-scroll"></div>
+            <div id="mass-students-list" class="mass-students-list grid"></div>
         </div>
     `;
 
@@ -13047,7 +13132,7 @@ window.prepareMassGradesList = async () => {
     const currentControlValues = Array.from(existingControls).map(ctrl => ctrl.value);
 
     // --- GENERAZIONE HEADER (UN CONTROLLO PER CIASCUN VOTO SELEZIONATO) ---
-    let headerHtml = `<div class="mass-config-card mb-3 flex flex-col gap-3"><p class="mass-config-heading">🗓️ Date delle prove</p>`;
+    let headerHtml = `<div class="mass-config-card mb-3"><p class="mass-config-heading">🗓️ Date delle prove</p><div class="mass-date-controls">`;
     const activeVoteConfig = [];
 
     for (let v = 0; v < voteCount; v++) {
@@ -13095,7 +13180,7 @@ window.prepareMassGradesList = async () => {
             `;
         }
     }
-    headerHtml += `</div>`;
+    headerHtml += `</div></div>`;
 
     if (type !== 'Scritto' && type !== 'Pratico') {
         const unavailableMonth = activeVoteConfig.find(month =>
