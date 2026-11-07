@@ -3671,14 +3671,41 @@ main {
         box-shadow: 0 8px 18px rgba(127, 29, 29, 0.2) !important;
     }
 
-    #modal-overlay #modal-body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
-    #modal-overlay #modal-body select,
-    #modal-overlay #modal-body textarea {
-        border: 1px solid #4b3b3b !important;
-        border-radius: 10px !important;
-        background: #151212 !important;
-        color: #f4f4f5 !important;
-    }
+    /* --- FIX UNIFORMITÀ MODALI (TEMA CHIARO) --- */
+#modal-overlay #modal-body input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+#modal-overlay #modal-body select,
+#modal-overlay #modal-body textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e7e0da !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;        /* Sfondo Bianco fisso */
+    color: #1c1917 !important;             /* Testo Nero/Pietra */
+    font-size: 0.85rem;
+    outline: none !important;
+}
+
+/* Colore delle scritte (Label) dentro il corpo del modale */
+#modal-overlay #modal-body label {
+    color: #44403c !important;
+    font-weight: 700;
+}
+
+/* Effetto al click (Focus) */
+#modal-overlay #modal-body input:focus,
+#modal-overlay #modal-body select:focus,
+#modal-overlay #modal-body textarea:focus {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Fix specifico per i testi nel Generatore Rapido e Multi Voto */
+#modal-overlay.quick-mass-grades-modal .mass-config-card .modal-label,
+#modal-overlay.quick-mass-grades-modal .mass-config-card label,
+#modal-overlay.quick-mass-grades-modal .mass-config-card p {
+    color: #44403c !important;
+}
 
     #modal-overlay #modal-body .mass-config-card .mass-config-heading {
         color: #44403c !important;
@@ -4695,6 +4722,53 @@ main {
     main > .tab-content.active-view {
         display: flex !important;
     }
+
+    /* --- FIX SPECIFICO PER MODALE MULTI-MATERIA (STEP 3) --- */
+
+/* 1. Rendi visibile il nome della materia (lo span a sinistra) */
+.multi-row-data span {
+    color: #44403c !important; /* Grigio molto scuro */
+    font-weight: 900 !important;
+    opacity: 1 !important;
+}
+
+/* 2. Fix per il quadratino del Voto (.m-voto) */
+#modal-body .multi-row-data input.m-voto {
+    min-height: 2.2rem !important; /* Ridotto per farlo stare nella riga */
+    width: 2.8rem !important;
+    padding: 0 !important;        /* Rimuovi padding che spinge il testo fuori */
+    text-align: center !important;
+    background: #ffffff !important;
+    color: #1c1917 !important;    /* Testo Nero */
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+/* 3. Fix per il selettore della Data (.m-data) */
+#modal-body .multi-row-data input.m-data {
+    min-height: 2.2rem !important;
+    padding: 0 5px !important;
+    font-size: 10px !important;
+    background: #ffffff !important;
+    color: #1c1917 !important;
+    border: 1px solid #d1d5db !important;
+}
+
+/* 4. Colore del nome dello studente nell'header della card */
+.mass-row p.text-stone-800 {
+    color: #1c1917 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    margin-bottom: 8px !important;
+}
+
+/* 5. Sfondo della riga per staccare dal bianco del modale */
+.multi-row-data {
+    background: #f9fafb !important; /* Grigino leggero */
+    border: 1px solid #f3f4f6 !important;
+    padding: 4px 8px !important;
+    border-radius: 8px !important;
+}
 </style>
 
 <button id="debug-toggle-btn" onclick="toggleDebug()" class="fixed bottom-4 right-4 z-[10001] bg-red-700 text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all border-2 border-white hidden">
@@ -13389,7 +13463,7 @@ window.updateMassSlotDatesByVoteIndex = (voteIndex, newDate) => {
 };
 
 // --- AGGIORNAMENTO DELLA FUNZIONE GENERATRICE DI DATE ---
-window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = []) => {
+window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = [], excludedDates = []) => {
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const yearStart = parseInt(ay.split('/')[0]);
     if (!window.blockedDates) window.blockedDates = [];
@@ -13406,10 +13480,14 @@ window.generateRandomValidDateString = (targetMonth = null, allowedWeekdays = []
         end = new Date(yearStart + 1, 5, 10, 12);
     }
 
+    const excludedDateSet = new Set(excludedDates);
     const validDates = [];
     for (const candidate = new Date(start); candidate <= end; candidate.setDate(candidate.getDate() + 1)) {
         const dayOfWeek = candidate.getDay();
-        if (dayOfWeek !== 0 && validDays.includes(dayOfWeek) && !window.isRegistrationBlocked(candidate)) {
+        const dateString = `${candidate.getFullYear()}-${String(candidate.getMonth() + 1).padStart(2, '0')}-${String(candidate.getDate()).padStart(2, '0')}`;
+        if (dayOfWeek !== 0 && validDays.includes(dayOfWeek)
+            && !window.isRegistrationBlocked(candidate)
+            && !excludedDateSet.has(dateString)) {
             validDates.push(new Date(candidate));
         }
     }
@@ -13971,6 +14049,10 @@ window.openMultiSubjectGenerator = () => {
         </div>
         <div id="multi-step-2" class="hidden space-y-4"></div>
         <div id="multi-step-3" class="hidden space-y-4">
+            <div id="multi-date-controls" class="mass-config-card">
+                <p class="mass-config-heading">🗓️ Date delle prove</p>
+                <div class="mass-date-controls"></div>
+            </div>
             <div id="multi-final-grid" class="mass-grid-system"></div>
         </div>
     `;
@@ -14038,6 +14120,7 @@ window.generateMultiGrades = async () => {
     const step2 = document.getElementById('multi-step-2');
     const step3 = document.getElementById('multi-step-3');
     const finalGrid = document.getElementById('multi-final-grid');
+    const dateControls = document.querySelector('#multi-date-controls .mass-date-controls');
     const confirm = document.getElementById('modal-confirm');
 
     if (students.length === 0) {
@@ -14069,10 +14152,19 @@ window.generateMultiGrades = async () => {
     confirm.innerText = "CARICAMENTO ORARI E STORICO...";
 
     let fullData = [];
+    const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+    const globalCalendarVal = document.getElementById('global-calendar')?.value;
+    const currentMonthIdx = globalCalendarVal ? new Date(globalCalendarVal).getMonth() : new Date().getMonth();
+    const usedFixedDates = new Set();
+    const getVoteMonth = (offset) => {
+        let month = (currentMonthIdx + offset) % 12;
+        while (month === 6 || month === 7) month = (month + 1) % 12;
+        return month;
+    };
 
     try {
         await window.loadExamStatus();
-        for (const config of configs) {
+        for (const [subjectIndex, config] of configs.entries()) {
             const { sub, type, minV, maxV, voteCount } = config;
             const teacher = window.getMassGradeTeacher(sub, cls);
             if (!teacher.id) {
@@ -14086,18 +14178,28 @@ window.generateMultiGrades = async () => {
                 throw new Error(`Non ci sono date disponibili per ${sub} nei giorni previsti dall'orario.`);
             }
             const history = await window.loadMassGradeHistory(students, sub, ay);
-            const sharedDates = [];
+            const voteMonths = Array.from({ length: voteCount }, (_, index) =>
+                getVoteMonth(subjectIndex + index)
+            );
+            const sharedDates = Array(voteCount).fill(null);
             if (type === 'Scritto' || type === 'Pratico') {
                 for (let index = 0; index < voteCount; index++) {
-                    const date = window.generateRandomValidDateString(null, schedule.giorni);
+                    const date = window.generateRandomValidDateString(voteMonths[index], schedule.giorni, usedFixedDates);
                     if (!date) {
-                        throw new Error(`Non ci sono date valide per ${sub} nei giorni previsti dall'orario.`);
+                        throw new Error(`Non ci sono date valide e distinte per ${sub} nei mesi selezionati e nei giorni previsti dall'orario.`);
                     }
-                    sharedDates.push(date);
+                    sharedDates[index] = date;
+                    usedFixedDates.add(date);
+                }
+            } else {
+                for (const month of voteMonths) {
+                    if (!window.generateRandomValidDateString(month, schedule.giorni)) {
+                        throw new Error(`Non ci sono date valide a ${monthNames[month]} per ${sub} nei giorni previsti dall'orario.`);
+                    }
                 }
             }
 
-            fullData.push({ sub, type, minV, maxV, voteCount, teacher, schedule, history, sharedDates });
+            fullData.push({ sub, type, minV, maxV, voteCount, teacher, schedule, history, voteMonths, sharedDates });
         }
     } catch (error) {
         console.error('Errore preparazione generatore multi-materia:', error);
@@ -14113,15 +14215,44 @@ window.generateMultiGrades = async () => {
     confirm.disabled = false;
     confirm.innerText = "CONFERMA E REGISTRA TUTTO";
 
+    window.multiGradeDateConfig = fullData;
+    dateControls.innerHTML = fullData.map(config => Array.from({ length: config.voteCount }, (_, index) => {
+        const label = `${config.sub.toUpperCase()} · Voto ${index + 1}`;
+        if (config.type === 'Scritto' || config.type === 'Pratico') {
+            const date = config.sharedDates[index];
+            return `
+                <label class="flex flex-col gap-1">
+                    <span class="modal-label font-bold">${label} · Data fissa (${config.type})</span>
+                    <input type="date" class="multi-fixed-date-control modal-input !py-2"
+                           data-sub="${config.sub}" data-vote-idx="${index}" data-previous-date="${date}"
+                           value="${date}" onchange="window.syncMultiWrittenDate(this)">
+                </label>`;
+        }
+
+        const month = config.voteMonths[index];
+        return `
+            <label class="flex flex-col gap-1">
+                <span class="modal-label font-bold">${label} · Mese interrogazione</span>
+                <select class="multi-month-control modal-input !py-2"
+                        data-sub="${config.sub}" data-vote-idx="${index}" data-previous-month="${month}"
+                        onchange="window.updateMultiVoteMonth(this)">
+                    ${monthNames.map((name, monthIndex) => {
+                        if (monthIndex === 6 || monthIndex === 7) return '';
+                        return `<option value="${monthIndex}" ${monthIndex === month ? 'selected' : ''}>${name.toUpperCase()}</option>`;
+                    }).join('')}
+                </select>
+            </label>`;
+    }).join('')).join('');
+
     finalGrid.innerHTML = students.map(s => {
         let studentRows = fullData.map(d => {
             return Array.from({ length: d.voteCount }, (_, index) => {
                 const generated = window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
                 const grade = typeof generated === 'object' ? generated.grade : generated;
                 const date = d.sharedDates[index]
-                    || window.generateRandomValidDateString(null, d.schedule.giorni);
+                    || window.generateRandomValidDateString(d.voteMonths[index], d.schedule.giorni);
                 if (!date) {
-                    throw new Error(`Non ci sono date valide per ${d.sub} nei giorni previsti dall'orario.`);
+                    throw new Error(`Non ci sono date valide a ${monthNames[d.voteMonths[index]]} per ${d.sub} nei giorni previsti dall'orario.`);
                 }
 
                 return `
@@ -14149,17 +14280,72 @@ window.generateMultiGrades = async () => {
 };
 
 window.syncMultiWrittenDate = (input) => {
-    const changedRow = input.closest('.multi-row-data');
-    if (!changedRow) return;
+    const control = input.classList.contains('multi-fixed-date-control')
+        ? input
+        : null;
+    const changedRow = control ? null : input.closest('.multi-row-data');
+    const subject = control?.dataset.sub || changedRow?.dataset.sub;
+    const voteIndex = control?.dataset.voteIdx || changedRow?.dataset.voteIdx;
+    if (!subject || voteIndex === undefined) return;
+
+    const previousDate = control?.dataset.previousDate
+        || changedRow?.querySelector('.m-data')?.value
+        || '';
+    const duplicateDate = Array.from(document.querySelectorAll('.multi-fixed-date-control')).some(dateInput =>
+        dateInput !== control
+        && dateInput.value === input.value
+        && (dateInput.dataset.sub !== subject || dateInput.dataset.voteIdx !== voteIndex)
+    );
+    if (duplicateDate) {
+        alert('Scegli una data diversa: ogni prova scritta o pratica deve avere una data distinta.');
+        input.value = previousDate;
+        return;
+    }
 
     document.querySelectorAll('.multi-row-data').forEach(row => {
-        if (row !== changedRow
-            && row.dataset.sub === changedRow.dataset.sub
-            && row.dataset.voteIdx === changedRow.dataset.voteIdx) {
+        if (row.dataset.sub === subject && row.dataset.voteIdx === voteIndex) {
             const dateInput = row.querySelector('.m-data');
             if (dateInput) dateInput.value = input.value;
         }
     });
+    if (control) {
+        control.dataset.previousDate = input.value;
+        const config = window.multiGradeDateConfig?.find(item => item.sub === subject);
+        if (config) config.sharedDates[Number(voteIndex)] = input.value;
+    } else {
+        const fixedControl = Array.from(document.querySelectorAll('.multi-fixed-date-control'))
+            .find(dateInput => dateInput.dataset.sub === subject && dateInput.dataset.voteIdx === voteIndex);
+        if (fixedControl) {
+            fixedControl.value = input.value;
+            fixedControl.dataset.previousDate = input.value;
+        }
+    }
+};
+
+window.updateMultiVoteMonth = (select) => {
+    const subject = select.dataset.sub;
+    const voteIndex = select.dataset.voteIdx;
+    const month = Number(select.value);
+    const config = window.multiGradeDateConfig?.find(item => item.sub === subject);
+    if (!config || !Number.isInteger(month)) return;
+
+    const firstDate = window.generateRandomValidDateString(month, config.schedule.giorni);
+    if (!firstDate) {
+        alert(`Non ci sono date valide nel mese selezionato per ${subject} nei giorni previsti dall'orario.`);
+        select.value = select.dataset.previousMonth;
+        return;
+    }
+
+    document.querySelectorAll('.multi-row-data').forEach(row => {
+        if (row.dataset.sub === subject && row.dataset.voteIdx === voteIndex) {
+            const dateInput = row.querySelector('.m-data');
+            if (dateInput) {
+                dateInput.value = window.generateRandomValidDateString(month, config.schedule.giorni) || firstDate;
+            }
+        }
+    });
+    config.voteMonths[Number(voteIndex)] = month;
+    select.dataset.previousMonth = String(month);
 };
 
 window.submitMultiGrades = async () => {
@@ -14172,13 +14358,13 @@ window.submitMultiGrades = async () => {
     const rows = document.querySelectorAll('.multi-row-data');
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const cls = window.selectedClass;
-    const agendaUpdates = {};
+    const agendaUpdates = {}; 
 
     try {
         for (const row of rows) {
             const sid = row.dataset.sid;
             const sub = row.dataset.sub;
-            const type = row.dataset.type;
+            const type = row.dataset.type; // 'Orale', 'Scritto', 'Pratico'
             const profName = row.dataset.profname;
             const profId = row.dataset.profid;
             const grade = row.querySelector('.m-voto').value.trim();
@@ -14190,6 +14376,16 @@ window.submitMultiGrades = async () => {
             const dateIta = `${d}/${m}/${y}`;
             const quad = (parseInt(m) >= 9 || parseInt(m) <= 1) ? 1 : 2;
 
+            // --- DEFINIZIONE ARGOMENTI REALISTICI ---
+            // Per il registro voti dello studente
+            const descVoto = type === 'Orale' ? 'Colloquio orale' : 
+                             (type === 'Scritto' ? 'Verifica scritta' : 'Prova pratica');
+            
+            // Per la firma sul registro di classe (Agenda)
+            const descFirma = type === 'Orale' ? `Interrogazioni e colloqui di ${sub.toLowerCase()}` : 
+                              (type === 'Scritto' ? `Svolgimento verifica scritta di ${sub.toLowerCase()}` : 
+                              `Esercitazione pratica di ${sub.toLowerCase()}`);
+
             // 1. Registro Personale Studente
             const recRef = window.getRecordDocRef(sid, ay, 'voti');
             await setDoc(recRef, {
@@ -14200,35 +14396,59 @@ window.submitMultiGrades = async () => {
                     data: dateIta,
                     prof: profName,
                     profId: profId,
-                    argomento: `Prova ${type} (Multi-Generatore)`,
+                    argomento: descVoto, // <--- ORA È PULITO (es: "Colloquio orale")
                     quad: quad,
                     anno: ay,
                     emoji: LISTA_MATERIE[sub.toLowerCase()] || "📚"
                 })
             }, { merge: true });
 
-            // 2. Raggruppamento per Agenda (v2)
-            if (!agendaUpdates[date]) agendaUpdates[date] = [];
+            // 2. Preparazione dati per l'Agenda (Log e Firme)
+            if (!agendaUpdates[date]) agendaUpdates[date] = { voti: [], firme: new Set() };
+            
             const sObj = window.allStudents.find(st => st.id === sid);
-            agendaUpdates[date].push({
+            agendaUpdates[date].voti.push({
                 studente: sObj?.name.toUpperCase(),
                 studenteId: sid,
                 voto: grade,
                 materia: sub,
-                argomento: `Prova ${type}`
+                argomento: descVoto // <--- ANCHE QUI PULITO
             });
+
+            const firmaKey = `${sub}|${profId}`;
+            if (!agendaUpdates[date].firme.has(firmaKey)) {
+                const localDateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+                const infoOrario = window.getProfDaysForSubject(profId, sub, cls);
+                const oraDaOrario = (infoOrario && infoOrario.ore && infoOrario.ore[localDateObj.getDay()]) 
+                    ? infoOrario.ore[localDateObj.getDay()] 
+                    : "1";
+
+                agendaUpdates[date].firme.add(JSON.stringify({
+                    ora: oraDaOrario.toString(),
+                    tipo: type === 'Orale' ? "Lezione" : "Verifica",
+                    materia: sub.toUpperCase(),
+                    argomento: descFirma, // <--- ORA È REALISTICO (es: "Interrogazioni e colloqui di...")
+                    prof: profName,
+                    profId: profId
+                }));
+            }
         }
 
-        // 3. Salvataggio finale in Agenda (un solo hit per data)
+        // 3. Salvataggio finale in Agenda
         for (const dateKey in agendaUpdates) {
             const aRef = window.getAgendaDocRef(cls, dateKey);
-            await setDoc(aRef, { daily_voti: arrayUnion(...agendaUpdates[dateKey]) }, { merge: true });
+            const dataGiorno = agendaUpdates[dateKey];
+            const arrayFirme = Array.from(dataGiorno.firme).map(f => JSON.parse(f));
+
+            await setDoc(aRef, { 
+                daily_voti: arrayUnion(...dataGiorno.voti),
+                firme: arrayUnion(...arrayFirme) 
+            }, { merge: true });
         }
 
-        alert("✅ Registri aggiornati con successo!");
+        alert("✅ Registri e Agende aggiornati correttamente.");
         window.closeModal();
         
-        // Refresh della vista attiva
         if (document.getElementById('view-registro-classe').classList.contains('active-view')) window.renderGlobalClassRegistry();
         if (document.getElementById('view-tabellone').classList.contains('active-view')) window.renderTabelloneGlobale();
 
