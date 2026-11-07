@@ -7069,12 +7069,16 @@ return `
             <span class="text-[9px] font-black uppercase bg-blue-100 px-2 py-0.5 rounded" style="color: #1e3a8a !important;">${c.materia}</span>
             
             ${canDeleteCompito ? `
+                <div class="opacity-0 group-hover:opacity-100 flex items-center gap-1">
+                <button onclick="window.editCompito(${idx}, '${cls}')" title="Modifica questo compito" aria-label="Modifica questo compito"
+                        class="text-blue-600 hover:text-blue-800 transition-all p-1">✏️</button>
                 <button onclick="window.deleteCompito(${idx}, '${cls}')" title="Elimina questo compito" aria-label="Elimina questo compito"
-                        class="opacity-0 group-hover:opacity-100 text-blue-500 hover:text-red-600 transition-all p-1">
+                        class="text-blue-500 hover:text-red-600 transition-all p-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
+                </div>
             ` : ''}
         </div>
         <!-- Contenuto del compito forzato in nero pieno -->
@@ -8348,6 +8352,32 @@ if (menu === 'classi') {
 
 // --- FUNZIONI DI GESTIONE INTEGRATA (PROFILO + AGENDA) ---
 
+window.openRecordEditModal = ({ title, bodyHtml, confirmText, onOpen, onSave }) => {
+    const overlay = document.getElementById('modal-overlay');
+    const confirmButton = document.getElementById('modal-confirm');
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-body').innerHTML = bodyHtml;
+    overlay.classList.add('agenda-form-modal');
+    overlay.classList.replace('hidden', 'flex');
+    confirmButton.classList.remove('hidden');
+    confirmButton.disabled = false;
+    confirmButton.innerText = confirmText;
+    if (onOpen) onOpen();
+
+    confirmButton.onclick = async () => {
+        confirmButton.disabled = true;
+        try {
+            const saved = await onSave();
+            if (saved !== false) window.closeModal();
+        } catch (error) {
+            console.error(`Errore durante il salvataggio: ${title}`, error);
+            alert('Si è verificato un errore durante il salvataggio. Riprova.');
+        } finally {
+            if (overlay.classList.contains('flex')) confirmButton.disabled = false;
+        }
+    };
+};
+
 window.editNote = async (idx, studentId) => {
     // Recuperiamo l'anno scolastico attivo nell'interfaccia eliminando spazi vuoti
     const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
@@ -8355,47 +8385,88 @@ window.editNote = async (idx, studentId) => {
     const annoCartellaIniziale = aySelezionato.replace('/', '_');
 
     const recordRef = window.getRecordDocRef(studentId, annoCartellaIniziale, 'note');
-    const d = await getDoc(recordRef);
+    let d;
+    try {
+        d = await getDoc(recordRef);
+    } catch (error) {
+        console.error('Errore durante il caricamento della nota:', error);
+        alert('Impossibile caricare la nota da modificare.');
+        return;
+    }
     
     if (d.exists()) {
-        const notes = d.data().note || [];
-        const vecchiaNota = { ...notes[idx] };
+        let notes = d.data().note || [];
+        let nota = notes[idx];
         
-        if (!vecchiaNota) {
+        if (!nota) {
             console.error("Nota non trovata all'indice:", idx);
             return;
         }
+        const vecchiaNota = { ...nota };
 
         // CORREZIONE: Estraiamo il vero anno della nota usando l'underscore (_) invece del trattino (-)
         const annoCartellaEffettivo = vecchiaNota.anno ? vecchiaNota.anno.replace('/', '_') : annoCartellaIniziale;
         const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'note');
-
-        const nuovoTesto = prompt("Modifica la nota/mandato:", vecchiaNota.testo);
-        
-        if (nuovoTesto !== null && nuovoTesto !== "" && nuovoTesto !== vecchiaNota.testo) {
-            // 1. Aggiorna Profilo Studente nella struttura v2
-            notes[idx].testo = nuovoTesto;
-            await setDoc(veroRecordRef, { note: notes }, { merge: true });
-
-            // 2. Aggiorna Agenda Globale v2
-            const dParts = vecchiaNota.data.split('/');
-            const dateKey = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
-            const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
-            
-            if (agendaRef) {
-                const aSnap = await getDoc(agendaRef);
-                if (aSnap.exists()) {
-                    let agendaNotes = aSnap.data().note || [];
-                    // Aggiorna il testo mantenendo inalterati gli altri campi della nota in agenda
-                    agendaNotes = agendaNotes.map(n => 
-                        (n.id === vecchiaNota.id) ? { ...n, testo: nuovoTesto } : n
-                    );
-                    await updateDoc(agendaRef, { note: agendaNotes });
-                }
+        if (veroRecordRef.path !== recordRef.path) {
+            let veroSnapshot;
+            try {
+                veroSnapshot = await getDoc(veroRecordRef);
+            } catch (error) {
+                console.error('Errore durante il caricamento della nota annuale:', error);
+                alert('Impossibile caricare la nota da modificare.');
+                return;
             }
-            alert("Nota aggiornata!");
-            loadStudentRecords(studentId);
+            notes = veroSnapshot.exists() ? (veroSnapshot.data().note || []) : [];
+            nota = notes.find(n => n.id === vecchiaNota.id);
+            if (!nota) {
+                alert('Nota non trovata nel registro dell’anno corrispondente.');
+                return;
+            }
         }
+
+        window.openRecordEditModal({
+            title: 'Modifica nota',
+            confirmText: 'Salva nota',
+            bodyHtml: `
+                <div class="agenda-form-grid">
+                    <div class="agenda-form-field agenda-form-field-wide">
+                        <label class="modal-label" for="edit-note-text">Testo della nota</label>
+                        <textarea id="edit-note-text" class="modal-input resize-y" required></textarea>
+                    </div>
+                </div>`,
+            onOpen: () => {
+                document.getElementById('edit-note-text').value = vecchiaNota.testo || '';
+            },
+            onSave: async () => {
+                const nuovoTesto = document.getElementById('edit-note-text').value.trim();
+                if (!nuovoTesto) {
+                    alert('Inserisci il testo della nota.');
+                    return false;
+                }
+                if (nuovoTesto === (vecchiaNota.testo || '')) return;
+
+                notes[idx] = { ...notes[idx], testo: nuovoTesto };
+                await setDoc(veroRecordRef, { note: notes }, { merge: true });
+
+                const dParts = vecchiaNota.data.split('/');
+                const dateKey = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
+                const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
+                if (agendaRef) {
+                    const aSnap = await getDoc(agendaRef);
+                    if (aSnap.exists()) {
+                        const agendaNotes = (aSnap.data().note || []).map(n => {
+                            const matchesNote = vecchiaNota.id
+                                ? n.id === vecchiaNota.id
+                                : n.testo === vecchiaNota.testo && n.data === vecchiaNota.data &&
+                                    n.profId === vecchiaNota.profId;
+                            return matchesNote ? { ...n, testo: nuovoTesto } : n;
+                        });
+                        await updateDoc(agendaRef, { note: agendaNotes });
+                    }
+                }
+                loadStudentRecords(studentId);
+            }
+        });
     }
 };
 
@@ -8407,7 +8478,14 @@ window.editVoto = async (idRicevuto, studentId) => {
     
     // Per sicurezza, cerchiamo prima nell'anno selezionato
     const recordRef = window.getRecordDocRef(studentId, ayKeyIniziale, 'voti');
-    let d = await getDoc(recordRef);
+    let d;
+    try {
+        d = await getDoc(recordRef);
+    } catch (error) {
+        console.error('Errore durante il caricamento del voto:', error);
+        alert('Impossibile caricare il voto da modificare.');
+        return;
+    }
     
     if (!d.exists()) {
         alert("Errore: Registro non trovato per l'anno selezionato. Controlla l'anno in alto.");
@@ -8429,34 +8507,74 @@ window.editVoto = async (idRicevuto, studentId) => {
     // Riferimento preciso nel caso in cui differisca da quello della vista
     const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'voti');
         
-    // --- PROMPT DI MODIFICA ---
-    const nuovoVotoVal = prompt("Modifica il valore del voto:", vecchioVoto.voto);
-    if (nuovoVotoVal === null) return;
+    const dateParts = String(vecchioVoto.data || '').split('/');
+    const dateInputValue = dateParts.length === 3
+        ? `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`
+        : '';
+    window.openRecordEditModal({
+        title: 'Modifica voto',
+        confirmText: 'Salva voto',
+        bodyHtml: `
+            <div class="agenda-form-grid">
+                <div class="agenda-form-field">
+                    <label class="modal-label" for="edit-grade-value">Voto</label>
+                    <input type="text" id="edit-grade-value" class="modal-input" required>
+                </div>
+                <div class="agenda-form-field">
+                    <label class="modal-label" for="edit-grade-date">Data</label>
+                    <input type="date" id="edit-grade-date" class="modal-input" required>
+                </div>
+                <div class="agenda-form-field agenda-form-field-wide">
+                    <label class="modal-label" for="edit-grade-topic">Argomento</label>
+                    <input type="text" id="edit-grade-topic" class="modal-input">
+                </div>
+                <div class="agenda-form-field agenda-form-field-wide">
+                    <label for="edit-grade-unvalued" class="flex min-h-[3.15rem] w-full items-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 text-xs font-bold text-zinc-700">
+                        <input type="checkbox" id="edit-grade-unvalued" class="h-4 w-4 accent-red-700">
+                        Non valutato (N.V.)
+                    </label>
+                </div>
+            </div>`,
+        onOpen: () => {
+            document.getElementById('edit-grade-value').value = vecchioVoto.voto || '';
+            document.getElementById('edit-grade-date').value = dateInputValue;
+            document.getElementById('edit-grade-topic').value = vecchioVoto.argomento || '';
+            document.getElementById('edit-grade-unvalued').checked = Boolean(vecchioVoto.nonValutato);
+        },
+        onSave: async () => {
+            const nuovoVotoVal = document.getElementById('edit-grade-value').value.trim();
+            const nuovaDataInput = document.getElementById('edit-grade-date').value;
+            const nuovoArgomento = document.getElementById('edit-grade-topic').value.trim();
+            const nuovoNV = document.getElementById('edit-grade-unvalued').checked;
+            if (!nuovoVotoVal || !nuovaDataInput) {
+                alert('Inserisci sia il voto sia la data.');
+                return false;
+            }
 
-    const nuovaData = prompt("Modifica la data (GG/MM/AAAA):", vecchioVoto.data);
-    if (nuovaData === null) return;
+            const [year, month, day] = nuovaDataInput.split('-');
+            const nuovaData = `${day}/${month}/${year}`;
 
-    const nuovoArgomento = prompt("Modifica l'argomento:", vecchioVoto.argomento || "");
-    if (nuovoArgomento === null) return;
+            const nuovoAnno = Number(month) >= 9
+                ? `${year}/${Number(year) + 1}`
+                : `${Number(year) - 1}/${year}`;
+            listaVoti[indiceVoto].voto = nuovoVotoVal;
+            listaVoti[indiceVoto].data = nuovaData;
+            listaVoti[indiceVoto].argomento = nuovoArgomento;
+            listaVoti[indiceVoto].nonValutato = nuovoNV;
+            listaVoti[indiceVoto].quad = (Number(month) >= 9 || Number(month) <= 1) ? 1 : 2;
+            listaVoti[indiceVoto].anno = nuovoAnno;
 
-    const nuovoNV = confirm("Segnare come 'Non Valutato' (il voto non farà media)?");
-
-    // --- AGGIORNAMENTO LOCALE ---
-    listaVoti[indiceVoto].voto = nuovoVotoVal;
-    listaVoti[indiceVoto].data = nuovaData;
-    listaVoti[indiceVoto].argomento = nuovoArgomento;
-    listaVoti[indiceVoto].nonValutato = nuovoNV;
-    
-    // Ricalcolo quadrimestre
-    if (nuovaData.includes('/')) {
-        const [, mPart] = nuovaData.split('/');
-        const mInt = parseInt(mPart);
-        listaVoti[indiceVoto].quad = (mInt >= 9 || mInt <= 1) ? 1 : 2;
-    }
-
-    // --- SALVATAGGIO ---
-    // CORREZIONE: Salva sul riferimento preciso (veroRecordRef) allineato con le cartelle corrette
-    await setDoc(veroRecordRef, { voti: listaVoti }, { merge: true });
+            const nuovoRecordRef = window.getRecordDocRef(studentId, nuovoAnno.replace('/', '_'), 'voti');
+            if (nuovoRecordRef.path === veroRecordRef.path) {
+                await setDoc(veroRecordRef, { voti: listaVoti }, { merge: true });
+            } else {
+                const nuovoSnap = await getDoc(nuovoRecordRef);
+                const votiAnnoNuovo = nuovoSnap.exists() ? [...(nuovoSnap.data().voti || [])] : [];
+                votiAnnoNuovo.push(listaVoti[indiceVoto]);
+                listaVoti.splice(indiceVoto, 1);
+                await setDoc(veroRecordRef, { voti: listaVoti }, { merge: true });
+                await setDoc(nuovoRecordRef, { voti: votiAnnoNuovo }, { merge: true });
+            }
 
     // --- AGGIORNAMENTO AGENDA ---
     const targetClass = window.selectedClass || "ClasseGenerica";
@@ -8478,8 +8596,9 @@ window.editVoto = async (idRicevuto, studentId) => {
             let daily = vSnap.data().daily_voti || [];
             
             // Filtra via l'elemento vecchio
-            daily = daily.filter(v => 
-                !(v.studenteId === studentId && v.materia === vecchioVoto.materia && v.voto === vecchioVoto.voto)
+            daily = daily.filter(v =>
+                !(v.studenteId === studentId && v.materia === vecchioVoto.materia &&
+                    v.voto === vecchioVoto.voto && (v.argomento || '') === (vecchioVoto.argomento || ''))
             );
 
             if (daily.length === 0) {
@@ -8528,15 +8647,15 @@ window.editVoto = async (idRicevuto, studentId) => {
         }
     }
 
-        alert("✅ Aggiornamento completato!");
-if (typeof loadStudentRecords === "function" && window.selectedStudentId) {
-    loadStudentRecords(window.selectedStudentId);
-}
+            if (typeof loadStudentRecords === "function" && window.selectedStudentId) {
+                loadStudentRecords(window.selectedStudentId);
+            }
     
-    // Refresh viste globali se attive
-    if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
-    if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
-    if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
+            if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+            if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+            if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
+        }
+    });
 };
 
 window.deleteNote = async (idx, studentId) => {
@@ -12071,6 +12190,68 @@ window.updateClassStartYear = async (year) => {
     } catch (e) { console.error(e); }
 };
 
+    window.editCompito = async (idx, cls) => {
+        const dateKey = document.getElementById('global-calendar').value;
+        const ref = window.getAgendaDocRef(cls, dateKey);
+        try {
+            const snap = await getDoc(ref);
+            if (!snap.exists()) {
+                alert('Agenda non trovata. Aggiorna la pagina e riprova.');
+                return;
+            }
+            const compiti = snap.data().compiti || [];
+            const compito = compiti[idx];
+            if (!compito) {
+                alert('Compito non trovato. Aggiorna la pagina e riprova.');
+                return;
+            }
+
+            window.openRecordEditModal({
+                title: 'Modifica compito',
+                confirmText: 'Salva compito',
+                bodyHtml: `
+                    <div class="agenda-form-grid">
+                        <div class="agenda-form-field">
+                            <label class="modal-label" for="edit-task-subject">Materia</label>
+                            <select id="edit-task-subject" class="modal-input"></select>
+                        </div>
+                        <div class="agenda-form-field agenda-form-field-wide">
+                            <label class="modal-label" for="edit-task-text">Descrizione attività</label>
+                            <textarea id="edit-task-text" class="modal-input resize-y" required></textarea>
+                        </div>
+                    </div>`,
+                onOpen: () => {
+                    const select = document.getElementById('edit-task-subject');
+                    const role = (window.userRole || '').toLowerCase();
+                    const subjects = role === 'admin' || role === 'preside'
+                        ? Object.keys(LISTA_MATERIE)
+                        : (window.currentUserData?.materie || []);
+                    [...new Set([...subjects, compito.materia || 'Generale'])].forEach(subject => {
+                        const option = document.createElement('option');
+                        option.value = subject;
+                        option.textContent = subject.toUpperCase();
+                        select.appendChild(option);
+                    });
+                    select.value = compito.materia || 'Generale';
+                    document.getElementById('edit-task-text').value = compito.testo || '';
+                },
+                onSave: async () => {
+                    const materia = document.getElementById('edit-task-subject').value;
+                    const testo = document.getElementById('edit-task-text').value.trim();
+                    if (!materia || !testo) {
+                        alert('Completa materia e descrizione del compito.');
+                        return false;
+                    }
+                    compiti[idx] = { ...compito, materia, testo };
+                    await updateDoc(ref, { compiti });
+                }
+            });
+        } catch (error) {
+            console.error('Errore durante il caricamento del compito:', error);
+            alert('Impossibile caricare il compito da modificare.');
+        }
+    };
+
     window.deleteCompito = async (idx, cls) => {
         if (!confirm("Eliminare questo compito?")) return;
         const dateKey = document.getElementById('global-calendar').value;
@@ -13918,28 +14099,73 @@ window.editFirma = async (idx, cls) => {
     try {
         const snap = await getDoc(ref);
         if (snap.exists()) {
-            let firme = snap.data().firme || [];
-            let f = firme[idx];
+            const firme = snap.data().firme || [];
+            const firma = firme[idx];
+            if (!firma) {
+                alert('Firma non trovata. Aggiorna la pagina e riprova.');
+                return;
+            }
 
-            // Chiediamo i nuovi dati all'utente
-            const nuovaOra = prompt("Modifica ora (es: 1, 2, Extra):", f.ora);
-            if (nuovaOra === null) return; // Annulla se l'utente preme "Annulla"
-
-            const nuovoArg = prompt("Modifica argomento della lezione:", f.argomento);
-            if (nuovoArg === null) return;
-
-            // Aggiorniamo l'oggetto nell'array
-            firme[idx] = { 
-                ...f, 
-                ora: nuovaOra, 
-                argomento: nuovoArg 
-            };
-
-            // Salviamo l'array aggiornato su Firebase
-            await updateDoc(ref, { firme: firme });
-            
-            alert("✅ Firma modificata correttamente!");
-            // La vista si aggiornerà automaticamente grazie a onSnapshot
+            window.openRecordEditModal({
+                title: 'Modifica firma',
+                confirmText: 'Salva firma',
+                bodyHtml: `
+                    <div class="agenda-form-grid">
+                        <div class="agenda-form-field">
+                            <label class="modal-label" for="edit-sign-hour">Ora</label>
+                            <select id="edit-sign-hour" class="modal-input"></select>
+                        </div>
+                        <div class="agenda-form-field">
+                            <label class="modal-label" for="edit-sign-type">Tipologia</label>
+                            <select id="edit-sign-type" class="modal-input"></select>
+                        </div>
+                        <div class="agenda-form-field">
+                            <label class="modal-label" for="edit-sign-subject">Materia</label>
+                            <select id="edit-sign-subject" class="modal-input"></select>
+                        </div>
+                        <div class="agenda-form-field agenda-form-field-wide">
+                            <label class="modal-label" for="edit-sign-topic">Argomento</label>
+                            <textarea id="edit-sign-topic" class="modal-input resize-y"></textarea>
+                        </div>
+                    </div>`,
+                onOpen: () => {
+                    const populate = (id, values, current) => {
+                        const select = document.getElementById(id);
+                        [...new Set([...values, String(current ?? '')].filter(Boolean))].forEach(value => {
+                            const option = document.createElement('option');
+                            option.value = value;
+                            option.textContent = value;
+                            select.appendChild(option);
+                        });
+                        select.value = String(current ?? '');
+                    };
+                    populate('edit-sign-hour', [...Array(12)].map((_, i) => String(i + 1)).concat('Extra'), firma.ora);
+                    populate('edit-sign-type', ['Lezione', 'Supplenza', 'Compresenza', 'Sorveglianza'], firma.tipo || 'Lezione');
+                    populate('edit-sign-subject',
+                        [...Object.keys(LISTA_MATERIE), ...(window.currentUserData?.materie || [])]
+                            .map(subject => subject.toLowerCase().trim()),
+                        firma.materia);
+                    document.getElementById('edit-sign-topic').value = firma.argomento || '';
+                },
+                onSave: async () => {
+                    const nuovaOra = document.getElementById('edit-sign-hour').value;
+                    const nuovoTipo = document.getElementById('edit-sign-type').value;
+                    const nuovaMateria = document.getElementById('edit-sign-subject').value;
+                    const nuovoArgomento = document.getElementById('edit-sign-topic').value.trim();
+                    if (!nuovaOra || !nuovoTipo || !nuovaMateria) {
+                        alert('Completa ora, tipologia e materia.');
+                        return false;
+                    }
+                    firme[idx] = {
+                        ...firma,
+                        ora: nuovaOra,
+                        tipo: nuovoTipo,
+                        materia: nuovaMateria,
+                        argomento: nuovoArgomento
+                    };
+                    await updateDoc(ref, { firme });
+                }
+            });
         }
     } catch (e) {
         console.error("Errore durante la modifica della firma:", e);
