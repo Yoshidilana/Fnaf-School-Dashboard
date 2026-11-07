@@ -3568,19 +3568,40 @@ main {
         gap: 0.65rem;
     }
 
-    #modal-overlay.quick-mass-grades-modal .mass-students-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-        gap: 0.5rem;
-        max-height: none;
-        overflow: visible;
-        padding-right: 0;
-    }
+/* Il contenitore generale ora non è una griglia, ma un contenitore semplice */
+#modal-overlay.quick-mass-grades-modal .mass-students-list {
+    display: block !important; 
+}
 
-    #modal-overlay.quick-mass-grades-modal .mass-row {
-        gap: 0.25rem;
-        padding: 0.5rem !important;
-    }
+/* Creiamo una nuova classe per la griglia effettiva degli studenti */
+.mass-grid-system {
+    display: grid !important;
+    /* Crea colonne da almeno 220px che si adattano allo spazio (Orizzontale) */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 10px !important;
+    align-items: start !important; /* Rimuove lo spazio vuoto sotto le card corte */
+    width: 100% !important;
+}
+
+/* Assicurati che l'header delle date occupi sempre tutta la riga in alto */
+.mass-global-header {
+    width: 100% !important;
+    margin-bottom: 15px !important;
+    display: block !important;
+}
+
+/* Compatta la card dello studente */
+.mass-row {
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+    /* Rendi la card dello studente ancora più densa */
+#modal-overlay.quick-mass-grades-modal .mass-row {
+    padding: 0.6rem !important;
+    height: fit-content; /* Si adatta al contenuto */
+}
 
     #modal-overlay.quick-mass-grades-modal .mass-row > p:first-child,
     #modal-overlay.quick-mass-grades-modal .mass-history-note {
@@ -13265,7 +13286,20 @@ window.prepareMassGradesList = async () => {
 
     if (students.length > 0 && !rowsHtml) return;
 
-    listContainer.innerHTML = headerHtml + rowsHtml;
+    // CREIAMO DUE CONTENITORI SEPARATI: 
+    // Uno per le date (sopra) e uno per la griglia studenti (sotto)
+    const finalHtml = `
+        <div class="mass-global-header">
+            ${headerHtml}
+        </div>
+        <div class="mass-grid-system">
+            ${rowsHtml}
+        </div>
+    `;
+
+    listContainer.innerHTML = finalHtml;
+    
+    // Mostriamo lo step 2
     step1.classList.add('hidden');
     step2.classList.remove('hidden');
     confirmBtn.classList.remove('hidden');
