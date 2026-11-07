@@ -5181,6 +5181,9 @@ main {
             <button id="btn-mass-global" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
                 🎲 Generatore Rapido
             </button>
+                <button id="btn-multi-global" onclick="window.openMultiSubjectGenerator()" class="hidden bg-blue-900/20 text-blue-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-blue-700 hover:text-white transition-all border border-blue-600/30">
+        📚 Multi-Materia
+    </button>
             <!-- Aggiornato bottone -->
             <button onclick="window.changeMenu('classi')" class="bg-zinc-100 text-zinc-700 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:bg-zinc-200">Indietro</button>
         </div>
@@ -5261,6 +5264,9 @@ main {
             <button id="btn-mass-tabellone" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
                 🎲 Generatore Rapido
             </button>
+                <button id="btn-multi-tabellone" onclick="window.openMultiSubjectGenerator()" class="hidden bg-blue-900/20 text-blue-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-blue-700 hover:text-white transition-all border border-blue-600/30">
+        📚 Multi-Materia
+    </button>
             <!-- Bottone corretto -->
             <button onclick="window.changeMenu('classi')" class="!bg-zinc-100 !text-zinc-900 px-4 py-2 rounded-xl font-black text-[9px] uppercase hover:!bg-zinc-200">
                 Indietro
@@ -6616,6 +6622,8 @@ toggle('home-btn-pagella', isStudente);
         window.configuraPannelloVotiDocente();
         toggle('btn-mass-global', isStaffDidattico);
         toggle('btn-mass-tabellone', isStaffDidattico);
+        toggle('btn-multi-global', isStaffDidattico);
+        toggle('btn-multi-tabellone', isStaffDidattico);
     } else {
         toggle('prof-grade-panel', false);
         toggle('btn-mass-global', false);
@@ -13908,6 +13916,254 @@ window.smartNavigateToRegistry = () => {
         // Rotta alternativa: Hub Classi
         alert("⚠️ Nessuna classe selezionata.\nVerrai reindirizzato all'Hub Classi per sceglierne una.");
         window.changeMenu('classi');
+    }
+};
+
+window.openMultiSubjectGenerator = () => {
+    const cls = window.selectedClass;
+    if (!cls || cls === 'ALL') return alert("Seleziona una classe specifica.");
+
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    // Recupera solo le materie attive per la classe in questo specifico anno
+    const availableSubjects = window.getAnnualClassSubjects(cls, ay);
+    const userSubjects = (window.currentUserData?.materie || []).map(m => m.toLowerCase().trim());
+    const isAdmin = window.userRole === 'admin' || window.userRole === 'preside';
+
+    // Filtro: l'admin vede tutto, il prof vede solo le sue materie che sono ANCHE nell'elenco della classe
+    let listToShow = isAdmin 
+        ? availableSubjects 
+        : availableSubjects.filter(m => userSubjects.includes(m.toLowerCase().trim()));
+
+    if (listToShow.length === 0) return alert("Nessuna materia assegnata trovata per questa classe nell'A.S. corrente.");
+
+    const body = document.getElementById('modal-body');
+    const confirm = document.getElementById('modal-confirm');
+    const title = document.getElementById('modal-title');
+    const overlay = document.getElementById('modal-overlay');
+
+    // --- RESET PULSANTE (Bug Fix) ---
+    confirm.disabled = false;
+    confirm.innerText = "Conferma";
+    confirm.classList.add('hidden'); // Nascondiamo il tasto fino all'ultimo step
+
+    title.innerText = "Generatore Multi-Materia";
+    overlay.classList.add('quick-mass-grades-modal');
+    overlay.classList.replace('hidden', 'flex');
+
+    body.innerHTML = `
+        <div id="multi-step-1" class="space-y-4">
+            <div class="agenda-form-intro">
+                <span class="agenda-form-icon">📚</span>
+                <div>
+                    <p class="text-[10px] font-black uppercase text-blue-700">Step 1: Selezione Materie</p>
+                    <p class="text-xs text-zinc-500">Seleziona le materie da popolare. Gli Admin possono sceglierne fino a 5.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2" id="multi-subject-selection">
+                ${listToShow.map(m => `
+                    <label class="mass-day-option flex items-center gap-2 p-3 cursor-pointer border rounded-xl hover:bg-blue-50 transition-all">
+                        <input type="checkbox" value="${m}" class="multi-check-sub w-4 h-4 accent-blue-600">
+                        <span class="text-[10px] font-black uppercase text-zinc-700">${m}</span>
+                    </label>
+                `).join('')}
+            </div>
+            <button onclick="window.setupMultiConfig()" class="mass-prepare-button w-full py-3 font-black uppercase text-[10px] bg-zinc-900 text-white rounded-xl">Prosegui alla configurazione →</button>
+        </div>
+        <div id="multi-step-2" class="hidden space-y-4"></div>
+        <div id="multi-step-3" class="hidden space-y-4">
+            <div id="multi-final-grid" class="mass-grid-system"></div>
+        </div>
+    `;
+};
+
+window.setupMultiConfig = () => {
+    const selected = Array.from(document.querySelectorAll('.multi-check-sub:checked')).map(cb => cb.value);
+    if (selected.length === 0) return alert("Seleziona almeno una materia.");
+    if (selected.length > 5) return alert("Per motivi di stabilità, puoi generare massimo 5 materie alla volta.");
+
+    const step1 = document.getElementById('multi-step-1');
+    const step2 = document.getElementById('multi-step-2');
+    step1.classList.add('hidden');
+    step2.classList.remove('hidden');
+
+    step2.innerHTML = `
+        <div class="agenda-form-intro mb-4">
+            <span class="agenda-form-icon">⚙️</span>
+            <p class="text-[10px] font-bold text-zinc-500 uppercase">Step 2: Parametri di generazione</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
+            ${selected.map((m, idx) => `
+                <div class="mass-config-card border-l-4 border-blue-500 bg-white p-4 rounded-xl shadow-sm" data-sub="${m}">
+                    <p class="font-black text-[11px] uppercase text-blue-700 mb-3 flex items-center gap-2">
+                        <span class="bg-blue-100 w-5 h-5 flex items-center justify-center rounded-full text-[9px]">${idx + 1}</span> ${m}
+                    </p>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[8px] font-black uppercase text-zinc-400 block mb-1">Tipo Valutazione</label>
+                            <select class="m-multi-type modal-input !py-1.5 w-full text-xs">
+                                <option value="Orale">Interrogazione (Orale)</option>
+                                <option value="Scritto">Verifica (Scritto)</option>
+                                <option value="Pratico">Laboratorio (Pratico)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[8px] font-black uppercase text-zinc-400 block mb-1">Intervallo Voti</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" class="m-multi-min modal-input !py-1.5 w-full text-center" value="4" min="2" max="10">
+                                <span class="text-zinc-300">-</span>
+                                <input type="number" class="m-multi-max modal-input !py-1.5 w-full text-center" value="9" min="2" max="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        <button onclick="window.generateMultiGrades()" class="mass-prepare-button w-full py-4 font-black uppercase text-[10px] bg-blue-600 text-white rounded-xl mt-4 shadow-lg">Genera Anteprima Voti →</button>
+    `;
+};
+
+window.generateMultiGrades = async () => {
+    const cls = window.selectedClass;
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const students = window.allStudents.filter(s => s.classe === cls);
+    const configCards = document.querySelectorAll('#multi-step-2 .mass-config-card');
+    
+    const step2 = document.getElementById('multi-step-2');
+    const step3 = document.getElementById('multi-step-3');
+    const finalGrid = document.getElementById('multi-final-grid');
+    const confirm = document.getElementById('modal-confirm');
+
+    // Mostriamo un caricamento perché il fetch dello storico è asincrono
+    confirm.classList.remove('hidden');
+    confirm.disabled = true;
+    confirm.innerText = "CALCOLO STORICO IN CORSO...";
+
+    let fullData = [];
+
+    for (const card of configCards) {
+        const sub = card.dataset.sub;
+        const type = card.querySelector('.m-multi-type').value;
+        const minV = parseInt(card.querySelector('.m-multi-min').value);
+        const maxV = parseInt(card.querySelector('.m-multi-max').value);
+        
+        const teacher = window.getMassGradeTeacher(sub, cls);
+        const schedule = window.getProfDaysForSubject(teacher.id, sub, cls);
+        // Recupera storico voti per coerenza (funzione già esistente nel tuo codice)
+        const history = await window.loadMassGradeHistory(students, sub, ay);
+
+        fullData.push({ sub, type, minV, maxV, teacher, schedule, history });
+    }
+
+    step2.classList.add('hidden');
+    step3.classList.remove('hidden');
+    confirm.disabled = false;
+    confirm.innerText = "CONFERMA E REGISTRA TUTTO";
+
+    finalGrid.innerHTML = students.map(s => {
+        let studentRows = fullData.map(d => {
+            const generated = window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
+            const grade = typeof generated === 'object' ? generated.grade : generated;
+            // Genera data casuale basata sull'orario della materia specifica
+            const date = window.generateRandomValidDateString(null, d.schedule.giorni);
+
+            return `
+                <div class="flex items-center gap-2 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data" 
+                     data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
+                    <span class="text-[8px] font-black w-16 truncate text-zinc-500 uppercase">${d.sub}</span>
+                    <input type="text" value="${grade}" class="m-voto w-10 text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
+                    <input type="date" value="${date}" class="m-data flex-1 text-[9px] border border-zinc-200 bg-white rounded-md p-1 outline-none">
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="mass-row p-3 bg-white border border-zinc-200 rounded-xl shadow-sm">
+                <p class="text-[10px] font-black text-stone-800 uppercase border-b border-zinc-100 mb-2 pb-1">${s.name}</p>
+                <div class="flex flex-col">
+                    ${studentRows}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    confirm.onclick = window.submitMultiGrades;
+};
+
+window.submitMultiGrades = async () => {
+    if (!confirm("ATTENZIONE: Stai per registrare una mole elevata di voti simultaneamente. Procedere?")) return;
+
+    const btn = document.getElementById('modal-confirm');
+    btn.disabled = true;
+    btn.innerText = "SALVATAGGIO IN CORSO...";
+
+    const rows = document.querySelectorAll('.multi-row-data');
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const cls = window.selectedClass;
+    const agendaUpdates = {};
+
+    try {
+        for (const row of rows) {
+            const sid = row.dataset.sid;
+            const sub = row.dataset.sub;
+            const type = row.dataset.type;
+            const profName = row.dataset.profname;
+            const profId = row.dataset.profid;
+            const grade = row.querySelector('.m-voto').value.trim();
+            const date = row.querySelector('.m-data').value;
+
+            if (!grade || !date) continue;
+
+            const [y, m, d] = date.split('-');
+            const dateIta = `${d}/${m}/${y}`;
+            const quad = (parseInt(m) >= 9 || parseInt(m) <= 1) ? 1 : 2;
+
+            // 1. Registro Personale Studente
+            const recRef = window.getRecordDocRef(sid, ay, 'voti');
+            await setDoc(recRef, {
+                voti: arrayUnion({
+                    id: crypto.randomUUID(),
+                    voto: grade,
+                    materia: sub.toLowerCase(),
+                    data: dateIta,
+                    prof: profName,
+                    profId: profId,
+                    argomento: `Prova ${type} (Multi-Generatore)`,
+                    quad: quad,
+                    anno: ay,
+                    emoji: LISTA_MATERIE[sub.toLowerCase()] || "📚"
+                })
+            }, { merge: true });
+
+            // 2. Raggruppamento per Agenda (v2)
+            if (!agendaUpdates[date]) agendaUpdates[date] = [];
+            const sObj = window.allStudents.find(st => st.id === sid);
+            agendaUpdates[date].push({
+                studente: sObj?.name.toUpperCase(),
+                studenteId: sid,
+                voto: grade,
+                materia: sub,
+                argomento: `Prova ${type}`
+            });
+        }
+
+        // 3. Salvataggio finale in Agenda (un solo hit per data)
+        for (const dateKey in agendaUpdates) {
+            const aRef = window.getAgendaDocRef(cls, dateKey);
+            await setDoc(aRef, { daily_voti: arrayUnion(...agendaUpdates[dateKey]) }, { merge: true });
+        }
+
+        alert("✅ Registri aggiornati con successo!");
+        window.closeModal();
+        
+        // Refresh della vista attiva
+        if (document.getElementById('view-registro-classe').classList.contains('active-view')) window.renderGlobalClassRegistry();
+        if (document.getElementById('view-tabellone').classList.contains('active-view')) window.renderTabelloneGlobale();
+
+    } catch (e) {
+        console.error(e);
+        alert("Errore durante il salvataggio massivo.");
+        btn.disabled = false;
+        btn.innerText = "RIPROVA SALVATAGGIO";
     }
 };
 
