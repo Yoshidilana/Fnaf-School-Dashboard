@@ -151,6 +151,34 @@ main {
     background: #b91c1c !important;
 }
 
+.portal-year-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1px solid #e9e2dc;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.portal-year-nav button {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: #fff5f3;
+    color: #b91c1c;
+    font-size: 0.95rem;
+    transition: background 150ms ease, color 150ms ease;
+}
+
+.portal-year-nav button:hover {
+    background: #b91c1c;
+    color: #fff;
+}
+
 .portal-date-chip {
     min-height: 42px;
     padding: 0.55rem 0.9rem !important;
@@ -377,6 +405,10 @@ main {
         flex-wrap: wrap;
     }
 
+    .portal-quick-date {
+        flex: 1 1 auto;
+    }
+
     .portal-date-chip {
         width: 100%;
         justify-content: center;
@@ -442,7 +474,7 @@ main {
 
 .agenda-nav-row {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: center;
     gap: 6px;
 }
@@ -4830,9 +4862,15 @@ main {
             <option value="04" class="bg-amber-500 text-zinc-950 font-black">APR</option>
             <option value="05" class="bg-amber-500 text-zinc-950 font-black">MAG</option>
             <option value="06" class="bg-amber-500 text-zinc-950 font-black">GIU</option>
+            <option value="07" class="bg-amber-500 text-zinc-950 font-black">LUG</option>
+            <option value="08" class="bg-amber-500 text-zinc-950 font-black">AGO</option>
         </select>
         
         <button onclick="window.vaiADataRapida()" class="bg-zinc-950 text-white text-[9px] px-3 py-1 rounded-xl font-black hover:bg-red-700 transition-all active:scale-90 border border-zinc-950">GO</button>
+    </div>
+    <div class="portal-year-nav" role="group" aria-label="Navigazione per anno">
+        <button type="button" onclick="window.navDate('year', -1)" title="Vai all'anno precedente" aria-label="Vai all'anno precedente">◀️</button>
+        <button type="button" onclick="window.navDate('year', 1)" title="Vai all'anno successivo" aria-label="Vai all'anno successivo">▶️</button>
     </div>
 </div>
 
@@ -5624,16 +5662,16 @@ main {
         <button onclick="window.jumpToEvent('next')" title="Vai al prossimo evento" aria-label="Vai al prossimo evento" class="nav-pill !bg-amber-100 !text-amber-700 !border-amber-200 hover:!bg-amber-600 hover:!text-white">Evento succ. ▶</button>
     </div>
     <div class="agenda-nav-row">
-        <button onclick="navDate('day', -1)" title="Vai al giorno precedente" aria-label="Vai al giorno precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">◀ Ieri</button>
-        <button onclick="navDate('day', 1)" title="Vai al giorno successivo" aria-label="Vai al giorno successivo" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300">Domani ▶</button>
-        <button onclick="navDate('week', -1)" title="Vai alla settimana precedente" aria-label="Vai alla settimana precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−7g</button>
-        <button onclick="navDate('week', 1)" title="Vai alla settimana successiva" aria-label="Vai alla settimana successiva" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+7g</button>
+        <button onclick="navDate('day', -1)" title="Vai al giorno precedente" aria-label="Vai al giorno precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">◀️</button>
+        <button onclick="navDate('day', 1)" title="Vai al giorno successivo" aria-label="Vai al giorno successivo" class="nav-pill !bg-red-100 hover:!bg-red-600 !text-red-600 hover:!text-white !border-red-300">▶️</button>
     </div>
     <div class="agenda-nav-row">
-        <button onclick="navDate('month', -1)" title="Vai al mese precedente" aria-label="Vai al mese precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−1 mese</button>
-        <button onclick="navDate('month', 1)" title="Vai al mese successivo" aria-label="Vai al mese successivo" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+1 mese</button>
-        <button onclick="navDate('year', -1)" title="Vai all'anno precedente" aria-label="Vai all'anno precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">−1 anno</button>
-        <button onclick="navDate('year', 1)" title="Vai all'anno successivo" aria-label="Vai all'anno successivo" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">+1 anno</button>
+        <button onclick="navDate('week', -1)" title="Vai alla settimana precedente" aria-label="Vai alla settimana precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">⏪</button>
+        <button onclick="navDate('week', 1)" title="Vai alla settimana successiva" aria-label="Vai alla settimana successiva" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">⏩</button>
+    </div>
+    <div class="agenda-nav-row">
+        <button onclick="navDate('month', -1)" title="Vai al mese precedente" aria-label="Vai al mese precedente" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">⏮️</button>
+        <button onclick="navDate('month', 1)" title="Vai al mese successivo" aria-label="Vai al mese successivo" class="nav-pill !bg-red-50 hover:!bg-red-600 !text-red-700 hover:!text-white !border-red-200">⏭️</button>
     </div>
 </div>
 </div>
@@ -6455,6 +6493,10 @@ window.updateDateContext = async (newDate) => { // Aggiunto async
     const month = date.getMonth() + 1;
     const yearFull = date.getFullYear();
     const ay = month >= 9 ? `${yearFull}/${yearFull + 1}` : `${yearFull - 1}/${yearFull}`;
+    const quickYearFilter = document.getElementById('quick-year-filter');
+    const quickMonthFilter = document.getElementById('quick-month-filter');
+    if (quickYearFilter) quickYearFilter.value = yearFull;
+    if (quickMonthFilter) quickMonthFilter.value = String(month).padStart(2, '0');
 
     // 2. Aggiornamento Display e Etichette
     const topDisplay = document.getElementById('current-date-display');
