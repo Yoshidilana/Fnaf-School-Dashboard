@@ -8120,125 +8120,101 @@ return `
             window.location.href = `https://discord.com/api/oauth2/authorize?client_id=1469524509106110484&redirect_uri=${uri}&response_type=token&scope=identify`;
         };
 
-	async function checkAuth() {
-    const params = new URLSearchParams(window.location.hash.slice(1));
-    let token = params.get('access_token');
-    
-    // --- LOGICA PERSISTENZA ---
-    if (token) {
-        // Se il token è nell'URL, lo salviamo e puliamo l'indirizzo
-        localStorage.setItem('fnaf_discord_token', token);
-        window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-        // Altrimenti lo cerchiamo nella memoria del browser
-        token = localStorage.getItem('fnaf_discord_token');
-    }
-
-    // Se non c'è il token, l'utente è un ospite
-    if (!token) {
-        applyRoleUI(); 
-        return;
-    }
-
-    try {
-        // Verifica il token con Discord
-        const res = await fetch('https://discord.com/api/users/@me', { 
-            headers: { Authorization: `Bearer ${token}` } 
-        });
-
-        // Se Discord dice che il token non è più valido (es. scaduto)
-        if (res.status === 401) {
-            localStorage.removeItem('fnaf_discord_token');
-            applyRoleUI();
-            return;
+// --- LOGICA DI AUTENTICAZIONE PERSISTENTE CON DEBUG PANEL ---
+async function checkAuth() {
+    onAuthStateChanged(auth, async (firebaseUser) => {
+        // 1. Se Firebase non ha ancora inizializzato l'utente anonimo, lo facciamo ora
+        if (!firebaseUser) {
+            await signInAnonymously(auth);
+            return; 
         }
 
-        const user = await res.json();
-        window.currentUserId = user.id;
+        const firebaseUid = firebaseUser.uid;
+        // Percorso dove salviamo l'accoppiata Browser <-> Discord ID
+        const linkRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'user_mapping', firebaseUid);
         
-        // Gestione Avatar
-        const discordAvatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
-        window.currentAvatarUrl = discordAvatarUrl; 
-        if (typeof syncDiscordAvatar === 'function') syncDiscordAvatar(user.id, discordAvatarUrl);
+        // 2. Controlliamo se Firebase ricorda un login precedente su questo browser
+        const linkSnap = await getDoc(linkRef);
+        let discordId = null;
 
-        // Aggiornamento Top Bar
-        const loginBtn = document.getElementById('login-btn');
-        const userProfile = document.getElementById('user-profile');
-        if (loginBtn) loginBtn.classList.add('hidden');
-        if (userProfile) {
-            userProfile.classList.remove('hidden');
-            userProfile.style.display = 'flex'; // Forza il flex per l'allineamento
-            document.getElementById('user-name').innerText = user.username;
-            document.getElementById('user-avatar').src = discordAvatarUrl;
+        if (linkSnap.exists()) {
+            discordId = linkSnap.data().discordId;
+            console.log("Sessione recuperata per Discord ID:", discordId);
         }
 
-        // --- CARICAMENTO DATI FIREBASE ---
-        const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', user.id));
-        
-        if(uDoc.exists()) {
-            window.currentUserData = uDoc.data();
-            window.userRole = getRoleType(window.currentUserData.role);
-            
-            // Inizializzazioni varie
-            if (typeof loadBacheca === 'function') loadBacheca();
-            if (typeof window.handleClassChange === 'function') {
-                window.handleClassChange('ALL');
+        // 3. Gestione del "ritorno" da Discord (se l'utente ha appena cliccato Accedi)
+        const params = new URLSearchParams(window.location.hash.slice(1));
+        let token = params.get('access_token');
+
+        if (token) {
+            try {
+                const res = await fetch('https://discord.com/api/users/@me', { 
+                    headers: { Authorization: `Bearer ${token}` } 
+                });
+                const user = await res.json();
+                
+                // Salviamo il collegamento nel database per "sempre"
+                await setDoc(linkRef, { 
+                    discordId: user.id, 
+                    username: user.username,
+                    lastLogin: Date.now() 
+                }, { merge: true });
+
+                discordId = user.id;
+                window.currentAvatarUrl = `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+                
+                // Puliamo l'URL dal token per sicurezza
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (e) {
+                console.error("Errore validazione token Discord:", e);
             }
+        }
+
+        // 4. Caricamento dati Fazbear Classroom se abbiamo un ID Discord
+        if (discordId) {
+            window.currentUserId = discordId;
+            const uDoc = await getDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', discordId));
             
-            applyRoleUI();
+            if (uDoc.exists()) {
+                window.currentUserData = uDoc.data();
+                window.userRole = getRoleType(window.currentUserData.role);
+                window.userName = window.currentUserData.name;
 
-// --- LOGICA DEBUG (La tua originale ottimizzata) ---
-const MY_ID = "477766915096313867";
-const debugPanel = document.getElementById('debug-auth-panel');
-const currentIdCheck = window.currentUserId ? String(window.currentUserId).trim() : "";
+                // Aggiorna UI Header
+                document.getElementById('login-btn').classList.add('hidden');
+                const userProfile = document.getElementById('user-profile');
+                if (userProfile) {
+                    userProfile.classList.remove('hidden');
+                    userProfile.style.display = 'flex';
+                    document.getElementById('user-name').innerText = window.currentUserData.name;
+                    document.getElementById('user-avatar').src = window.currentUserData.avatar || window.currentAvatarUrl || "";
+                }
 
-if (currentIdCheck === MY_ID || window.userRole === 'Admin') {
-    if (debugPanel) {
-        debugPanel.style.setProperty('display', 'block', 'important');
-        debugPanel.classList.remove('hidden');
-        console.log("🛠️ Modalità Creatore Attiva");
-    }
-} else {
-    if (debugPanel) debugPanel.remove();
-}
+                // --- INTEGRAZIONE LOGICA DEBUG (Ripristinata) ---
+                const MY_ID = "477766915096313867";
+                const debugPanel = document.getElementById('test-bypass-panel');
+                const debugBtn = document.getElementById('debug-toggle-btn');
+                const currentIdCheck = String(window.currentUserId).trim();
 
-            // --- MATERIE PER I PROF (La tua originale) ---
-            if (window.userRole === ROLES.PROF || window.userRole === ROLES.PRESIDE || window.userRole === ROLES.ADMIN) {
-    const mSelect = document.getElementById('input-grade-subject');
-    if (mSelect) {
-        let mats = window.currentUserData?.materie || [];
-        
-        // Se Admin o Preside, carichiamo tutte le materie
-        if (window.userRole === ROLES.ADMIN || window.userRole === ROLES.PRESIDE) {
-            mats = Object.keys(LISTA_MATERIE);
-        }
-        
-        // Popoliamo il selettore materie
-        mSelect.innerHTML = mats.map(m => {
-            const cleanMat = m.toLowerCase().trim();
-            const emoji = LISTA_MATERIE[cleanMat] || "📚";
-            return `<option value="${cleanMat}">${emoji} ${m.toUpperCase()}</option>`;
-        }).join('');
+                if (currentIdCheck === MY_ID || window.userRole === 'admin') {
+                    console.log("🛠️ Modalità Creatore/Admin Rilevata");
+                    // Nota: il pannello rimane comunque nascosto finché non premi SHIFT+ALT+S
+                } else {
+                    // Se non sei tu, rimuoviamo i componenti di debug dal DOM per sicurezza
+                    if (debugPanel) debugPanel.remove();
+                    if (debugBtn) debugBtn.remove();
+                }
+                // ----------------------------------------------
 
-        // Colleghiamo l'evento: quando cambi materia, cambiano i voti disponibili
-        mSelect.onchange = (e) => window.aggiornaOpzioniVoto(e.target.value);
-        
-        // FORZIAMO il primo caricamento dei voti in base alla prima materia in lista
-        setTimeout(() => {
-            window.aggiornaOpzioniVoto(mSelect.value);
-        }, 500);
-    }
-}
+                if (typeof loadBacheca === 'function') loadBacheca();
+                applyRoleUI();
+            }
         } else {
-            // Se l'utente ha il token ma non è nel database, lo trattiamo come ospite registrato
+            // Nessun login trovato: l'utente è un Ospite
             applyRoleUI();
         }
-
-    } catch (e) {
-        console.error("Errore durante il checkAuth:", e);
-        // Se c'è un errore di rete (es. sei offline), non cancelliamo il token così riprova al prossimo avvio
-    }
-}       
+    });
+} 
 
 
 window.changeMenu = (menu) => {
@@ -11778,10 +11754,19 @@ window.deleteStaffMessage = async (idx) => {
         await updateDoc(chatRef, { list: list });
     }
 };
-	window.logoutDiscord = () => {
+window.logoutDiscord = async () => {
     if(confirm("Vuoi uscire dal sistema?")) {
-        localStorage.removeItem('fnaf_discord_token');
-        location.reload(); // Ricarica la pagina per tornare allo stato "Ospite"
+        try {
+            if (auth.currentUser) {
+                const linkRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'user_mapping', auth.currentUser.uid);
+                await deleteDoc(linkRef); // Cancella il ricordo del login
+            }
+            localStorage.removeItem('fnaf_discord_token');
+            location.reload();
+        } catch (e) {
+            console.error("Errore durante il logout:", e);
+            location.reload();
+        }
     }
 };
 	// NUOVA FUNZIONE: Cambia lo studente restando nella pagina attuale
