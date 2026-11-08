@@ -10268,7 +10268,6 @@ window.filterByClass = (cls) => {
     const displaySimple = window.getDisplayClassName(cls, false);
     info.innerText = `Classe ${displaySimple} - Visualizzazione: ${profSubject.toUpperCase()}`;
 
-    tbody.innerHTML = '<tr><td colspan="10" class="p-10 text-center animate-pulse uppercase font-black">Sincronizzazione dati classe...</td></tr>';
 
     const classStudents = window.allStudents.filter(s => s.classe === cls);
     let rowsHtml = "";
