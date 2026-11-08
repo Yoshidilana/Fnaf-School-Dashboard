@@ -6428,6 +6428,11 @@ const CLASSI_VALIDE = [
     "S": "Sufficiente",
     "NS": "Insufficiente"
 };
+        const isReligionSubject = subject => String(subject || '').trim().toLowerCase() === 'religione';
+        window.generateReligionJudgment = () => {
+            const judgments = Object.keys(MAP_RELIGIONE);
+            return judgments[Math.floor(Math.random() * judgments.length)];
+        };
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -13215,7 +13220,7 @@ window.openQuickMassGradesModal = () => {
             <div class="mass-config-card">
                 <p class="mass-config-heading"><span>01</span> Configura la prova</p>
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="quick-mass-sub" onchange="window.clearMassScheduleSelection()" class="modal-input !py-2">
+                    <select id="quick-mass-sub" onchange="window.handleQuickMassSubjectChange()" class="modal-input !py-2">
                         ${(isAdmin ? Object.keys(LISTA_MATERIE) : materieDocente).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
                     </select>
                     <select id="quick-mass-type" class="modal-input !py-2">
@@ -13223,7 +13228,7 @@ window.openQuickMassGradesModal = () => {
                         <option value="Orale" selected>Orale</option>
                         <option value="Pratico">Pratico</option>
                     </select>
-                    <label class="mass-history-option col-span-2">
+                    <label id="quick-mass-history-option" class="mass-history-option col-span-2">
                         <input type="checkbox" id="quick-mass-use-history" checked class="mt-1 accent-amber-500">
                         <span>
                             <span class="block text-xs font-black text-amber-900">Usa lo storico dei voti</span>
@@ -13234,7 +13239,7 @@ window.openQuickMassGradesModal = () => {
             </div>
 
             <div class="mass-config-card">
-                <p class="mass-config-heading"><span>02</span> Intervallo voti</p>
+                <p id="quick-mass-range-heading" class="mass-config-heading"><span>02</span> Intervallo voti</p>
                 <div class="flex items-center gap-4">
                     <input type="range" id="quick-mass-min" min="2" max="10" value="4" class="flex-1 accent-red-600" oninput="this.nextElementSibling.innerText = this.value">
                     <span class="text-xs font-black text-stone-800 w-4">4</span>
@@ -13242,6 +13247,7 @@ window.openQuickMassGradesModal = () => {
                     <input type="range" id="quick-mass-max" min="2" max="10" value="9" class="flex-1 accent-red-600" oninput="this.nextElementSibling.innerText = this.value">
                     <span class="text-xs font-black text-stone-800 w-4">9</span>
                 </div>
+                <p id="quick-mass-religion-hint" class="hidden text-xs font-bold text-stone-600">Per Religione verrà generato un giudizio tra Ottimo, Distinto, Buono, Discreto, Sufficiente e Insufficiente.</p>
             </div>
 
             <div class="mass-config-card">
@@ -13279,7 +13285,7 @@ window.openQuickMassGradesModal = () => {
             </div>
 
             <div class="mass-config-card">
-                <p class="mass-config-heading"><span>04</span> Numero di voti per studente</p>
+                <p id="quick-mass-count-heading" class="mass-config-heading"><span>04</span> Numero di voti per studente</p>
                 <select id="quick-mass-count" class="modal-input !py-2">
                     <option value="1">1 Voto (Standard)</option>
                     <option value="2">2 Voti (Multi-voto)</option>
@@ -13301,6 +13307,7 @@ window.openQuickMassGradesModal = () => {
     `;
 
     confirm.classList.add('hidden');
+    window.handleQuickMassSubjectChange();
 };
 
 window.getProfDaysForSubject = (profId, materia, cls) => {
@@ -13502,7 +13509,8 @@ window.prepareMassGradesList = async () => {
     }
 
     const teacher = window.getMassGradeTeacher(sub, window.selectedClass);
-    const historyEnabled = document.getElementById('quick-mass-use-history').checked;
+    const religionSubject = isReligionSubject(sub);
+    const historyEnabled = !religionSubject && document.getElementById('quick-mass-use-history').checked;
     const currentAy = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     let gradeHistory = new Map();
 
@@ -13610,7 +13618,9 @@ window.prepareMassGradesList = async () => {
     const rowsHtml = students.map((s) => {
         let studentSlotsHtml = "";
         const history = gradeHistory.get(s.id) || [];
-        let historyNote = historyEnabled
+        let historyNote = religionSubject
+            ? 'Giudizio generato casualmente.'
+            : historyEnabled
             ? 'Nessuno storico disponibile: voto casuale nel range scelto.'
             : 'Storico disattivato: voto casuale nel range scelto.';
         if (history.length > 0) {
@@ -13619,8 +13629,10 @@ window.prepareMassGradesList = async () => {
         }
 
         for (let i = 0; i < voteCount; i++) {
-            const generated = window.generateMassGrade(history, minV, maxV);
-            const finalGrade = typeof generated === 'number' ? generated : generated.grade;
+            const generated = religionSubject
+                ? window.generateReligionJudgment()
+                : window.generateMassGrade(history, minV, maxV);
+            const finalGrade = generated && typeof generated === 'object' ? generated.grade : generated;
             
             let studentDate;
             if (type === 'Scritto' || type === 'Pratico') {
@@ -14361,6 +14373,24 @@ window.openMultiSubjectGenerator = () => {
     `;
 };
 
+window.handleQuickMassSubjectChange = () => {
+    window.clearMassScheduleSelection();
+    const isReligion = isReligionSubject(document.getElementById('quick-mass-sub')?.value);
+    document.getElementById('quick-mass-history-option')?.classList.toggle('hidden', isReligion);
+    document.getElementById('quick-mass-range-heading')?.classList.toggle('hidden', isReligion);
+    document.getElementById('quick-mass-min')?.parentElement?.classList.toggle('hidden', isReligion);
+    document.getElementById('quick-mass-religion-hint')?.classList.toggle('hidden', !isReligion);
+    const countHeading = document.getElementById('quick-mass-count-heading');
+    if (countHeading) countHeading.innerHTML = `<span>04</span> Numero di ${isReligion ? 'giudizi' : 'voti'} per studente`;
+    const countOptions = document.getElementById('quick-mass-count')?.options || [];
+    Array.from(countOptions).forEach((option, index) => {
+        const count = index + 1;
+        option.textContent = isReligion
+            ? `${count} ${count === 1 ? 'Giudizio' : 'Giudizi'}${count === 1 ? ' (Standard)' : ' (Multi-giudizio)'}`
+            : `${count} ${count === 1 ? 'Voto (Standard)' : 'Voti (Multi-voto)'}`;
+    });
+};
+
 window.setupMultiConfig = () => {
     const selected = Array.from(document.querySelectorAll('.multi-check-sub:checked')).map(cb => cb.value);
     if (selected.length === 0) return alert("Seleziona almeno una materia.");
@@ -14377,7 +14407,9 @@ window.setupMultiConfig = () => {
             <p class="text-[10px] font-bold text-zinc-500 uppercase">Step 2: Parametri di generazione</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scroll">
-            ${selected.map((m, idx) => `
+            ${selected.map((m, idx) => {
+                const religionSubject = isReligionSubject(m);
+                return `
                 <div class="mass-config-card border-l-4 border-blue-500 bg-white p-4 rounded-xl shadow-sm" data-sub="${m}">
                     <p class="font-black text-[11px] uppercase text-blue-700 mb-3 flex items-center gap-2">
                         <span class="bg-blue-100 w-5 h-5 flex items-center justify-center rounded-full text-[9px]">${idx + 1}</span> ${m}
@@ -14391,7 +14423,7 @@ window.setupMultiConfig = () => {
                                 <option value="Pratico">Laboratorio (Pratico)</option>
                             </select>
                         </div>
-                        <div>
+                        <div class="${religionSubject ? 'hidden' : ''}">
                             <label class="text-[8px] font-black uppercase text-zinc-400 block mb-1">Intervallo Voti</label>
                             <div class="flex items-center gap-2">
                                 <input type="number" class="m-multi-min modal-input !py-1.5 w-full text-center" value="4" min="2" max="10">
@@ -14399,16 +14431,18 @@ window.setupMultiConfig = () => {
                                 <input type="number" class="m-multi-max modal-input !py-1.5 w-full text-center" value="9" min="2" max="10">
                             </div>
                         </div>
+                        ${religionSubject ? '<p class="text-[10px] font-semibold text-zinc-500">Verrà generato un giudizio tra Ottimo, Distinto, Buono, Discreto, Sufficiente e Insufficiente.</p>' : ''}
                         <div>
-                            <label class="text-[8px] font-black uppercase text-zinc-400 block mb-1">Voti per studente</label>
+                            <label class="text-[8px] font-black uppercase text-zinc-400 block mb-1">${religionSubject ? 'Giudizi' : 'Voti'} per studente</label>
                             <select class="m-multi-count modal-input !py-1.5 w-full text-xs" required>
-                                <option value="" selected disabled>Seleziona il numero di voti</option>
-                                ${[1, 2, 3, 4, 5].map(count => `<option value="${count}">${count} ${count === 1 ? 'voto' : 'voti'}</option>`).join('')}
+                                <option value="" selected disabled>Seleziona il numero di ${religionSubject ? 'giudizi' : 'voti'}</option>
+                                ${[1, 2, 3, 4, 5].map(count => `<option value="${count}">${count} ${religionSubject ? (count === 1 ? 'giudizio' : 'giudizi') : (count === 1 ? 'voto' : 'voti')}</option>`).join('')}
                             </select>
                         </div>
                     </div>
                 </div>
-            `).join('')}
+            `;
+            }).join('')}
         </div>
         <button onclick="window.generateMultiGrades()" class="mass-prepare-button w-full py-4 font-black uppercase text-[10px] bg-blue-600 text-white rounded-xl mt-4 shadow-lg">Genera Anteprima Voti →</button>
     `;
@@ -14440,11 +14474,12 @@ window.generateMultiGrades = async () => {
         voteCount: Number(card.querySelector('.m-multi-count').value)
     }));
     if (configs.some(config => !Number.isInteger(config.voteCount) || config.voteCount < 1 || config.voteCount > 5)) {
-        alert('Seleziona il numero di voti per ogni materia.');
+        alert('Seleziona il numero di voti o giudizi per ogni materia.');
         return;
     }
-    if (configs.some(config => !Number.isFinite(config.minV) || !Number.isFinite(config.maxV)
-        || config.minV < 2 || config.minV > 10 || config.maxV < 2 || config.maxV > 10)) {
+    if (configs.some(config => !isReligionSubject(config.sub) &&
+        (!Number.isFinite(config.minV) || !Number.isFinite(config.maxV)
+        || config.minV < 2 || config.minV > 10 || config.maxV < 2 || config.maxV > 10))) {
         alert('Inserisci un intervallo di voti valido tra 2 e 10 per ogni materia.');
         return;
     }
@@ -14480,7 +14515,9 @@ window.generateMultiGrades = async () => {
             if (!window.generateRandomValidDateString(null, schedule.giorni)) {
                 throw new Error(`Non ci sono date disponibili per ${sub} nei giorni previsti dall'orario.`);
             }
-            const history = await window.loadMassGradeHistory(students, sub, ay);
+            const history = isReligionSubject(sub)
+                ? new Map()
+                : await window.loadMassGradeHistory(students, sub, ay);
             const voteMonths = Array.from({ length: voteCount }, (_, index) =>
                 getVoteMonth(subjectIndex + index)
             );
@@ -14550,7 +14587,9 @@ window.generateMultiGrades = async () => {
     finalGrid.innerHTML = students.map(s => {
         let studentRows = fullData.map(d => {
             return Array.from({ length: d.voteCount }, (_, index) => {
-                const generated = window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
+                const generated = isReligionSubject(d.sub)
+                    ? window.generateReligionJudgment()
+                    : window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
                 const grade = typeof generated === 'object' ? generated.grade : generated;
                 const date = d.sharedDates[index]
                     || window.generateRandomValidDateString(d.voteMonths[index], d.schedule.giorni);
