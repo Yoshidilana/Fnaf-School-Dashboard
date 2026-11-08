@@ -6994,6 +6994,7 @@ window.loadClassAgenda = async (cls, dataFiltro) => {
         
         const currentUser = (window.currentUserData?.name || "").trim();
         const canWrite = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.PROF, ROLES.ADMIN].includes(role);
+        const canManageAllFirme = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(role);
 
         // Rendering Lista Avvisi (Ambra)
         const avvisiHtml = (data.comunicazioni || []).map((com, idx) => {
@@ -7046,7 +7047,7 @@ const firmeHtml = (data.firme || [])
 
             <!-- Bottoni Azione -->
             <div class="flex gap-1 ml-2 shrink-0">
-                ${isAdmin || (role === 'prof' && f.profId === window.currentUserId) ? `
+                ${canManageAllFirme || (role === ROLES.PROF && f.profId === window.currentUserId) ? `
                     <button onclick="window.editFirma(${originalIdx}, '${cls}')" title="Modifica questa firma" aria-label="Modifica questa firma" class="p-2 bg-stone-100 hover:bg-stone-200 border border-stone-200 text-stone-700 rounded-xl text-xs transition-all active:scale-90 shadow-sm">✏️</button>
                     <button onclick="window.deleteFirma(${originalIdx}, '${cls}')" title="Elimina questa firma" aria-label="Elimina questa firma" class="p-2 bg-stone-100 hover:bg-red-50 hover:border-red-200 hover:text-red-600 border border-stone-200 text-stone-700 rounded-xl text-xs transition-all active:scale-90 shadow-sm">🗑️</button>
                 ` : ''}
@@ -11417,15 +11418,34 @@ window.editSubjectComment = async (materia, quad) => {
         alert("Errore durante il salvataggio del commento della materia.");
     }
 };	window.deleteFirma = async (idx, cls) => {
-    if(!confirm("Vuoi davvero eliminare questa firma? L'azione è irreversibile.")) return;
+    const role = window.userRole;
+    const canManageAllFirme = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(role);
+    if (role !== ROLES.PROF && !canManageAllFirme) {
+        alert('Non hai i permessi per eliminare questa firma.');
+        return;
+    }
     
     const dateKey = document.getElementById('global-calendar').value; // Prende la data selezionata
     const docRef = window.getAgendaDocRef(cls, dateKey);
+    if (!docRef) {
+        alert('Seleziona una classe e una data valide.');
+        return;
+    }
     
     try {
         const snap = await getDoc(docRef);
         if(snap.exists()){
-            let firme = snap.data().firme || [];
+            const firme = snap.data().firme || [];
+            const firma = firme[idx];
+            if (!firma) {
+                alert('Firma non trovata. Aggiorna la pagina e riprova.');
+                return;
+            }
+            if (!canManageAllFirme && firma.profId !== window.currentUserId) {
+                alert('Puoi eliminare solo le firme registrate da te.');
+                return;
+            }
+            if (!confirm("Vuoi davvero eliminare questa firma? L'azione è irreversibile.")) return;
             firme.splice(idx, 1); // Rimuove la firma all'indice selezionato
             await updateDoc(docRef, { firme: firme });
             alert("Firma rimossa con successo!");
@@ -14092,8 +14112,19 @@ window.syncOrarioConFirme = async () => {
 };
 
 window.editFirma = async (idx, cls) => {
+    const role = window.userRole;
+    const canManageAllFirme = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(role);
+    if (role !== ROLES.PROF && !canManageAllFirme) {
+        alert('Non hai i permessi per modificare questa firma.');
+        return;
+    }
+
     const dateKey = document.getElementById('global-calendar').value;
     const ref = window.getAgendaDocRef(cls, dateKey);
+    if (!ref) {
+        alert('Seleziona una classe e una data valide.');
+        return;
+    }
     
     try {
         const snap = await getDoc(ref);
@@ -14102,6 +14133,10 @@ window.editFirma = async (idx, cls) => {
             const firma = firme[idx];
             if (!firma) {
                 alert('Firma non trovata. Aggiorna la pagina e riprova.');
+                return;
+            }
+            if (!canManageAllFirme && firma.profId !== window.currentUserId) {
+                alert('Puoi modificare solo le firme registrate da te.');
                 return;
             }
 
