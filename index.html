@@ -7546,15 +7546,23 @@ return `
     }); // Questa chiude l'onSnapshot dei voti originario (se non l'avevi già chiusa sopra)
 } // Questa chiude definitivamente loadStudentRecords
 
+window.canManageGrade = (grade) => {
+    if ([ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole)) return true;
+    return window.userRole === ROLES.PROF &&
+        Boolean(grade?.profId) &&
+        grade.profId === window.currentUserId;
+};
+
 function renderVotoTag(v, studentId) {
     const valNum = window.parseVotoScolastico(v.voto);
     let statusClass = valNum >= 6 ? "grade-positive" : (valNum > 0 ? "grade-negative" : "grade-neutral");
     if (v.nonValutato) statusClass = "grade-nv";
-const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole) 
+    const canManage = window.canManageGrade(v);
+    const handlers = canManage
     ? `onclick="window.editVoto('${v.id}', '${studentId}')" oncontextmenu="window.deleteVoto('${v.id}', '${studentId}'); return false;"` 
     : "";
 
-    return `<span class="grade-badge inline-flex items-center justify-center font-black cursor-pointer transition-transform hover:scale-110 active:scale-90 ${statusClass}" title="${v.data} - ${v.argomento || ''}" ${handlers}>${v.voto}</span>`;
+    return `<span class="grade-badge inline-flex items-center justify-center font-black ${canManage ? 'cursor-pointer transition-transform hover:scale-110 active:scale-90' : ''} ${statusClass}" title="${v.data} - ${v.argomento || ''}" ${handlers}>${v.voto}</span>`;
 }
         function renderNoteActions(n, idx, studentId) {
             const isMyNote = n.profId === window.currentUserId;
@@ -8502,6 +8510,10 @@ window.editVoto = async (idRicevuto, studentId) => {
     }
 
     const vecchioVoto = { ...listaVoti[indiceVoto] };
+    if (!window.canManageGrade(vecchioVoto)) {
+        alert('Puoi modificare solo i voti registrati da te.');
+        return;
+    }
         
     // CORREZIONE: Estraiamo l'anno scolastico effettivo memorizzato nel voto usando l'underscore (_) ed evitando variabili inesistenti
     const annoCartellaEffettivo = vecchioVoto.anno ? vecchioVoto.anno.replace('/', '_') : ayKeyIniziale;
@@ -9911,8 +9923,6 @@ if (notesList) {
 };
 
 window.deleteVoto = async (idRicevuto, studentId) => {
-    if (!confirm("⚠️ Sei sicuro di voler eliminare definitivamente questo voto?")) return;
-
     try {
         const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
         // 1. TENTATIVO: cerchiamo nell'anno selezionato (caso più comune)
@@ -9935,6 +9945,11 @@ window.deleteVoto = async (idRicevuto, studentId) => {
             alert("Errore: Voto non trovato in questo registro.");
             return;
         }
+        if (!window.canManageGrade(votoDaEliminare)) {
+            alert('Puoi eliminare solo i voti registrati da te.');
+            return;
+        }
+        if (!confirm("⚠️ Sei sicuro di voler eliminare definitivamente questo voto?")) return;
 
         // --- ELIMINAZIONE ---
         // Ora che abbiamo il voto, sappiamo con certezza in quale anno si trova
@@ -10753,12 +10768,13 @@ tbody.innerHTML = allData.map(s => {
                 const dataBreve = v.data ? v.data.substring(0, 5) : '--/--';
                 const bgClass = v.nonValutato ? 'bg-blue-900/20 border-blue-500/30' : 'bg-black/20 border-white/5';
 
-const handlers = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole) 
+const canManage = window.canManageGrade(v);
+const handlers = canManage
     ? `onclick="window.editVoto('${v.id}', '${s.id}')" oncontextmenu="window.deleteVoto('${v.id}', '${s.id}'); return false;"` 
     : "";
 
                 return `
-                    <div class="flex flex-col items-center justify-center min-w-[28px] p-1 ${bgClass} rounded border shadow-inner cursor-pointer transition-transform hover:scale-110"
+                    <div class="flex flex-col items-center justify-center min-w-[28px] p-1 ${bgClass} rounded border shadow-inner ${canManage ? 'cursor-pointer transition-transform hover:scale-110' : ''}"
                          title="${v.data} - ${v.argomento || 'Valutazione'}" ${handlers}>
                         <span class="text-[6px] text-zinc-500 font-black leading-none mb-0.5">${dataBreve}</span>
                         <span class="text-[10px] font-black ${colorClass} leading-none">${v.voto}</span>
