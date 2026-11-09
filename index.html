@@ -6547,6 +6547,11 @@ if (window.selectedClass || (window.userRole === 'studente' && window.currentUse
     }
 }
 
+    // Refresh dell'Orario se la vista è attiva
+    if (document.getElementById('view-orario')?.classList.contains('active-view')) {
+        window.loadOrarioLezioni();
+    }
+
 	  // AGGIUNTA: Refresh del Registro Voti Globale se la vista è attiva
     if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) {
         window.renderGlobalClassRegistry();
