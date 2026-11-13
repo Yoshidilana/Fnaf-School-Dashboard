@@ -14576,33 +14576,52 @@ window.generateMultiGrades = async () => {
     confirm.innerText = "CONFERMA E REGISTRA TUTTO";
 
     window.multiGradeDateConfig = fullData;
-    dateControls.innerHTML = fullData.map(config => Array.from({ length: config.voteCount }, (_, index) => {
-        const label = `${config.sub.toUpperCase()} · Voto ${index + 1}`;
-        if (config.type === 'Scritto' || config.type === 'Pratico') {
-            const date = config.sharedDates[index];
-            return `
-                <label class="flex flex-col gap-1">
-                    <span class="modal-label font-bold">${label} · Data fissa (${config.type})</span>
-                    <input type="date" class="multi-fixed-date-control modal-input !py-2"
-                           data-sub="${config.sub}" data-vote-idx="${index}" data-previous-date="${date}"
-                           value="${date}" onchange="window.syncMultiWrittenDate(this)">
-                </label>`;
-        }
+    const dayNames = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
 
-        const month = config.voteMonths[index];
-        return `
-            <label class="flex flex-col gap-1">
-                <span class="modal-label font-bold">${label} · Mese interrogazione</span>
-                <select class="multi-month-control modal-input !py-2"
-                        data-sub="${config.sub}" data-vote-idx="${index}" data-previous-month="${month}"
-                        onchange="window.updateMultiVoteMonth(this)">
-                    ${monthNames.map((name, monthIndex) => {
-                        if (monthIndex === 6 || monthIndex === 7) return '';
-                        return `<option value="${monthIndex}" ${monthIndex === month ? 'selected' : ''}>${name.toUpperCase()}</option>`;
-                    }).join('')}
-                </select>
-            </label>`;
-    }).join('')).join('');
+    dateControls.innerHTML = fullData.map(config => {
+        const validDaysText = config.schedule.giorni.map(d => dayNames[d]).join(', ');
+
+        return Array.from({ length: config.voteCount }, (_, index) => {
+            const label = `${config.sub.toUpperCase()} · Voto ${index + 1}`;
+            
+            const infoGiorni = `
+                <div class="flex items-center gap-1 mt-1">
+                    <span class="text-[7px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase border border-blue-100">
+                        🗓️ In Orario: ${validDaysText}
+                    </span>
+                </div>`;
+
+            // Usiamo uno stile inline per bypassare il CSS globale che rende scure le classi zinc
+            const cardStyle = `style="background-color: #ffffff !important; border: 1px solid #e5e7eb !important;"`;
+
+            if (config.type === 'Scritto' || config.type === 'Pratico') {
+                const date = config.sharedDates[index];
+                return `
+                    <label class="flex flex-col gap-1 p-3 rounded-xl shadow-sm" ${cardStyle}>
+                        <span class="text-[10px] font-black uppercase text-zinc-400 !mb-0">${label} (Fissa)</span>
+                        ${infoGiorni}
+                        <input type="date" class="multi-fixed-date-control modal-input !py-2 mt-2 !bg-white !text-zinc-900"
+                               data-sub="${config.sub}" data-vote-idx="${index}" data-previous-date="${date}"
+                               value="${date}" onchange="window.syncMultiWrittenDate(this)">
+                    </label>`;
+            }
+
+            const month = config.voteMonths[index];
+            return `
+                <label class="flex flex-col gap-1 p-3 rounded-xl shadow-sm" ${cardStyle}>
+                    <span class="text-[10px] font-black uppercase text-zinc-400 !mb-0">${label} (Mese)</span>
+                    ${infoGiorni}
+                    <select class="multi-month-control modal-input !py-2 mt-2 !bg-white !text-zinc-900"
+                            data-sub="${config.sub}" data-vote-idx="${index}" data-previous-month="${month}"
+                            onchange="window.updateMultiVoteMonth(this)">
+                        ${monthNames.map((name, monthIndex) => {
+                            if (monthIndex === 6 || monthIndex === 7) return '';
+                            return `<option value="${monthIndex}" ${monthIndex === month ? 'selected' : ''}>${name.toUpperCase()}</option>`;
+                        }).join('')}
+                    </select>
+                </label>`;
+        }).join('');
+    }).join('');
 
    finalGrid.innerHTML = students.map(s => {
         let studentRows = fullData.map(d => {
@@ -14727,28 +14746,55 @@ window.submitMultiGrades = async () => {
     const btn = document.getElementById('modal-confirm');
     btn.disabled = true;
     
-    // --- DICHIARIAMO LE VARIABILI PRIMA DI USARLE ---
+    // --- 1. DEFINIZIONE VARIABILI GLOBALI DELLA FUNZIONE ---
     const rows = document.querySelectorAll('.multi-row-data');
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const cls = window.selectedClass;
-    const agendaUpdates = {}; 
-
-    // --- ORA IL CONTROLLO FUNZIONA PERCHÉ SA COS'È 'AY' E 'ROWS' ---
+    const dayNames = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
     const [portalStartYear, portalEndYear] = ay.split('/').map(Number);
+    
+    btn.innerText = "VERIFICA COERENZA...";
+
+    // --- 2. CICLO DI CONTROLLO PREVENTIVO (ANNO + GIORNO SETTIMANA) ---
     for (let row of rows) {
         const dateInput = row.querySelector('.m-data');
-        if (dateInput) {
-            const inputYear = parseInt(dateInput.value.split('-')[0]);
+        const sub = row.dataset.sub;
+        const profId = row.dataset.profid;
+
+        if (dateInput && dateInput.value) {
+            const dateVal = dateInput.value;
+            const [inputYear, inputMonth, inputDay] = dateVal.split('-').map(Number);
+            
+            // A. Controllo Anno (Distrazione)
             if (inputYear !== portalStartYear && inputYear !== portalEndYear) {
                 alert(`⚠️ Errore di distrazione!\nHai inserito una data del ${inputYear}, ma il portale è impostato sull'A.S. ${ay}.\n\nCorreggi la data manuale prima di salvare.`);
                 btn.disabled = false;
                 btn.innerText = "CONFERMA E REGISTRA TUTTO";
-                return; // Blocca tutto
+                return;
+            }
+
+            // B. Controllo Giorno Settimana (Orario)
+            const jsDate = new Date(inputYear, inputMonth - 1, inputDay);
+            const inputDayOfWeek = jsDate.getDay(); 
+
+            // Chiamiamo la funzione che controlla l'orario settimanale
+            const schedule = window.getProfDaysForSubject(profId, sub, cls);
+            
+            if (schedule.giorni && schedule.giorni.length > 0) {
+                if (!schedule.giorni.includes(inputDayOfWeek)) {
+                    const studentName = row.closest('.mass-row').querySelector('p').innerText;
+                    alert(`⚠️ Errore Orario!\n\nStudente: ${studentName}\nMateria: ${sub.toUpperCase()}\n\nIl giorno scelto (${dayNames[inputDayOfWeek]} ${inputDay}) non risulta in orario per questa materia.\n\nControlla l'orario o correggi la data.`);
+                    btn.disabled = false;
+                    btn.innerText = "CONFERMA E REGISTRA TUTTO";
+                    return; 
+                }
             }
         }
     }
 
+    // --- 3. SE TUTTO È OK, PROCEDE AL SALVATAGGIO ---
     btn.innerText = "SALVATAGGIO IN CORSO...";
+    const agendaUpdates = {}; 
 
     try {
         for (const row of rows) {
