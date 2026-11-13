@@ -5402,47 +5402,55 @@ main {
 
 
 <!-- VIEW: ORARIO SETTIMANALE -->
-<div id="view-orario" class="tab-content hidden p-6 max-w-6xl mx-auto">
-    <div class="flex justify-between items-center mb-6 bg-blue-900 p-6 rounded-3xl border border-zinc-800 shadow-xl">
+<div id="view-orario" class="tab-content hidden p-6 max-w-6xl mx-auto" style="background-color: #f9fafb !important;">
+    <div class="flex justify-between items-center mb-6 p-6 rounded-3xl border border-zinc-200 shadow-xl" style="background-color: #ffffff !important;">
         <div>
-            <h2 class="text-3xl font-black uppercase italic text-white tracking-tighter">Orario <span class="text-red-600">Settimanale</span></h2>
-            <p class="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Distribuzione lezioni Classe <span id="orario-class-title" class="text-white">--</span></p>
+            <h2 class="text-3xl font-black uppercase italic tracking-tighter" style="color: #111827 !important;">Orario <span style="color: #dc2626 !important;">Settimanale</span></h2>
+            <p class="text-[10px] font-bold uppercase tracking-[0.2em]" style="color: #6b7280 !important;">Distribuzione lezioni Classe <span id="orario-class-title" style="color: #dc2626 !important;">--</span></p>
         </div>
         
-        <!-- Zona Pulsanti Azione -->
         <div class="flex gap-2">
-            <!-- Il tasto Sincronizza ora è qui, ordinato e protetto -->
             <button id="btn-sync-orario" onclick="window.syncOrarioConFirme()" class="hidden bg-amber-600 hover:bg-amber-500 text-white text-[9px] font-black px-4 py-2 rounded-xl uppercase transition-all shadow-lg">
                 🔄 Sincronizza da Firme
             </button>
-            <button onclick="window.changeMenu('classi')" class="bg-zinc-800 text-zinc-400 text-[9px] font-black px-4 py-2 rounded-xl uppercase hover:bg-red-700 hover:text-white transition-all">Indietro</button>
+            <button onclick="window.changeMenu('classi')" style="background-color: #f3f4f6 !important; color: #374151 !important;" class="text-[9px] font-black px-4 py-2 rounded-xl uppercase hover:bg-red-700 hover:text-white transition-all border border-zinc-200">Indietro</button>
         </div>
     </div>
 
-    <!-- Contenitore Tabella -->
-    <div class="registry-container border-zinc-200 overflow-hidden">
+    <!-- Contenitore Tabella (Forzato Bianco) -->
+    <div class="registry-container border-zinc-200 overflow-hidden" style="background-color: #ffffff !important;">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-blue-500 text-!zinc-900 text-[10px] font-black uppercase tracking-widest">
-                        <th class="p-4 border-r border-zinc-200 w-20">Ora</th>
-                        <th class="p-4 border-r border-zinc-200 text-center">Lunedì</th>
-                        <th class="p-4 border-r border-zinc-200 text-center">Martedì</th>
-                        <th class="p-4 border-r border-zinc-200 text-center">Mercoledì</th>
-                        <th class="p-4 border-r border-zinc-200 text-center">Giovedì</th>
-                        <th class="p-4 border-r border-zinc-200 text-center">Venerdì</th> 
-                        <th class="p-4 text-center">Sabato</th> 
-                    </tr>
-                </thead>
-                <tbody id="orario-table-body" class="bg-!zinc-100">
+<thead>
+    <tr style="background-color: #f8fafc !important; border-bottom: 3px solid #dc2626 !important;">
+        <!-- Angolo in alto a sinistra coordinato con la colonna ore -->
+        <th class="p-4 border-r border-zinc-200 w-20" style="background-color: #111827 !important;"></th>
+        
+        <th class="p-4 border-r border-zinc-200 text-center text-[10px] font-black uppercase" style="color: #4b5563 !important;">Lunedì</th>
+        <th class="p-4 border-r border-zinc-200 text-center text-[10px] font-black uppercase" style="color: #4b5563 !important;">Martedì</th>
+        <th class="p-4 border-r border-zinc-200 text-center text-[10px] font-black uppercase" style="color: #4b5563 !important;">Mercoledì</th>
+        <th class="p-4 border-r border-zinc-200 text-center text-[10px] font-black uppercase" style="color: #4b5563 !important;">Giovedì</th>
+        <th class="p-4 border-r border-zinc-200 text-center text-[10px] font-black uppercase" style="color: #4b5563 !important;">Venerdì</th> 
+        <th class="p-4 text-center text-[10px] font-black uppercase" style="color: #4b5563 !important;">Sabato</th> 
+    </tr>
+</thead>
+                <tbody id="orario-table-body">
                     <!-- Generato via JS -->
                 </tbody>
             </table>
         </div>
     </div>
-    <p id="orario-admin-hint" class="hidden mt-4 text-[9px] text-zinc-500 font-bold uppercase text-center italic">
-        💡 Suggerimento: Clicca su una cella per assegnare o modificare la materia.
-    </p>
+
+    <!-- Sezione Statistiche Ore Staff (Forzata Bianca) -->
+    <div id="orario-staff-report" class="mt-8 p-6 rounded-3xl shadow-sm border border-zinc-200" style="background-color: #ffffff !important;">
+        <div class="flex items-center gap-2 mb-4 border-b border-zinc-100 pb-3">
+            <span class="text-xl">📊</span>
+            <h3 class="text-[10px] font-black uppercase tracking-widest" style="color: #6b7280 !important;">Riepilogo Carico Orario Docenti (A.S. Corrente)</h3>
+        </div>
+        <div id="staff-hours-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Popolato via JS -->
+        </div>
+    </div>
 </div>
 
 
@@ -6428,7 +6436,7 @@ main {
 // LEGENDA IDENTIFICATIVI CLASSI (NOMI IN CODICE)
 // =========================================================================
 // Questi ID sono statici e rappresentano le diverse generazioni di animatronics:
-// - A, B, C: Generazioni "Classiche"
+// - A, B, C: Generazioni "Classiche" (A Original e Toys, B Funtime, C Glamrock, Mediocre melodies, Misc e Rockstars)
 // - W (es. AW, BW): Versioni "Withered"
 // - P (es. AP, BP): Versioni "Phantom"
 // - N (es. AN, BN): Versioni "Nightmare"
@@ -13998,6 +14006,82 @@ window.submitQuickMassGrades = async () => {
 
 // --- SISTEMA ORARIO SETTIMANALE ---
 
+window.calculateStaffHours = () => {
+    const container = document.getElementById('staff-hours-grid');
+    const cls = window.selectedClass;
+    if (!container || !cls || cls === 'ALL') return;
+
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
+    const config = window.classConfigsCache[cls] || {};
+    const orarioClasse = (config.orariPerAnno && config.orariPerAnno[ay]) ? config.orariPerAnno[ay] : {};
+
+    const dayNamesFull = { "lun": "Lun", "mar": "Mar", "mer": "Mer", "gio": "Gio", "ven": "Ven", "sab": "Sab" };
+    const staffData = {};
+
+    for (const ora in orarioClasse) {
+        for (const giorno in orarioClasse[ora]) {
+            const cell = orarioClasse[ora][giorno];
+            if (cell && cell.profId && cell.materia && cell.prof) {
+                const pid = cell.profId;
+                if (!staffData[pid]) {
+                    staffData[pid] = { name: cell.prof, subjects: {}, days: new Set() };
+                }
+                const materia = cell.materia.toLowerCase().trim();
+                staffData[pid].subjects[materia] = (staffData[pid].subjects[materia] || 0) + 1;
+                if (dayNamesFull[giorno.toLowerCase()]) staffData[pid].days.add(dayNamesFull[giorno.toLowerCase()]);
+            }
+        }
+    }
+
+    const profIds = Object.keys(staffData).sort((a, b) => staffData[a].name.localeCompare(staffData[b].name));
+
+    if (profIds.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center py-6 text-[10px] font-black text-zinc-400 uppercase italic">Nessun docente assegnato</p>`;
+        return;
+    }
+
+    container.innerHTML = profIds.map(pid => {
+        const info = staffData[pid];
+        const listaMaterie = Object.entries(info.subjects);
+        const totaleOre = listaMaterie.reduce((sum, [_, count]) => sum + count, 0);
+        
+        // Materie in Blu, Totale in Rosso (Testo scuro su bianco)
+        let breakdown = listaMaterie
+            .map(([mat, count]) => `<span style="color: #1d4ed8 !important; font-weight: 700;">${mat.toUpperCase()}: ${count}</span>`)
+            .join('<span style="color: #9ca3af; margin: 0 4px;">;</span> ');
+        
+        if (listaMaterie.length > 1) {
+            breakdown += ` <span style="color: #b91c1c !important; font-weight: 900; margin-left: 4px;">= ${totaleOre} ore</span>`;
+        } else {
+            breakdown = `<span style="color: #b91c1c !important; font-weight: 900;">${totaleOre} ore settimanali</span>`;
+        }
+
+        const sortedDays = Array.from(info.days).sort((a, b) => {
+            const ordine = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+            return ordine.indexOf(a) - ordine.indexOf(b);
+        });
+
+        return `
+            <div style="background-color: #f9fafb !important; border: 1px solid #e5e7eb !important;" class="p-4 rounded-2xl shadow-sm">
+                <div class="flex justify-between items-start mb-2">
+                    <p style="color: #111827 !important;" class="text-[11px] font-black uppercase tracking-tight">${info.name.toUpperCase()}</p>
+                    <div class="flex gap-1">
+                        ${sortedDays.map(d => `
+                            <span style="background-color: #ffffff !important; color: #4b5563 !important; border: 1px solid #d1d5db !important;" 
+                                  class="text-[7px] font-black px-1.5 py-0.5 rounded-md uppercase">
+                                ${d}
+                            </span>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="text-[9px] font-bold uppercase leading-tight">
+                    ${breakdown}
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
 window.loadOrarioLezioni = async () => {
     const cls = window.selectedClass;
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
@@ -14022,8 +14106,11 @@ window.loadOrarioLezioni = async () => {
         const giorni = ["lun", "mar", "mer", "gio", "ven", "sab"];
 
     for (let ora = 1; ora <= 8; ora++) {
-        html += `<tr class="border-b border-zinc-800/50">
-            <td class="p-4 bg-blue-600 font-black text-red-600 text-center border-r border-zinc-800">${ora}°</td>`;
+        html += `<tr class="border-b border-zinc-100">
+            <td class="p-4 font-black text-center border-r border-zinc-200" 
+                style="background-color: #111827 !important; color: #ffffff !important; width: 60px;">
+                ${ora}°
+            </td>`;
         
         giorni.forEach(giorno => {
             const cellData = (orarioAttuale[ora] && orarioAttuale[ora][giorno]) ? orarioAttuale[ora][giorno] : null;
@@ -14043,6 +14130,8 @@ window.loadOrarioLezioni = async () => {
         html += `</tr>`;
     }
     container.innerHTML = html;
+    window.calculateStaffHours(); 
+
 };
 
 // Modal per assegnare il prof alla cella dell'orario
@@ -14055,7 +14144,7 @@ window.openEditOrarioModal = async (ora, giorno) => {
     // --- RESET STATO PULSANTE ---
     confirm.disabled = false;
     confirm.classList.remove('hidden');
-    confirm.innerText = "Assegna Lezione"; // Forza il testo corretto per l'orario
+    confirm.innerText = "Assegna Lezione"; 
     // ----------------------------
     
     title.innerText = `Assegna Lezione: ${ora}° Ora - ${giorno.toUpperCase()}`;
@@ -14076,7 +14165,6 @@ window.openEditOrarioModal = async (ora, giorno) => {
 
     confirm.classList.remove('hidden');
     
-    // Funzione helper per generare le opzioni delle materie in base al prof
     const getMaterieOptions = (prof) => {
         const mats = Array.isArray(prof.materie) ? prof.materie : [prof.materie];
         return mats.map(m => `<option value="${m.toLowerCase()}">${m.toUpperCase()}</option>`).join('');
@@ -14100,7 +14188,6 @@ window.openEditOrarioModal = async (ora, giorno) => {
         </div>
     `;
 
-    // Funzione globale temporanea per gestire il cambio prof nel modal
     window.updateMateriaDropdown = (el) => {
         const container = document.getElementById('materia-select-container');
         const matSelect = document.getElementById('select-orario-materia');
@@ -14117,16 +14204,50 @@ window.openEditOrarioModal = async (ora, giorno) => {
         const profSelect = document.getElementById('select-orario-prof');
         const matSelect = document.getElementById('select-orario-materia');
         const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim().replace('/', '-');
+        
+        const selectedProfId = profSelect.value;
+
+        // --- 🛡️ NUOVO: CONTROLLO ANTI-CONFLITTO PER ANNO SCOLASTICO ---
+        if (selectedProfId !== 'cancella') {
+            const profOpt = profSelect.options[profSelect.selectedIndex];
+            const profName = profOpt.dataset.name;
+
+            confirm.disabled = true;
+            confirm.innerText = "VERIFICA DISPONIBILITÀ...";
+
+            // Cicliamo tutte le classi per vedere se il prof è già occupato
+            for (const altraClasse of CLASSI_VALIDE) {
+                if (altraClasse === cls) continue; // Non controllare la classe attuale
+
+                const altraRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', altraClasse);
+                const altraSnap = await getDoc(altraRef);
+
+                if (altraSnap.exists()) {
+                    const dataAltra = altraSnap.data();
+                    // Controlla se in quell'anno, quell'ora e quel giorno la cella è piena
+                    const occupato = dataAltra.orariPerAnno?.[ay]?.[ora]?.[giorno];
+
+                    if (occupato && occupato.profId === selectedProfId) {
+                        alert(`⚠️ IMPOSSIBILE ASSEGNARE!\n\nIl docente ${profName.toUpperCase()} risulta già impegnato nella classe ${altraClasse} alla ${ora}° ora di ${giorno.toUpperCase()} per l'A.S. ${ay.replace('-', '/')}.\n\nUn professore non può trovarsi in due posti contemporaneamente!`);
+                        confirm.disabled = false;
+                        confirm.innerText = "Assegna Lezione";
+                        return; // BLOCCO TOTALE DEL SALVATAGGIO
+                    }
+                }
+            }
+        }
+        // --- FINE CONTROLLO ---
+
         const ref = doc(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata', cls);
         
-        if (profSelect.value === 'cancella') {
+        if (selectedProfId === 'cancella') {
             await setDoc(ref, { orariPerAnno: { [ay]: { [ora]: { [giorno]: deleteField() } } } }, { merge: true });
         } else {
             const profOpt = profSelect.options[profSelect.selectedIndex];
             const nuovaLezione = {
                 prof: profOpt.dataset.name,
-                profId: profSelect.value,
-                materia: matSelect.value // Salva la materia specifica scelta
+                profId: selectedProfId,
+                materia: matSelect.value 
             };
             await setDoc(ref, { orariPerAnno: { [ay]: { [ora]: { [giorno]: nuovaLezione } } } }, { merge: true });
         }
@@ -14142,6 +14263,8 @@ window.changeMenu = (menu) => {
     oldChangeMenu(menu);
     if (menu === 'orario') window.loadOrarioLezioni();
 };
+
+
 
 // --- LOGICA DI SINCRONIZZAZIONE INTELLIGENTE ORARIO/FIRME ---
 
