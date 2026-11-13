@@ -3608,10 +3608,10 @@ main {
 /* Creiamo una nuova classe per la griglia effettiva degli studenti */
 .mass-grid-system {
     display: grid !important;
-    /* Crea colonne da almeno 220px che si adattano allo spazio (Orizzontale) */
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    /* Aumentato a 260px per evitare l'uscita dei dati */
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important;
     gap: 10px !important;
-    align-items: start !important; /* Rimuove lo spazio vuoto sotto le card corte */
+    align-items: start !important;
     width: 100% !important;
 }
 
@@ -13766,7 +13766,7 @@ window.setRandomValidDate = () => {
     if (input) input.value = window.generateRandomValidDateString() || '';
 };
 
-window.submitQuickMassGrades = async () => {
+window.submitQuickMassGrades = async () => { 
     const sub = document.getElementById('quick-mass-sub').value;
     const type = document.getElementById('quick-mass-type').value;
     const targetClass = window.selectedClass;
@@ -13786,6 +13786,21 @@ window.submitQuickMassGrades = async () => {
 
     const btn = document.getElementById('modal-confirm');
     btn.disabled = true;
+        btn.innerText = "CONTROLLO COERENZA...";
+
+    // --- AGGIUNTA: CONTROLLO DISTRAZIONE ---
+    const [portalStartYear, portalEndYear] = ay.split('/').map(Number);
+    const allDateInputs = document.querySelectorAll('.mass-date');
+    for (let input of allDateInputs) {
+        const inputYear = parseInt(input.value.split('-')[0]);
+        if (inputYear !== portalStartYear && inputYear !== portalEndYear) {
+            alert(`⚠️ Errore di distrazione!\nHai inserito una data del ${inputYear}, ma il portale è impostato sull'A.S. ${ay}.\n\nCorreggi la data manuale prima di salvare.`);
+            btn.disabled = false;
+            btn.innerText = "REGISTRA TUTTI I VOTI";
+            return; // Blocca tutto
+        }
+    }
+
     btn.innerText = "REGISTRAZIONE IN CORSO...";
 
     // Mappa per raggruppare firme e voti giornalieri per data
@@ -14589,7 +14604,7 @@ window.generateMultiGrades = async () => {
             </label>`;
     }).join('')).join('');
 
-    finalGrid.innerHTML = students.map(s => {
+   finalGrid.innerHTML = students.map(s => {
         let studentRows = fullData.map(d => {
             return Array.from({ length: d.voteCount }, (_, index) => {
                 const generated = isReligionSubject(d.sub)
@@ -14598,18 +14613,29 @@ window.generateMultiGrades = async () => {
                 const grade = typeof generated === 'object' ? generated.grade : generated;
                 const date = d.sharedDates[index]
                     || window.generateRandomValidDateString(d.voteMonths[index], d.schedule.giorni);
+                
                 if (!date) {
                     throw new Error(`Non ci sono date valide a ${monthNames[d.voteMonths[index]]} per ${d.sub} nei giorni previsti dall'orario.`);
                 }
 
-                return `
-                    <div class="flex items-center gap-2 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
-                         data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
-                        <span class="text-[8px] font-black w-16 truncate text-zinc-500 uppercase">${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}</span>
-                        <input type="text" value="${grade}" class="m-voto w-10 text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
-                        <input type="date" value="${date}" ${d.type === 'Scritto' || d.type === 'Pratico' ? 'onchange="window.syncMultiWrittenDate(this)"' : ''} class="m-data flex-1 text-[9px] border border-zinc-200 bg-white rounded-md p-1 outline-none">
-                    </div>
-                `;
+                // MODIFICA QUI: Rimossa classe 'truncate' e 'w-16', aggiunta 'min-w-max' o rimosso il limite di larghezza
+return `
+    <div class="grid grid-cols-12 items-center gap-1 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
+         data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
+        
+        <!-- Nome Materia: occupa 5 colonne su 12 -->
+        <span class="col-span-5 text-[8px] font-black text-zinc-500 uppercase leading-none whitespace-nowrap overflow-hidden">
+            ${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}
+        </span>
+
+        <!-- Voto: occupa 2 colonne su 12 -->
+        <input type="text" value="${grade}" class="m-voto col-span-2 w-full text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
+
+        <!-- Data: occupa 5 colonne su 12 -->
+        <input type="date" value="${date}" ${d.type === 'Scritto' || d.type === 'Pratico' ? 'onchange="window.syncMultiWrittenDate(this)"' : ''} 
+               class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
+    </div>
+`;
             }).join('');
         }).join('');
 
@@ -14700,12 +14726,29 @@ window.submitMultiGrades = async () => {
 
     const btn = document.getElementById('modal-confirm');
     btn.disabled = true;
-    btn.innerText = "SALVATAGGIO IN CORSO...";
-
+    
+    // --- DICHIARIAMO LE VARIABILI PRIMA DI USARLE ---
     const rows = document.querySelectorAll('.multi-row-data');
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const cls = window.selectedClass;
     const agendaUpdates = {}; 
+
+    // --- ORA IL CONTROLLO FUNZIONA PERCHÉ SA COS'È 'AY' E 'ROWS' ---
+    const [portalStartYear, portalEndYear] = ay.split('/').map(Number);
+    for (let row of rows) {
+        const dateInput = row.querySelector('.m-data');
+        if (dateInput) {
+            const inputYear = parseInt(dateInput.value.split('-')[0]);
+            if (inputYear !== portalStartYear && inputYear !== portalEndYear) {
+                alert(`⚠️ Errore di distrazione!\nHai inserito una data del ${inputYear}, ma il portale è impostato sull'A.S. ${ay}.\n\nCorreggi la data manuale prima di salvare.`);
+                btn.disabled = false;
+                btn.innerText = "CONFERMA E REGISTRA TUTTO";
+                return; // Blocca tutto
+            }
+        }
+    }
+
+    btn.innerText = "SALVATAGGIO IN CORSO...";
 
     try {
         for (const row of rows) {
@@ -14724,14 +14767,8 @@ window.submitMultiGrades = async () => {
             const quad = (parseInt(m) >= 9 || parseInt(m) <= 1) ? 1 : 2;
 
             // --- DEFINIZIONE ARGOMENTI REALISTICI ---
-            // Per il registro voti dello studente
-            const descVoto = type === 'Orale' ? 'Colloquio orale' : 
-                             (type === 'Scritto' ? 'Verifica scritta' : 'Prova pratica');
-            
-            // Per la firma sul registro di classe (Agenda)
-            const descFirma = type === 'Orale' ? `Interrogazioni e colloqui di ${sub.toLowerCase()}` : 
-                              (type === 'Scritto' ? `Svolgimento verifica scritta di ${sub.toLowerCase()}` : 
-                              `Esercitazione pratica di ${sub.toLowerCase()}`);
+            const descVoto = type === 'Orale' ? 'Colloquio orale' : (type === 'Scritto' ? 'Verifica scritta' : 'Prova pratica');
+            const descFirma = type === 'Orale' ? `Interrogazioni e colloqui di ${sub.toLowerCase()}` : `Svolgimento verifica scritta di ${sub.toLowerCase()}`;
 
             // 1. Registro Personale Studente
             const recRef = window.getRecordDocRef(sid, ay, 'voti');
@@ -14743,7 +14780,7 @@ window.submitMultiGrades = async () => {
                     data: dateIta,
                     prof: profName,
                     profId: profId,
-                    argomento: descVoto, // <--- ORA È PULITO (es: "Colloquio orale")
+                    argomento: descVoto,
                     quad: quad,
                     anno: ay,
                     emoji: LISTA_MATERIE[sub.toLowerCase()] || "📚"
@@ -14759,7 +14796,7 @@ window.submitMultiGrades = async () => {
                 studenteId: sid,
                 voto: grade,
                 materia: sub,
-                argomento: descVoto // <--- ANCHE QUI PULITO
+                argomento: descVoto
             });
 
             const firmaKey = `${sub}|${profId}`;
@@ -14774,7 +14811,7 @@ window.submitMultiGrades = async () => {
                     ora: oraDaOrario.toString(),
                     tipo: type === 'Orale' ? "Lezione" : "Verifica",
                     materia: sub.toUpperCase(),
-                    argomento: descFirma, // <--- ORA È REALISTICO (es: "Interrogazioni e colloqui di...")
+                    argomento: descFirma,
                     prof: profName,
                     profId: profId
                 }));
