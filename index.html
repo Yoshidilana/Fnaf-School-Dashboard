@@ -13558,21 +13558,31 @@ window.prepareMassGradesList = async () => {
     const existingControls = document.querySelectorAll('.mass-master-control');
     const currentControlValues = Array.from(existingControls).map(ctrl => ctrl.value);
 
-    // --- GENERAZIONE HEADER (UN CONTROLLO PER CIASCUN VOTO SELEZIONATO) ---
-    let headerHtml = `<div class="mass-config-card mb-3"><p class="mass-config-heading">🗓️ Date delle prove</p><div class="mass-date-controls">`;
+    const dayNames = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
+    // Recupera i dati reali dal DB per la materia selezionata
+const realSchedule = window.getProfDaysForSubject(teacher.id, sub, window.selectedClass);
+// Se il DB ha dei giorni, usa quelli per il testo del badge, altrimenti usa le checkbox
+const daysToShow = (realSchedule.giorni && realSchedule.giorni.length > 0) ? realSchedule.giorni : giorniFermi;
+const validDaysText = daysToShow.map(d => dayNames[d]).join(', ');
+
+    // --- GENERAZIONE HEADER (CON BADGE ORARIO E FIX COLORE) ---
+    let headerHtml = `<div class="mass-config-card mb-3" style="background-color: #ffffff !important; border: 1px solid #e5e7eb !important;">
+                        <p class="mass-config-heading !text-zinc-900">🗓️ Date delle prove</p>
+                        <div class="flex items-center gap-1 mb-3">
+                            <span class="text-[7px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase border border-blue-100">
+                                🗓️ In Orario: ${validDaysText}
+                            </span>
+                        </div>
+                        <div class="mass-date-controls">`;
+    
     const activeVoteConfig = [];
 
     for (let v = 0; v < voteCount; v++) {
-        // Se l'utente ha già scelto un mese/data per questo voto teniamo quello, altrimenti ne calcoliamo uno di partenza
-        let savedVal = currentControlValues[v];
-
         if (type === 'Scritto' || type === 'Pratico') {
-            let defaultDate = savedVal;
-            if (!defaultDate) {
-                let targetMonth = (currentMonthIdx + v) % 12;
-                if (targetMonth === 6 || targetMonth === 7) targetMonth = 8;
-                defaultDate = window.generateRandomValidDateString(targetMonth, giorniFermi);
-            }
+            let targetMonth = (currentMonthIdx + v) % 12;
+            if (targetMonth === 6 || targetMonth === 7) targetMonth = 8;
+            
+            const defaultDate = window.generateRandomValidDateString(targetMonth, giorniFermi);
             if (!defaultDate) {
                 alert('Non ci sono date valide nel mese selezionato per i giorni di lezione scelti.');
                 return;
@@ -13581,23 +13591,22 @@ window.prepareMassGradesList = async () => {
 
             headerHtml += `
                 <div class="flex flex-col gap-1">
-                    <label class="modal-label !text-red-600 font-bold">Data Prova ${type} (Voto ${v + 1})</label>
+                    <label class="text-[10px] font-black uppercase text-zinc-400 !mb-0">Data Prova ${type} (Voto ${v + 1})</label>
                     <input type="date" value="${defaultDate}" data-vote-idx="${v}"
                            onchange="window.updateMassSlotDatesByVoteIndex(${v}, this.value)"
-                           class="mass-master-control modal-input !py-2 rounded-lg w-full outline-none">
+                           class="mass-master-control modal-input !py-2 rounded-lg w-full outline-none !bg-white !text-zinc-900 border-zinc-200">
                 </div>
             `;
         } else {
-            let targetMonth = savedVal !== undefined ? parseInt(savedVal) : (currentMonthIdx + v) % 12;
-            if (savedVal === undefined && (targetMonth === 6 || targetMonth === 7)) targetMonth = 8;
-            
+            let targetMonth = (currentMonthIdx + v) % 12;
+            if (targetMonth === 6 || targetMonth === 7) targetMonth = 8;
             activeVoteConfig.push(targetMonth);
 
             headerHtml += `
                 <div class="flex flex-col gap-1">
-                    <label class="modal-label font-bold text-stone-500">Mese per Interrogazioni - Voto ${v + 1}</label>
+                    <label class="text-[10px] font-black uppercase text-zinc-400 !mb-0">Mese per Interrogazioni - Voto ${v + 1}</label>
                     <select data-vote-idx="${v}" onchange="window.regenMassSlotDatesByMonth(${v}, this.value)" 
-                            class="mass-master-control modal-input !py-2 rounded-lg w-full outline-none">
+                            class="mass-master-control modal-input !py-2 rounded-lg w-full outline-none !bg-white !text-zinc-900 border-zinc-200">
                         ${monthNames.map((name, idx) => {
                             if (idx === 6 || idx === 7) return ''; 
                             return `<option value="${idx}" ${idx === targetMonth ? 'selected' : ''}>${name.toUpperCase()}</option>`;
@@ -13671,8 +13680,7 @@ window.prepareMassGradesList = async () => {
 
     if (students.length > 0 && !rowsHtml) return;
 
-    // CREIAMO DUE CONTENITORI SEPARATI: 
-    // Uno per le date (sopra) e uno per la griglia studenti (sotto)
+    // 1. Uniamo l'header delle date e la griglia degli studenti
     const finalHtml = `
         <div class="mass-global-header">
             ${headerHtml}
@@ -13682,11 +13690,26 @@ window.prepareMassGradesList = async () => {
         </div>
     `;
 
-    listContainer.innerHTML = finalHtml;
+    // 2. Prepariamo l'header dello Step 2 con il tasto INDIETRO
+    const step2Header = `
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="window.goBackToMassStep1()" class="flex items-center gap-1 text-[9px] font-black uppercase text-zinc-400 hover:text-red-600 transition-colors">
+                ⬅ Torna alla Configurazione
+            </button>
+            <p class="text-[9px] text-stone-500 font-black uppercase">05 · Revisione individuale</p>
+            <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700">Rigenera 🎲</button>
+        </div>
+    `;
+
+    // 3. Inseriamo tutto nello Step 2 (sovrascrivendo il contenuto precedente)
+    step2.innerHTML = step2Header + `<div class="mass-students-list">${finalHtml}</div>`;
     
-    // Mostriamo lo step 2
+    // 4. Gestione visibilità e Titolo
+    document.getElementById('modal-title').innerText = "Revisione Voti Generati";
     step1.classList.add('hidden');
     step2.classList.remove('hidden');
+    
+    // 5. Attivazione pulsante di salvataggio finale
     confirmBtn.classList.remove('hidden');
     confirmBtn.disabled = false;
     confirmBtn.innerText = "REGISTRA TUTTI I VOTI";
@@ -13779,130 +13802,152 @@ window.submitQuickMassGrades = async () => {
     const finalProfName = docente.name;
     const finalProfId = docente.id;
 
-    // Recuperiamo l'orario usando il finalProfId CORRETTO
+    // Recuperiamo l'orario settimanale del docente per questa materia
     const infoOrario = window.getProfDaysForSubject(finalProfId, sub, targetClass);
+    const dayNames = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
 
     if (!confirm(`Stai per registrare le valutazioni individuali per la classe ${targetClass}.\nDocente Firmatario: ${finalProfName}\nProcedere?`)) return;
 
     const btn = document.getElementById('modal-confirm');
     btn.disabled = true;
-        btn.innerText = "CONTROLLO COERENZA...";
+    btn.innerText = "VERIFICA COERENZA...";
 
-    // --- AGGIUNTA: CONTROLLO DISTRAZIONE ---
+    // --- 1. CICLO DI CONTROLLO (ANNO + ORARIO) ---
     const [portalStartYear, portalEndYear] = ay.split('/').map(Number);
-    const allDateInputs = document.querySelectorAll('.mass-date');
-    for (let input of allDateInputs) {
-        const inputYear = parseInt(input.value.split('-')[0]);
-        if (inputYear !== portalStartYear && inputYear !== portalEndYear) {
-            alert(`⚠️ Errore di distrazione!\nHai inserito una data del ${inputYear}, ma il portale è impostato sull'A.S. ${ay}.\n\nCorreggi la data manuale prima di salvare.`);
-            btn.disabled = false;
-            btn.innerText = "REGISTRA TUTTI I VOTI";
-            return; // Blocca tutto
+    const allRowsPreview = document.querySelectorAll('.mass-row');
+
+    for (let row of allRowsPreview) {
+        const studentName = row.querySelector('p').innerText;
+        const dateInputs = row.querySelectorAll('.mass-date');
+
+        for (let input of dateInputs) {
+            const dateVal = input.value;
+            const [inputYear, inputMonth, inputDay] = dateVal.split('-').map(Number);
+            
+            // A. Controllo Anno (Distrazione)
+            if (inputYear !== portalStartYear && inputYear !== portalEndYear) {
+                alert(`⚠️ Errore di distrazione!\nStudente: ${studentName}\nHai inserito una data del ${inputYear}, ma il portale è impostato sull'A.S. ${ay}.\n\nCorreggi la data manuale prima di salvare.`);
+                btn.disabled = false;
+                btn.innerText = "REGISTRA TUTTI I VOTI";
+                return; 
+            }
+
+            // B. Controllo Giorno Settimana (Orario)
+            const jsDate = new Date(inputYear, inputMonth - 1, inputDay);
+            const inputDayOfWeek = jsDate.getDay(); 
+
+            if (infoOrario.giorni && infoOrario.giorni.length > 0) {
+                if (!infoOrario.giorni.includes(inputDayOfWeek)) {
+                    alert(`⚠️ Errore Orario!\n\nStudente: ${studentName}\nMateria: ${sub.toUpperCase()}\n\nIl giorno scelto (${dayNames[inputDayOfWeek]} ${inputDay}) non risulta in orario per questa materia.\n\nControlla l'orario o correggi la data.`);
+                    btn.disabled = false;
+                    btn.innerText = "REGISTRA TUTTI I VOTI";
+                    return; 
+                }
+            }
         }
     }
 
+    // --- 2. SE TUTTI I CONTROLLI PASSANO, PROCEDE AL SALVATAGGIO ---
     btn.innerText = "REGISTRAZIONE IN CORSO...";
-
-    // Mappa per raggruppare firme e voti giornalieri per data
     const agendaUpdatesByDate = {};
     let totalVotesSaved = 0;
 
-    for (const row of rows) {
-        const sid = row.dataset.sid;
-        const studentObj = window.allStudents.find(s => s.id === sid);
-        const studentName = studentObj ? studentObj.name : "Studente Sconosciuto";
+    try {
+        for (const row of rows) {
+            const sid = row.dataset.sid;
+            const studentObj = window.allStudents.find(s => s.id === sid);
+            const studentName = studentObj ? studentObj.name : "Studente Sconosciuto";
+            const slots = row.querySelectorAll('.mass-slot');
 
-        // Selezioniamo TUTTI gli slot (multi-voto) presenti nella riga dello studente
-        const slots = row.querySelectorAll('.mass-slot');
+            for (const slot of slots) {
+                const gradeInput = slot.querySelector('.mass-grade');
+                const dateInput = slot.querySelector('.mass-date');
 
-        for (const slot of slots) {
-            const gradeInput = slot.querySelector('.mass-grade');
-            const dateInput = slot.querySelector('.mass-date');
+                if (!gradeInput || !dateInput) continue;
 
-            if (!gradeInput || !dateInput) continue;
+                const grade = gradeInput.value.trim();
+                const dateVal = dateInput.value; 
 
-            const grade = gradeInput.value.trim();
-            const dateVal = dateInput.value; // Formato YYYY-MM-DD
+                if (!grade || !dateVal) continue;
 
-            if (!grade || !dateVal) continue;
+                const [yyyy, mm, dd] = dateVal.split('-');
+                const dateIta = `${dd}/${mm}/${yyyy}`;
+                const quad = (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2;
 
-            const [yyyy, mm, dd] = dateVal.split('-');
-            const dateIta = `${dd}/${mm}/${yyyy}`;
-            const quad = (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2;
+                // Salva nel profilo dello studente
+                const recordRef = window.getRecordDocRef(sid, ay, 'voti');
+                await setDoc(recordRef, {
+                    voti: arrayUnion({
+                        id: crypto.randomUUID(),
+                        voto: grade.toString(),
+                        materia: sub.toLowerCase(),
+                        data: dateIta,
+                        prof: finalProfName,
+                        profId: finalProfId,
+                        argomento: `Prova ${type}`,
+                        quad: quad,
+                        anno: ay,
+                        emoji: LISTA_MATERIE[sub.toLowerCase()] || "📝"
+                    })
+                }, { merge: true });
 
-            // 1. SALVATAGGIO NEL RECORD PERSONALE DELLO STUDENTE (VOTI)
-            const recordRef = window.getRecordDocRef(sid, ay, 'voti');
-            await setDoc(recordRef, {
-                voti: arrayUnion({
-                    id: crypto.randomUUID(),
+                totalVotesSaved++;
+
+                // Raggruppa per l'agenda giornaliera
+                if (!agendaUpdatesByDate[dateVal]) {
+                    const localDateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+                    const localDayOfWeek = localDateObj.getDay();
+                    const oraDaOrario = (infoOrario && infoOrario.ore && infoOrario.ore[localDayOfWeek]) 
+                        ? infoOrario.ore[localDayOfWeek] 
+                        : "1";
+
+                    agendaUpdatesByDate[dateVal] = {
+                        firme: {
+                            ora: oraDaOrario.toString(),
+                            tipo: "Verifica", 
+                            materia: sub.toUpperCase(), 
+                            argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
+                            prof: finalProfName, 
+                            profId: finalProfId
+                        },
+                        votiGiornalieri: []
+                    };
+                }
+
+                agendaUpdatesByDate[dateVal].votiGiornalieri.push({
+                    studente: studentName.toUpperCase(),
+                    studenteId: sid,
                     voto: grade.toString(),
                     materia: sub.toLowerCase(),
-                    data: dateIta,
-                    prof: finalProfName,
-                    profId: finalProfId,
-                    argomento: `Prova ${type}`,
-                    quad: quad,
-                    anno: ay,
-                    emoji: LISTA_MATERIE[sub.toLowerCase()] || (type === 'Scritto' ? "📝" : "🗣️")
-                })
-            }, { merge: true });
-
-            totalVotesSaved++;
-
-            // Prepara la struttura di raggruppamento temporanea per l'agenda giornaliera
-            if (!agendaUpdatesByDate[dateVal]) {
-                const localDateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
-                const localDayOfWeek = localDateObj.getDay();
-
-                const oraDaOrario = (infoOrario && infoOrario.ore && infoOrario.ore[localDayOfWeek]) 
-                    ? infoOrario.ore[localDayOfWeek] 
-                    : "1";
-
-                agendaUpdatesByDate[dateVal] = {
-                    firme: {
-                        ora: oraDaOrario.toString(),
-                        tipo: "Verifica", 
-                        materia: sub.toUpperCase(), 
-                        argomento: `Svolgimento prove ${type.toLowerCase()} di ${sub.toLowerCase()}`,
-                        prof: finalProfName, 
-                        profId: finalProfId
-                    },
-                    votiGiornalieri: []
-                };
+                    argomento: `Prova ${type}`
+                });
             }
-
-            // Aggiungi il voto dell'evento specifico all'elenco giornaliero per quella data
-            agendaUpdatesByDate[dateVal].votiGiornalieri.push({
-                studente: studentName.toUpperCase(),
-                studenteId: sid,
-                voto: grade.toString(),
-                materia: sub.toLowerCase(),
-                argomento: `Prova ${type}`
-            });
         }
+
+        // Salvataggio finale in Agenda
+        for (const d of Object.keys(agendaUpdatesByDate)) {
+            const agendaRef = window.getAgendaDocRef(targetClass, d);
+            const dataGiorno = agendaUpdatesByDate[d];
+            await setDoc(agendaRef, {
+                firme: arrayUnion(dataGiorno.firme),
+                daily_voti: arrayUnion(...dataGiorno.votiGiornalieri)
+            }, { merge: true });
+        }
+
+        alert(`✅ Operazione completata!\n${totalVotesSaved} voti registrati.`);
+        window.closeModal();
+        if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
+        else window.handleClassChange();
+
+        if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+        if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+
+    } catch (e) {
+        console.error(e);
+        alert("Errore durante il salvataggio.");
+        btn.disabled = false;
+        btn.innerText = "RIPROVA SALVATAGGIO";
     }
-
-    // 2. SALVATAGGIO IN AGENDA (FIRME + DAILY_VOTI INSIEME)
-    for (const d of Object.keys(agendaUpdatesByDate)) {
-        const agendaRef = window.getAgendaDocRef(targetClass, d);
-        const dataGiorno = agendaUpdatesByDate[d];
-
-        await setDoc(agendaRef, {
-            firme: arrayUnion(dataGiorno.firme),
-            daily_voti: arrayUnion(...dataGiorno.votiGiornalieri)
-        }, { merge: true });
-    }
-
-        alert(`✅ Operazione completata!\n${totalVotesSaved} voti totali registrati a nome di: ${finalProfName}`);
-    window.closeModal();
-    
-    if (window.selectedStudentId) loadStudentRecords(window.selectedStudentId);
-    else window.handleClassChange();
-
-    // Refresh immediato delle tabelle collettive
-    if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
-    if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
-    if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
 };
 
 // --- SISTEMA ORARIO SETTIMANALE ---
@@ -14422,6 +14467,13 @@ window.setupMultiConfig = () => {
     step2.classList.remove('hidden');
 
     step2.innerHTML = `
+        <!-- TASTO INDIETRO AGGIUNTO QUI -->
+        <div class="mb-4">
+            <button onclick="window.goBackToMultiStep1()" class="flex items-center gap-1 text-[9px] font-black uppercase text-zinc-400 hover:text-blue-600 transition-colors">
+                ⬅ Torna a Selezione Materie
+            </button>
+        </div>
+
         <div class="agenda-form-intro mb-4">
             <span class="agenda-form-icon">⚙️</span>
             <p class="text-[10px] font-bold text-zinc-500 uppercase">Step 2: Parametri di generazione</p>
@@ -14574,6 +14626,13 @@ window.generateMultiGrades = async () => {
     step3.classList.remove('hidden');
     confirm.disabled = false;
     confirm.innerText = "CONFERMA E REGISTRA TUTTO";
+        const backToStep2Html = `
+        <div class="mb-4">
+            <button onclick="window.goBackToMultiStep2()" class="flex items-center gap-1 text-[9px] font-black uppercase text-zinc-400 hover:text-blue-600 transition-colors">
+                ⬅ Torna a Parametri Voti
+            </button>
+        </div>
+    `;
 
     window.multiGradeDateConfig = fullData;
     const dayNames = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
@@ -14888,6 +14947,25 @@ window.submitMultiGrades = async () => {
         btn.disabled = false;
         btn.innerText = "RIPROVA SALVATAGGIO";
     }
+};
+
+window.goBackToMassStep1 = () => {
+    document.getElementById('mass-step-1').classList.remove('hidden');
+    document.getElementById('mass-step-2').classList.add('hidden');
+    document.getElementById('modal-confirm').classList.add('hidden');
+    document.getElementById('modal-title').innerText = "Generatore Rapido · Voti Classe";
+};
+
+window.goBackToMultiStep1 = () => {
+    document.getElementById('multi-step-1').classList.remove('hidden');
+    document.getElementById('multi-step-2').classList.add('hidden');
+    document.getElementById('modal-confirm').classList.add('hidden');
+};
+
+window.goBackToMultiStep2 = () => {
+    document.getElementById('multi-step-2').classList.remove('hidden');
+    document.getElementById('multi-step-3').classList.add('hidden');
+    document.getElementById('modal-confirm').classList.add('hidden');
 };
 
    </script>
