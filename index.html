@@ -5606,16 +5606,41 @@ main {
     </section>
 </div>
 
-		<div id="view-sportello" class="tab-content hidden space-y-6">
-    <div class="glass-light p-8 rounded-3xl border-l-8 border-purple-700 shadow-xl bg-white">
-        <h1 class="text-3xl font-black uppercase text-zinc-900 flex items-center gap-3">
+<!-- VIEW: SPORTELLO ASCOLTO -->
+<div id="view-sportello" class="tab-content hidden space-y-8 p-6">
+    
+    <!-- Header dello Sportello (Distanziato dall'header del portale con mt-6) -->
+    <div class="p-8 rounded-3xl border-l-8 shadow-xl mt-6" 
+         style="background-color: #ffffff !important; border: 1px solid #e5e7eb !important; border-left: 8px solid #7e22ce !important;">
+        
+        <!-- Titolo: Colore Viola Notte quasi Nero -->
+        <h1 class="text-3xl font-black uppercase flex items-center gap-3" 
+            style="color: #1e1b4b !important; margin: 0 !important;">
             <span>🧠</span> Sportello Ascolto
         </h1>
-        <p class="text-zinc-400 text-[10px] font-bold uppercase mt-2 tracking-widest">Area Riservata Counselor Scolastico</p>
+        
+        <!-- Sottotitolo: Viola Intenso -->
+        <p class="text-[10px] font-black uppercase mt-2 tracking-[0.2em]" 
+           style="color: #6b21a8 !important; margin-top: 8px !important; opacity: 1 !important;">
+            Area Riservata Counselor Scolastico
+        </p>
     </div>
-    <div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
-        <p class="text-zinc-400 font-black uppercase text-xs">Sezione Sportello Attiva</p>
-        <p class="text-[10px] text-zinc-300 italic">Qui potrai gestire i colloqui e le convocazioni di supporto.</p>
+
+    <!-- Box Informativo Centrale -->
+    <div class="p-12 text-center border-2 border-dashed border-zinc-200 rounded-[40px]" 
+         style="background-color: rgba(255, 255, 255, 0.5) !important;">
+        
+        <p class="font-black uppercase text-xs mb-3" style="color: #4b5563 !important;">
+            Sezione Sportello Attiva
+        </p>
+        
+        <p class="text-sm font-semibold italic leading-relaxed" style="color: #000000 !important;">
+            "Qui potrai gestire i colloqui e le convocazioni di supporto."
+        </p>
+        
+        <div class="mt-6 flex justify-center opacity-20">
+            <span class="text-4xl">🔒</span>
+        </div>
     </div>
 </div>
             
@@ -6678,6 +6703,7 @@ function applyRoleUI() {
     const config = window.classConfigsCache[window.selectedClass] || { startYear: null };
     const grade = window.calculateClassGrade(ay, config.startYear);
     const isMaturita = grade === 5;
+    const puòVedereSportello = [ROLES.COUNSELOR, ROLES.ADMIN, ROLES.PRESIDE].includes(type);
     // NORMALIZZAZIONE CLASSE: Se è "None" o vuota, diventa null
     let miaClasse = window.currentUserData?.classe;
 if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaClasse.trim() === "")) {
@@ -6711,13 +6737,14 @@ if (typeof miaClasse === 'string' && (miaClasse.toLowerCase() === "none" || miaC
     toggle('menu-presenze-studente', isStudente);
     toggle('home-profilo-btn', type !== ROLES.OSPITE);
     toggle('menu-chat-staff', isStaffGenerale);
-    toggle('menu-counselor', type === ROLES.COUNSELOR || type === ROLES.ADMIN);
+    toggle('menu-counselor', puòVedereSportello);      // Sidebar
     toggle('hub-btn-registro-globale', isStaffDidattico);
-    toggle('menu-hub', [ROLES.ADMIN, ROLES.TECNICO].includes(type));
+    toggle('menu-hub', [ROLES.ADMIN, ROLES.TECNICO, ROLES.PRESIDE, ROLES.SEGRETERIA].includes(type));
+
 
 // Gestione Filtri in alto
 toggle('home-btn-classi', isStaffGenerale || type === ROLES.OSPITE);
-toggle('home-btn-hub', isAdmin || type === ROLES.TECNICO);
+toggle('home-btn-hub', [ROLES.ADMIN, ROLES.TECNICO, ROLES.PRESIDE, ROLES.SEGRETERIA].includes(type));
 toggle('home-btn-staff', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].includes(type));
 toggle('home-btn-chat', isStaffGenerale);
 toggle('btn-config-materie-annuali', isStaffDidattico);
@@ -6789,9 +6816,6 @@ toggle('menu-notifiche-full', [ROLES.PRESIDE, ROLES.ADMIN, ROLES.VICE_PRESIDE].i
 toggle('menu-didattica', type === ROLES.STUDENTE);
 toggle('home-btn-didattica', type === ROLES.STUDENTE);
 toggle('btn-add-didattica', isStaffDidattico || type === ROLES.ADMIN);
-
-    // AGGIUNTA: Mostra il menu HUB (Pannello di Controllo) solo ad Admin e Tecnici
-    toggle('menu-hub', isAdmin || type === ROLES.TECNICO);
 
 
 // --- NUOVA LOGICA NAVIGAZIONE STAFF ---
@@ -7590,71 +7614,94 @@ function renderVotoTag(v, studentId) {
 
         // --- AZIONI SCRITTURA ---
         window.submitGrade = async () => {
-            const v = document.getElementById('input-grade-val').value;
-            const m = document.getElementById('input-grade-subject').value;
-            const nv = document.getElementById('input-grade-nv').checked;
-            const arg = document.getElementById('input-grade-topic').value.trim() || "Valutazione generale";
-            const gradeDate = document.getElementById('input-grade-date').value;
-            if (!gradeDate || !m || !v || !window.selectedStudentId) {
-                alert("Completa data, materia, voto e seleziona uno studente prima di registrare.");
-                return;
-            }
+    const v = document.getElementById('input-grade-val').value;
+    const m = document.getElementById('input-grade-subject').value;
+    const nv = document.getElementById('input-grade-nv').checked;
+    const arg = document.getElementById('input-grade-topic').value.trim() || "Valutazione generale";
+    const gradeDate = document.getElementById('input-grade-date').value;
 
-            const inputCal = document.getElementById('global-calendar');
-            if (inputCal.value !== gradeDate) {
-                inputCal.value = gradeDate;
-                await window.updateDateContext(gradeDate);
-            }
+    // 1. Controllo campi obbligatori
+    if (!gradeDate || !m || !v || !window.selectedStudentId) {
+        alert("Completa data, materia, voto e seleziona uno studente prima di registrare.");
+        return;
+    }
 
-            const dParts = gradeDate.split('-');
-            const year = parseInt(dParts[0]);
-            const month = parseInt(dParts[1]);
-            const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
-            const quadrimestre = month >= 9 || month <= 1 ? 1 : 2;
-            const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-            const ref = window.getRecordDocRef(window.selectedStudentId, annoScolastico, 'voti');
-            const entry = { 
-                id: crypto.randomUUID(),
-                voto: v.toString(),
-                materia: m.toLowerCase(),
-                data: dataScelta,
-                prof: window.currentUserData.name,
-                profId: window.currentUserId,
-                argomento: arg,
-                quad: quadrimestre,
-                anno: annoScolastico,
-                nonValutato: nv,
-                emoji: nv ? "🔵" : (LISTA_MATERIE[m.toLowerCase()] || "📝")
-            };
-            
-            await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
-            
-            // Log Agenda
-            const agendaRef = window.getAgendaDocRef(window.selectedClass, gradeDate);
-            const studentName = window.allStudents.find(s => s.id === window.selectedStudentId)?.name || "Studente Ignoto";
+    // --- NUOVO CONTROLLO: COERENZA MATERIE ANNUALI ---
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const cls = window.selectedClass;
 
-await setDoc(agendaRef, { 
-    daily_voti: arrayUnion({ 
-        studente: studentName, 
-        studenteId: window.selectedStudentId, 
-        voto: v, 
-        materia: m,
-        argomento: arg 
-    }) 
-}, { merge: true });
-            
-            document.getElementById('input-grade-val').value = "";
-            document.getElementById('input-grade-nv').checked = false;
-            document.getElementById('input-grade-topic').value = "";
-            window.closeModal();
-            alert("Voto registrato nel profilo e in agenda!");
-            loadStudentRecords(window.selectedStudentId);
+    // Recuperiamo le materie ufficialmente attive per questa classe in questo anno
+    const materiePerplesse = window.getAnnualClassSubjects(cls, ay).map(s => s.toLowerCase().trim());
 
-            // Refresh viste globali se attive
-            if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
-            if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
-            if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) window.renderScrutinioFinale();
-        };
+    // Se la configurazione esiste (ovvero se la lista non è vuota)
+    if (materiePerplesse.length > 0) {
+        if (!materiePerplesse.includes(m.toLowerCase().trim())) {
+            alert(`⚠️ Azione Negata!\n\nLa materia "${m.toUpperCase()}" non risulta tra le materie attive per la classe ${cls} nell'A.S. ${ay}.\n\nControlla la configurazione nell'Hub Classe o seleziona una materia corretta.`);
+            return; // Blocca il salvataggio
+        }
+    }
+    // --- FINE CONTROLLO ---
+
+    const inputCal = document.getElementById('global-calendar');
+    if (inputCal.value !== gradeDate) {
+        inputCal.value = gradeDate;
+        await window.updateDateContext(gradeDate);
+    }
+
+    const dParts = gradeDate.split('-');
+    const year = parseInt(dParts[0]);
+    const month = parseInt(dParts[1]);
+    const dataScelta = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+    const quadrimestre = (month >= 9 || month <= 1) ? 1 : 2;
+    const annoScolastico = month >= 9 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+
+    const ref = window.getRecordDocRef(window.selectedStudentId, annoScolastico, 'voti');
+    const entry = { 
+        id: crypto.randomUUID(),
+        voto: v.toString(),
+        materia: m.toLowerCase(),
+        data: dataScelta,
+        prof: window.currentUserData.name,
+        profId: window.currentUserId,
+        argomento: arg,
+        quad: quadrimestre,
+        anno: annoScolastico,
+        nonValutato: nv,
+        emoji: nv ? "🔵" : (LISTA_MATERIE[m.toLowerCase()] || "📝")
+    };
+    
+    try {
+        await setDoc(ref, { voti: arrayUnion(entry) }, { merge: true });
+        
+        // Log in Agenda
+        const agendaRef = window.getAgendaDocRef(window.selectedClass, gradeDate);
+        const studentName = window.allStudents.find(s => s.id === window.selectedStudentId)?.name || "Studente Ignoto";
+
+        await setDoc(agendaRef, { 
+            daily_voti: arrayUnion({ 
+                studente: studentName, 
+                studenteId: window.selectedStudentId, 
+                voto: v, 
+                materia: m,
+                argomento: arg 
+            }) 
+        }, { merge: true });
+        
+        document.getElementById('input-grade-val').value = "";
+        document.getElementById('input-grade-nv').checked = false;
+        document.getElementById('input-grade-topic').value = "";
+        window.closeModal();
+        alert("✅ Voto registrato con successo!");
+        loadStudentRecords(window.selectedStudentId);
+
+        // Refresh grafici e tabelle
+        if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) window.renderGlobalClassRegistry();
+        if (document.getElementById('view-tabellone')?.classList.contains('active-view')) window.renderTabelloneGlobale();
+    } catch (e) {
+        console.error("Errore salvataggio:", e);
+        alert("Errore tecnico durante il salvataggio.");
+    }
+};
 
         window.openModal = (type) => {
     // --- RESET PULSANTE CONFIRMA ---
@@ -13201,22 +13248,47 @@ window.openQuickMassGradesModal = () => {
     const body = document.getElementById('modal-body');
     const confirm = document.getElementById('modal-confirm');
     const title = document.getElementById('modal-title');
-    
-    title.innerText = "Generatore Rapido · Voti Classe";
     const overlay = document.getElementById('modal-overlay');
     
-    // --- RESET STATO PULSANTE ---
+    // --- 1. RECUPERO DATI CONTESTUALI ---
+    const cls = window.selectedClass;
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const isAdmin = window.userRole === 'admin' || window.userRole === 'preside';
+    
+    // Recuperiamo le materie ufficiali dell'anno per questa classe
+    const annualSubjects = window.getAnnualClassSubjects(cls, ay);
+    const userSubjects = (window.currentUserData?.materie || []).map(m => m.toLowerCase().trim());
+
+    // --- 2. FILTRAGGIO INTELLIGENTE ---
+    let finalSubjectList = [];
+
+    if (annualSubjects.length > 0) {
+        // Se la classe è configurata:
+        // L'Admin vede tutte le materie configurate.
+        // Il Prof vede solo le SUE materie che sono presenti nella configurazione della classe.
+        finalSubjectList = isAdmin 
+            ? annualSubjects 
+            : annualSubjects.filter(m => userSubjects.includes(m.toLowerCase().trim()));
+    } else {
+        // Fallback: se la classe NON è configurata, mostriamo le solite per non bloccare il lavoro
+        finalSubjectList = isAdmin ? Object.keys(LISTA_MATERIE) : userSubjects;
+    }
+
+    if (finalSubjectList.length === 0) {
+        alert(`⚠️ Attenzione: non risultano materie assegnate al tuo profilo per la classe ${cls} nell'A.S. ${ay}.`);
+        return;
+    }
+
+    // --- 3. CONFIGURAZIONE UI MODALE ---
+    title.innerText = "Generatore Rapido · Voti Classe";
     confirm.disabled = false; 
     confirm.innerText = "Conferma";
-    confirm.classList.add('hidden'); // Nascondi all'inizio (Step 1)
-    // ----------------------------
+    confirm.classList.add('hidden'); // Nascondi fino allo Step 2
 
     overlay.classList.add('quick-mass-grades-modal');
     overlay.classList.replace('hidden', 'flex');
-    confirm.disabled = false; 
+
     window.massScheduleConfig = null;
-    const materieDocente = window.currentUserData?.materie || [];
-    const isAdmin = window.userRole === 'admin';
 
     body.innerHTML = `
         <div id="mass-step-1" class="space-y-3">
@@ -13224,7 +13296,8 @@ window.openQuickMassGradesModal = () => {
                 <p class="mass-config-heading"><span>01</span> Configura la prova</p>
                 <div class="grid grid-cols-2 gap-2">
                     <select id="quick-mass-sub" onchange="window.handleQuickMassSubjectChange()" class="modal-input !py-2">
-                        ${(isAdmin ? Object.keys(LISTA_MATERIE) : materieDocente).map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
+                        <!-- POPOLAMENTO DINAMICO FILTRATO -->
+                        ${finalSubjectList.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('')}
                     </select>
                     <select id="quick-mass-type" class="modal-input !py-2">
                         <option value="Scritto">Scritto</option>
@@ -13235,7 +13308,7 @@ window.openQuickMassGradesModal = () => {
                         <input type="checkbox" id="quick-mass-use-history" checked class="mt-1 accent-amber-500">
                         <span>
                             <span class="block text-xs font-black text-amber-900">Usa lo storico dei voti</span>
-                            <span class="mt-1 block text-[10px] leading-relaxed text-amber-700/70">Stima voti coerenti con quelli già ottenuti in questa materia, includendo gli anni precedenti del ciclo.</span>
+                            <span class="mt-1 block text-[10px] leading-relaxed text-amber-700/70">Stima voti coerenti con quelli già ottenuti in questa materia.</span>
                         </span>
                     </label>
                 </div>
@@ -13250,41 +13323,24 @@ window.openQuickMassGradesModal = () => {
                     <input type="range" id="quick-mass-max" min="2" max="10" value="9" class="flex-1 accent-red-600" oninput="this.nextElementSibling.innerText = this.value">
                     <span class="text-xs font-black text-stone-800 w-4">9</span>
                 </div>
-                <p id="quick-mass-religion-hint" class="hidden text-xs font-bold text-stone-600">Per Religione verrà generato un giudizio tra Ottimo, Distinto, Buono, Discreto, Sufficiente e Insufficiente.</p>
             </div>
 
             <div class="mass-config-card">
                 <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <p class="mass-config-heading !mb-0"><span>03</span> Giorni disponibili</p>
-                    <button type="button" onclick="window.applyMassScheduleDays()" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[9px] font-black uppercase text-red-700 transition-colors hover:bg-red-100 hover:border-red-300">📅 Usa orario docente</button>
+                    <button type="button" onclick="window.applyMassScheduleDays()" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[9px] font-black uppercase text-red-700 transition-colors hover:bg-red-100">📅 Usa orario docente</button>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
-                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="1" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
-                        <span class="text-xs font-bold">Lun</span>
-                    </label>
-                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="2" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
-                        <span class="text-xs font-bold">Mar</span>
-                    </label>
-                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="3" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
-                        <span class="text-xs font-bold">Mer</span>
-                    </label>
-                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="4" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
-                        <span class="text-xs font-bold">Gio</span>
-                    </label>
-                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="5" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
-                        <span class="text-xs font-bold">Ven</span>
-                    </label>
-                    <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
-                        <input type="checkbox" name="mass-days" value="6" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
-                        <span class="text-xs font-bold">Sab</span>
-                    </label>
+                    ${[1,2,3,4,5,6].map(d => {
+                        const days = ["", "Lun", "Mar", "Mer", "Gio", "Ven", "Sab"];
+                        return `
+                        <label class="mass-day-option flex items-center gap-2 p-2 cursor-pointer select-none">
+                            <input type="checkbox" name="mass-days" value="${d}" checked onchange="window.clearMassScheduleSelection()" class="accent-red-600">
+                            <span class="text-xs font-bold">${days[d]}</span>
+                        </label>`;
+                    }).join('')}
                 </div>
-                <p id="mass-schedule-status" class="mass-schedule-status mt-2">Seleziona i giorni manualmente oppure usa l’orario del docente per questa classe.</p>
+                <p id="mass-schedule-status" class="mass-schedule-status mt-2">Seleziona i giorni manualmente o usa l’orario reale.</p>
             </div>
 
             <div class="mass-config-card">
@@ -13293,20 +13349,12 @@ window.openQuickMassGradesModal = () => {
                     <option value="1">1 Voto (Standard)</option>
                     <option value="2">2 Voti (Multi-voto)</option>
                     <option value="3">3 Voti (Multi-voto)</option>
-                    <option value="4">4 Voti (Multi-voto)</option>
-                    <option value="5">5 Voti (Multi-voto)</option>
                 </select>
             </div>
 
             <button onclick="window.prepareMassGradesList()" class="mass-prepare-button w-full py-3 font-black uppercase text-[10px]">Prepara e rivedi i voti →</button>
         </div>
-        <div id="mass-step-2" class="hidden space-y-4">
-            <div class="flex justify-between items-center">
-                <p class="text-[9px] text-stone-500 font-black uppercase">05 · Revisione individuale</p>
-                <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700">Rigenera voti 🎲</button>
-            </div>
-            <div id="mass-students-list" class="mass-students-list grid"></div>
-        </div>
+        <div id="mass-step-2" class="hidden space-y-4"></div>
     `;
 
     confirm.classList.add('hidden');
