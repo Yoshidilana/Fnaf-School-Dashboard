@@ -10844,39 +10844,78 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 	window.triggerGoldenDebug = async function() {
+    // Se il pannello è già aperto, lo chiudiamo
     if (document.getElementById('golden-debug-panel')) {
         document.getElementById('golden-debug-panel').remove();
         return;
     }
 
     const MY_ID = "477766915096313867";
-    const isLocal = window.location.hostname === "localhost" || window.location.protocol === "file:";
-    const isMeOnline = window.currentUserId === MY_ID;
+    
+    // --- FIX LOCALE AGGIORNATO ---
+    const isLocal = window.location.hostname === "localhost" || 
+                    window.location.hostname === "127.0.0.1" || 
+                    window.location.protocol === "file:";
+    
+    // Se sei loggato col tuo ID o sei su 127.0.0.1 / localhost, entra diretto
+    const isAuthorized = window.currentUserId === MY_ID || isLocal;
 
     const panel = document.createElement('div');
     panel.id = 'golden-debug-panel';
     panel.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-[340px] p-4 z-[99999] border-2 border-red-700 shadow-2xl rounded-xl text-center flex flex-col';
     panel.style.cssText = 'background: rgba(5, 5, 5, 0.98); backdrop-filter: blur(15px); color: #fff; font-family: monospace; max-height: 80vh;';
 
-    // 1. Schermata di caricamento o Password
-    if (!isMeOnline && !isLocal) {
+    if (isAuthorized) {
+        window.showGoldenUserList(panel);
+    } else {
         panel.innerHTML = `
-            <h2 class="text-lg font-black text-yellow-500 mb-2 uppercase">Easter Egg!</h2>
-            <p class="text-[10px] text-zinc-400 mb-4 italic">"It's me." - Inserisci la chiave.</p>
+            <h2 class="text-lg font-black text-yellow-500 mb-2 uppercase">Golden Debug Access</h2>
+            <p class="text-[10px] text-zinc-400 mb-4 italic">"It's me." - Inserisci la chiave segreta.</p>
             <div class="flex flex-col gap-3">
-                <input type="password" id="golden-pass-input" placeholder="********" class="bg-zinc-900 border border-zinc-800 text-white p-2 rounded text-sm text-center outline-none focus:border-red-600 transition-all">
-                <button onclick="window.verifyGoldenPass()" class="bg-white text-black p-2 rounded text-xs font-bold uppercase hover:bg-red-600 hover:text-white transition-all">Verify</button>
-            </div>`;
+                <input type="password" id="golden-pass-input" placeholder="********" 
+                    class="bg-zinc-900 border border-zinc-800 text-white p-2 rounded text-sm text-center outline-none focus:border-red-600 transition-all">
+                <button onclick="window.verifyGoldenPass()" class="bg-white text-black p-2 rounded text-xs font-bold uppercase hover:bg-red-600 hover:text-white transition-all">Sblocca Sistema</button>
+            </div>
+            <button onclick="this.parentElement.remove()" class="mt-4 text-[9px] text-zinc-600 hover:text-white uppercase">Annulla x</button>`;
         document.body.appendChild(panel);
-        return;
     }
+};
 
-    // 2. Se autorizzato, carichiamo la lista utenti
-    panel.innerHTML = `<h2 class="text-red-600 font-black animate-pulse text-xs">COLLEGAMENTO AL DATABASE...</h2>`;
-    document.body.appendChild(panel);
+// Funzione per generare l'hash SHA-256 (non toccare questa parte)
+async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);                    
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+window.verifyGoldenPass = async function() {
+    const input = document.getElementById('golden-pass-input');
+    const panel = document.getElementById('golden-debug-panel');
+    
+    // Il tuo hash segreto (corrisponde alla tua parola chiave)
+    const SUPER_SECRET_HASH = "38f43a54613c72a2006031fba6fe60ace787bb7619a8974e0214c0e068e65e60";
+
+    const hashedInput = await sha256(input.value.trim());
+
+    if (hashedInput === SUPER_SECRET_HASH) {
+        // PASSWORD CORRETTA: Carica subito la lista utenti
+        window.showGoldenUserList(panel);
+    } else {
+        // ERRORE: Feedback visivo e sonoro
+        input.value = '';
+        input.placeholder = 'CHIAVE ERRATA';
+        input.classList.add('border-red-600');
+        if (typeof honkSound !== 'undefined') honkSound.play().catch(e => {});
+    }
+};
+
+// Funzione che scarica gli utenti e crea i pulsanti per il bypass
+window.showGoldenUserList = async function(panel) {
+    panel.innerHTML = `<h2 class="text-red-600 font-black animate-pulse text-xs">ACCESSO AI SERVER IN CORSO...</h2>`;
+    if (!panel.parentElement) document.body.appendChild(panel);
 
     try {
-        // Percorso esatto: artifacts > fnaf-school-bot > public > data > assignments
         const collPath = window.collection(window.db, 'artifacts', 'fnaf-school-bot', 'public', 'data', 'assignments');
         const snapshot = await window.getDocs(collPath);
         
@@ -10889,68 +10928,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             buttonsHtml += `
                 <button onclick="document.getElementById('debug-input-id').value='${id}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
-                        class="w-full mb-1 p-2 bg-zinc-900 hover:bg-red-900 border border-zinc-800 rounded text-[10px] text-left flex justify-between items-center transition-colors">
-                    <span class="font-bold uppercase">${nome}</span>
-                    <span class="text-[8px] text-zinc-500">${ruolo}</span>
+                        class="w-full mb-1 p-2 bg-zinc-900 hover:bg-red-900 border border-zinc-800 rounded text-[10px] text-left flex justify-between items-center transition-colors group">
+                    <span class="font-bold uppercase group-hover:text-white">${nome}</span>
+                    <span class="text-[8px] text-zinc-500 group-hover:text-zinc-300">${ruolo}</span>
                 </button>
             `;
         });
 
         panel.innerHTML = `
-            <h2 class="text-red-600 font-black text-sm mb-1 italic uppercase tracking-widest">Golden Debug</h2>
-            <p class="text-[8px] text-zinc-500 mb-3 uppercase">Seleziona Identità per Bypass</p>
-            <div class="overflow-y-auto flex-1 pr-1 custom-scrollbar" style="max-height: 350px;">
+            <h2 class="text-yellow-500 font-black text-sm mb-1 italic uppercase tracking-widest">Master Debug Panel</h2>
+            <p class="text-[8px] text-zinc-500 mb-3 uppercase font-bold">Seleziona identità per il bypass</p>
+            <div class="overflow-y-auto flex-1 pr-1 custom-scroll" style="max-height: 400px;">
                 ${buttonsHtml}
             </div>
-            <button onclick="document.getElementById('golden-debug-panel').remove()" class="mt-3 text-[9px] text-zinc-600 hover:text-white uppercase">Abort x</button>
+            <button onclick="document.getElementById('golden-debug-panel').remove()" class="mt-3 text-[9px] text-zinc-600 hover:text-white uppercase font-black">Esci dal pannello x</button>
         `;
 
     } catch (err) {
-        panel.innerHTML = `<p class="text-red-500 text-[10px]">ERRORE DB: ${err.message}</p>`;
-    }
-};
-
-// Funzione per generare l'hash SHA-256 in JavaScript nativo
-async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);                    
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-window.verifyGoldenPass = async function() {
-    const input = document.getElementById('golden-pass-input');
-    const panel = document.getElementById('golden-debug-panel');
-    const MY_ID = "477766915096313867";
-
-    // FIRMA SHA-256 della tua chiave segreta (es: se la password è "iltuoiddiscord" o una parola chiave)
-    // Generiamo l'hash della password inserita dall'utente
-    const hashedInput = await sha256(input.value.trim());
-
-    const SUPER_SECRET_HASH = "38f43a54613c72a2006031fba6fe60ace787bb7619a8974e0214c0e068e65e60";
-
-    if (hashedInput === SUPER_SECRET_HASH) {
-        // TRASFORMAZIONE IN DEBUG
         panel.innerHTML = `
-            <h2 class="text-xl font-black text-green-500 mb-2 animate-pulse uppercase">Decoded</h2>
-            <div class="flex flex-col gap-2">
-                <button onclick="document.getElementById('debug-input-id').value='${MY_ID}'; window.startBypass(); document.getElementById('golden-debug-panel').remove();" 
-                        class="bg-red-800 hover:bg-red-700 text-white p-3 rounded font-bold uppercase text-xs transition-all">
-                    🚀 Start Master Bypass
-                </button>
-                <button onclick="document.getElementById('golden-debug-panel').remove()" class="text-[10px] text-zinc-500 hover:text-white uppercase mt-2">Exit x</button>
-            </div>
-        `;
-    } else {
-        input.value = '';
-        input.placeholder = 'INVALID KEY';
-        input.classList.add('border-red-600');
-        
-        // Riproduce l'honk se fallisce
-        const context = new (window.AudioContext || window.webkitAudioContext)();
-        if (context.state === 'suspended') context.resume();
-        honkSound.currentTime = 0;
-        honkSound.play().catch(e => console.log("Audio bloccato"));
+            <p class="text-red-500 text-[10px] font-bold">ERRORE DI COLLEGAMENTO</p>
+            <p class="text-zinc-600 text-[8px] mt-2">${err.message}</p>
+            <button onclick="this.parentElement.remove()" class="mt-4 text-[9px] uppercase">Chiudi</button>`;
     }
 };
 
