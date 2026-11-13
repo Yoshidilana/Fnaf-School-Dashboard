@@ -14682,7 +14682,8 @@ window.generateMultiGrades = async () => {
         }).join('');
     }).join('');
 
-   finalGrid.innerHTML = students.map(s => {
+    // 1. Generiamo la griglia degli studenti e la salviamo in una variabile
+    finalGrid.innerHTML = students.map(s => {
         let studentRows = fullData.map(d => {
             return Array.from({ length: d.voteCount }, (_, index) => {
                 const generated = isReligionSubject(d.sub)
@@ -14693,40 +14694,36 @@ window.generateMultiGrades = async () => {
                     || window.generateRandomValidDateString(d.voteMonths[index], d.schedule.giorni);
                 
                 if (!date) {
-                    throw new Error(`Non ci sono date valide a ${monthNames[d.voteMonths[index]]} per ${d.sub} nei giorni previsti dall'orario.`);
+                    throw new Error(`Non ci sono date valide per ${d.sub} nei giorni previsti.`);
                 }
 
-                // MODIFICA QUI: Rimossa classe 'truncate' e 'w-16', aggiunta 'min-w-max' o rimosso il limite di larghezza
-return `
-    <div class="grid grid-cols-12 items-center gap-1 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
-         data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
-        
-        <!-- Nome Materia: occupa 5 colonne su 12 -->
-        <span class="col-span-5 text-[8px] font-black text-zinc-500 uppercase leading-none whitespace-nowrap overflow-hidden">
-            ${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}
-        </span>
-
-        <!-- Voto: occupa 2 colonne su 12 -->
-        <input type="text" value="${grade}" class="m-voto col-span-2 w-full text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
-
-        <!-- Data: occupa 5 colonne su 12 -->
-        <input type="date" value="${date}" ${d.type === 'Scritto' || d.type === 'Pratico' ? 'onchange="window.syncMultiWrittenDate(this)"' : ''} 
-               class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
-    </div>
-`;
+                return `
+                    <div class="grid grid-cols-12 items-center gap-1 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
+                         data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
+                        <span class="col-span-5 text-[8px] font-black text-zinc-500 uppercase leading-none whitespace-nowrap overflow-hidden">
+                            ${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}
+                        </span>
+                        <input type="text" value="${grade}" class="m-voto col-span-2 w-full text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
+                        <input type="date" value="${date}" ${d.type === 'Scritto' || d.type === 'Pratico' ? 'onchange="window.syncMultiWrittenDate(this)"' : ''} 
+                               class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
+                    </div>`;
             }).join('');
         }).join('');
 
         return `
             <div class="mass-row p-3 bg-white border border-zinc-200 rounded-xl shadow-sm">
                 <p class="text-[10px] font-black text-stone-800 uppercase border-b border-zinc-100 mb-2 pb-1">${s.name}</p>
-                <div class="flex flex-col">
-                    ${studentRows}
-                </div>
-            </div>
-        `;
+                <div class="flex flex-col">${studentRows}</div>
+            </div>`;
     }).join('');
 
+    // 2. ORA INSERIAMO IL TASTO INDIETRO (FUORI DAI CICLI)
+    // Se non esiste già un pulsante con classe 'btn-back-step', lo aggiungiamo in cima allo Step 3
+    if (!step3.querySelector('.btn-back-step')) {
+        step3.insertAdjacentHTML('afterbegin', backToStep2Html.replace('button', 'button class="btn-back-step"'));
+    }
+
+    // 3. Colleghiamo l'azione finale al tasto rosso
     confirm.onclick = window.submitMultiGrades;
 };
 
