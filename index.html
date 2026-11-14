@@ -964,7 +964,10 @@ main {
 }
 .grade-positive { background: #ecfdf5; color: #059669; border-color: #10b98133; }
 .grade-negative { background: #fef2f2; color: #dc2626; border-color: #ef444433; }
+.grade-religion { background: #f4f4f5; color: #18181b !important; border-color: #d4d4d8; }
 .grade-nv { background: #eff6ff !important; color: #1d4ed8 !important; border-color: #3b82f644 !important; }
+.religion-grade-chip { background: #fff !important; border-color: #d4d4d8 !important; }
+.religion-grade-value { color: #18181b !important; }
 
 /* Effetto al passaggio del mouse sui voti */
 .grade-badge:hover {
@@ -7702,7 +7705,9 @@ window.canManageGrade = (grade) => {
 
 function renderVotoTag(v, studentId) {
     const valNum = window.parseVotoScolastico(v.voto);
-    let statusClass = valNum >= 6 ? "grade-positive" : (valNum > 0 ? "grade-negative" : "grade-neutral");
+    let statusClass = isReligionSubject(v.materia)
+        ? "grade-religion"
+        : (valNum >= 6 ? "grade-positive" : (valNum > 0 ? "grade-negative" : "grade-neutral"));
     if (v.nonValutato) statusClass = "grade-nv";
     const canManage = window.canManageGrade(v);
     const handlers = canManage
@@ -10921,11 +10926,14 @@ tbody.innerHTML = allData.map(s => {
                         // Generazione HTML per tutti i voti nella casella (Con Tooltip e Gestione)
             const votiHtml = votiDettaglio.map(v => {
                 const val = window.parseVotoScolastico(v.voto);
-                let colorClass = val < 6 ? 'text-red-500' : 'text-green-500';
+                const isReligionGrade = isReligionSubject(v.materia) && !v.nonValutato;
+                let colorClass = isReligionGrade ? 'religion-grade-value' : (val < 6 ? 'text-red-500' : 'text-green-500');
                 if (v.nonValutato) colorClass = 'text-blue-500';
                 
                 const dataBreve = v.data ? v.data.substring(0, 5) : '--/--';
-                const bgClass = v.nonValutato ? 'bg-blue-900/20 border-blue-500/30' : 'bg-black/20 border-white/5';
+                const bgClass = v.nonValutato
+                    ? 'bg-blue-900/20 border-blue-500/30'
+                    : (isReligionGrade ? 'religion-grade-chip' : 'bg-black/20 border-white/5');
 
 const canManage = window.canManageGrade(v);
 const handlers = canManage
@@ -12184,14 +12192,16 @@ window.showTabelloneDetails = (studentId, materia) => {
 
     html += voti.map(v => {
         const val = window.parseVotoScolastico(v.voto);
-        const color = val < 6 ? 'text-red-500' : 'text-green-400';
+        const color = isReligionSubject(v.materia) && !v.nonValutato
+            ? 'religion-grade-value'
+            : (v.nonValutato ? 'text-blue-500' : (val < 6 ? 'text-red-500' : 'text-green-400'));
         return `
             <div class="tabellone-detail-row">
                 <div class="flex flex-col">
                     <span class="text-[10px] font-black text-zinc-100 uppercase">${v.data}</span>
                     <span class="text-[8px] text-zinc-500 italic leading-tight">${v.argomento || 'Valutazione'}</span>
                 </div>
-                <span class="text-lg font-black ${color}">${v.voto}</span>
+                <span class="text-lg font-black ${color} ${isReligionSubject(v.materia) && !v.nonValutato ? 'religion-grade-chip rounded px-2' : ''}">${v.voto}</span>
             </div>
         `;
     }).join('');
