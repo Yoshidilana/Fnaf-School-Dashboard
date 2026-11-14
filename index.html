@@ -894,8 +894,26 @@ main {
 .bg-zinc-900, .bg-\[\#18181b\] { background-color: #fffefe !important; }
 .bg-\[\#121214\], .bg-zinc-700 { background-color: #ffffff !important; }
 .border-zinc-800 { border-color: #26211e !important; }
-.bg-white, .bg-zinc-900 {
-    background-color: #1b1816 !important;
+
+/* --- FIX TEMA CHIARO GLOBALE --- */
+/* Forza lo sfondo bianco reale per le classi standard */
+.bg-white { 
+    background-color: #ffffff !important; 
+}
+
+/* Gestione delle tonalità di grigio per mantenere il contrasto */
+.bg-zinc-50 { background-color: #f9fafb !important; }
+.bg-zinc-100 { background-color: #f4f4f5 !important; }
+.bg-zinc-200 { background-color: #e4e4e7 !important; }
+
+/* Invertiamo i zinc scuri (900/950) per farli diventare chiari nel tema light */
+.bg-zinc-900, .bg-zinc-950, .bg-\[#18181b\] { 
+    background-color: #ffffff !important; 
+}
+
+/* Forza i testi scuri su sfondi chiari */
+.text-zinc-800, .text-zinc-900, .text-stone-800 { 
+    color: #1c1917 !important; 
 }
 
 /* --- REGISTRO VOTI MODERNIZZATO (NO SCROLL) --- */
@@ -3784,50 +3802,94 @@ main {
         filter: brightness(0.96);
     }
 
-    #calendar-modal {
-        padding: clamp(0.75rem, 3vw, 1.5rem) !important;
-        background: rgba(24, 20, 20, 0.62) !important;
-        backdrop-filter: blur(7px);
-    }
+/* --- CALENDARIO SCOLASTICO--- */
+#calendar-modal {
+    background: rgba(28, 25, 23, 0.6) !important; /* Overlay scuro trasparente per focus */
+    backdrop-filter: blur(10px);
+}
 
-    #calendar-modal > div {
-        max-height: 90vh;
-        overflow: auto;
-        border: 1px solid #e7e0da !important;
-        border-radius: 22px !important;
-        background: linear-gradient(155deg, #fff, #faf7f4) !important;
-        color: #292322 !important;
-        box-shadow: 0 24px 70px rgba(24, 20, 20, 0.28) !important;
-    }
+#calendar-modal > div {
+    background: linear-gradient(145deg, #ffffff, #fcfaf8) !important;
+    border: 1px solid #e7e0da !important;
+    border-radius: 32px !important;
+    padding: 2.5rem !important;
+    box-shadow: 0 30px 60px -12px rgba(41, 30, 24, 0.3) !important;
+}
 
-    #calendar-modal h3 {
-        color: #292322 !important;
-    }
+#calendar-modal h3 {
+    color: #b91c1c !important; /* Rosso Fazbear */
+    letter-spacing: -0.02em;
+}
 
-    #calendar-modal p,
-    #calendar-modal h4,
-    #calendar-modal span,
-    #calendar-modal label {
-        color: #57534e !important;
-    }
+/* Sezioni interne al modal */
+.cal-section-box {
+    background: #fdfdfd !important;
+    border: 1px solid #eee7e2 !important;
+    border-radius: 20px;
+    padding: 1.25rem;
+    transition: all 0.2s ease;
+}
 
-    #calendar-modal hr {
-        border-color: #eee7e2 !important;
-    }
+.cal-section-box:hover {
+    border-color: #fca5a5 !important;
+    box-shadow: 0 8px 20px rgba(185, 28, 28, 0.05);
+}
 
-    #calendar-modal > div > div.bg-\[\#23272a\],
-    #calendar-modal #cal-blocked-list {
-        border: 1px solid #e7e0da !important;
-        border-radius: 13px !important;
-        background: #faf8f6 !important;
-    }
+/* Lista dei giorni bloccati */
+#cal-blocked-list {
+    background: #faf8f6 !important;
+    border: 1px solid #e7e0da !important;
+    border-radius: 18px;
+    padding: 10px;
+}
 
-    #calendar-modal input {
-        border: 1px solid #e7e0da !important;
-        border-radius: 9px !important;
-        background: #fff !important;
-        color: #292322 !important;
-    }
+.blocked-date-tag {
+    background: #ffffff !important;
+    border: 1px solid #eee7e2 !important;
+    color: #1c1917 !important;
+    font-weight: 800;
+    font-size: 11px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+
+/* Bottoni e Input */
+#calendar-modal input[type="date"] {
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    color: #1c1917 !important;
+    font-weight: 600;
+}
+
+/* Pulsante Chiudi */
+.btn-cal-close {
+    background: #f4f4f5 !important;
+    color: #57534e !important;
+    border: 1px solid #e4e4e7 !important;
+}
+
+.btn-cal-close:hover {
+    background: #e4e4e7 !important;
+    color: #1c1917 !important;
+}
+
+/* Forza il pulsante Salva a non diventare bianco */
+.btn-save-calendar-final {
+    background-color: #b91c1c !important; /* Rosso scuro fisso */
+    color: #ffffff !important; /* Testo bianco fisso */
+    border: 1px solid #991b1b !important;
+    box-shadow: 0 4px 12px rgba(185, 28, 28, 0.2) !important;
+}
+
+.btn-save-calendar-final:hover {
+    background-color: #dc2626 !important; /* Rosso più acceso al passaggio */
+    transform: translateY(-1px);
+}
 
     #view-chat-staff {
         width: 100%;
@@ -5052,57 +5114,69 @@ main {
     </div>
 </div>
 
-<div id="calendar-modal" class="hidden fixed inset-0 bg-black/70 z-[9999] justify-center items-center p-4">
-    <div class="bg-[#2c2f33] text-white p-6 rounded-xl w-full max-w-lg max-h-[90vh] flex flex-col shadow-2xl border border-zinc-800">
+<!-- VIEW: MODAL CALENDARIO (VERSIONE GESTIONALE) -->
+<div id="calendar-modal" class="hidden fixed inset-0 z-[100] justify-center items-center p-4">
+    <div class="w-full max-w-lg max-h-[92vh] flex flex-col">
         
-        <div class="shrink-0">
-            <h3 class="text-lg font-black text-red-550 uppercase italic tracking-wide">📅 Gestione Vacanze e Blocchi</h3>
-            <p class="text-xs text-zinc-400 mt-1">Imposta i giorni di chiusura dell'A.S. corrente per bloccare voti, note e firme.</p>
-            <hr class="border-zinc-700 my-3">
+        <!-- Header -->
+        <div class="shrink-0 mb-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="text-2xl font-black uppercase italic tracking-tighter">Calendario <span class="text-stone-400">Scolastico</span></h3>
+                    <p class="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mt-1">Sospensione didattica e festività</p>
+                </div>
+                <button onclick="window.closeCalendarModal()" class="w-10 h-10 flex items-center justify-center rounded-full bg-stone-100 text-stone-400 hover:text-red-600 transition-colors">✕</button>
+            </div>
+            <div class="h-1 w-20 bg-red-600 rounded-full mt-4"></div>
         </div>
 
-        <div class="overflow-y-auto pr-1 flex-1 space-y-4 custom-scrollbar">
+        <div class="overflow-y-auto flex-1 space-y-6 custom-scroll pr-2">
             
-            <div class="bg-[#23272a] p-3 rounded-lg border border-zinc-700/50">
-                <label class="text-[11px] font-black tracking-wider text-indigo-400 uppercase block mb-2">OPZIONE 1: Giorno Singolo (Ponti, Allerte, Imprevisti)</label>
+            <!-- Giorno Singolo -->
+            <div class="cal-section-box">
+                <label class="text-[10px] font-black uppercase text-stone-500 mb-3 block tracking-widest">Aggiungi Giorno Singolo</label>
                 <div class="flex gap-2">
-                    <input type="date" id="cal-input-date" class="flex-1 px-3 py-2 text-sm rounded bg-[#1c1e22] border border-zinc-700 text-white focus:outline-none focus:border-indigo-500">
-                    <button onclick="window.addSingleDate()" class="px-4 py-2 bg-emerald-650 hover:bg-emerald-600 text-white font-bold text-xs uppercase tracking-wider rounded transition-all shrink-0">Aggiungi</button>
+                    <input type="date" id="cal-input-date" class="flex-1 px-4 py-2.5 rounded-xl border border-stone-200 outline-none focus:border-red-500 transition-all">
+                    <button onclick="window.addSingleDate()" class="px-6 py-2.5 bg-red-600 text-white font-black text-[10px] uppercase rounded-xl shadow-lg shadow-red-900/20 hover:bg-red-700 active:scale-95 transition-all">Aggiungi +</button>
                 </div>
             </div>
 
-            <div class="bg-[#23272a] p-3 rounded-lg border border-zinc-700/50">
-                <label class="text-[11px] font-black tracking-wider text-amber-500 uppercase block mb-2">OPZIONE 2: Periodo Multiplo (Vacanze lunghe)</label>
-                <div class="grid grid-cols-2 gap-2 items-center mb-2">
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[10px] text-zinc-500 uppercase font-bold">Dal:</span>
-                        <input type="date" id="cal-input-start" class="w-full px-2 py-1.5 text-xs rounded bg-[#1c1e22] border border-zinc-700 text-white focus:outline-none">
+            <!-- Range Vacanze -->
+            <div class="cal-section-box">
+                <label class="text-[10px] font-black uppercase text-amber-600 mb-3 block tracking-widest">Configura Periodo Vacanze</label>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="space-y-1">
+                        <span class="text-[8px] font-black text-stone-400 uppercase ml-1">Data Inizio</span>
+                        <input type="date" id="cal-input-start" class="w-full px-4 py-2 rounded-xl border border-stone-200 outline-none">
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[10px] text-zinc-500 uppercase font-bold">Al:</span>
-                        <input type="date" id="cal-input-end" class="w-full px-2 py-1.5 text-xs rounded bg-[#1c1e22] border border-zinc-700 text-white focus:outline-none">
+                    <div class="space-y-1">
+                        <span class="text-[8px] font-black text-stone-400 uppercase ml-1">Data Fine</span>
+                        <input type="date" id="cal-input-end" class="w-full px-4 py-2 rounded-xl border border-stone-200 outline-none">
                     </div>
                 </div>
-                <button onclick="window.addDateRange()" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-[#2c2f33] font-black text-xs uppercase tracking-wider rounded transition-all">Aggiungi Intero Periodo</button>
+                <button onclick="window.addDateRange()" class="w-full py-3.5 bg-amber-500 text-white font-black text-[10px] uppercase rounded-xl hover:bg-amber-600 transition-all shadow-md">Blocca Intero Periodo</button>
             </div>
 
+            <!-- Lista Riassuntiva -->
             <div>
-                <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-400 mb-2">Giorni Bloccati Attivi:</h4>
-                <div id="cal-blocked-list" class="max-h-[160px] overflow-y-auto bg-[#23272a] p-2 rounded border border-zinc-700 space-y-1 custom-scrollbar">
-                    </div>
+                <h4 class="text-[10px] font-black uppercase text-stone-400 mb-3 tracking-widest px-1">Giorni di chiusura salvati:</h4>
+                <div id="cal-blocked-list" class="max-h-[180px] overflow-y-auto space-y-1">
+                    <!-- Dinamico -->
+                </div>
             </div>
 
         </div>
 
-        <div class="shrink-0 pt-4 mt-2 border-t border-zinc-700 flex justify-between gap-4">
-            <button onclick="window.closeCalendarModal()" class="px-4 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-bold text-xs uppercase tracking-wider rounded transition-all">
-                Chiudi
+        <!-- Footer Footer -->
+        <div class="shrink-0 pt-6 mt-4 border-t border-stone-100 flex justify-between gap-4">
+            <button onclick="window.closeCalendarModal()" class="btn-cal-close px-8 py-3.5 font-black text-[10px] uppercase rounded-xl transition-all">
+                Annulla
             </button>
-            <button onclick="window.saveCalendarToFirestore()" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase tracking-wider rounded shadow-lg shadow-red-900/20 transition-all">
-                Salva su Database
-            </button>
+<button onclick="window.saveCalendarToFirestore()" 
+    class="btn-save-calendar-final px-8 py-3.5 font-black text-[10px] uppercase rounded-xl transition-all">
+    Salva Calendario
+</button>
         </div>
-
     </div>
 </div>
 
@@ -5288,19 +5362,20 @@ main {
                 </select>
             </div>
                 </div>
-        <div class="flex flex-wrap items-center gap-2">
-            <div id="reg-global-delete-controls" class="hidden items-center gap-2">
-                <select id="reg-global-delete-quarter" aria-label="Quadrimestre da eliminare"
-                    class="border border-red-200 rounded-xl px-3 py-2 text-[9px] font-black uppercase text-red-800 bg-white">
-                    <option value="all">Tutti i quadrimestri</option>
-                    <option value="1">Solo 1° quadrimestre</option>
-                    <option value="2">Solo 2° quadrimestre</option>
-                </select>
-                <button onclick="window.requestClassSubjectGradeDeletion()"
-                    class="bg-red-50 text-red-700 text-[9px] font-black uppercase px-3 py-2 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-200">
-                    🗑️ Elimina voti materia
-                </button>
-            </div>
+<div class="flex flex-wrap items-center gap-2">
+    <!-- Aggiunto !bg-white e border-zinc-200 per chiarezza -->
+    <div id="reg-global-delete-controls" class="hidden items-center gap-2 p-2 !bg-white rounded-2xl border border-zinc-200">
+        <select id="reg-global-delete-quarter" aria-label="Quadrimestre da eliminare"
+            class="border border-red-200 rounded-xl px-3 py-2 text-[9px] font-black uppercase text-red-800 !bg-white">
+            <option value="all">Tutti i quadrimestri</option>
+            <option value="1">Solo 1° quadrimestre</option>
+            <option value="2">Solo 2° quadrimestre</option>
+        </select>
+        <button onclick="window.requestClassSubjectGradeDeletion()"
+            class="bg-red-50 text-red-700 text-[9px] font-black uppercase px-3 py-2 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-200">
+            🗑️ Elimina voti materia
+        </button>
+    </div>
             <!-- Generatore Rapido Spostato Qui -->
             <button id="btn-mass-global" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
                 🎲 Generatore Rapido
@@ -13043,20 +13118,19 @@ window.renderBlockedDatesList = () => {
     listContainer.innerHTML = '';
 
     if (tempBlockedDates.length === 0) {
-        listContainer.innerHTML = '<span style="color: #72767d; fontSize: 13px;">Nessun giorno bloccato impostato.</span>';
+        listContainer.innerHTML = '<p class="text-center py-4 text-stone-400 text-[10px] font-bold uppercase">Nessun giorno bloccato.</p>';
         return;
     }
 
     tempBlockedDates.forEach((dateStr) => {
-        // Formattiamo la visualizzazione da YYYY-MM-DD a GG/MM/AAAA
         const [yyyy, mm, dd] = dateStr.split('-');
         const visualDate = `${dd}/${mm}/${yyyy}`;
 
         const item = document.createElement('div');
-        item.style = "display: flex; justify-content: space-between; align-items: center; background: #2c2f33; padding: 6px 10px; margin-bottom: 5px; border-radius: 4px; font-size: 14px;";
+        item.className = "blocked-date-tag"; // Usa la classe CSS definita sopra
         item.innerHTML = `
             <span>📅 ${visualDate}</span>
-            <span onclick="window.removeDateFromBlockedList('${dateStr}')" style="color: #ff4757; cursor: pointer; font-weight: bold; font-size: 12px; padding: 2px 6px;">❌</span>
+            <span onclick="window.removeDateFromBlockedList('${dateStr}')" class="text-red-500 cursor-pointer hover:scale-125 transition-transform">✕</span>
         `;
         listContainer.appendChild(item);
     });
