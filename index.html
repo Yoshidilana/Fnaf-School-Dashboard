@@ -13357,6 +13357,8 @@ window.openQuickMassGradesModal = () => {
                     <option value="1">1 Voto (Standard)</option>
                     <option value="2">2 Voti (Multi-voto)</option>
                     <option value="3">3 Voti (Multi-voto)</option>
+                    <option value="4">4 Voti (Multi-voto)</option>
+                    <option value="5">5 Voti (Multi-voto)</option>
                 </select>
             </div>
 
@@ -13721,15 +13723,18 @@ const validDaysText = daysToShow.map(d => dayNames[d]).join(', ');
             `;
         }
 
-        return `
-            <div class="mass-row p-3 flex flex-col gap-2" data-sid="${s.id}">
-                <p class="text-[10px] font-black text-stone-800 uppercase truncate border-b border-stone-200 pb-1">${s.name}</p>
-                <p class="mass-history-note">${historyNote}</p>
-                <div class="grid grid-cols-1 gap-1">
-                    ${studentSlotsHtml}
-                </div>
-            </div>
-        `;
+return `
+    <div class="mass-row p-3 flex flex-col gap-2" data-sid="${s.id}">
+        <div class="flex justify-between items-start border-b border-stone-200 pb-1">
+            <p class="text-[10px] font-black text-stone-800 uppercase truncate">${s.name}</p>
+        </div>
+        ${window.getDiceButtonsHTML()} <!-- AGGIUNTO QUI -->
+        <p class="mass-history-note">${historyNote}</p>
+        <div class="grid grid-cols-1 gap-1">
+            ${studentSlotsHtml}
+        </div>
+    </div>
+`;
     }).filter(Boolean).join('');
 
     if (students.length > 0 && !rowsHtml) return;
@@ -13842,6 +13847,53 @@ window.setRandomValidDate = () => {
     const input = document.getElementById('quick-mass-date');
     if (input) input.value = window.generateRandomValidDateString() || '';
 };
+
+window.individualRoll = (btn, rangeKey) => {
+    const row = btn.closest('.mass-row');
+    // Seleziona tutti gli input voto della riga (funziona sia per Generatore Rapido che Multi-Materia)
+    const inputs = row.querySelectorAll('.mass-grade, .m-voto');
+    
+    const ranges = {
+        'schifo': { min: 0, max: 2, labels: ['1', '2', '2-', '1½'] },
+        'studia': { min: 3, max: 4, labels: ['3', '3½', '4-', '4', '3+'] },
+        'meh': { min: 5, max: 5.75, labels: ['5', '5+', '5½', '6-'] },
+        'bene': { min: 6, max: 7.25, labels: ['6', '6½', '7-', '7', '6+'] },
+        'ottimo': { min: 8, max: 9.25, labels: ['8', '8+', '8½', '9-', '9'] },
+        'eccellente': { min: 10, max: 10.5, labels: ['10', '10L'] }
+    };
+
+    const r = ranges[rangeKey];
+
+    inputs.forEach(input => {
+        // Controllo se è religione
+        const subName = input.closest('[data-sub]')?.dataset.sub || document.getElementById('quick-mass-sub')?.value;
+        if (String(subName).toLowerCase().trim() === 'religione') {
+            input.value = window.generateReligionJudgment();
+            return;
+        }
+
+        // Estrai un'etichetta a caso dal set predefinito per quel range
+        const finalValue = r.labels[Math.floor(Math.random() * r.labels.length)];
+        input.value = finalValue;
+        
+        // Feedback visivo flash
+        input.style.backgroundColor = '#fef08a';
+        setTimeout(() => input.style.backgroundColor = '#fff', 300);
+    });
+};
+
+// HTML dei bottoni da riutilizzare
+window.getDiceButtonsHTML = () => `
+    <div class="flex flex-wrap gap-1 mt-2 mb-1">
+        <button onclick="window.individualRoll(this, 'schifo')" title="Voto 0-2" class="px-1.5 py-0.5 bg-black text-white text-[7px] font-black rounded hover:bg-red-900 transition-colors uppercase">SCHIFO!</button>
+        <button onclick="window.individualRoll(this, 'studia')" title="Voto 3-4" class="px-1.5 py-0.5 bg-red-700 text-white text-[7px] font-black rounded hover:bg-red-800 transition-colors uppercase">STUDIA!!</button>
+        <button onclick="window.individualRoll(this, 'meh')" title="Voto 5-6-" class="px-1.5 py-0.5 bg-stone-400 text-white text-[7px] font-black rounded hover:bg-stone-500 transition-colors uppercase">Meh</button>
+        <button onclick="window.individualRoll(this, 'bene')" title="Voto 6-7" class="px-1.5 py-0.5 bg-blue-500 text-white text-[7px] font-black rounded hover:bg-blue-600 transition-colors uppercase">Bene</button>
+        <button onclick="window.individualRoll(this, 'ottimo')" title="Voto 8-9" class="px-1.5 py-0.5 bg-emerald-500 text-white text-[7px] font-black rounded hover:bg-emerald-600 transition-colors uppercase">OTTIMO</button>
+        <button onclick="window.individualRoll(this, 'eccellente')" title="Voto 10" class="px-1.5 py-0.5 bg-yellow-500 text-black text-[7px] font-black rounded hover:bg-yellow-400 transition-colors uppercase">ECCELLENTE</button>
+    </div>
+    <p class="text-[6px] text-zinc-400 font-bold uppercase tracking-tighter mb-2 italic">Shuffle individuale</p>
+`;
 
 window.submitQuickMassGrades = async () => { 
     const sub = document.getElementById('quick-mass-sub').value;
@@ -14852,12 +14904,16 @@ window.generateMultiGrades = async () => {
     }).join('');
 
     // 1. Generiamo la griglia degli studenti e la salviamo in una variabile
+   // Generiamo la griglia degli studenti
     finalGrid.innerHTML = students.map(s => {
+        // Genera le righe per ogni materia configurata per questo studente
         let studentRows = fullData.map(d => {
             return Array.from({ length: d.voteCount }, (_, index) => {
+                // Eseguiamo la logica di generazione UNA SOLA VOLTA
                 const generated = isReligionSubject(d.sub)
                     ? window.generateReligionJudgment()
                     : window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
+                
                 const grade = typeof generated === 'object' ? generated.grade : generated;
                 const date = d.sharedDates[index]
                     || window.generateRandomValidDateString(d.voteMonths[index], d.schedule.giorni);
@@ -14869,30 +14925,32 @@ window.generateMultiGrades = async () => {
                 return `
                     <div class="grid grid-cols-12 items-center gap-1 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
                          data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
-                        <span class="col-span-5 text-[8px] font-black text-zinc-500 uppercase leading-none whitespace-nowrap overflow-hidden">
+                        <span class="col-span-5 text-[8px] font-black text-zinc-500 uppercase leading-none truncate">
                             ${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}
                         </span>
                         <input type="text" value="${grade}" class="m-voto col-span-2 w-full text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
-                        <input type="date" value="${date}" ${d.type === 'Scritto' || d.type === 'Pratico' ? 'onchange="window.syncMultiWrittenDate(this)"' : ''} 
-                               class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
+                        <input type="date" value="${date}" class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
                     </div>`;
             }).join('');
         }).join('');
 
+        // Ritorna la card dello studente con i bottoni individuali
         return `
-            <div class="mass-row p-3 bg-white border border-zinc-200 rounded-xl shadow-sm">
-                <p class="text-[10px] font-black text-stone-800 uppercase border-b border-zinc-100 mb-2 pb-1">${s.name}</p>
-                <div class="flex flex-col">${studentRows}</div>
+            <div class="mass-row p-3 bg-white border border-zinc-200 rounded-xl shadow-sm flex flex-col">
+                <p class="text-[10px] font-black text-stone-800 uppercase border-b border-zinc-100 mb-1 pb-1">${s.name}</p>
+                
+                <!-- TERMINALE DI VOTO RAPIDO INDIVIDUALE -->
+                ${window.getDiceButtonsHTML()}
+                
+                <div class="flex flex-col mt-2">${studentRows}</div>
             </div>`;
     }).join('');
 
-    // 2. ORA INSERIAMO IL TASTO INDIETRO (FUORI DAI CICLI)
-    // Se non esiste già un pulsante con classe 'btn-back-step', lo aggiungiamo in cima allo Step 3
+    // Inseriamo il tasto indietro se non esiste
     if (!step3.querySelector('.btn-back-step')) {
         step3.insertAdjacentHTML('afterbegin', backToStep2Html.replace('button', 'button class="btn-back-step"'));
     }
 
-    // 3. Colleghiamo l'azione finale al tasto rosso
     confirm.onclick = window.submitMultiGrades;
 };
 
