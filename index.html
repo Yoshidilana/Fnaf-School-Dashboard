@@ -2882,6 +2882,18 @@ main {
         color: #3b302b !important;
     }
 
+    #view-scrutinio #scrutinio-final-body td.grade-result-negative {
+        color: #dc2626 !important;
+    }
+
+    #view-scrutinio #scrutinio-final-body td.grade-result-positive {
+        color: #047857 !important;
+    }
+
+    #view-scrutinio #scrutinio-final-body td.grade-result-neutral {
+        color: #a8a29e !important;
+    }
+
     #view-registro-classe,
     #view-tabellone,
     #view-scrutinio {
@@ -10730,9 +10742,11 @@ window.renderScrutinioFinale = async (subjectMode) => {
             return String(Math.round(average));
         };
         const gradeColor = (value, subjectKey) => {
-            if (value === '-') return 'text-zinc-400';
-            if (subjectKey === 'RELIGIONE') return value === 'INSUFFICIENTE' ? 'text-red-600' : 'text-emerald-700';
-            return Number.parseFloat(value) < 6 ? 'text-red-600' : 'text-emerald-700';
+            if (value === '-') return 'grade-result-neutral';
+            if (subjectKey === 'RELIGIONE') {
+                return value === 'INSUFFICIENTE' ? 'grade-result-negative' : 'grade-result-positive';
+            }
+            return Number.parseFloat(value) < 6 ? 'grade-result-negative' : 'grade-result-positive';
         };
 
         if (head) {
