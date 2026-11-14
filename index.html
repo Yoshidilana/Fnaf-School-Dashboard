@@ -14214,6 +14214,12 @@ window.individualRoll = (btn, rangeKey) => {
     };
 
     const labels = ranges[rangeKey];
+    if (!labels) return;
+    row.dataset.individualRollRange = rangeKey;
+    row.querySelectorAll('.individual-grade-shift').forEach(button => {
+        button.disabled = false;
+        button.classList.remove('opacity-40', 'cursor-not-allowed');
+    });
 
     inputs.forEach(input => {
         // Controllo speciale per Religione
@@ -14233,6 +14239,43 @@ window.individualRoll = (btn, rangeKey) => {
     });
 };
 
+window.shiftIndividualGrades = (btn, direction) => {
+    if (direction !== -1 && direction !== 1) return;
+    const row = btn.closest('.mass-row');
+    if (!row?.dataset.individualRollRange) return;
+
+    const numericScale = [];
+    for (let grade = 1; grade < 10; grade++) {
+        numericScale.push(String(grade), `${grade}+`, `${grade}½`, `${grade + 1}-`);
+    }
+    numericScale.push('10', '10L');
+    const religionScale = ['NS', 'S', 'd', 'B', 'D', 'O'];
+
+    row.querySelectorAll('.mass-grade, .m-voto').forEach(input => {
+        if (!input.value.trim()) return;
+        const subject = input.closest('.multi-row-data')?.dataset.sub
+            || document.getElementById('quick-mass-sub')?.value;
+        if (isReligionSubject(subject)) {
+            const currentIndex = religionScale.indexOf(input.value);
+            if (currentIndex !== -1) {
+                input.value = religionScale[Math.max(0, Math.min(religionScale.length - 1, currentIndex + direction))];
+            }
+        } else {
+            const currentValue = window.parseVotoScolastico(input.value);
+            if (!Number.isFinite(currentValue) || currentValue < 1 || currentValue > 10.5) return;
+            const targetValue = Math.max(1, Math.min(10.5, currentValue + direction));
+            input.value = numericScale.reduce((closest, grade) =>
+                Math.abs(window.parseVotoScolastico(grade) - targetValue)
+                < Math.abs(window.parseVotoScolastico(closest) - targetValue)
+                    ? grade
+                    : closest, numericScale[0]);
+        }
+
+        input.style.backgroundColor = '#fef08a';
+        setTimeout(() => input.style.backgroundColor = '#fff', 300);
+    });
+};
+
 // HTML dei bottoni da riutilizzare
 window.getDiceButtonsHTML = () => `
     <div class="flex flex-wrap gap-1.5 mt-2 mb-2">
@@ -14244,6 +14287,8 @@ window.getDiceButtonsHTML = () => `
         <button onclick="window.individualRoll(this, 'bravo')" title="Voto 7½-8+" class="px-2 py-1 bg-indigo-500 text-white text-[8px] font-black rounded-lg hover:bg-indigo-600 transition-all uppercase shadow-sm">Bravo! 😎</button>
         <button onclick="window.individualRoll(this, 'ottimo')" title="Voto 8½-10-" class="px-2 py-1 bg-emerald-500 text-white text-[8px] font-black rounded-lg hover:bg-emerald-600 transition-all uppercase shadow-sm">Ottimo ✨</button>
         <button onclick="window.individualRoll(this, 'eccellente')" title="Voto 10" class="px-2 py-1 bg-amber-500 text-black text-[8px] font-black rounded-lg hover:bg-yellow-400 transition-all uppercase shadow-sm">Eccellente 🏆</button>
+        <button onclick="window.shiftIndividualGrades(this, 1)" title="Aumenta i voti di un punto" aria-label="Aumenta i voti di un punto" disabled class="individual-grade-shift opacity-40 cursor-not-allowed px-2 py-1 bg-emerald-700 text-white text-[10px] font-black rounded-lg transition-all shadow-sm">⬆️</button>
+        <button onclick="window.shiftIndividualGrades(this, -1)" title="Diminuisci i voti di un punto" aria-label="Diminuisci i voti di un punto" disabled class="individual-grade-shift opacity-40 cursor-not-allowed px-2 py-1 bg-red-700 text-white text-[10px] font-black rounded-lg transition-all shadow-sm">⬇️</button>
     </div>
     <p class="text-[7px] text-zinc-400 font-bold uppercase tracking-widest mb-2 italic">🎲 Estrazione rapida per riga</p>
 `;
