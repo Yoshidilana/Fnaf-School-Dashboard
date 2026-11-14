@@ -5259,7 +5259,7 @@ main {
 </div>
 	
 	<div id="view-gestione-staff" class="tab-content hidden p-4">
-    <div class="flex justify-between items-center mb-6">
+	    <div class="flex justify-between items-center mb-6">
         <div>
             <h2 class="text-2xl font-black uppercase italic text-zinc-550 leading-tight">Gestione Personale</h2>
             <p class="text-[10px] font-black text-red-600 uppercase tracking-widest">Fascicoli Riservati Dirigenza</p>
@@ -5275,7 +5275,7 @@ main {
 
 <!-- VIEW: REGISTRO VOTI GLOBALE -->
 <div id="view-registro-classe" class="tab-content hidden p-6">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <div class="flex items-center gap-4">
             <div>
                 <h2 class="text-2xl font-black italic uppercase text-yellow-800">Registro Voti Classe</h2>
@@ -5288,7 +5288,19 @@ main {
                 </select>
             </div>
                 </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+            <div id="reg-global-delete-controls" class="hidden items-center gap-2">
+                <select id="reg-global-delete-quarter" aria-label="Quadrimestre da eliminare"
+                    class="border border-red-200 rounded-xl px-3 py-2 text-[9px] font-black uppercase text-red-800 bg-white">
+                    <option value="all">Tutti i quadrimestri</option>
+                    <option value="1">Solo 1° quadrimestre</option>
+                    <option value="2">Solo 2° quadrimestre</option>
+                </select>
+                <button onclick="window.requestClassSubjectGradeDeletion()"
+                    class="bg-red-50 text-red-700 text-[9px] font-black uppercase px-3 py-2 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-200">
+                    🗑️ Elimina voti materia
+                </button>
+            </div>
             <!-- Generatore Rapido Spostato Qui -->
             <button id="btn-mass-global" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
                 🎲 Generatore Rapido
@@ -5356,14 +5368,14 @@ main {
 
 		<!-- VIEW: TABELLONE GLOBALE SCRUTINIO -->
 <div id="view-tabellone" class="tab-content hidden p-6 !bg-white"> <!-- Aggiunto !bg-white -->
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <div>
             <!-- Aggiunto !text-zinc-900 -->
             <h2 class="text-2xl font-black italic uppercase !text-zinc-900">
                 Tabellone Medie Classe <span id="tab-class-name" class="text-red-600">--</span>
                         </h2>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <div id="tabellone-subject-mode-container" class="hidden items-center gap-2">
                 <label for="tabellone-subject-mode" class="text-[9px] font-black uppercase text-zinc-500">Materie</label>
                 <select id="tabellone-subject-mode" onchange="window.renderTabelloneGlobale(this.value)"
@@ -5372,6 +5384,10 @@ main {
                     <option value="mine">Le mie</option>
                 </select>
             </div>
+            <button id="btn-delete-all-class-grades" onclick="window.requestAllClassGradesDeletion()"
+                class="hidden bg-red-50 text-red-700 text-[9px] font-black uppercase px-3 py-2 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-200">
+                🗑️ Elimina tutti i voti della classe
+            </button>
             <!-- Generatore Rapido Spostato Qui -->
             <button id="btn-mass-tabellone" onclick="window.openQuickMassGradesModal()" class="hidden bg-red-900/20 text-red-500 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg hover:bg-red-700 hover:text-white transition-all border border-red-600/30">
                 🎲 Generatore Rapido
@@ -10321,6 +10337,14 @@ window.filterByClass = (cls) => {
     }
 
     const profSubject = subjectOverride || subjectSelect.value || materieDisponibili[0] || "Materia non definita";
+    const deleteControls = document.getElementById('reg-global-delete-controls');
+    const canDeleteClassSubject = isAdmin ||
+        (window.userRole === ROLES.PROF && materieDisponibili.length > 0);
+    if (deleteControls) {
+        deleteControls.classList.toggle('hidden', !canDeleteClassSubject);
+        deleteControls.classList.toggle('flex', canDeleteClassSubject);
+        deleteControls.dataset.subject = profSubject;
+    }
 
     const displaySimple = window.getDisplayClassName(cls, false);
     info.innerText = `Classe ${displaySimple} - Visualizzazione: ${profSubject.toUpperCase()}`;
@@ -10692,6 +10716,9 @@ window.renderTabelloneGlobale = async (subjectMode) => {
     const tabTitle = document.getElementById('tab-class-name');
 const subjectModeContainer = document.getElementById('tabellone-subject-mode-container');
 const subjectModeSelect = document.getElementById('tabellone-subject-mode');
+const deleteAllGradesButton = document.getElementById('btn-delete-all-class-grades');
+const canDeleteAllClassGrades = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
+if (deleteAllGradesButton) deleteAllGradesButton.classList.toggle('hidden', !canDeleteAllClassGrades);
 
 // Definiamo chi ha il permesso di vedere il filtro (Prof, Preside, Vice e Admin)
 const isPowerUser = [ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
@@ -12842,6 +12869,14 @@ window.eseguiMigrazioneAgendas = async () => {
 window.deleteAllGradesBySubject = async (studentId, subject) => {
     const subjectUpper = subject.toUpperCase();
     const currentAY = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const isSenior = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
+    const teacherSubjects = (window.currentUserData?.materie || [])
+        .map(value => String(value).trim().toLocaleLowerCase('it'));
+    if (!isSenior && (window.userRole !== ROLES.PROF ||
+        !teacherSubjects.includes(subject.trim().toLocaleLowerCase('it')))) {
+        alert('Puoi eliminare solo i voti di una materia assegnata al tuo profilo.');
+        return;
+    }
 
     if (!confirm(`⚠️ AZIONE IRREVERSIBILE\n\nSei sicuro di voler eliminare TUTTI i voti di ${subjectUpper} per l'A.S. ${currentAY}?`)) return;
 
@@ -13183,6 +13218,232 @@ if (![ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole))
         console.error("Errore:", error);
         alert("❌ Errore durante l'azzeramento.");
     }
+};
+
+window.openClassGradeDeletionConfirmation = ({ classId, academicYear, subject, quarter }) => {
+    const subjectLabel = subject ? `materia ${subject.toUpperCase()}` : 'tutte le materie';
+    const quarterLabel = quarter === 1 ? 'solo il 1° quadrimestre'
+        : quarter === 2 ? 'solo il 2° quadrimestre'
+            : 'tutti i quadrimestri';
+    const scopeLabel = `${subjectLabel}, ${quarterLabel}, per tutti gli studenti della classe ${classId}, A.S. ${academicYear}`;
+
+    window.openRecordEditModal({
+        title: 'Conferma eliminazione voti',
+        confirmText: 'Elimina voti',
+        bodyHtml: `
+            <div class="space-y-4">
+                <p class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-900">
+                    Operazione irreversibile: verranno eliminati ${scopeLabel}.
+                </p>
+                <div class="agenda-form-field">
+                    <label class="modal-label" for="bulk-grade-delete-confirm">Scrivi ELIMINA per confermare</label>
+                    <input id="bulk-grade-delete-confirm" type="text" class="modal-input" autocomplete="off">
+                </div>
+            </div>`,
+        onSave: async () => {
+            if (document.getElementById('bulk-grade-delete-confirm').value.trim().toUpperCase() !== 'ELIMINA') {
+                alert('Scrivi ELIMINA per confermare l’operazione.');
+                return false;
+            }
+
+            let result;
+            try {
+                result = await window.deleteClassGradesByScope({ classId, academicYear, subject, quarter });
+            } catch (error) {
+                console.error('Errore durante l’eliminazione massiva dei voti:', error);
+                alert(error.message || 'Eliminazione non completata. Verifica i registri della classe.');
+                return false;
+            }
+            if (!result.deletedCount) {
+                alert('Non sono stati trovati voti corrispondenti all’ambito selezionato.');
+                return false;
+            }
+
+            alert(`Eliminazione completata: rimossi ${result.deletedCount} voti di ${result.studentsUpdated} studenti.`);
+        }
+    });
+};
+
+window.requestClassSubjectGradeDeletion = () => {
+    const classId = window.selectedClass;
+    const academicYear = document.getElementById('current-academic-year')?.innerText.replace('A.S. ', '').trim();
+    const subject = document.getElementById('reg-global-delete-controls')?.dataset.subject
+        || document.getElementById('reg-global-subject-select')?.value;
+    const quarterValue = document.getElementById('reg-global-delete-quarter')?.value || 'all';
+    const quarter = quarterValue === 'all' ? null : Number(quarterValue);
+    const isSenior = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
+
+    if (!isSenior && window.userRole !== ROLES.PROF) {
+        alert('Non hai i permessi per eliminare i voti della classe.');
+        return;
+    }
+    if (!classId || classId === 'ALL' || !academicYear || !subject) {
+        alert('Seleziona una classe e una materia valide.');
+        return;
+    }
+    const teacherSubjects = (window.currentUserData?.materie || [])
+        .map(value => String(value).trim().toLocaleLowerCase('it'));
+    if (!isSenior && !teacherSubjects.includes(subject.trim().toLocaleLowerCase('it'))) {
+        alert('Puoi eliminare solo i voti di una materia assegnata al tuo profilo.');
+        return;
+    }
+
+    window.openClassGradeDeletionConfirmation({ classId, academicYear, subject, quarter });
+};
+
+window.requestAllClassGradesDeletion = () => {
+    if (![ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole)) {
+        alert('Solo preside, vice-preside e admin possono eliminare tutti i voti della classe.');
+        return;
+    }
+
+    const classId = window.selectedClass;
+    const academicYear = document.getElementById('current-academic-year')?.innerText.replace('A.S. ', '').trim();
+    if (!classId || classId === 'ALL' || !academicYear) {
+        alert('Seleziona una classe e un anno scolastico validi.');
+        return;
+    }
+
+    window.openClassGradeDeletionConfirmation({ classId, academicYear, subject: null, quarter: null });
+};
+
+window.deleteClassGradesByScope = async ({ classId, academicYear, subject = null, quarter = null }) => {
+    const isSenior = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(window.userRole);
+    const currentAcademicYear = document.getElementById('current-academic-year')?.innerText.replace('A.S. ', '').trim();
+    if (subject) {
+        if (!isSenior && window.userRole !== ROLES.PROF) {
+            throw new Error('Ruolo non autorizzato per eliminare i voti della materia.');
+        }
+        const teacherSubjects = (window.currentUserData?.materie || [])
+            .map(value => String(value).trim().toLocaleLowerCase('it'));
+        if (!isSenior && !teacherSubjects.includes(subject.trim().toLocaleLowerCase('it'))) {
+            throw new Error('La materia selezionata non è assegnata al docente.');
+        }
+    } else if (!isSenior) {
+        throw new Error('Solo preside, vice-preside e admin possono eliminare tutti i voti della classe.');
+    }
+    if (classId !== window.selectedClass || !academicYear || academicYear !== currentAcademicYear
+        || !CLASSI_VALIDE.includes(classId)) {
+        throw new Error('Classe o anno scolastico non valido per la cancellazione.');
+    }
+
+    const students = (window.allStudents || []).filter(student =>
+        student.classe === classId && String(student.role || '').toLocaleLowerCase('it').includes('studente')
+    );
+    if (!students.length) throw new Error('Nessuno studente trovato nella classe selezionata.');
+
+    const subjectKey = subject?.trim().toLocaleLowerCase('it') || null;
+    const studentChanges = [];
+    const agendaRemovalCounts = new Map();
+    let deletedCount = 0;
+    let updatedStudentRecords = 0;
+    let updatedAgendaDocuments = 0;
+
+    const snapshots = await Promise.all(students.map(async student => ({
+        student,
+        snapshot: await getDoc(window.getRecordDocRef(student.id, academicYear, 'voti'))
+    })));
+
+    for (const { student, snapshot } of snapshots) {
+        if (!snapshot.exists()) continue;
+        const votes = snapshot.data().voti || [];
+        const removed = [];
+        const retained = [];
+        for (const vote of votes) {
+            const voteYear = String(vote.anno || '').replace('-', '/');
+            const matchesYear = voteYear === academicYear;
+            const matchesSubject = !subjectKey ||
+                String(vote.materia || '').trim().toLocaleLowerCase('it') === subjectKey;
+            const matchesQuarter = !quarter || isDateInQ(vote.data, quarter);
+            if (!matchesYear || !matchesSubject || !matchesQuarter) {
+                retained.push(vote);
+                continue;
+            }
+
+            removed.push(vote);
+            if (vote.data && vote.materia) {
+                const dateParts = String(vote.data).split('/');
+                if (dateParts.length === 3) {
+                    const dateKey = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+                    const key = JSON.stringify([
+                        String(student.id),
+                        String(vote.materia).trim().toLocaleLowerCase('it'),
+                        String(vote.voto)
+                    ]);
+                    const dayCounts = agendaRemovalCounts.get(dateKey) || new Map();
+                    dayCounts.set(key, (dayCounts.get(key) || 0) + 1);
+                    agendaRemovalCounts.set(dateKey, dayCounts);
+                }
+            }
+        }
+
+        if (removed.length) {
+            studentChanges.push({
+                studentId: student.id,
+                retained,
+                removed
+            });
+            deletedCount += removed.length;
+        }
+    }
+
+    if (!deletedCount) return { deletedCount: 0, studentsUpdated: 0 };
+
+    try {
+        for (const change of studentChanges) {
+            await setDoc(window.getRecordDocRef(change.studentId, academicYear, 'voti'), {
+                voti: change.retained
+            }, { merge: true });
+            updatedStudentRecords++;
+        }
+
+        for (const [dateKey, removalCounts] of agendaRemovalCounts) {
+            const agendaRef = window.getAgendaDocRef(classId, dateKey);
+            if (!agendaRef) continue;
+            const agendaSnapshot = await getDoc(agendaRef);
+            if (!agendaSnapshot.exists()) continue;
+
+            const remainingCounts = new Map(removalCounts);
+            const dailyVotes = agendaSnapshot.data().daily_voti || [];
+            const retainedDailyVotes = dailyVotes.filter(dailyVote => {
+                const key = JSON.stringify([
+                    String(dailyVote.studenteId),
+                    String(dailyVote.materia || '').trim().toLocaleLowerCase('it'),
+                    String(dailyVote.voto)
+                ]);
+                const remaining = remainingCounts.get(key) || 0;
+                if (!remaining) return true;
+                remainingCounts.set(key, remaining - 1);
+                return false;
+            });
+
+            if (retainedDailyVotes.length !== dailyVotes.length) {
+                await updateDoc(agendaRef, { daily_voti: retainedDailyVotes });
+                updatedAgendaDocuments++;
+            }
+        }
+    } catch (error) {
+        throw new Error(
+            `Eliminazione interrotta: aggiornati ${updatedStudentRecords} registri studenti su ${studentChanges.length} ` +
+            `e ${updatedAgendaDocuments} agende. Controlla questi dati prima di riprovare. ` +
+            `${error.message || ''}`
+        );
+    }
+
+    if (typeof loadStudentRecords === 'function' && window.selectedStudentId) {
+        loadStudentRecords(window.selectedStudentId);
+    }
+    if (document.getElementById('view-registro-classe')?.classList.contains('active-view')) {
+        window.renderGlobalClassRegistry(subject || undefined);
+    }
+    if (document.getElementById('view-tabellone')?.classList.contains('active-view')) {
+        await window.renderTabelloneGlobale();
+    }
+    if (document.getElementById('view-scrutinio')?.classList.contains('active-view')) {
+        await window.renderScrutinioFinale();
+    }
+
+    return { deletedCount, studentsUpdated: studentChanges.length };
 };
 
 window.eseguiMigrazioneRecords = async () => {
