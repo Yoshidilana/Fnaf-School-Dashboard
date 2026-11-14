@@ -13983,24 +13983,23 @@ const validDaysText = daysToShow.map(d => dayNames[d]).join(', ');
     
     const activeVoteConfig = [];
 
-    for (let v = 0; v < voteCount; v++) {
+       for (let v = 0; v < voteCount; v++) {
+        const labelVoto = `Voto ${v + 1}`;
         if (type === 'Scritto' || type === 'Pratico') {
             let targetMonth = (currentMonthIdx + v) % 12;
             if (targetMonth === 6 || targetMonth === 7) targetMonth = 8;
             
             const defaultDate = window.generateRandomValidDateString(targetMonth, giorniFermi);
-            if (!defaultDate) {
-                alert('Non ci sono date valide nel mese selezionato per i giorni di lezione scelti.');
-                return;
-            }
             activeVoteConfig.push(defaultDate);
 
             headerHtml += `
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black uppercase text-zinc-400 !mb-0">Data Prova ${type} (Voto ${v + 1})</label>
+                <div class="flex flex-col gap-1 p-2 bg-zinc-50 rounded-xl border border-zinc-100">
+                    <label class="text-[9px] font-black uppercase text-red-600 !mb-0">${labelVoto} (${type})</label>
                     <input type="date" value="${defaultDate}" data-vote-idx="${v}"
                            onchange="window.updateMassSlotDatesByVoteIndex(${v}, this.value)"
-                           class="mass-master-control modal-input !py-2 rounded-lg w-full outline-none !bg-white !text-zinc-900 border-zinc-200">
+                           class="mass-master-control modal-input !py-1.5 rounded-lg w-full !bg-white !text-zinc-900 border-zinc-200">
+                    <input type="text" placeholder="Argomento ${labelVoto}..." data-vote-idx="${v}"
+                           class="mass-master-topic modal-input !py-1.5 mt-1 rounded-lg w-full !bg-white !text-zinc-900 border-zinc-200 text-[10px]">
                 </div>
             `;
         } else {
@@ -14009,15 +14008,17 @@ const validDaysText = daysToShow.map(d => dayNames[d]).join(', ');
             activeVoteConfig.push(targetMonth);
 
             headerHtml += `
-                <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black uppercase text-zinc-400 !mb-0">Mese per Interrogazioni - Voto ${v + 1}</label>
+                <div class="flex flex-col gap-1 p-2 bg-zinc-50 rounded-xl border border-zinc-100">
+                    <label class="text-[9px] font-black uppercase text-red-600 !mb-0">${labelVoto} (Interrogazione)</label>
                     <select data-vote-idx="${v}" onchange="window.regenMassSlotDatesByMonth(${v}, this.value)" 
-                            class="mass-master-control modal-input !py-2 rounded-lg w-full outline-none !bg-white !text-zinc-900 border-zinc-200">
+                            class="mass-master-control modal-input !py-1.5 rounded-lg w-full !bg-white !text-zinc-900 border-zinc-200">
                         ${monthNames.map((name, idx) => {
                             if (idx === 6 || idx === 7) return ''; 
                             return `<option value="${idx}" ${idx === targetMonth ? 'selected' : ''}>${name.toUpperCase()}</option>`;
                         }).join('')}
                     </select>
+                    <input type="text" placeholder="Argomento ${labelVoto}..." data-vote-idx="${v}"
+                           class="mass-master-topic modal-input !py-1.5 mt-1 rounded-lg w-full !bg-white !text-zinc-900 border-zinc-200 text-[10px]">
                 </div>
             `;
         }
@@ -14380,6 +14381,12 @@ window.submitQuickMassGrades = async () => {
     let totalVotesSaved = 0;
 
     try {
+        // Recuperiamo tutti gli argomenti impostati nei master control
+        const masterTopics = {};
+        document.querySelectorAll('.mass-master-topic').forEach(input => {
+            masterTopics[input.dataset.voteIdx] = input.value.trim() || `Valutazione ${type}`;
+        });
+
         for (const row of rows) {
             const sid = row.dataset.sid;
             const studentObj = window.allStudents.find(s => s.id === sid);
@@ -14388,18 +14395,20 @@ window.submitQuickMassGrades = async () => {
             for (const slot of slots) {
                 const gradeInput = slot.querySelector('.mass-grade');
                 const dateInput = slot.querySelector('.mass-date');
+                const vIdx = slot.dataset.voteIdx;
                 if (!gradeInput?.value || !dateInput?.value) continue;
 
                 const dateVal = dateInput.value; 
                 const [yyyy, mm, dd] = dateVal.split('-');
                 const dateIta = `${dd}/${mm}/${yyyy}`;
+                const finalTopic = masterTopics[vIdx];
 
                 // Salva nel record studente
                 await setDoc(window.getRecordDocRef(sid, ay, 'voti'), {
                     voti: arrayUnion({
                         id: crypto.randomUUID(), voto: gradeInput.value.trim(), materia: sub.toLowerCase(),
                         data: dateIta, prof: docente.name, profId: docente.id,
-                        argomento: `Prova ${type}`, quad: (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2,
+                        argomento: finalTopic, quad: (parseInt(mm) >= 9 || parseInt(mm) <= 1) ? 1 : 2,
                         anno: ay, emoji: LISTA_MATERIE[sub.toLowerCase()] || "📝"
                     })
                 }, { merge: true });
@@ -14410,13 +14419,20 @@ window.submitQuickMassGrades = async () => {
                     const localDateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
                     const oraDaOrario = (infoOrario.ore && infoOrario.ore[localDateObj.getDay()]) ? infoOrario.ore[localDateObj.getDay()] : "1";
                     agendaUpdatesByDate[dateVal] = {
-                        firme: { ora: oraDaOrario.toString(), tipo: "Verifica", materia: sub.toUpperCase(), argomento: `Svolgimento prove`, prof: docente.name, profId: docente.id },
+                        firme: { 
+                            ora: oraDaOrario.toString(), 
+                            tipo: type, // Usa il tipo reale (Scritto/Orale) invece di "Verifica" fisso
+                            materia: sub.toUpperCase(), 
+                            argomento: finalTopic, // Usa l'argomento scelto invece di "Svolgimento prove"
+                            prof: docente.name, 
+                            profId: docente.id 
+                        },
                         votiGiornalieri: []
                     };
                 }
                 agendaUpdatesByDate[dateVal].votiGiornalieri.push({
                     studente: (studentObj?.name || "Studente").toUpperCase(), studenteId: sid,
-                    voto: gradeInput.value.trim(), materia: sub.toLowerCase(), argomento: `Prova ${type}`
+                    voto: gradeInput.value.trim(), materia: sub.toLowerCase(), argomento: finalTopic
                 });
             }
         }
@@ -15237,47 +15253,39 @@ window.generateMultiGrades = async () => {
     window.multiGradeDateConfig = fullData;
     const dayNames = ["Domenica", "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato"];
 
-    dateControls.innerHTML = fullData.map(config => {
+       dateControls.innerHTML = fullData.map(config => {
         const validDaysText = config.schedule.giorni.map(d => dayNames[d]).join(', ');
 
         return Array.from({ length: config.voteCount }, (_, index) => {
             const label = `${config.sub.toUpperCase()} · Voto ${index + 1}`;
-            
-            const infoGiorni = `
-                <div class="flex items-center gap-1 mt-1">
-                    <span class="text-[7px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded uppercase border border-blue-100">
-                        🗓️ In Orario: ${validDaysText}
-                    </span>
-                </div>`;
-
-            // Usiamo uno stile inline per bypassare il CSS globale che rende scure le classi zinc
             const cardStyle = `style="background-color: #ffffff !important; border: 1px solid #e5e7eb !important;"`;
 
+            let controlHtml = "";
             if (config.type === 'Scritto' || config.type === 'Pratico') {
                 const date = config.sharedDates[index];
-                return `
-                    <label class="flex flex-col gap-1 p-3 rounded-xl shadow-sm" ${cardStyle}>
-                        <span class="text-[10px] font-black uppercase text-zinc-400 !mb-0">${label} (Fissa)</span>
-                        ${infoGiorni}
-                        <input type="date" class="multi-fixed-date-control modal-input !py-2 mt-2 !bg-white !text-zinc-900"
+                controlHtml = `<input type="date" class="multi-fixed-date-control modal-input !py-1.5 mt-2 !bg-white !text-zinc-900"
                                data-sub="${config.sub}" data-vote-idx="${index}" data-previous-date="${date}"
-                               value="${date}" onchange="window.syncMultiWrittenDate(this)">
-                    </label>`;
+                               value="${date}" onchange="window.syncMultiWrittenDate(this)">`;
+            } else {
+                const month = config.voteMonths[index];
+                controlHtml = `<select class="multi-month-control modal-input !py-1.5 mt-2 !bg-white !text-zinc-900"
+                                data-sub="${config.sub}" data-vote-idx="${index}" data-previous-month="${month}"
+                                onchange="window.updateMultiVoteMonth(this)">
+                                ${monthNames.map((name, monthIndex) => {
+                                    if (monthIndex === 6 || monthIndex === 7) return '';
+                                    return `<option value="${monthIndex}" ${monthIndex === month ? 'selected' : ''}>${name.toUpperCase()}</option>`;
+                                }).join('')}
+                               </select>`;
             }
 
-            const month = config.voteMonths[index];
             return `
                 <label class="flex flex-col gap-1 p-3 rounded-xl shadow-sm" ${cardStyle}>
-                    <span class="text-[10px] font-black uppercase text-zinc-400 !mb-0">${label} (Mese)</span>
-                    ${infoGiorni}
-                    <select class="multi-month-control modal-input !py-2 mt-2 !bg-white !text-zinc-900"
-                            data-sub="${config.sub}" data-vote-idx="${index}" data-previous-month="${month}"
-                            onchange="window.updateMultiVoteMonth(this)">
-                        ${monthNames.map((name, monthIndex) => {
-                            if (monthIndex === 6 || monthIndex === 7) return '';
-                            return `<option value="${monthIndex}" ${monthIndex === month ? 'selected' : ''}>${name.toUpperCase()}</option>`;
-                        }).join('')}
-                    </select>
+                    <span class="text-[10px] font-black uppercase text-blue-700 !mb-0">${label}</span>
+                    <span class="text-[7px] font-black bg-blue-50 text-blue-400 px-1.5 py-0.5 rounded uppercase w-fit">🗓️ ${validDaysText}</span>
+                    ${controlHtml}
+                    <input type="text" placeholder="Argomento voto..." 
+                           data-sub="${config.sub}" data-vote-idx="${index}"
+                           class="multi-master-topic modal-input !py-1.5 mt-1 !bg-white !text-zinc-900 border-zinc-200 text-[10px]">
                 </label>`;
         }).join('');
     }).join('');
@@ -15454,37 +15462,71 @@ window.submitMultiGrades = async () => {
             row.dataset.oraCalcolata = oraTrovata || "1";
         }
 
-        // --- SALVATAGGIO (Usa la stessa logica di raggruppamento del Quick per l'agenda) ---
+               // --- SALVATAGGIO ---
         btn.innerText = "SALVATAGGIO...";
+        
+        // Mappiamo gli argomenti master
+        const masterTopics = {};
+        document.querySelectorAll('.multi-master-topic').forEach(input => {
+            const key = `${input.dataset.sub}|${input.dataset.voteIdx}`;
+            masterTopics[key] = input.value.trim();
+        });
+
         const agendaUpdates = {};
         for (const row of rows) {
             const sid = row.dataset.sid;
             const sub = row.dataset.sub;
+            const vIdx = row.dataset.voteIdx;
             const date = row.querySelector('.m-data').value;
             const grade = row.querySelector('.m-voto').value.trim();
             const profName = row.dataset.profname;
             const profId = row.dataset.profid;
+            const type = row.dataset.type;
+
+            const topicKey = `${sub}|${vIdx}`;
+            const finalTopic = masterTopics[topicKey] || `Valutazione ${sub}`;
 
             // 1. Record Studente
             await setDoc(window.getRecordDocRef(sid, ay, 'voti'), {
                 voti: arrayUnion({
                     id: crypto.randomUUID(), voto: grade, materia: sub.toLowerCase(),
                     data: date.split('-').reverse().join('/'), prof: profName, profId: profId,
-                    argomento: "Valutazione", quad: (parseInt(date.split('-')[1]) >= 9 || parseInt(date.split('-')[1]) <= 1) ? 1 : 2,
+                    argomento: finalTopic, quad: (parseInt(date.split('-')[1]) >= 9 || parseInt(date.split('-')[1]) <= 1) ? 1 : 2,
                     anno: ay, emoji: LISTA_MATERIE[sub.toLowerCase()] || "📚"
                 })
             }, { merge: true });
 
             // 2. Agenda
-            if (!agendaUpdates[date]) agendaUpdates[date] = { voti: [], firme: new Set() };
+            if (!agendaUpdates[date]) agendaUpdates[date] = { voti: [], firme: new Map() };
             const sObj = window.allStudents.find(st => st.id === sid);
-            agendaUpdates[date].voti.push({ studente: (sObj?.name || "Studente").toUpperCase(), studenteId: sid, voto: grade, materia: sub, argomento: "Valutazione" });
-            agendaUpdates[date].firme.add(JSON.stringify({ ora: row.dataset.oraCalcolata, tipo: "Lezione", materia: sub.toUpperCase(), argomento: `Interrogazioni/Verifiche`, prof: profName, profId: profId }));
+            
+            agendaUpdates[date].voti.push({ 
+                studente: (sObj?.name || "Studente").toUpperCase(), 
+                studenteId: sid, 
+                voto: grade, 
+                materia: sub, 
+                argomento: finalTopic 
+            });
+
+            // Usiamo una Map per le firme per evitare duplicati della stessa materia nello stesso giorno
+            const firmaKey = `${sub}|${profId}`;
+            agendaUpdates[date].firme.set(firmaKey, { 
+                ora: row.dataset.oraCalcolata, 
+                tipo: type, 
+                materia: sub.toUpperCase(), 
+                argomento: finalTopic, 
+                prof: profName, 
+                profId: profId 
+            });
         }
 
         for (const dKey in agendaUpdates) {
             const aRef = window.getAgendaDocRef(cls, dKey);
-            await setDoc(aRef, { daily_voti: arrayUnion(...agendaUpdates[dKey].voti), firme: arrayUnion(...Array.from(agendaUpdates[dKey].firme).map(f => JSON.parse(f))) }, { merge: true });
+            const firmeArray = Array.from(agendaUpdates[dKey].firme.values());
+            await setDoc(aRef, { 
+                daily_voti: arrayUnion(...agendaUpdates[dKey].voti), 
+                firme: arrayUnion(...firmeArray) 
+            }, { merge: true });
         }
         alert("✅ Registrazione completata!");
         window.closeModal();
