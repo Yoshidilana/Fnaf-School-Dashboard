@@ -14242,8 +14242,11 @@ window.individualRoll = (btn, rangeKey) => {
 window.shiftIndividualGrades = (btn, direction) => {
     if (direction !== -1 && direction !== 1) return;
     const row = btn.closest('.mass-row');
-    if (!row?.dataset.individualRollRange) return;
+    const inputs = Array.from(row.querySelectorAll('.mass-grade, .m-voto'));
+    
+    if (inputs.length === 0) return;
 
+    // 1. Definiamo la scala completa dei voti (per convertire i numeri in stringhe corrette)
     const numericScale = [];
     for (let grade = 1; grade < 10; grade++) {
         numericScale.push(String(grade), `${grade}+`, `${grade}½`, `${grade + 1}-`);
@@ -14251,27 +14254,52 @@ window.shiftIndividualGrades = (btn, direction) => {
     numericScale.push('10', '10L');
     const religionScale = ['NS', 'S', 'd', 'B', 'D', 'O'];
 
-    row.querySelectorAll('.mass-grade, .m-voto').forEach(input => {
-        if (!input.value.trim()) return;
-        const subject = input.closest('.multi-row-data')?.dataset.sub
-            || document.getElementById('quick-mass-sub')?.value;
-        if (isReligionSubject(subject)) {
-            const currentIndex = religionScale.indexOf(input.value);
-            if (currentIndex !== -1) {
-                input.value = religionScale[Math.max(0, Math.min(religionScale.length - 1, currentIndex + direction))];
-            }
-        } else {
-            const currentValue = window.parseVotoScolastico(input.value);
-            if (!Number.isFinite(currentValue) || currentValue < 1 || currentValue > 10.5) return;
-            const targetValue = Math.max(1, Math.min(10.5, currentValue + direction));
-            input.value = numericScale.reduce((closest, grade) =>
-                Math.abs(window.parseVotoScolastico(grade) - targetValue)
-                < Math.abs(window.parseVotoScolastico(closest) - targetValue)
-                    ? grade
-                    : closest, numericScale[0]);
-        }
+    // 2. Estraiamo i valori attuali e li convertiamo in numeri per poterli ordinare
+    let values = inputs.map(input => ({
+        input: input,
+        val: window.parseVotoScolastico(input.value),
+        originalStr: input.value,
+        isRel: isReligionSubject(input.closest('[data-sub]')?.dataset.sub || document.getElementById('quick-mass-sub')?.value)
+    }));
 
-        input.style.backgroundColor = '#fef08a';
+    // 3. Controlliamo se sono già ordinati
+    const isSorted = values.every((v, i) => {
+        if (i === 0) return true;
+        return direction === 1 ? v.val >= values[i-1].val : v.val <= values[i-1].val;
+    });
+
+    if (isSorted) {
+        // Se sono già ordinati, al secondo click spostiamo l'intera riga verso l'alto o il basso
+        values.forEach(v => {
+            if (v.isRel) {
+                const idx = religionScale.indexOf(v.originalStr);
+                const nextIdx = Math.max(0, Math.min(religionScale.length - 1, idx + direction));
+                v.originalStr = religionScale[nextIdx];
+                v.val = nextIdx; // valore fittizio per l'ordinamento
+            } else {
+                // Cerchiamo il voto più vicino nella scala e ci spostiamo di uno step
+                const currentVal = v.val;
+                let targetVal = direction === 1 ? currentVal + 0.25 : currentVal - 0.25;
+                targetVal = Math.max(1, Math.min(10.5, targetVal));
+                
+                v.originalStr = numericScale.reduce((prev, curr) => 
+                    Math.abs(window.parseVotoScolastico(curr) - targetVal) < Math.abs(window.parseVotoScolastico(prev) - targetVal) ? curr : prev
+                );
+                v.val = window.parseVotoScolastico(v.originalStr);
+            }
+        });
+    }
+
+    // 4. Ordiniamo i valori (Ascendente per 1, Discendente per -1)
+    values.sort((a, b) => direction === 1 ? a.val - b.val : b.val - a.val);
+
+    // 5. Applichiamo i nuovi valori agli input della riga
+    values.forEach((v, i) => {
+        const input = inputs[i];
+        input.value = v.originalStr;
+        
+        // Feedback visivo (flash)
+        input.style.backgroundColor = direction === 1 ? '#dcfce7' : '#fee2e2';
         setTimeout(() => input.style.backgroundColor = '#fff', 300);
     });
 };
