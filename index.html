@@ -14247,7 +14247,7 @@ window.shiftIndividualGrades = (btn, direction) => {
     
     if (inputs.length === 0) return;
 
-    // 1. Definiamo la scala completa dei voti (per convertire i numeri in stringhe corrette)
+    // 1. Definiamo la scala completa dei voti
     const numericScale = [];
     for (let grade = 1; grade < 10; grade++) {
         numericScale.push(String(grade), `${grade}+`, `${grade}½`, `${grade + 1}-`);
@@ -14255,7 +14255,7 @@ window.shiftIndividualGrades = (btn, direction) => {
     numericScale.push('10', '10L');
     const religionScale = ['NS', 'S', 'd', 'B', 'D', 'O'];
 
-    // 2. Estraiamo i valori attuali e li convertiamo in numeri per poterli ordinare
+    // 2. Mappiamo i valori attuali
     let values = inputs.map(input => ({
         input: input,
         val: window.parseVotoScolastico(input.value),
@@ -14270,31 +14270,29 @@ window.shiftIndividualGrades = (btn, direction) => {
     });
 
     if (isSorted) {
-        // Se sono già ordinati, al secondo click spostiamo l'intera riga verso l'alto o il basso
+        // --- MODIFICA QUI: Aumento più deciso ---
         values.forEach(v => {
             if (v.isRel) {
                 const idx = religionScale.indexOf(v.originalStr);
                 const nextIdx = Math.max(0, Math.min(religionScale.length - 1, idx + direction));
                 v.originalStr = religionScale[nextIdx];
-                v.val = nextIdx; // valore fittizio per l'ordinamento
             } else {
-                // Cerchiamo il voto più vicino nella scala e ci spostiamo di uno step
-                const currentVal = v.val;
-                let targetVal = direction === 1 ? currentVal + 0.25 : currentVal - 0.25;
-                targetVal = Math.max(1, Math.min(10.5, targetVal));
-                
-                v.originalStr = numericScale.reduce((prev, curr) => 
-                    Math.abs(window.parseVotoScolastico(curr) - targetVal) < Math.abs(window.parseVotoScolastico(prev) - targetVal) ? curr : prev
-                );
-                v.val = window.parseVotoScolastico(v.originalStr);
+                // Troviamo l'indice attuale nella scala
+                let currentIdx = numericScale.findIndex(s => window.parseVotoScolastico(s) === v.val);
+                if (currentIdx === -1) currentIdx = numericScale.indexOf(v.originalStr);
+
+                // Spostiamo di 2 step (ovvero 0.5 punti) per click invece di 1 step (0.25)
+                // Se vuoi un punto intero, cambia il 2 in 4.
+                const nextIdx = Math.max(0, Math.min(numericScale.length - 1, currentIdx + (direction * 2)));
+                v.originalStr = numericScale[nextIdx];
             }
         });
     }
 
-    // 4. Ordiniamo i valori (Ascendente per 1, Discendente per -1)
+    // 4. Ordina sempre (per mantenere la coerenza visiva)
     values.sort((a, b) => direction === 1 ? a.val - b.val : b.val - a.val);
 
-    // 5. Applichiamo i nuovi valori agli input della riga
+    // 5. Applica i nuovi valori
     values.forEach((v, i) => {
         const input = inputs[i];
         input.value = v.originalStr;
