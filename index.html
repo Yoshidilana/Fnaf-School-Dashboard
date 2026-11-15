@@ -14200,8 +14200,10 @@ window.setRandomValidDate = () => {
 };
 
 window.individualRoll = (btn, rangeKey) => {
-    const row = btn.closest('.mass-row');
-    const inputs = row.querySelectorAll('.mass-grade, .m-voto');
+    // Cerca prima se il tasto è dentro una singola riga materia (.multi-row-data)
+    // Altrimenti cerca in tutta la card dello studente (.mass-row)
+    const container = btn.closest('.multi-row-data') || btn.closest('.mass-row');
+    const inputs = container.querySelectorAll('.mass-grade, .m-voto');
     
     const ranges = {
         'orribile': ['1', '1½', '2', '2½', '3-'],
@@ -14216,38 +14218,24 @@ window.individualRoll = (btn, rangeKey) => {
 
     const labels = ranges[rangeKey];
     if (!labels) return;
-    row.dataset.individualRollRange = rangeKey;
-    row.querySelectorAll('.individual-grade-shift').forEach(button => {
-        button.disabled = false;
-        button.classList.remove('opacity-40', 'cursor-not-allowed');
-    });
 
     inputs.forEach(input => {
-        // Controllo speciale per Religione
         const subName = input.closest('[data-sub]')?.dataset.sub || document.getElementById('quick-mass-sub')?.value;
         if (String(subName).toLowerCase().trim() === 'religione') {
             input.value = window.generateReligionJudgment();
-            return;
+        } else {
+            input.value = labels[Math.floor(Math.random() * labels.length)];
         }
-
-        // Estrai un'etichetta a caso dal set definito
-        const finalValue = labels[Math.floor(Math.random() * labels.length)];
-        input.value = finalValue;
-        
-        // Feedback visivo flash (Giallino)
         input.style.backgroundColor = '#fef08a';
         setTimeout(() => input.style.backgroundColor = '#fff', 300);
     });
 };
 
 window.shiftIndividualGrades = (btn, direction) => {
-    if (direction !== -1 && direction !== 1) return;
-    const row = btn.closest('.mass-row');
-    const inputs = Array.from(row.querySelectorAll('.mass-grade, .m-voto'));
-    
+    const container = btn.closest('.multi-row-data') || btn.closest('.mass-row');
+    const inputs = Array.from(container.querySelectorAll('.mass-grade, .m-voto'));
     if (inputs.length === 0) return;
 
-    // 1. Definiamo la scala completa dei voti
     const numericScale = [];
     for (let grade = 1; grade < 10; grade++) {
         numericScale.push(String(grade), `${grade}+`, `${grade}½`, `${grade + 1}-`);
@@ -14255,49 +14243,20 @@ window.shiftIndividualGrades = (btn, direction) => {
     numericScale.push('10', '10L');
     const religionScale = ['NS', 'S', 'd', 'B', 'D', 'O'];
 
-    // 2. Mappiamo i valori attuali
-    let values = inputs.map(input => ({
-        input: input,
-        val: window.parseVotoScolastico(input.value),
-        originalStr: input.value,
-        isRel: isReligionSubject(input.closest('[data-sub]')?.dataset.sub || document.getElementById('quick-mass-sub')?.value)
-    }));
+    inputs.forEach(input => {
+        const isRel = isReligionSubject(input.closest('[data-sub]')?.dataset.sub || document.getElementById('quick-mass-sub')?.value);
+        let currentVal = input.value;
 
-    // 3. Controlliamo se sono già ordinati
-    const isSorted = values.every((v, i) => {
-        if (i === 0) return true;
-        return direction === 1 ? v.val >= values[i-1].val : v.val <= values[i-1].val;
-    });
-
-    if (isSorted) {
-        // --- MODIFICA QUI: Aumento più deciso ---
-        values.forEach(v => {
-            if (v.isRel) {
-                const idx = religionScale.indexOf(v.originalStr);
-                const nextIdx = Math.max(0, Math.min(religionScale.length - 1, idx + direction));
-                v.originalStr = religionScale[nextIdx];
-            } else {
-                // Troviamo l'indice attuale nella scala
-                let currentIdx = numericScale.findIndex(s => window.parseVotoScolastico(s) === v.val);
-                if (currentIdx === -1) currentIdx = numericScale.indexOf(v.originalStr);
-
-                // Spostiamo di 2 step (ovvero 0.5 punti) per click invece di 1 step (0.25)
-                // Se vuoi un punto intero, cambia il 2 in 4.
-                const nextIdx = Math.max(0, Math.min(numericScale.length - 1, currentIdx + (direction * 2)));
-                v.originalStr = numericScale[nextIdx];
-            }
-        });
-    }
-
-    // 4. Ordina sempre (per mantenere la coerenza visiva)
-    values.sort((a, b) => direction === 1 ? a.val - b.val : b.val - a.val);
-
-    // 5. Applica i nuovi valori
-    values.forEach((v, i) => {
-        const input = inputs[i];
-        input.value = v.originalStr;
-        
-        // Feedback visivo (flash)
+        if (isRel) {
+            const idx = religionScale.indexOf(currentVal);
+            const nextIdx = Math.max(0, Math.min(religionScale.length - 1, idx + direction));
+            input.value = religionScale[nextIdx];
+        } else {
+            let currentIdx = numericScale.findIndex(s => window.parseVotoScolastico(s) === window.parseVotoScolastico(currentVal));
+            if (currentIdx === -1) currentIdx = numericScale.indexOf(currentVal);
+            const nextIdx = Math.max(0, Math.min(numericScale.length - 1, currentIdx + (direction * 2)));
+            input.value = numericScale[nextIdx];
+        }
         input.style.backgroundColor = direction === 1 ? '#dcfce7' : '#fee2e2';
         setTimeout(() => input.style.backgroundColor = '#fff', 300);
     });
@@ -14318,6 +14277,21 @@ window.getDiceButtonsHTML = () => `
         <button onclick="window.shiftIndividualGrades(this, -1)" title="Diminuisci i voti di un punto" aria-label="Diminuisci i voti di un punto" disabled class="individual-grade-shift opacity-40 cursor-not-allowed px-2 py-1 bg-red-700 text-white text-[10px] font-black rounded-lg transition-all shadow-sm">⬇️</button>
     </div>
     <p class="text-[7px] text-zinc-400 font-bold uppercase tracking-widest mb-2 italic">🎲 Estrazione rapida per riga</p>
+`;
+
+window.getMiniDiceButtonsHTML = () => `
+    <div class="flex flex-wrap gap-1 mt-1">
+        <button onclick="window.individualRoll(this, 'orribile')" title="Orribile" class="hover:scale-125 transition-transform">🤮</button>
+        <button onclick="window.individualRoll(this, 'schifo')" title="Schifo" class="hover:scale-125 transition-transform">🤢</button>
+        <button onclick="window.individualRoll(this, 'studia')" title="Studia!" class="hover:scale-125 transition-transform">😡</button>
+        <button onclick="window.individualRoll(this, 'meh')" title="Meh" class="hover:scale-125 transition-transform">😐</button>
+        <button onclick="window.individualRoll(this, 'buono')" title="Buono" class="hover:scale-125 transition-transform">🙂</button>
+        <button onclick="window.individualRoll(this, 'bravo')" title="Bravo" class="hover:scale-125 transition-transform">😎</button>
+        <button onclick="window.individualRoll(this, 'ottimo')" title="Ottimo" class="hover:scale-125 transition-transform">✨</button>
+        <button onclick="window.individualRoll(this, 'eccellente')" title="Eccellente" class="hover:scale-125 transition-transform">🏆</button>
+        <button onclick="window.shiftIndividualGrades(this, 1)" class="ml-1 text-emerald-600 font-bold">↑</button>
+        <button onclick="window.shiftIndividualGrades(this, -1)" class="text-red-600 font-bold">↓</button>
+    </div>
 `;
 
 window.submitQuickMassGrades = async () => { 
@@ -15307,14 +15281,20 @@ window.generateMultiGrades = async () => {
                     throw new Error(`Non ci sono date valide per ${d.sub} nei giorni previsti.`);
                 }
 
-                return `
-                    <div class="grid grid-cols-12 items-center gap-1 p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
+                               return `
+                    <div class="flex flex-col p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
                          data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
-                        <span class="col-span-5 text-[8px] font-black text-zinc-500 uppercase leading-none truncate">
-                            ${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}
-                        </span>
-                        <input type="text" value="${grade}" class="m-voto col-span-2 w-full text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
-                        <input type="date" value="${date}" class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
+                        
+                        <div class="grid grid-cols-12 items-center gap-1">
+                            <div class="col-span-5 flex flex-col">
+                                <span class="text-[8px] font-black text-zinc-500 uppercase leading-none truncate">
+                                    ${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}
+                                </span>
+                                ${window.getMiniDiceButtonsHTML()} <!-- Tasti mini per materia -->
+                            </div>
+                            <input type="text" value="${grade}" class="m-voto col-span-2 w-full text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
+                            <input type="date" value="${date}" class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
+                        </div>
                     </div>`;
             }).join('');
         }).join('');
