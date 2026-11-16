@@ -7114,7 +7114,8 @@ return `
 
         // --- CARICAMENTO DATI ---
 let agendaListener = null; // Variabile globale per l'ascoltatore
-let attendanceAgendaListener = null; 
+let attendanceAgendaListener = null;
+let studentUnsubs = []; // <--- AGGIUNGI QUESTA RIGA QUI
 
 window.loadClassAgenda = async (cls, dataFiltro) => {
     // 1. Pulizia listener precedenti
@@ -7401,17 +7402,24 @@ async function loadStudentRecords(studentId) {
     const calElement = document.getElementById('global-calendar');
     if (!calElement || !studentId) return;
 
+    // --- 1. CHIUSURA LISTENER PRECEDENTI ---
+    // Prima di caricare il nuovo studente, "spegniamo" i flussi di dati di quello vecchio
+    studentUnsubs.forEach(unsub => unsub());
+    studentUnsubs = []; 
+
     const dateVal = new Date(calElement.value);
     const yearVal = dateVal.getFullYear();
     const aySelezionato = (dateVal.getMonth() + 1) >= 9 ? `${yearVal}/${yearVal + 1}` : `${yearVal - 1}/${yearVal}`;
 
-    // Riferimenti ai nuovi documenti separati
+    // Riferimenti ai documenti separati (V2)
     const votiRef = window.getRecordDocRef(studentId, aySelezionato, 'voti');
     const noteRef = window.getRecordDocRef(studentId, aySelezionato, 'note');
     const pagellaRef = window.getRecordDocRef(studentId, aySelezionato, 'pagella');
 
-    // Listener per i Voti
-    onSnapshot(votiRef, dVoti => {
+    // --- 2. APERTURA NUOVI LISTENER E SALVATAGGIO NELL'ARRAY ---
+
+    // LISTENER VOTI
+    const unsubVoti = onSnapshot(votiRef, dVoti => {
         const tbody = document.getElementById('registro-voti-body');
         const resetContainer = document.getElementById('admin-reset-container');
         if (!tbody) return;
@@ -7628,31 +7636,32 @@ const canReset = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(windo
             document.getElementById('pagella-student-name').innerText = student ? student.name.toUpperCase() : "STUDENTE";
         }
         
-if (typeof window.renderPagella === 'function') {
-            const data = dVoti.exists() ? dVoti.data() : {};
-            window.renderPagella(votiTuttoAnno, aySelezionato, data); 
+        // Aggiorna Pagella (Passiamo solo voti e anno, lei leggerà il resto dal suo doc)
+        if (typeof window.renderPagella === 'function') {
+            window.renderPagella(votiTuttoAnno, aySelezionato); 
         }
+    });
 
 
-// 8. Sezione Note (Disciplinari, Mandati e Colloqui) - VERSIONE CORRETTA
-        onSnapshot(noteRef, dNote => {
-            const dataNoteDoc = dNote.exists() ? dNote.data() : {};
-            const originalNotes = dataNoteDoc.note || [];
+    // LISTENER NOTE (Adesso è separato, non più dentro quello dei voti)
+    const unsubNote = onSnapshot(noteRef, dNote => {
+        const dataNoteDoc = dNote.exists() ? dNote.data() : {};
+        const originalNotes = dataNoteDoc.note || [];
+        
+        const filteredNotes = originalNotes.filter(n => {
+            let nAy = n.anno;
+            if(!nAy && n.data) {
+                const p = n.data.split('/');
+                nAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
+            }
+            return nAy === aySelezionato;
+        });
             
-            const filteredNotes = originalNotes.filter(n => {
-                let nAy = n.anno;
-                if(!nAy && n.data) {
-                    const p = n.data.split('/');
-                    nAy = parseInt(p[1]) >= 9 ? `${p[2]}/${parseInt(p[2])+1}` : `${parseInt(p[2])-1}/${p[2]}`;
-                }
-                return nAy === aySelezionato;
-            });
-            
-            const reversedNotes = [...filteredNotes].reverse();
-            const notesContainer = document.getElementById('notes-list-global');
-            if (notesContainer) {
-                notesContainer.innerHTML = reversedNotes.map((n) => {
-                    const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id || (origNote.testo === n.testo && origNote.data === n.data));
+        const reversedNotes = [...filteredNotes].reverse();
+        const notesContainer = document.getElementById('notes-list-global');
+        if (notesContainer) {
+            notesContainer.innerHTML = reversedNotes.map((n) => {
+                const realIdx = originalNotes.findIndex(origNote => origNote.id === n.id);
                     
                     const isMandato = n.tipo === 'mandato';
                     const isColloquio = n.tipo === 'colloquio';
@@ -7688,13 +7697,13 @@ return `
         <span class="text-[14px] grayscale group-hover:grayscale-0 transition-all">📋</span>
     </div>
 </div>`;
-                }).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl">
-                                    <p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p>
-                                 </div>`;
-            }
-        });
-    }); // Questa chiude l'onSnapshot dei voti originario (se non l'avevi già chiusa sopra)
-} // Questa chiude definitivamente loadStudentRecords
+            }).join('') || `<div class="p-10 text-center border-2 border-dashed border-zinc-200 rounded-3xl"><p class="opacity-30 uppercase font-black italic text-xs">Nessun provvedimento registrato</p></div>`;
+        }
+    });
+
+    // --- 3. SALVATAGGIO DEI LISTENER PER LA PULIZIA ---
+    studentUnsubs.push(unsubVoti, unsubNote);
+}
 
 window.canManageGrade = (grade) => {
     if ([ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole)) return true;
@@ -11130,7 +11139,78 @@ window.showGoldenUserList = async function(panel) {
 
 // --- GESTORE AMMINISTRAZIONE (HUB) ---
 window.hubManager = {
-    // 1. MOSTRA LISTA
+    // 1. CALCOLA STATISTICHE (OTTIMIZZATA: Legge un riepilogo per risparmiare letture)
+    calcolaStatistiche: async function(force = false) {
+        console.log("📊 Recupero statistiche globali...");
+        const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+        const yearKey = ay.replace('/', '_');
+        
+        // Puntiamo a un unico documento che contiene i totali già pronti
+        const statsRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'statistics', yearKey);
+        
+        try {
+            // Se non premiamo "Aggiorna", proviamo a leggere solo il riepilogo (1 sola lettura!)
+            if (!force) {
+                const snap = await getDoc(statsRef);
+                if (snap.exists()) {
+                    const d = snap.data();
+                    console.log("✅ Statistiche caricate dal riepilogo salvato.");
+                    this.applicaDatiAUI(d.totalStudents, d.globalMedia, d.totalStaff, d.totalNotes, ay);
+                    return;
+                }
+            }
+
+            // Se il riepilogo non esiste o se clicchiamo "Aggiorna", facciamo il calcolo pesante
+            console.log("⚠️ Ricalcolo totale in corso... (Lettura massiva database)");
+            let totalGrades = 0, gradesSum = 0, totalNotes = 0;
+            const students = (window.allStudents || []).filter(s => getRoleType(s.role) === ROLES.STUDENTE);
+            const staffCount = (window.allStudents || []).filter(u => {
+                const rt = getRoleType(u.role);
+                return rt !== ROLES.STUDENTE && rt !== ROLES.OSPITE;
+            }).length;
+
+            for (const s of students) {
+                const vRef = window.getRecordDocRef(s.id, ay, 'voti');
+                const nRef = window.getRecordDocRef(s.id, ay, 'note');
+                const [vSnap, nSnap] = await Promise.all([getDoc(vRef), getDoc(nRef)]);
+
+                if (nSnap.exists()) totalNotes += (nSnap.data().note || []).length;
+                if (vSnap.exists()) {
+                    (vSnap.data().voti || []).forEach(v => {
+                        const val = window.parseVotoScolastico(v.voto);
+                        if (val > 0) { gradesSum += val; totalGrades++; }
+                    });
+                }
+            }
+
+            const media = totalGrades > 0 ? (gradesSum / totalGrades).toFixed(1) : "0.0";
+
+            // SALVIAMO IL RIEPILOGO: così la prossima volta admin non spreca letture
+            await setDoc(statsRef, {
+                totalStudents: students.length,
+                globalMedia: media,
+                totalStaff: staffCount,
+                totalNotes: totalNotes,
+                lastUpdate: Date.now()
+            });
+
+            this.applicaDatiAUI(students.length, media, staffCount, totalNotes, ay);
+            if (force) alert("✅ Statistiche ricalcolate e salvate!");
+
+        } catch (e) {
+            console.error("Errore statistiche:", e);
+        }
+    },
+
+    // Funzione interna per scrivere i dati nel DOM
+    applicaDatiAUI: function(ts, gm, tst, tn, ay) {
+        if (document.getElementById('admin-dashboard-year')) document.getElementById('admin-dashboard-year').innerText = `A.S. ${ay}`;
+        if (document.getElementById('stat-total-students')) document.getElementById('stat-total-students').innerText = ts;
+        if (document.getElementById('stat-global-media')) document.getElementById('stat-global-media').innerText = gm;
+        if (document.getElementById('stat-total-staff')) document.getElementById('stat-total-staff').innerText = tst;
+        if (document.getElementById('stat-total-notes')) document.getElementById('stat-total-notes').innerText = tn;
+    },
+
     mostraListaUtenti: async function() {
         const container = document.getElementById('hub-dynamic-content');
         container.classList.remove('hidden');
@@ -11140,7 +11220,6 @@ window.hubManager = {
             const snap = await getDocs(collection(db, 'artifacts', APP_ID, 'public', 'data', 'assignments'));
             window.allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             
-            // Contenitore principale scuro con bordi definiti per integrarsi nell'interfaccia
             let html = `
                 <div class="admin-user-list mt-4">
                     <div class="p-4 border-b border-stone-200 bg-stone-50/60 space-y-3">
@@ -11173,13 +11252,11 @@ window.hubManager = {
                 const role = u.role || 'ospite';
                 const roleType = getRoleType(role);
                 
-                // Separazione netta: se è prof dice "DOCENZE: classe", se è studente mostra la classe pulita
                 const displayClasse = (roleType === ROLES.STUDENTE) 
                     ? `<span class="user-class-badge px-2 py-1 rounded-md border border-stone-200 bg-stone-100 text-stone-700 text-[8px] font-black uppercase">${u.classe || '-'}</span>` 
                     : (u.classi_docente ? `<span class="text-red-600 font-black uppercase tracking-tight">DOCENZE: ${u.classi_docente.join(', ')}</span>` : '<span class="text-stone-400">-</span>');
 
                 if (roleType === ROLES.OSPITE) return;
-
                 const foto = u.avatar || u.avatar_npc || `https://ui-avatars.com/api/?name=${u.name || 'U'}&background=random`;
 
                 html += `
@@ -11213,320 +11290,135 @@ window.hubManager = {
             container.innerHTML = html;
             this.setFiltroRuolo(this.currentRoleFilter || 'all');
         } catch (e) {
-            container.innerHTML = `<p class="text-red-500 p-4 text-[10px] font-black uppercase">Errore: ${e.message}</p>`;
+            container.innerHTML = `<p class="text-red-500 p-4">Errore: ${e.message}</p>`;
         }
-    },		
-
-    // 2. NUOVO UTENTE
- nuovoUtente: function() {
-    const role = window.userRole;
-    const isAuthorized = [ROLES.ADMIN, ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.SEGRETERIA, ROLES.TECNICO].includes(role);
-
-    if (!isAuthorized) {
-        alert("⛔ Accesso Negato: Solo la Segreteria o l'Amministrazione possono registrare nuovi utenti.");
-        return;
-    }
-
-    const container = document.getElementById('hub-dynamic-content');
-    container.classList.remove('hidden');
-    container.innerHTML = `
-        <div class="bg-[#18181b] p-6 rounded-2xl border border-[#27272a] shadow-2xl space-y-4">
-            <h3 class="font-black uppercase text-[10px] border-b border-[#27272a] pb-2 text-zinc-400">Registra Nuovo Utente</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input id="new-u-id" type="text" placeholder="ID Discord" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
-                <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
-                
-                <select id="new-u-role" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white" 
-                    onchange="const show = ['Prof', 'Preside', 'Vice Preside'].includes(this.value); document.getElementById('materia-input-group').classList.toggle('hidden', !show)">
-                    <option value="Studente">Studente</option>
-		    <option value="Studentessa">Studentessa</option>
-                    <option value="Prof">Prof</option>
-                    <option value="Preside">Preside</option>
-                    <option value="Vice Preside">Vice Preside</option>
-                    <option value="Bidello">Bidello</option>
-                    <option value="Tecnico">Tecnico</option>
-                    <option value="Segreteria">Segreteria</option>
-		    <option value="Counselor">Counselor scolastico</option>
-                </select>
-
-                <div id="class-selection-group" class="col-span-full bg-[#09090b] p-4 rounded-xl border border-[#3f3f46]">
-    <label class="block text-[10px] font-black uppercase text-zinc-400 mb-2">Classi Assegnate</label>
-    <div id="classes-checkbox-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
-        ${CLASSI_VALIDE.map(cls => `
-            <label class="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg border border-zinc-800 cursor-pointer hover:border-red-600 transition-all">
-                <input type="checkbox" value="${cls}" class="prof-class-check w-4 h-4 accent-red-600">
-                <span class="text-[10px] font-bold text-white">${cls}</span>
-            </label>
-        `).join('')}
-    </div>
-    <p id="student-class-hint" class="text-[8px] text-zinc-500 mt-2 uppercase font-bold">Nota: Per gli studenti, seleziona una sola classe.</p>
-</div>
-
-		<div class="mb-4">
-    <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">URL Foto Profilo (Opzionale)</label>
-    <input type="text" id="reg-avatar" placeholder="Incolla il link dell'immagine..." 
-        class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-white text-sm outline-none focus:border-red-600 transition-all">
-</div>
-
-                <div id="materia-input-group" class="hidden col-span-full">
-                    <label class="text-[9px] font-black uppercase text-zinc-500 ml-1">Materie (separate da virgola)</label>
-                    <input id="new-u-materie" type="text" placeholder="es: italiano, storia, latino" class="w-full p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
-                </div>
-            </div>
-            <button onclick="window.hubManager.salvaNuovoUtente()" class="w-full bg-red-600 text-white p-4 rounded-xl font-black uppercase text-[10px] hover:bg-red-700 transition-all shadow-lg shadow-red-900/20">Salva nel Database</button>
-        </div>`;
-},
-
-    // 3. SALVA E ELIMINA
-    // Cerca la funzione salvaNuovoUtente e sostituiscila con questa:
-salvaNuovoUtente: async function() {
-    const id = document.getElementById('new-u-id').value.trim();
-    const name = document.getElementById('new-u-name').value.trim();
-    const role = normalizeRoleLabel(document.getElementById('new-u-role').value);
-    const materieRaw = document.getElementById('new-u-materie').value;
-    const avatar = document.getElementById('reg-avatar').value.trim();
-
-    const selectedClasses = Array.from(document.querySelectorAll('.prof-class-check:checked')).map(cb => cb.value);
-
-    if(!id || !name) return alert("⚠️ ID e Nome sono obbligatori!");
-    
-    const roleType = getRoleType(role);
-
-    // Validazione: Studente deve avere esattamente una classe
-    if (roleType === ROLES.STUDENTE && selectedClasses.length !== 1) {
-        return alert("⚠️ Uno studente deve essere assegnato a esattamente UNA classe.");
-    }
-
-    let arrayMaterie = null;
-    if (materieRaw) {
-        arrayMaterie = materieRaw.split(',').map(m => m.trim().toLowerCase()).filter(m => m !== "");
-    }
-
-    try {
-        const dataToSave = {
-            name: name,
-            role: role,
-            materie: arrayMaterie,
-            avatar: avatar || "https://ui-avatars.com/api/?name=" + name
-        };
-
-    // --- LOGICA DISTINTA CAMPI ---
-        if (roleType === ROLES.STUDENTE) {
-            dataToSave.classe = selectedClasses[0]; // Campo per studenti (stringa)
-            dataToSave.classi_docente = window.deleteField(); // Rimuove il campo docente
-        } else {
-            dataToSave.classi_docente = selectedClasses; // Campo per docenti (array)
-            dataToSave.classe = window.deleteField();    // Rimuove definitivamente il campo studente per lo Staff
-        }
-
-        await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), dataToSave, { merge: true });
-        
-        alert("✅ Utente salvato con successo!");
-        this.mostraListaUtenti();
-    } catch (e) {
-        console.error(e);
-        alert("❌ Errore: " + e.message);
-    }
-},
-
-modificaUtente: function(id) {
-    const u = window.allUsers.find(user => user.id === id);
-    if(!u) return;
-
-    this.nuovoUtente();
-    
-    document.querySelector('#hub-dynamic-content h3').innerText = "Modifica Utente";
-    const idInput = document.getElementById('new-u-id');
-    idInput.value = id;
-    idInput.disabled = true;
-
-    document.getElementById('new-u-name').value = u.name || '';
-    document.getElementById('new-u-role').value = normalizeRoleLabel(u.role) || 'Studente';
-    document.getElementById('reg-avatar').value = u.avatar || u.avatar_npc || '';
-    
-    // --- LOGICA LETTURA CLASSI ---
-    // Se è un docente legge da classi_docente, se è studente da classe
-    const classiUtente = Array.isArray(u.classi_docente) ? u.classi_docente : (u.classe ? [u.classe] : []);
-    
-    document.querySelectorAll('.prof-class-check').forEach(cb => {
-        cb.checked = classiUtente.includes(cb.value);
-    });
-
-        if([ROLES.PROF, ROLES.PRESIDE, ROLES.VICE_PRESIDE].includes(getRoleType(u.role))) {
-        const matInput = document.getElementById('new-u-materie');
-        document.getElementById('materia-input-group').classList.remove('hidden');
-        matInput.value = Array.isArray(u.materie) ? u.materie.join(', ') : (u.materie || '');
-    }
-},
-
-    eliminaUtente: async function(id) {
-        if(!confirm(`Sei sicuro di voler eliminare l'utente ${id}?`)) return;
-        try {
-            await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id));
-            this.mostraListaUtenti();
-        } catch (e) { alert("Errore: " + e.message); }
     },
 
-    // 4. HELPERS E FILTRI (Prima erano fuori per errore!)
+    nuovoUtente: function() {
+        const container = document.getElementById('hub-dynamic-content');
+        container.classList.remove('hidden');
+        container.innerHTML = `
+            <div class="bg-[#18181b] p-6 rounded-2xl border border-[#27272a] shadow-2xl space-y-4">
+                <h3 class="font-black uppercase text-[10px] border-b border-[#27272a] pb-2 text-zinc-400">Registra Nuovo Utente</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input id="new-u-id" type="text" placeholder="ID Discord" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
+                    <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
+                    <select id="new-u-role" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white" onchange="const show = ['Prof', 'Preside', 'Vice Preside'].includes(this.value); document.getElementById('materia-input-group').classList.toggle('hidden', !show)">
+                        <option value="Studente">Studente</option>
+                        <option value="Studentessa">Studentessa</option>
+                        <option value="Prof">Prof</option>
+                        <option value="Preside">Preside</option>
+                        <option value="Vice Preside">Vice Preside</option>
+                        <option value="Bidello">Bidello</option>
+                        <option value="Tecnico">Tecnico</option>
+                        <option value="Segreteria">Segreteria</option>
+                        <option value="Counselor">Counselor scolastico</option>
+                    </select>
+                    <div id="class-selection-group" class="col-span-full bg-[#09090b] p-4 rounded-xl border border-[#3f3f46]">
+                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-2">Classi Assegnate</label>
+                        <div id="classes-checkbox-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                            ${CLASSI_VALIDE.map(cls => `
+                                <label class="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg border border-zinc-800 cursor-pointer hover:border-red-600 transition-all">
+                                    <input type="checkbox" value="${cls}" class="prof-class-check w-4 h-4 accent-red-600">
+                                    <span class="text-[10px] font-bold text-white">${cls}</span>
+                                </label>`).join('')}
+                        </div>
+                    </div>
+                    <div class="col-span-full">
+                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">URL Foto Profilo</label>
+                        <input type="text" id="reg-avatar" placeholder="Link immagine..." class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-white text-sm">
+                    </div>
+                    <div id="materia-input-group" class="hidden col-span-full">
+                        <input id="new-u-materie" type="text" placeholder="materie (italiano, storia...)" class="w-full p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs text-white">
+                    </div>
+                </div>
+                <button onclick="window.hubManager.salvaNuovoUtente()" class="w-full bg-red-600 text-white p-4 rounded-xl font-black uppercase text-[10px]">Salva nel Database</button>
+            </div>`;
+    },
+
+    salvaNuovoUtente: async function() {
+        const id = document.getElementById('new-u-id').value.trim();
+        const name = document.getElementById('new-u-name').value.trim();
+        const role = normalizeRoleLabel(document.getElementById('new-u-role').value);
+        const selectedClasses = Array.from(document.querySelectorAll('.prof-class-check:checked')).map(cb => cb.value);
+        if(!id || !name) return alert("⚠️ ID e Nome obbligatori!");
+        
+        try {
+            const data = { name, role, avatar: document.getElementById('reg-avatar').value.trim() };
+            if (getRoleType(role) === ROLES.STUDENTE) data.classe = selectedClasses[0];
+            else data.classi_docente = selectedClasses;
+
+            await setDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id), data, { merge: true });
+            alert("✅ Salvato!");
+            this.mostraListaUtenti();
+        } catch (e) { alert(e.message); }
+    },
+
+    modificaUtente: function(id) {
+        const u = window.allUsers.find(user => user.id === id);
+        if(!u) return;
+        this.nuovoUtente();
+        document.getElementById('new-u-id').value = id;
+        document.getElementById('new-u-id').disabled = true;
+        document.getElementById('new-u-name').value = u.name || '';
+        document.getElementById('new-u-role').value = normalizeRoleLabel(u.role);
+        document.getElementById('reg-avatar').value = u.avatar || u.avatar_npc || '';
+        const classi = Array.isArray(u.classi_docente) ? u.classi_docente : (u.classe ? [u.classe] : []);
+        document.querySelectorAll('.prof-class-check').forEach(cb => cb.checked = classi.includes(cb.value));
+    },
+
+    eliminaUtente: async function(id) {
+        if(!confirm("Eliminare l'utente?")) return;
+        await deleteDoc(doc(db, 'artifacts', APP_ID, 'public', 'data', 'assignments', id));
+        this.mostraListaUtenti();
+    },
+
     getCategoriaRuolo: function(roleType) {
-    const r = (roleType || '').toLowerCase();
-    
-    if ([ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(r)) return 'dirigenza';
-    if (r === ROLES.PROF) return 'prof';
-    
-    // Counselor nel personale
-    if ([ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.COUNSELOR].includes(r)) return 'personale';
-    
-    // Se la stringa contiene "studente" o "studentessa", la categoria è studente
-    if (r.includes('studente') || r.includes('studentessa')) return 'studente';
-    
-    return 'altro';
-},
+        const r = (roleType || '').toLowerCase();
+        if ([ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(r)) return 'dirigenza';
+        if (r === ROLES.PROF) return 'prof';
+        if ([ROLES.BIDELLO, ROLES.TECNICO, ROLES.SEGRETERIA, ROLES.COUNSELOR].includes(r)) return 'personale';
+        if (r.includes('studente') || r.includes('studentessa')) return 'studente';
+        return 'altro';
+    },
 
     getRoleStyle: function(roleType) {
-    const r = (roleType || '').toLowerCase();
-    
-    if (r === ROLES.ADMIN || r === ROLES.PRESIDE) return 'bg-red-50 text-red-700 border-red-100';
-    if (r === ROLES.PROF) return 'bg-blue-50 text-blue-700 border-blue-100';
-    if (r === ROLES.COUNSELOR) return 'bg-purple-50 text-purple-700 border-purple-100'; 
-    
-    if (r.includes('studente') || r.includes('studentessa')) return 'bg-zinc-50 text-zinc-600 border-zinc-200';
-    
-    return 'bg-amber-50 text-amber-700 border-amber-100';
-},
+        const r = (roleType || '').toLowerCase();
+        if (r === ROLES.ADMIN || r === ROLES.PRESIDE) return 'bg-red-50 text-red-700 border-red-100';
+        if (r === ROLES.PROF) return 'bg-blue-50 text-blue-700 border-blue-100';
+        return 'bg-zinc-50 text-zinc-600 border-zinc-200';
+    },
 
     currentRoleFilter: 'all',
- setFiltroRuolo: function(cat) {
+    setFiltroRuolo: function(cat) {
         this.currentRoleFilter = cat;
         document.querySelectorAll('.hub-filter-btn').forEach(btn => {
-            const onclickText = btn.getAttribute('onclick');
-            const isActive = onclickText && onclickText.includes(`'${cat}'`);
-            
-            // Classi corrette per il tema ad alto contrasto
-            btn.className = isActive ? 
-                "hub-filter-btn active bg-red-600 border border-red-700 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all" : 
-                "hub-filter-btn bg-stone-100 border border-stone-200 text-stone-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase transition-all hover:bg-stone-200";
+            const isActive = btn.getAttribute('onclick').includes(`'${cat}'`);
+            btn.className = isActive ? "hub-filter-btn active bg-red-600 border border-red-700 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase" : "hub-filter-btn bg-stone-100 border border-stone-200 text-stone-600 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase";
         });
         this.filtraUtenti();
     },
 
     filtraUtenti: function() {
-        const searchInput = document.getElementById('global-search-input');
-        const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        const cat = this.currentRoleFilter || 'all';
-
+        const query = document.getElementById('global-search-input')?.value.toLowerCase().trim() || '';
         document.querySelectorAll('.user-row').forEach(row => {
-            // Controllo sicuro sui dataset per evitare errori se mancano i dati
-            const searchData = row.dataset.search ? row.dataset.search.toLowerCase() : '';
-            const roleCatData = row.dataset.roleCat || '';
-            
-            const matchesSearch = searchData.includes(query);
-            const matchesRole = (cat === 'all' || roleCatData === cat);
-            
+            const matchesSearch = row.dataset.search.includes(query);
+            const matchesRole = (this.currentRoleFilter === 'all' || row.dataset.roleCat === this.currentRoleFilter);
             row.style.display = (matchesSearch && matchesRole) ? '' : 'none';
         });
     },
 
-    vaiAlProfilo: function(id, roleType) {
-        if (typeof window.selectAndGoToProfile === 'function') {
-            window.selectAndGoToProfile(id, roleType); 
-        }
-    },
-
-    // --- NUOVE FUNZIONI INSERITE CORRETTAMENTE ---
     ricercaGlobale: function(query) {
         const resultsDiv = document.getElementById('global-search-results');
         if (!resultsDiv) return;
-        const normalizedQuery = String(query || '').trim().toLowerCase();
         this.filtraUtenti();
-        if (normalizedQuery.length < 2) {
-            resultsDiv.classList.add('hidden');
-            resultsDiv.innerHTML = '';
-            return;
-        }
-
-        const filtered = (window.allStudents || []).filter(u => {
-            const name = String(u.name || '').toLowerCase();
-            const id = String(u.id || '').toLowerCase();
-            return name.includes(normalizedQuery) || id.includes(normalizedQuery);
-        }).slice(0, 8);
-
-        resultsDiv.classList.remove('hidden');
-        if (filtered.length > 0) {
-            resultsDiv.innerHTML = filtered.map(u => `
-                <div onclick="window.selectAndGoToProfile('${u.id}'); document.getElementById('global-search-results').classList.add('hidden');" 
-                     class="p-3 cursor-pointer border-b border-stone-200/70 flex justify-between items-center hover:bg-red-50/50 rounded-lg transition-colors">
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-stone-800">${u.name || 'N.D.'}</p>
-                        <p class="text-[8px] text-stone-500 font-bold uppercase">${u.role || 'Utente'} - ${u.classe || 'No Classe'}</p>
-                    </div>
-                    <span class="text-stone-400 font-bold">→</span>
-                </div>`).join('');
-        } else {
-            resultsDiv.innerHTML = '<p class="p-4 text-[10px] text-stone-500 italic font-medium">Nessun utente trovato</p>';
-        }
+        if (query.trim().length < 2) { resultsDiv.classList.add('hidden'); return; }
+        const filtered = (window.allStudents || []).filter(u => u.name.toLowerCase().includes(query.toLowerCase())).slice(0, 8);
+        resultsDiv.classList.toggle('hidden', filtered.length === 0);
+        resultsDiv.innerHTML = filtered.map(u => `<div onclick="window.selectAndGoToProfile('${u.id}'); resultsDiv.classList.add('hidden');" class="p-3 cursor-pointer border-b border-stone-200 flex justify-between items-center hover:bg-red-50 rounded-lg"><p class="text-[10px] font-black uppercase">${u.name}</p><span class="text-stone-400">→</span></div>`).join('');
     },
 
-calcolaStatistiche: async function() {
-    console.log("📊 Calcolo statistiche globali (Ripristinato e corretto)...");
-    let totalGrades = 0, gradesSum = 0, totalNotes = 0;
-    
-    const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    const annoCartella = aySelezionato.replace('/', '_');
-    
-    // Filtriamo sia "studente" che "studentessa" per non escludere le ragazze
-    const users = window.allStudents || [];
-    const students = users.filter(s => getRoleType(s.role) === ROLES.STUDENTE);
-    const staffCount = users.filter(u => {
-        const roleType = getRoleType(u.role);
-        return roleType !== ROLES.STUDENTE && roleType !== ROLES.OSPITE;
-    }).length;
-
-    const yearBadge = document.getElementById('admin-dashboard-year');
-    if (yearBadge) yearBadge.innerText = `A.S. ${aySelezionato}`;
-    if (document.getElementById('stat-total-students')) {
-        document.getElementById('stat-total-students').innerText = students.length;
-    }
-    if (document.getElementById('stat-total-staff')) {
-        document.getElementById('stat-total-staff').innerText = staffCount;
-    }
-
-    for (const s of students) {
-        // ASSICURATI che l'ID dentro window.allStudents sia memorizzato nel campo .id
-        // Se nel tuo oggetto studente l'ID di Discord si chiama in un altro modo (es. s.uid), cambialo qui sotto
-        const studenteId = s.id; 
-
-        const votiRef = window.getRecordDocRef(studenteId, annoCartella, 'voti');
-        const noteRef = window.getRecordDocRef(studenteId, annoCartella, 'note');
-
-        try {
-            const [votiSnap, noteSnap] = await Promise.all([getDoc(votiRef), getDoc(noteRef)]);
-
-            if (noteSnap.exists()) {
-                const listaNote = noteSnap.data().note || [];
-                totalNotes += listaNote.length;
-            }
-
-            if (votiSnap.exists()) {
-                const listaVoti = votiSnap.data().voti || [];
-                listaVoti.forEach(v => {
-                    const valoreVoto = window.parseVotoScolastico(v.voto);
-                    if (valoreVoto > 0) {
-                        gradesSum += valoreVoto;
-                        totalGrades++;
-                    }
-                });
-            }
-        } catch (e) {
-            console.error(`Errore nel calcolo statistiche per lo studente ${studenteId}:`, e);
-        }
-    }
-
-    const globalMedia = totalGrades > 0 ? (gradesSum / totalGrades).toFixed(1) : "0.0";
-    
-    if(document.getElementById('stat-global-media')) document.getElementById('stat-global-media').innerText = globalMedia;
-    if(document.getElementById('stat-total-notes')) document.getElementById('stat-total-notes').innerText = totalNotes;
-}
+    vaiAlProfilo: function(id) { window.selectAndGoToProfile(id); }
 };
 
 // Funzione per salvare il commento globale sulla pagella (Solo Docenti)
