@@ -13999,7 +13999,10 @@ return `
                 ⬅ Torna alla Configurazione
             </button>
             <p class="text-[9px] text-stone-500 font-black uppercase">05 · Revisione individuale</p>
-            <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700">Rigenera 🎲</button>
+            <div class="flex items-center gap-2">
+                ${type === 'Scritto' || type === 'Pratico' ? '' : '<button onclick="window.syncMassOralDates()" class="text-[8px] text-blue-700 font-bold uppercase hover:text-blue-800 whitespace-nowrap">Sincronizza date</button>'}
+                <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700 whitespace-nowrap">Rigenera 🎲</button>
+            </div>
         </div>
     `;
 
@@ -14034,6 +14037,105 @@ window.regenMassSlotDatesByMonth = (voteIndex, newMonth) => {
             }
             dateInput.value = date;
         }
+    });
+};
+
+window.syncMassOralDates = () => {
+    const type = document.getElementById('quick-mass-type')?.value;
+    if (type === 'Scritto' || type === 'Pratico') return;
+
+    const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
+    const validWeekdays = Array.from(checkedBoxes).map(cb => parseInt(cb.value, 10));
+    if (validWeekdays.length === 0) {
+        alert('Seleziona almeno un giorno di lezione.');
+        return;
+    }
+
+    const academicYear = document.getElementById('current-academic-year').innerText
+        .replace('A.S. ', '').trim();
+    const yearStart = parseInt(academicYear.split('/')[0], 10);
+    const monthNames = ["Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno", "Luglio", "Agosto", "Settembre", "Ottobre", "Novembre", "Dicembre"];
+    const slotsByVote = new Map();
+    document.querySelectorAll('.mass-slot').forEach(slot => {
+        const voteIndex = slot.dataset.voteIdx;
+        if (!slotsByVote.has(voteIndex)) slotsByVote.set(voteIndex, []);
+        slotsByVote.get(voteIndex).push(slot);
+    });
+
+    const plannedDates = [];
+    for (const [voteIndex, slots] of slotsByVote) {
+        const monthControl = Array.from(document.querySelectorAll('.mass-master-control'))
+            .find(control => control.dataset.voteIdx === voteIndex);
+        const month = Number(monthControl?.value);
+        if (!Number.isInteger(month) || month < 0 || month > 11) {
+            alert('Seleziona un mese valido per ogni interrogazione.');
+            return;
+        }
+
+        const year = month >= 8 ? yearStart : yearStart + 1;
+        const candidates = [];
+        for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
+            const date = new Date(year, month, day, 12);
+            if (date.getDay() === 0 || !validWeekdays.includes(date.getDay())
+                || window.isRegistrationBlocked(date)) continue;
+            candidates.push(`${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+        }
+        if (candidates.length === 0) {
+            alert(`Non ci sono date valide a ${monthNames[month]} per i giorni di lezione scelti.`);
+            return;
+        }
+
+        const groupSizes = [];
+        let remaining = slots.length;
+        while (remaining > 0) {
+            if (remaining <= 5) {
+                groupSizes.push(remaining);
+                break;
+            }
+            const options = [2, 3, 4, 5].filter(size => size <= remaining);
+            const weights = [2, 3, 4, 5].filter(size => size <= remaining)
+                .map(size => size === 2 ? 3 : size === 3 ? 4 : 3);
+            const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+            let choice = Math.random() * totalWeight;
+            let groupSize = options[0];
+            for (let index = 0; index < options.length; index++) {
+                choice -= weights[index];
+                if (choice < 0) {
+                    groupSize = options[index];
+                    break;
+                }
+            }
+            groupSizes.push(groupSize);
+            remaining -= groupSize;
+        }
+        if (groupSizes.length > 1 && groupSizes[groupSizes.length - 1] === 1) {
+            groupSizes[groupSizes.length - 2]++;
+            groupSizes.pop();
+        }
+
+        const groupCount = groupSizes.length;
+        const windowSize = Math.min(candidates.length, Math.max(groupCount, Math.ceil(groupCount * 1.5)));
+        const windowStart = Math.floor(Math.random() * (candidates.length - windowSize + 1));
+        const nearbyDates = candidates.slice(windowStart, windowStart + windowSize);
+        const availableDates = nearbyDates.slice();
+        const assignments = [];
+        for (const groupSize of groupSizes) {
+            const dateIndex = Math.floor(Math.random() * availableDates.length);
+            const date = availableDates.splice(dateIndex, 1)[0];
+            assignments.push({ date, count: groupSize });
+        }
+
+        let slotIndex = 0;
+        for (const assignment of assignments) {
+            for (let count = 0; count < assignment.count; count++) {
+                plannedDates.push({ slot: slots[slotIndex++], date: assignment.date });
+            }
+        }
+    }
+
+    plannedDates.forEach(({ slot, date }) => {
+        const dateInput = slot.querySelector('.mass-date');
+        if (dateInput) dateInput.value = date;
     });
 };
 
