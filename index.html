@@ -5138,7 +5138,7 @@ main {
             <div class="flex justify-between items-start">
                 <div>
                     <h3 class="text-2xl font-black uppercase italic tracking-tighter">Calendario <span class="text-stone-400">Scolastico</span></h3>
-                    <p class="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mt-1">Sospensione didattica e festività</p>
+                    <p class="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mt-1">Date scolastiche, chiusure ed esami</p>
                 </div>
                 <button onclick="window.closeCalendarModal()" class="w-10 h-10 flex items-center justify-center rounded-full bg-stone-100 text-stone-400 hover:text-red-600 transition-colors">✕</button>
             </div>
@@ -5146,6 +5146,32 @@ main {
         </div>
 
         <div class="overflow-y-auto flex-1 space-y-6 custom-scroll pr-2">
+
+            <div class="cal-section-box">
+                <label class="text-[10px] font-black uppercase text-blue-700 mb-3 block tracking-widest">Periodo delle lezioni</label>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <span class="text-[8px] font-black text-stone-400 uppercase ml-1">Inizio scuola</span>
+                        <input type="date" id="cal-school-start" class="w-full px-4 py-2 rounded-xl border border-stone-200 outline-none">
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-[8px] font-black text-stone-400 uppercase ml-1">Fine scuola</span>
+                        <input type="date" id="cal-school-end" class="w-full px-4 py-2 rounded-xl border border-stone-200 outline-none">
+                    </div>
+                </div>
+            </div>
+
+            <div class="cal-section-box">
+                <label class="text-[10px] font-black uppercase text-red-700 mb-2 block tracking-widest">Scritte di maturità</label>
+                <p class="text-[9px] text-stone-500 mb-3">Una data condivisa per materia in tutte le quinte che la svolgono. Le date non bloccano le normali registrazioni.</p>
+                <div id="cal-written-exam-dates" class="space-y-2"></div>
+            </div>
+
+            <div class="cal-section-box">
+                <label class="text-[10px] font-black uppercase text-amber-700 mb-2 block tracking-widest">Orali di maturità per classe quinta</label>
+                <p class="text-[9px] text-stone-500 mb-3">Inserisci una o più date per classe: gli studenti saranno distribuiti uniformemente tra i giorni scelti.</p>
+                <div id="cal-oral-exam-schedules" class="space-y-3"></div>
+            </div>
             
             <!-- Giorno Singolo -->
             <div class="cal-section-box">
@@ -6665,9 +6691,11 @@ window.updateDateContext = async (newDate) => { // Aggiunto async
     try {
         const calSnap = await getDoc(calRef);
         if (calSnap.exists()) {
-            window.blockedDates = calSnap.data().blocked_dates || [];
+            window.schoolCalendarData = calSnap.data();
+            window.blockedDates = window.schoolCalendarData.blocked_dates || [];
             console.log(`📅 Calendario ${ay} caricato: ${window.blockedDates.length} giorni festivi rilevati.`);
         } else {
+            window.schoolCalendarData = {};
             window.blockedDates = []; // Reset se non esiste il documento
         }
     } catch (e) {
@@ -12938,6 +12966,43 @@ window.deleteAllGradesBySubject = async (studentId, subject) => {
 
 // Array locale temporaneo che tiene traccia delle modifiche prima di salvare
 let tempBlockedDates = [];
+window.schoolCalendarData = window.schoolCalendarData || {};
+window.calendarExamClasses = [];
+window.calendarExamDraft = null;
+
+const escapeCalendarHtml = value => String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+}[char]));
+
+const isValidCalendarDate = value => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || '');
+    if (!match) return false;
+    const [, year, month, day] = match.map(Number);
+    const date = new Date(year, month - 1, day, 12);
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+};
+
+const formatCalendarDate = value => {
+    const [year, month, day] = value.split('-');
+    return `${day}/${month}/${year}`;
+};
+
+const getCalendarOralAssignments = (classInfo, dates) => {
+    if (!dates.length) return [];
+    const orderedDates = [...dates].sort();
+    const orderedStudents = [...classInfo.students].sort((a, b) =>
+        String(a.name).localeCompare(String(b.name), 'it', { sensitivity: 'base' })
+    );
+    return orderedStudents.map((student, index) => ({
+        studentId: student.id,
+        studentName: student.name,
+        date: orderedDates[index % orderedDates.length]
+    }));
+};
 
 // --- 1. VERIFICA SE UNA DATA È BLOCCATA (Corretta contro i bug di fuso orario e orari casuali) ---
 window.isRegistrationBlocked = (dateParam) => {
@@ -12982,42 +13047,240 @@ window.isRegistrationBlocked = (dateParam) => {
 // --- 2. SALVATAGGIO DIRETTO SUL DATABASE ---
 window.saveSchoolCalendar = async (schoolYear, arrayOfDates) => {
     if (window.userRole !== 'admin' && window.userRole !== 'preside') {
-        return alert("Accesso negato.");
+        alert("Accesso negato.");
+        return false;
     }
 
     try {
         const calRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', schoolYear);
-        
-        // USARE arrayUnion PER AGGIUNGERE I NUOVI ELEMENTI SENZA SOVRASCRIVERE QUELLI VECCHI
-        await setDoc(calRef, { 
-            blocked_dates: arrayUnion(...arrayOfDates) 
-        }, { merge: true });
+        const calendarData = window.calendarExamDraft;
+        const uniqueBlockedDates = [...new Set(arrayOfDates)].sort();
+        const savedCalendar = {
+            school_start_date: calendarData.schoolStartDate,
+            school_end_date: calendarData.schoolEndDate,
+            written_exam_dates: calendarData.writtenExamSubjects.map(subject => ({
+                subject: subject.label,
+                date: calendarData.writtenExamDates[subject.key] || ''
+            })),
+            oral_exam_schedules: window.calendarExamClasses.map(classInfo => {
+                const dates = [...(calendarData.oralExamDatesByClass[classInfo.id] || [])].sort();
+                return {
+                    class_id: classInfo.id,
+                    dates,
+                    student_assignments: getCalendarOralAssignments(classInfo, dates)
+                        .map(assignment => ({
+                            student_id: assignment.studentId,
+                            date: assignment.date
+                        }))
+                };
+            }),
+            blocked_dates: uniqueBlockedDates
+        };
+        await setDoc(calRef, savedCalendar, { merge: true });
 
-        alert(`📅 Calendario scolastico per l'A.S. ${schoolYear.replace('_', '/')} aggiornato con i nuovi giorni!`);
-        
-        // Uniamo le date anche localmente nella variabile globale per tenerla allineata
-        if (!window.blockedDates) window.blockedDates = [];
-        arrayOfDates.forEach(d => {
-            if (!window.blockedDates.includes(d)) window.blockedDates.push(d);
-        });
-        window.blockedDates.sort();
-
+        alert(`📅 Calendario scolastico per l'A.S. ${schoolYear.replace('_', '/')} aggiornato.`);
+        window.blockedDates = uniqueBlockedDates;
+        window.schoolCalendarData = { ...window.schoolCalendarData, ...savedCalendar };
+        return true;
     } catch (e) {
         console.error("Errore salvataggio calendario:", e);
         alert("❌ Errore durante il salvataggio del calendario.");
+        return false;
     }
 };
 
 // --- 3. APERTURA MODAL INTERFACCIA ---
-window.openCalendarModal = () => {
-    // Copiamo le date globali attuelles nell'array temporaneo del pannello
-    tempBlockedDates = window.blockedDates ? [...window.blockedDates] : [];
-    
-    // Ordiniamo le date cronologicamente per renderle leggibili nella lista
-    tempBlockedDates.sort();
+window.openCalendarModal = async () => {
+    const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const schoolYearDocId = ay.replace('/', '_');
+    const calendarRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'school_calendars', schoolYearDocId);
+    const classMetadata = collection(db, 'artifacts', APP_ID, 'public', 'data', 'class_metadata');
 
-    document.getElementById('calendar-modal').style.display = 'flex';
-    window.renderBlockedDatesList();
+    try {
+        const [calendarSnapshot, classSnapshot] = await Promise.all([
+            getDoc(calendarRef),
+            getDocs(classMetadata)
+        ]);
+        window.schoolCalendarData = calendarSnapshot.exists() ? calendarSnapshot.data() : {};
+        window.blockedDates = window.schoolCalendarData.blocked_dates || [];
+        tempBlockedDates = [...window.blockedDates].sort();
+
+        const classConfigs = new Map();
+        classSnapshot.forEach(classDoc => classConfigs.set(classDoc.id, classDoc.data()));
+        window.calendarExamClasses = CLASSI_VALIDE.flatMap(classId => {
+            const config = classConfigs.get(classId);
+            if (!config || window.calculateClassGrade(ay, config.startYear) !== 5) return [];
+            const examSubjects = Array.isArray(config.examSubjects)
+                ? config.examSubjects.map(subject => String(subject || '').trim()).filter(Boolean)
+                : [];
+            const students = (window.allStudents || [])
+                .filter(student => student.classe === classId && getRoleType(student.role) === ROLES.STUDENTE)
+                .map(student => ({ id: student.id, name: student.name || 'Studente' }));
+            return [{
+                id: classId,
+                displayName: `${window.calculateClassGrade(ay, config.startYear)}${window.getSection(classId)} (${classId})`,
+                examSubjects,
+                students
+            }];
+        });
+
+        const subjectsByKey = new Map();
+        window.calendarExamClasses.forEach(classInfo => classInfo.examSubjects.forEach(subject => {
+            const key = subject.toLocaleLowerCase('it');
+            if (!subjectsByKey.has(key)) subjectsByKey.set(key, subject);
+        }));
+        const savedWrittenDates = window.schoolCalendarData.written_exam_dates || [];
+        const writtenDatesByKey = {};
+        if (Array.isArray(savedWrittenDates)) {
+            savedWrittenDates.forEach(entry => {
+                if (entry?.subject) writtenDatesByKey[String(entry.subject).toLocaleLowerCase('it')] = entry.date || '';
+            });
+        } else if (savedWrittenDates && typeof savedWrittenDates === 'object') {
+            Object.entries(savedWrittenDates).forEach(([subject, date]) => {
+                writtenDatesByKey[subject.toLocaleLowerCase('it')] = date || '';
+            });
+        }
+
+        const savedOralSchedules = window.schoolCalendarData.oral_exam_schedules || [];
+        const savedOralByClass = Array.isArray(savedOralSchedules)
+            ? new Map(savedOralSchedules.map(schedule => [schedule.class_id, schedule]))
+            : new Map(Object.entries(savedOralSchedules));
+        const oralExamDatesByClass = {};
+        window.calendarExamClasses.forEach(classInfo => {
+            const savedSchedule = savedOralByClass.get(classInfo.id);
+            const dates = Array.isArray(savedSchedule?.dates)
+                ? savedSchedule.dates
+                : Array.isArray(savedSchedule) ? savedSchedule : [];
+            oralExamDatesByClass[classInfo.id] = [...new Set(dates.filter(isValidCalendarDate))].sort();
+        });
+
+        window.calendarExamDraft = {
+            schoolStartDate: window.schoolCalendarData.school_start_date || '',
+            schoolEndDate: window.schoolCalendarData.school_end_date || '',
+            writtenExamSubjects: [...subjectsByKey].map(([key, label]) => ({ key, label })),
+            writtenExamDates: writtenDatesByKey,
+            oralExamDatesByClass
+        };
+        document.getElementById('cal-school-start').value = window.calendarExamDraft.schoolStartDate;
+        document.getElementById('cal-school-end').value = window.calendarExamDraft.schoolEndDate;
+        window.renderCalendarExamControls();
+        window.renderBlockedDatesList();
+        document.getElementById('calendar-modal').style.display = 'flex';
+    } catch (error) {
+        console.error('Errore caricamento dati calendario scolastico:', error);
+        alert('Non è stato possibile caricare il calendario e le classi quinte. Riprova.');
+    }
+};
+
+window.renderCalendarExamControls = () => {
+    const draft = window.calendarExamDraft;
+    if (!draft) return;
+
+    const writtenContainer = document.getElementById('cal-written-exam-dates');
+    const writtenLimitWarning = draft.writtenExamSubjects.length > 14
+        ? '<p class="text-[9px] font-bold text-red-600">Sono configurate più di 14 materie d’esame: riduci la configurazione prima di salvare il calendario.</p>'
+        : '';
+    if (!draft.writtenExamSubjects.length) {
+        writtenContainer.innerHTML = `${writtenLimitWarning}<p class="text-[9px] text-stone-400">Nessuna materia d’esame configurata per le quinte di questo anno.</p>`;
+    } else {
+        writtenContainer.innerHTML = writtenLimitWarning + draft.writtenExamSubjects.map((subject, index) => `
+            <label class="flex items-center gap-3 p-2 rounded-lg bg-white border border-stone-100">
+                <span class="flex-1 text-[9px] font-black uppercase text-stone-700">${escapeCalendarHtml(subject.label)}</span>
+                <input type="date" value="${escapeCalendarHtml(draft.writtenExamDates[subject.key] || '')}"
+                       onchange="window.updateCalendarWrittenExamDate(${index}, this.value)"
+                       class="w-40 max-w-[55%] px-2 py-1 rounded-lg border border-stone-200 outline-none">
+            </label>
+        `).join('');
+    }
+
+    const oralContainer = document.getElementById('cal-oral-exam-schedules');
+    if (!window.calendarExamClasses.length) {
+        oralContainer.innerHTML = '<p class="text-[9px] text-stone-400">Nessuna classe quinta trovata per questo anno scolastico.</p>';
+        return;
+    }
+    oralContainer.innerHTML = window.calendarExamClasses.map((classInfo, classIndex) => {
+        const dates = draft.oralExamDatesByClass[classInfo.id] || [];
+        const assignments = getCalendarOralAssignments(classInfo, dates);
+        const dateList = dates.length
+            ? dates.map(date => `
+                <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-amber-50 text-amber-800 text-[9px] font-bold">
+                    ${formatCalendarDate(date)}
+                    <button type="button" aria-label="Rimuovi data orale ${formatCalendarDate(date)}"
+                            onclick="window.removeCalendarOralDate(${classIndex}, '${date}')"
+                            class="text-red-600 hover:text-red-800">✕</button>
+                </span>
+            `).join('')
+            : '<span class="text-[9px] text-stone-400">Nessuna data orale inserita.</span>';
+        const studentList = assignments.length
+            ? assignments.map(assignment => `
+                <div class="flex justify-between gap-2 text-[9px] text-stone-600">
+                    <span>${escapeCalendarHtml(assignment.studentName)}</span>
+                    <span class="font-bold text-amber-800">${formatCalendarDate(assignment.date)}</span>
+                </div>
+            `).join('')
+            : '<span class="text-[9px] text-stone-400">Nessuno studente caricato per questa classe.</span>';
+
+        return `
+            <div class="p-3 rounded-xl bg-white border border-stone-100">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[10px] font-black uppercase text-stone-800">${escapeCalendarHtml(classInfo.displayName)}</span>
+                    <span class="text-[8px] font-bold uppercase text-stone-400">${classInfo.students.length} studenti</span>
+                </div>
+                <div class="flex gap-2 mb-2">
+                    <input type="date" id="cal-oral-date-${classIndex}" class="flex-1 px-2 py-1 rounded-lg border border-stone-200 outline-none">
+                    <button type="button" onclick="window.addCalendarOralDate(${classIndex})"
+                            class="px-3 py-1 rounded-lg bg-amber-500 text-white text-[8px] font-black uppercase">Aggiungi</button>
+                </div>
+                <div class="flex flex-wrap gap-1 mb-2">${dateList}</div>
+                <div class="max-h-36 overflow-y-auto space-y-1 border-t border-stone-100 pt-2">${studentList}</div>
+            </div>
+        `;
+    }).join('');
+};
+
+window.updateCalendarWrittenExamDate = (subjectIndex, date) => {
+    const subject = window.calendarExamDraft?.writtenExamSubjects[subjectIndex];
+    if (subject) window.calendarExamDraft.writtenExamDates[subject.key] = date;
+};
+
+window.addCalendarOralDate = classIndex => {
+    const classInfo = window.calendarExamClasses[classIndex];
+    const input = document.getElementById(`cal-oral-date-${classIndex}`);
+    const date = input?.value;
+    const schoolEnd = document.getElementById('cal-school-end')?.value || '';
+    if (!classInfo || !date || !isValidCalendarDate(date)) {
+        alert('Seleziona una data orale valida.');
+        return;
+    }
+    if (!schoolEnd) {
+        alert('Inserisci prima la data di fine scuola per poter pianificare gli esami.');
+        return;
+    }
+    if (date <= schoolEnd) {
+        alert('Le date degli esami orali devono essere successive alla fine della scuola.');
+        return;
+    }
+    if (!getValidCalendarYears().includes(Number(date.slice(0, 4)))) {
+        alert('La data orale deve appartenere all’anno scolastico selezionato.');
+        return;
+    }
+
+    const dates = window.calendarExamDraft.oralExamDatesByClass[classInfo.id];
+    if (dates.includes(date)) {
+        alert('Questa data orale è già presente per la classe.');
+        return;
+    }
+    dates.push(date);
+    dates.sort();
+    window.renderCalendarExamControls();
+};
+
+window.removeCalendarOralDate = (classIndex, date) => {
+    const classInfo = window.calendarExamClasses[classIndex];
+    if (!classInfo) return;
+    window.calendarExamDraft.oralExamDatesByClass[classInfo.id] =
+        window.calendarExamDraft.oralExamDatesByClass[classInfo.id].filter(existingDate => existingDate !== date);
+    window.renderCalendarExamControls();
 };
 
 // --- 4. CHIUSURA MODAL ---
@@ -13141,12 +13404,87 @@ window.removeDateFromBlockedList = (dateStr) => {
 window.saveCalendarToFirestore = async () => {
     const ay = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
     const schoolYearDocId = ay.replace('/', '_');
+    const draft = window.calendarExamDraft;
+    if (!draft) {
+        alert('Riapri il calendario scolastico prima di salvare.');
+        return;
+    }
 
-    if (!confirm(`Confirmi il salvataggio di ${tempBlockedDates.length} giorni bloccati per l'A.S. ${ay}?`)) return;
+    const schoolStartDate = document.getElementById('cal-school-start').value;
+    const schoolEndDate = document.getElementById('cal-school-end').value;
+    if (Boolean(schoolStartDate) !== Boolean(schoolEndDate)) {
+        alert('Inserisci sia la data di inizio sia quella di fine scuola, oppure lascia entrambe vuote.');
+        return;
+    }
+    if (schoolStartDate && (!isValidCalendarDate(schoolStartDate) || !isValidCalendarDate(schoolEndDate))) {
+        alert('Inserisci date valide per l’inizio e la fine della scuola.');
+        return;
+    }
+    if (schoolStartDate) {
+        const validYears = getValidCalendarYears();
+        if (![schoolStartDate, schoolEndDate].every(date => validYears.includes(Number(date.slice(0, 4))))) {
+            alert(`Le date scolastiche devono appartenere all'A.S. ${ay}.`);
+            return;
+        }
+        if (schoolStartDate >= schoolEndDate) {
+            alert('La data di inizio scuola deve precedere quella di fine.');
+            return;
+        }
+    }
+    if (draft.writtenExamSubjects.length > 14) {
+        alert('Sono configurate più di 14 materie d’esame. Riduci la configurazione prima di salvare.');
+        return;
+    }
 
-    // Sfrutta la funzione master definita sopra per evitare codice duplicato
-    await window.saveSchoolCalendar(schoolYearDocId, tempBlockedDates);
-    window.closeCalendarModal();
+    const hasExamDates = draft.writtenExamSubjects.some(subject => draft.writtenExamDates[subject.key])
+        || Object.values(draft.oralExamDatesByClass).some(dates => dates.length > 0);
+    if (hasExamDates && !schoolEndDate) {
+        alert('Inserisci la data di fine scuola prima di pianificare gli esami.');
+        return;
+    }
+
+    const examDates = [
+        ...draft.writtenExamSubjects.map(subject => ({
+            label: `la prova scritta di ${subject.label}`,
+            date: draft.writtenExamDates[subject.key] || ''
+        })),
+        ...window.calendarExamClasses.flatMap(classInfo =>
+            (draft.oralExamDatesByClass[classInfo.id] || []).map(date => ({
+                label: `l’orale della classe ${classInfo.displayName}`,
+                date
+            }))
+        )
+    ].filter(exam => exam.date);
+    const validYears = getValidCalendarYears();
+    for (const exam of examDates) {
+        if (!isValidCalendarDate(exam.date)) {
+            alert(`Inserisci una data valida per ${exam.label}.`);
+            return;
+        }
+        if (!validYears.includes(Number(exam.date.slice(0, 4)))) {
+            alert(`La data di ${exam.label} deve appartenere all'A.S. ${ay}.`);
+            return;
+        }
+        if (exam.date <= schoolEndDate) {
+            alert(`La data di ${exam.label} deve essere successiva alla fine della scuola.`);
+            return;
+        }
+    }
+    for (const classInfo of window.calendarExamClasses) {
+        if ((draft.oralExamDatesByClass[classInfo.id] || []).length && classInfo.students.length === 0) {
+            alert(`Non risultano studenti caricati per ${classInfo.displayName}; impossibile assegnare le date orali.`);
+            return;
+        }
+    }
+
+    draft.schoolStartDate = schoolStartDate;
+    draft.schoolEndDate = schoolEndDate;
+
+    if (!confirm(`Confermi il salvataggio del calendario scolastico per l'A.S. ${ay}?`)) return;
+
+    if (await window.saveSchoolCalendar(schoolYearDocId, tempBlockedDates)) {
+        window.closeCalendarModal();
+    }
 }; 
 
 window.deleteAllGradesAllSubjects = async (studentId) => {
