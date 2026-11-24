@@ -3837,12 +3837,25 @@ main {
 }
 
 /* Sezioni interne al modal */
+/* Assicura che le sezioni abbiano sempre il fondo chiaro */
 .cal-section-box {
-    background: #fdfdfd !important;
-    border: 1px solid #eee7e2 !important;
+    background-color: #fcfaf8 !important;
+    border: 1px solid #e7e0da !important;
     border-radius: 20px;
     padding: 1.25rem;
     transition: all 0.2s ease;
+}
+
+/* Fix specifico per le etichette e i contenitori dinamici */
+#cal-written-exam-dates label, 
+#cal-oral-exam-schedules > div {
+    background-color: #ffffff !important;
+    color: #1c1917 !important;
+}
+
+/* Testo descrittivo piccolo */
+#calendar-modal p {
+    color: #57534e !important;
 }
 
 .cal-section-box:hover {
@@ -3874,11 +3887,12 @@ main {
 }
 
 /* Bottoni e Input */
-#calendar-modal input[type="date"] {
-    background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
+#calendar-modal input[type="date"],
+#calendar-modal select,
+#calendar-modal input[type="text"] {
+    background-color: #ffffff !important;
     color: #1c1917 !important;
-    font-weight: 600;
+    border: 1px solid #d1d5db !important;
 }
 
 /* Pulsante Chiudi */
@@ -13178,61 +13192,67 @@ window.renderCalendarExamControls = () => {
 
     const writtenContainer = document.getElementById('cal-written-exam-dates');
     const writtenLimitWarning = draft.writtenExamSubjects.length > 14
-        ? '<p class="text-[9px] font-bold text-red-600">Sono configurate più di 14 materie d’esame: riduci la configurazione prima di salvare il calendario.</p>'
+        ? '<p class="text-[9px] font-bold text-red-600 mb-2">Attenzione: troppe materie configurate.</p>'
         : '';
+
     if (!draft.writtenExamSubjects.length) {
-        writtenContainer.innerHTML = `${writtenLimitWarning}<p class="text-[9px] text-stone-400">Nessuna materia d’esame configurata per le quinte di questo anno.</p>`;
+        writtenContainer.innerHTML = `${writtenLimitWarning}<p class="text-[9px] text-stone-400">Nessuna materia d’esame configurata.</p>`;
     } else {
+        // Forza sfondo grigio chiarissimo e testo scuro per le etichette degli scritti
         writtenContainer.innerHTML = writtenLimitWarning + draft.writtenExamSubjects.map((subject, index) => `
-            <label class="flex items-center gap-3 p-2 rounded-lg bg-white border border-stone-100">
-                <span class="flex-1 text-[9px] font-black uppercase text-stone-700">${escapeCalendarHtml(subject.label)}</span>
+            <label class="flex items-center gap-3 p-2 rounded-lg border border-stone-200" style="background-color: #f9fafb !important;">
+                <span class="flex-1 text-[9px] font-black uppercase" style="color: #1c1917 !important;">${escapeCalendarHtml(subject.label)}</span>
                 <input type="date" value="${escapeCalendarHtml(draft.writtenExamDates[subject.key] || '')}"
                        onchange="window.updateCalendarWrittenExamDate(${index}, this.value)"
-                       class="w-40 max-w-[55%] px-2 py-1 rounded-lg border border-stone-200 outline-none">
+                       class="w-40 max-w-[55%] px-2 py-1 rounded-lg border border-stone-300 outline-none" 
+                       style="background-color: #ffffff !important; color: #1c1917 !important;">
             </label>
         `).join('');
     }
 
     const oralContainer = document.getElementById('cal-oral-exam-schedules');
     if (!window.calendarExamClasses.length) {
-        oralContainer.innerHTML = '<p class="text-[9px] text-stone-400">Nessuna classe quinta trovata per questo anno scolastico.</p>';
+        oralContainer.innerHTML = '<p class="text-[9px] text-stone-400">Nessuna classe quinta trovata.</p>';
         return;
     }
+
+    // Forza sfondo bianco e testo scuro per le card delle classi orali
     oralContainer.innerHTML = window.calendarExamClasses.map((classInfo, classIndex) => {
         const dates = draft.oralExamDatesByClass[classInfo.id] || [];
         const assignments = getCalendarOralAssignments(classInfo, dates);
         const dateList = dates.length
             ? dates.map(date => `
-                <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-amber-50 text-amber-800 text-[9px] font-bold">
+                <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-amber-100 text-amber-900 text-[9px] font-black border border-amber-200">
                     ${formatCalendarDate(date)}
-                    <button type="button" aria-label="Rimuovi data orale ${formatCalendarDate(date)}"
-                            onclick="window.removeCalendarOralDate(${classIndex}, '${date}')"
-                            class="text-red-600 hover:text-red-800">✕</button>
+                    <button type="button" onclick="window.removeCalendarOralDate(${classIndex}, '${date}')" class="text-red-600 font-bold hover:scale-110">✕</button>
                 </span>
             `).join('')
-            : '<span class="text-[9px] text-stone-400">Nessuna data orale inserita.</span>';
+            : '<span class="text-[9px] text-stone-400">Nessuna data inserita.</span>';
+
         const studentList = assignments.length
             ? assignments.map(assignment => `
-                <div class="flex justify-between gap-2 text-[9px] text-stone-600">
-                    <span>${escapeCalendarHtml(assignment.studentName)}</span>
-                    <span class="font-bold text-amber-800">${formatCalendarDate(assignment.date)}</span>
+                <div class="flex justify-between gap-2 text-[9px] border-b border-stone-50 py-1" style="color: #44403c !important;">
+                    <span class="font-medium">${escapeCalendarHtml(assignment.studentName)}</span>
+                    <span class="font-black text-amber-700">${formatCalendarDate(assignment.date)}</span>
                 </div>
             `).join('')
-            : '<span class="text-[9px] text-stone-400">Nessuno studente caricato per questa classe.</span>';
+            : '<span class="text-[9px] text-stone-400 italic">Nessun calendario generato.</span>';
 
         return `
-            <div class="p-3 rounded-xl bg-white border border-stone-100">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-black uppercase text-stone-800">${escapeCalendarHtml(classInfo.displayName)}</span>
-                    <span class="text-[8px] font-bold uppercase text-stone-400">${classInfo.students.length} studenti</span>
+            <div class="p-4 rounded-xl border border-stone-200 shadow-sm" style="background-color: #ffffff !important;">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-[10px] font-black uppercase" style="color: #1c1917 !important;">${escapeCalendarHtml(classInfo.displayName)}</span>
+                    <span class="text-[8px] font-black py-0.5 px-2 bg-stone-100 rounded-full text-stone-500 uppercase">${classInfo.students.length} Studenti</span>
                 </div>
-                <div class="flex gap-2 mb-2">
-                    <input type="date" id="cal-oral-date-${classIndex}" class="flex-1 px-2 py-1 rounded-lg border border-stone-200 outline-none">
+                <div class="flex gap-2 mb-3">
+                    <input type="date" id="cal-oral-date-${classIndex}" 
+                           class="flex-1 px-2 py-1.5 rounded-lg border border-stone-300 outline-none"
+                           style="background-color: #ffffff !important; color: #1c1917 !important;">
                     <button type="button" onclick="window.addCalendarOralDate(${classIndex})"
-                            class="px-3 py-1 rounded-lg bg-amber-500 text-white text-[8px] font-black uppercase">Aggiungi</button>
+                            class="px-4 py-1 rounded-lg bg-amber-500 text-white text-[9px] font-black uppercase shadow-sm">Aggiungi</button>
                 </div>
-                <div class="flex flex-wrap gap-1 mb-2">${dateList}</div>
-                <div class="max-h-36 overflow-y-auto space-y-1 border-t border-stone-100 pt-2">${studentList}</div>
+                <div class="flex flex-wrap gap-1.5 mb-3">${dateList}</div>
+                <div class="max-h-40 overflow-y-auto space-y-0.5 border-t border-stone-100 pt-3">${studentList}</div>
             </div>
         `;
     }).join('');
