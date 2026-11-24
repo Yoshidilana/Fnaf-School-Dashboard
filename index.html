@@ -1373,8 +1373,6 @@ main {
     }
 
     /* Override Globali per classi Tailwind residue */
-.bg-white { background-color: #18181b !important; }
-.text-zinc-800, .text-zinc-900, .text-zinc-700 { color: #f4f4f5 !important; }
 .border-zinc-200, .border-zinc-100, .border-zinc-300 { border-color: #27272a !important; }
 .bg-zinc-50, .bg-zinc-100, .bg-zinc-200 { background-color: #121214 !important; } /* Modificato: era #09090b */
 
@@ -6470,7 +6468,6 @@ main {
                 <div class="admin-panel-heading">
                     <h3 class="admin-panel-title"><span class="admin-panel-icon">👥</span> Gestione utenti</h3>
                     <div class="flex gap-2">
-                        <button onclick="window.hubManager.mostraListaUtenti()" class="admin-action-button" title="Carica e visualizza tutti gli utenti">Elenco</button>
                         <button onclick="window.hubManager.nuovoUtente()" class="admin-action-button admin-action-button-primary">+ Nuovo utente</button>
                     </div>
                 </div>
@@ -7768,18 +7765,22 @@ function renderVotoTag(v, studentId) {
     return `<span class="grade-badge inline-flex items-center justify-center font-black ${canManage ? 'cursor-pointer transition-transform hover:scale-110 active:scale-90' : ''} ${statusClass}" title="${v.data} - ${v.argomento || ''}" ${handlers}>${v.voto}</span>`;
 }
         function renderNoteActions(n, idx, studentId) {
-            const isMyNote = n.profId === window.currentUserId;
-            const canManageAllNotes = [ROLES.PRESIDE, ROLES.ADMIN].includes(window.userRole);
-            if(!isMyNote && !canManageAllNotes) return '';
-            
-            let actions = `<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1">`;
-            actions += `<button onclick="window.editNote(${idx}, '${studentId}')" class="bg-zinc-200 p-1 rounded text-[8px]">✏️</button>`;
-            if(canManageAllNotes || (n.tipo !== 'mandato')) {
-                 actions += `<button onclick="window.deleteNote(${idx}, '${studentId}')" class="bg-red-100 p-1 rounded text-[8px]">🗑️</button>`;
-            }
-            actions += `</div>`;
-            return actions;
-        }
+    const isMyNote = n.profId === window.currentUserId;
+    // AGGIUNTO VICE_PRESIDE QUI
+    const canManageAllNotes = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(window.userRole);
+    
+    if(!isMyNote && !canManageAllNotes) return '';
+    
+    let actions = `<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 flex gap-1">`;
+    actions += `<button onclick="window.editNote(${idx}, '${studentId}')" class="bg-zinc-200 p-1 rounded text-[8px]">✏️</button>`;
+    
+    // Solo la dirigenza o l'autore può eliminare
+    if(canManageAllNotes || isMyNote) {
+         actions += `<button onclick="window.deleteNote(${idx}, '${studentId}')" class="bg-red-100 p-1 rounded text-[8px]">🗑️</button>`;
+    }
+    actions += `</div>`;
+    return actions;
+}
 
         // --- AZIONI SCRITTURA ---
         window.submitGrade = async () => {
@@ -8485,8 +8486,10 @@ if (menu === 'home') {
         window.changeMenu('classi');
         return;
     }
-	if (menu === 'hub') {
+
+if (menu === 'hub') {
     window.hubManager.calcolaStatistiche();
+    window.hubManager.mostraListaUtenti(); // AGGIUNTO: Carica la lista automaticamente
 }
 
     // --- LOGICA VISIVA (Hidden/Active) ---
@@ -8874,11 +8877,13 @@ window.editVoto = async (idRicevuto, studentId) => {
 };
 
 window.deleteNote = async (idx, studentId) => {
+    // Recupero il ruolo per il controllo
+    const role = window.userRole;
+    const canManageAllNotes = [ROLES.PRESIDE, ROLES.VICE_PRESIDE, ROLES.ADMIN].includes(role);
+
     if (!confirm("Eliminare definitivamente questa nota?")) return;
     
-    // Recuperiamo l'anno scolastico e puliamo gli spazi
     const aySelezionato = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    // Trasformiamo in formato con underscore per il database (es: "2025_2026")
     const annoCartellaIniziale = aySelezionato.replace('/', '_');
     
     const recordRef = window.getRecordDocRef(studentId, annoCartellaIniziale, 'note');
@@ -8888,20 +8893,21 @@ window.deleteNote = async (idx, studentId) => {
         const notes = d.data().note || [];
         const notaDaEliminare = notes[idx];
         
-        if (!notaDaEliminare) {
-            console.error("Nota non trovata all'indice:", idx);
+        if (!notaDaEliminare) return;
+
+        // CONTROLLO SICUREZZA: Se non sei Dirigenza e non è tua, blocca
+        if (!canManageAllNotes && notaDaEliminare.profId !== window.currentUserId) {
+            alert("Non hai i permessi per eliminare una nota non tua.");
             return;
         }
 
-        // Estraiamo il vero anno della nota usando l'underscore (es: "2025/2026" -> "2025_2026")
         const annoCartellaEffettivo = notaDaEliminare.anno ? notaDaEliminare.anno.replace('/', '_') : annoCartellaIniziale;
         const veroRecordRef = window.getRecordDocRef(studentId, annoCartellaEffettivo, 'note');
 
-        // 1. Rimuovi dal Profilo Studente v2
         notes.splice(idx, 1);
         await setDoc(veroRecordRef, { note: notes }, { merge: true });
 
-        // 2. Rimuovi dall'Agenda Globale v2
+        // Pulizia Agenda
         const dParts = notaDaEliminare.data.split('/');
         const dateKey = `${dParts[2]}-${dParts[1]}-${dParts[0]}`;
         const agendaRef = window.getAgendaDocRef(window.selectedClass, dateKey);
@@ -8910,7 +8916,6 @@ window.deleteNote = async (idx, studentId) => {
             const aSnap = await getDoc(agendaRef);
             if (aSnap.exists()) {
                 let agendaNotes = aSnap.data().note || [];
-                // Filtriamo via la nota usando l'ID univoco
                 const nuoveNote = agendaNotes.filter(n => n.id !== notaDaEliminare.id);
                 await updateDoc(agendaRef, { note: nuoveNote });
             }
@@ -11336,16 +11341,45 @@ window.hubManager = {
         }
     },
 
-    nuovoUtente: function() {
-        const container = document.getElementById('hub-dynamic-content');
-        container.classList.remove('hidden');
-        container.innerHTML = `
-            <div class="bg-[#18181b] p-6 rounded-2xl border border-[#27272a] shadow-2xl space-y-4">
-                <h3 class="font-black uppercase text-[10px] border-b border-[#27272a] pb-2 text-zinc-400">Registra Nuovo Utente</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input id="new-u-id" type="text" placeholder="ID Discord" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
-                    <input id="new-u-name" type="text" placeholder="Nome e Cognome" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none focus:border-red-600 text-white">
-                    <select id="new-u-role" class="p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs outline-none text-white" onchange="const show = ['Prof', 'Preside', 'Vice Preside'].includes(this.value); document.getElementById('materia-input-group').classList.toggle('hidden', !show)">
+nuovoUtente: function() {
+    const container = document.getElementById('hub-dynamic-content');
+    container.classList.remove('hidden');
+    
+    container.innerHTML = `
+        <div style="background-color: #ffffff !important;" class="p-6 rounded-3xl border border-zinc-300 shadow-xl space-y-6">
+            <!-- Header -->
+            <div style="background-color: #ffffff !important;" class="flex justify-between items-center border-b border-zinc-200 pb-4">
+                <div class="flex flex-col">
+                    <h3 style="color: #000000 !important;" class="font-black uppercase text-xs italic">Registrazione Anagrafica</h3>
+                    <p style="color: #666666 !important;" class="text-[9px] font-bold uppercase tracking-widest">Inserisci i dati del nuovo utente</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.parentElement.classList.add('hidden')" class="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 text-zinc-500 hover:text-red-600 transition-all">✕</button>
+            </div>
+            
+            <div style="background-color: #ffffff !important;" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <!-- ID Discord -->
+                <div class="flex flex-col gap-1">
+                    <label style="color: #000000 !important;" class="text-[9px] font-black uppercase ml-1">ID Discord</label>
+                    <input id="new-u-id" type="text" placeholder="ID Discord" 
+                        style="background-color: #ffffff !important; color: #000000 !important; border: 2px solid #d1d5db !important;"
+                        class="p-3 rounded-xl text-xs font-bold outline-none focus:border-red-600">
+                </div>
+
+                <!-- Nome -->
+                <div class="flex flex-col gap-1">
+                    <label style="color: #000000 !important;" class="text-[9px] font-black uppercase ml-1">Nome e Cognome</label>
+                    <input id="new-u-name" type="text" placeholder="Nome completo" 
+                        style="background-color: #ffffff !important; color: #000000 !important; border: 2px solid #d1d5db !important;"
+                        class="p-3 rounded-xl text-xs font-bold outline-none focus:border-red-600">
+                </div>
+                
+                <!-- Ruolo -->
+                <div class="flex flex-col gap-1">
+                    <label style="color: #000000 !important;" class="text-[9px] font-black uppercase ml-1">Ruolo</label>
+                    <select id="new-u-role" 
+                        style="background-color: #ffffff !important; color: #000000 !important; border: 2px solid #d1d5db !important;"
+                        class="p-3 rounded-xl text-xs font-bold outline-none cursor-pointer" 
+                        onchange="const show = ['Prof', 'Preside', 'Vice Preside'].includes(this.value); document.getElementById('materia-input-group').classList.toggle('hidden', !show)">
                         <option value="Studente">Studente</option>
                         <option value="Studentessa">Studentessa</option>
                         <option value="Prof">Prof</option>
@@ -11356,27 +11390,46 @@ window.hubManager = {
                         <option value="Segreteria">Segreteria</option>
                         <option value="Counselor">Counselor scolastico</option>
                     </select>
-                    <div id="class-selection-group" class="col-span-full bg-[#09090b] p-4 rounded-xl border border-[#3f3f46]">
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-2">Classi Assegnate</label>
-                        <div id="classes-checkbox-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                            ${CLASSI_VALIDE.map(cls => `
-                                <label class="flex items-center gap-2 p-2 bg-zinc-900 rounded-lg border border-zinc-800 cursor-pointer hover:border-red-600 transition-all">
-                                    <input type="checkbox" value="${cls}" class="prof-class-check w-4 h-4 accent-red-600">
-                                    <span class="text-[10px] font-bold text-white">${cls}</span>
-                                </label>`).join('')}
-                        </div>
-                    </div>
-                    <div class="col-span-full">
-                        <label class="block text-[10px] font-black uppercase text-zinc-400 mb-1">URL Foto Profilo</label>
-                        <input type="text" id="reg-avatar" placeholder="Link immagine..." class="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-white text-sm">
-                    </div>
-                    <div id="materia-input-group" class="hidden col-span-full">
-                        <input id="new-u-materie" type="text" placeholder="materie (italiano, storia...)" class="w-full p-3 bg-[#09090b] border border-[#3f3f46] rounded-xl text-xs text-white">
+                </div>
+
+                <!-- Foto -->
+                <div class="flex flex-col gap-1">
+                    <label style="color: #000000 !important;" class="text-[9px] font-black uppercase ml-1">URL Foto Profilo</label>
+                    <input type="text" id="reg-avatar" placeholder="Link immagine" 
+                        style="background-color: #ffffff !important; color: #000000 !important; border: 2px solid #d1d5db !important;"
+                        class="p-3 rounded-xl text-xs font-bold outline-none focus:border-red-600">
+                </div>
+
+                <!-- BOX CLASSI -->
+                <div id="class-selection-group" style="background-color: #ffffff !important; border: 2px solid #d1d5db !important;" class="col-span-full p-5 rounded-2xl">
+                    <label style="color: #000000 !important;" class="block text-[10px] font-black uppercase mb-3 tracking-widest">Assegnazione Classi</label>
+                    <div id="classes-checkbox-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                        ${CLASSI_VALIDE.map(cls => `
+                            <label style="background-color: #ffffff !important; border: 2px solid #e5e7eb !important;" class="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:border-red-600 transition-all group">
+                                <input type="checkbox" value="${cls}" class="prof-class-check w-4 h-4 accent-red-600">
+                                <span style="color: #000000 !important;" class="text-[10px] font-black group-hover:text-red-600">${cls}</span>
+                            </label>`).join('')}
                     </div>
                 </div>
-                <button onclick="window.hubManager.salvaNuovoUtente()" class="w-full bg-red-600 text-white p-4 rounded-xl font-black uppercase text-[10px]">Salva nel Database</button>
-            </div>`;
-    },
+
+                <!-- Materie -->
+                <div id="materia-input-group" class="hidden col-span-full">
+                    <div class="flex flex-col gap-1">
+                        <label style="color: #000000 !important;" class="text-[9px] font-black uppercase ml-1">Materie (separate da virgola)</label>
+                        <input id="new-u-materie" type="text" placeholder="italiano, storia, ..." 
+                            style="background-color: #ffffff !important; color: #000000 !important; border: 2px solid #d1d5db !important;"
+                            class="w-full p-3 rounded-xl text-xs font-bold outline-none focus:border-red-600">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasto Conferma -->
+            <button onclick="window.hubManager.salvaNuovoUtente()" 
+                class="w-full bg-red-600 hover:bg-red-700 text-white p-4 rounded-2xl font-black uppercase text-[11px] shadow-lg transition-all active:scale-95">
+                Salva Utente nel Database
+            </button>
+        </div>`;
+},
 
     salvaNuovoUtente: async function() {
         const id = document.getElementById('new-u-id').value.trim();
