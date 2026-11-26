@@ -14416,6 +14416,8 @@ return `
     // 2. Prepariamo l'header dello Step 2 con il tasto INDIETRO
     const isScritto = type === 'Scritto'; // Verifica se è un compito scritto
 
+    const isScritto = type === 'Scritto'; 
+
     const step2Header = `
         <div class="flex justify-between items-center mb-4">
             <button onclick="window.goBackToMassStep1()" class="flex items-center gap-1 text-[9px] font-black uppercase text-zinc-400 hover:text-red-600 transition-colors">
@@ -14423,13 +14425,13 @@ return `
             </button>
             <p class="text-[9px] text-stone-500 font-black uppercase">05 · Revisione individuale</p>
             <div class="flex items-center gap-2">
-                <!-- IL PULSANTE COMPARE SOLO SE NON È SCRITTO -->
+                <!-- MODIFICATO: Il pulsante compare se NON è scritto (quindi per Orale e Pratico) -->
                 ${!isScritto ? `
                     <button onclick="window.syncMassOralDates()" class="text-[8px] text-blue-700 font-bold uppercase hover:text-blue-800 whitespace-nowrap">
                         Sincronizza date (${type}) 📅
                     </button>` : '' 
                 }
-                <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700 whitespace-nowrap">Rigenera 🎲</button>
+                <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700 whitespace-nowrap">Rigenera tutto 🎲</button>
             </div>
         </div>
     `;
@@ -14469,19 +14471,17 @@ window.regenMassSlotDatesByMonth = (voteIndex, newMonth) => {
 
 window.syncMassOralDates = () => {
     const type = document.getElementById('quick-mass-type')?.value;
-    // Adesso il blocco è solo per lo scritto. Gli orali e i pratici vengono sincronizzati (divisi).
+    // Blocca solo se è Scritto. Orale e Pratico ora vengono sincronizzati.
     if (type === 'Scritto') return; 
 
     const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
     const validWeekdays = Array.from(checkedBoxes).map(cb => parseInt(cb.value, 10));
+    
     if (validWeekdays.length === 0) {
         alert('Seleziona almeno un giorno di lezione.');
         return;
     }
 
-    const academicYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    const yearStart = parseInt(academicYear.split('/')[0], 10);
-    
     // Troviamo tutti gli slot (Voto 1, Voto 2...)
     const slotsByVote = new Map();
     document.querySelectorAll('.mass-slot').forEach(slot => {
@@ -14491,36 +14491,43 @@ window.syncMassOralDates = () => {
     });
 
     for (const [voteIndex, slots] of slotsByVote) {
-        const monthControl = Array.from(document.querySelectorAll('.mass-master-control'))
-                                  .find(control => control.dataset.voteIdx === voteIndex);
-        const month = Number(monthControl?.value);
-        if (isNaN(month)) continue;
-
-        const year = month >= 8 ? yearStart : yearStart + 1;
+        // Recuperiamo la DATA CENTRALE impostata nel master control
+        const masterDateInput = Array.from(document.querySelectorAll('.mass-master-control'))
+                                     .find(control => control.dataset.voteIdx === voteIndex);
+        
+        if (!masterDateInput || !masterDateInput.value) continue;
+        
+        const centerDate = new Date(masterDateInput.value);
         const candidates = [];
-        for (let day = 1; day <= new Date(year, month + 1, 0).getDate(); day++) {
-            const date = new Date(year, month, day, 12);
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            if (date.getDay() !== 0 && validWeekdays.includes(date.getDay()) && !window.isRegistrationBlocked(dateStr)) {
-                candidates.push(dateStr);
-            }
-        }
-
-        if (candidates.length === 0) continue;
-
-        // --- LOGICA DI RAGGRUPPAMENTO (Valida per Orali e Pratici) ---
-        // Media di 3.5 studenti a lezione (quindi gruppi da 3 o 4)
         const studentsPerDay = 3.5; 
         const daysNeeded = Math.ceil(slots.length / studentsPerDay);
-        
-        const windowSize = Math.min(candidates.length, Math.max(daysNeeded, Math.ceil(daysNeeded * 1.3)));
-        const startIdx = Math.floor(Math.random() * (candidates.length - windowSize + 1));
-        const selectedWindow = candidates.slice(startIdx, startIdx + windowSize);
+
+        // Cerchiamo i giorni validi espandendoci dalla data centrale (max 30 giorni di raggio)
+        let offset = 0;
+        while (candidates.length < daysNeeded && offset < 30) {
+            // Controlla il giorno corrente, poi +1, poi -1, poi +2, poi -2...
+            const offsetsToCheck = offset === 0 ? [0] : [offset, -offset];
+            
+            for (let off of offsetsToCheck) {
+                const d = new Date(centerDate);
+                d.setDate(d.getDate() + off);
+                const dStr = d.toISOString().split('T')[0];
+                
+                if (d.getDay() !== 0 && validWeekdays.includes(d.getDay()) && !window.isRegistrationBlocked(dStr)) {
+                    if (!candidates.includes(dStr)) candidates.push(dStr);
+                }
+            }
+            offset++;
+            if (candidates.length >= daysNeeded) break;
+        }
+
+        candidates.sort(); // Mettiamo le date in ordine cronologico
 
         slots.forEach((slot, index) => {
             const dateInput = slot.querySelector('.mass-date');
             if (dateInput) {
-                dateInput.value = selectedWindow[index % selectedWindow.length];
+                // Distribuisce gli studenti ciclicamente sulle date trovate
+                dateInput.value = candidates[index % candidates.length];
                 dateInput.style.backgroundColor = '#dbeafe';
                 setTimeout(() => dateInput.style.backgroundColor = '', 600);
             }
@@ -15916,56 +15923,56 @@ window.submitMultiGrades = async () => {
 };
 
 window.syncMultiOralDates = () => {
-    const academicYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
-    const yearStart = parseInt(academicYear.split('/')[0]);
-
     if (!window.multiGradeDateConfig) return;
 
     window.multiGradeDateConfig.forEach(config => {
-        // SALTA GLI SCRITTI: le prove scritte rimangono accorpate
         if (config.type === 'Scritto') return; 
 
         const validWeekdays = config.schedule.giorni;
         if (!validWeekdays || validWeekdays.length === 0) return;
 
         for (let vIdx = 0; vIdx < config.voteCount; vIdx++) {
-            const month = config.voteMonths[vIdx];
             const targetSlots = Array.from(document.querySelectorAll(`.multi-row-data[data-sub="${config.sub}"][data-vote-idx="${vIdx}"]`));
             if (targetSlots.length === 0) continue;
 
-            const year = month >= 8 ? yearStart : yearStart + 1;
-            const candidates = [];
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            // Recupera la data imposta per questa materia/voto
+            const masterControl = document.querySelector(`.multi-fixed-date-control[data-sub="${config.sub}"][data-vote-idx="${vIdx}"]`) ||
+                                 document.querySelector(`.multi-month-control[data-sub="${config.sub}"][data-vote-idx="${vIdx}"]`);
             
-            for (let d = 1; d <= daysInMonth; d++) {
-                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-                const dateObj = new Date(year, month, d, 12);
-                if (dateObj.getDay() !== 0 && validWeekdays.includes(dateObj.getDay()) && !window.isRegistrationBlocked(dateStr)) {
-                    candidates.push(dateStr);
+            // Se non c'è una data fissa (perché era in modalità mese), usa la data del primo slot come centro
+            const firstSlotDate = targetSlots[0].querySelector('.m-data').value;
+            const centerDate = new Date(masterControl?.value && masterControl.type === 'date' ? masterControl.value : firstSlotDate);
+            
+            const candidates = [];
+            const daysNeeded = Math.ceil(targetSlots.length / 3.5);
+
+            let offset = 0;
+            while (candidates.length < daysNeeded && offset < 30) {
+                const offsetsToCheck = offset === 0 ? [0] : [offset, -offset];
+                for (let off of offsetsToCheck) {
+                    const d = new Date(centerDate);
+                    d.setDate(d.getDate() + off);
+                    const dStr = d.toISOString().split('T')[0];
+                    
+                    if (d.getDay() !== 0 && validWeekdays.includes(d.getDay()) && !window.isRegistrationBlocked(dStr)) {
+                        if (!candidates.includes(dStr)) candidates.push(dStr);
+                    }
                 }
+                offset++;
+                if (candidates.length >= daysNeeded) break;
             }
 
-            if (candidates.length === 0) continue;
-
-            // DISTRIBUZIONE A GRUPPI (Clumping)
-            const daysNeeded = Math.ceil(targetSlots.length / 3.5);
-            const windowSize = Math.min(candidates.length, Math.max(daysNeeded, Math.ceil(daysNeeded * 1.5)));
-            const startIdx = Math.floor(Math.random() * (candidates.length - windowSize + 1));
-            const selectedWindow = candidates.slice(startIdx, startIdx + windowSize);
-
-            selectedWindow.sort();
+            candidates.sort();
             targetSlots.forEach((slot, index) => {
                 const dateInput = slot.querySelector('.m-data');
                 if (dateInput) {
-                    dateInput.value = selectedWindow[index % selectedWindow.length];
+                    dateInput.value = candidates[index % candidates.length];
                     dateInput.style.backgroundColor = '#dbeafe';
                     setTimeout(() => dateInput.style.backgroundColor = '', 600);
                 }
             });
         }
     });
-
-    alert("📅 Sincronizzazione completata: le prove Orali e Pratiche sono state divise su più date vicine.");
 };
 
 window.sortIndividualGrades = (btn, direction) => {
