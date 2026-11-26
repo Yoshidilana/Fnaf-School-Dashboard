@@ -15667,13 +15667,10 @@ window.generateMultiGrades = async () => {
         }).join('');
     }).join('');
 
-    // 1. Generiamo la griglia degli studenti e la salviamo in una variabile
-   // Generiamo la griglia degli studenti
+  // 1. Generiamo la griglia degli studenti
     finalGrid.innerHTML = students.map(s => {
-        // Genera le righe per ogni materia configurata per questo studente
         let studentRows = fullData.map(d => {
             return Array.from({ length: d.voteCount }, (_, index) => {
-                // Eseguiamo la logica di generazione UNA SOLA VOLTA
                 const generated = isReligionSubject(d.sub)
                     ? window.generateReligionJudgment()
                     : window.generateMassGrade(d.history.get(s.id), d.minV, d.maxV);
@@ -15682,20 +15679,15 @@ window.generateMultiGrades = async () => {
                 const date = d.sharedDates[index]
                     || window.generateRandomValidDateString(d.voteMonths[index], d.schedule.giorni);
                 
-                if (!date) {
-                    throw new Error(`Non ci sono date valide per ${d.sub} nei giorni previsti.`);
-                }
-
-                               return `
+                return `
                     <div class="flex flex-col p-1.5 bg-zinc-50 border border-zinc-100 rounded-lg mb-1 multi-row-data"
                          data-sid="${s.id}" data-sub="${d.sub}" data-type="${d.type}" data-vote-idx="${index}" data-profname="${d.teacher.name}" data-profid="${d.teacher.id}">
-                        
                         <div class="grid grid-cols-12 items-center gap-1">
                             <div class="col-span-5 flex flex-col">
                                 <span class="text-[8px] font-black text-zinc-500 uppercase leading-none truncate">
                                     ${d.sub}${d.voteCount > 1 ? ` · ${index + 1}` : ''}
                                 </span>
-                                ${window.getMiniDiceButtonsHTML()} <!-- Tasti mini per materia -->
+                                ${window.getMiniDiceButtonsHTML()}
                             </div>
                             <input type="text" value="${grade}" class="m-voto col-span-2 w-full text-center text-[10px] font-black border border-zinc-200 bg-white rounded-md">
                             <input type="date" value="${date}" class="m-data col-span-5 w-full text-[9px] border border-zinc-200 bg-white rounded-md p-0.5 outline-none">
@@ -15704,22 +15696,33 @@ window.generateMultiGrades = async () => {
             }).join('');
         }).join('');
 
-        // Ritorna la card dello studente con i bottoni individuali
         return `
             <div class="mass-row p-3 bg-white border border-zinc-200 rounded-xl shadow-sm flex flex-col">
                 <p class="text-[10px] font-black text-stone-800 uppercase border-b border-zinc-100 mb-1 pb-1">${s.name}</p>
-                
-                <!-- TERMINALE DI VOTO RAPIDO INDIVIDUALE -->
                 ${window.getDiceButtonsHTML()}
-                
                 <div class="flex flex-col mt-2">${studentRows}</div>
             </div>`;
     }).join('');
 
-    // Inseriamo il tasto indietro se non esiste
-    if (!step3.querySelector('.btn-back-step')) {
-        step3.insertAdjacentHTML('afterbegin', backToStep2Html.replace('button', 'button class="btn-back-step"'));
-    }
+    // --- AGGIUNTA BARRA STRUMENTI STEP 3 MULTI-MATERIA ---
+    const toolbarHtml = `
+        <div class="flex justify-between items-center mb-4 bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+            <button onclick="window.goBackToMultiStep2()" class="text-[9px] font-black uppercase text-zinc-400 hover:text-blue-600 transition-colors">⬅ Parametri</button>
+            <div class="flex items-center gap-3">
+                <button onclick="window.syncMultiOralDates()" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase hover:bg-blue-700 shadow-sm">Sincronizza date orali 📅</button>
+                <button onclick="window.generateMultiGrades()" class="text-[9px] font-black uppercase text-red-600 hover:text-red-700">Rigenera tutto 🎲</button>
+            </div>
+        </div>
+    `;
+    
+    // Inseriamo la toolbar all'inizio dello step 3
+    step3.innerHTML = toolbarHtml + `
+        <div id="multi-date-controls" class="mass-config-card">
+            <p class="mass-config-heading">🗓️ Date delle prove</p>
+            <div class="mass-date-controls">${dateControls.innerHTML}</div>
+        </div>
+        <div id="multi-final-grid" class="mass-grid-system">${finalGrid.innerHTML}</div>
+    `;
 
     confirm.onclick = window.submitMultiGrades;
 };
@@ -15917,6 +15920,69 @@ window.submitMultiGrades = async () => {
         console.error(e);
         btn.disabled = false;
     }
+};
+
+window.syncMultiOralDates = () => {
+    // 1. Recuperiamo l'anno accademico per calcolare le date esatte
+    const academicYear = document.getElementById('current-academic-year').innerText.replace('A.S. ', '').trim();
+    const yearStart = parseInt(academicYear.split('/')[0]);
+
+    // 2. Controlliamo se la configurazione automatica esiste
+    if (!window.multiGradeDateConfig) {
+        alert("⚠️ Errore: Configurazioni materie non trovate. Rigenera l'anteprima.");
+        return;
+    }
+
+    // 3. Cicliamo su ogni materia configurata (qui il sistema sa già i giorni di lezione per ognuna)
+    window.multiGradeDateConfig.forEach(config => {
+        const sub = config.sub;
+        const validWeekdays = config.schedule.giorni; // Prende i giorni reali dall'orario docente del DB
+        
+        if (!validWeekdays || validWeekdays.length === 0) {
+            console.warn(`Nessun giorno in orario trovato per ${sub}, salto la sincronizzazione.`);
+            return;
+        }
+
+        // Gestiamo ogni slot di voto (Voto 1, Voto 2, ecc.) per questa materia
+        for (let vIdx = 0; vIdx < config.voteCount; vIdx++) {
+            const month = config.voteMonths[vIdx];
+            
+            // Trova tutti gli studenti per questa specifica materia e questo specifico indice di voto
+            const targetSlots = Array.from(document.querySelectorAll(`.multi-row-data[data-sub="${sub}"][data-vote-idx="${vIdx}"]`));
+            if (targetSlots.length === 0) continue;
+
+            // CALCOLA DATE DISPONIBILI (Saltando vacanze e domeniche)
+            const year = month >= 8 ? yearStart : yearStart + 1;
+            const candidates = [];
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateObj = new Date(year, month, d, 12);
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                
+                if (dateObj.getDay() !== 0 && validWeekdays.includes(dateObj.getDay()) && !window.isRegistrationBlocked(dateStr)) {
+                    candidates.push(dateStr);
+                }
+            }
+
+            if (candidates.length === 0) continue;
+
+            // DISTRIBUZIONE EQUA (SPALMATURA AUTOMATICA)
+            candidates.sort();
+            targetSlots.forEach((slot, index) => {
+                const dateInput = slot.querySelector('.m-data');
+                if (dateInput) {
+                    dateInput.value = candidates[index % candidates.length];
+                    
+                    // Effetto visivo di conferma
+                    dateInput.style.backgroundColor = '#dbeafe';
+                    setTimeout(() => dateInput.style.backgroundColor = '', 600);
+                }
+            });
+        }
+    });
+
+    alert("📅 Sincronizzazione automatica completata!\nGli studenti sono stati distribuiti equamente in base all'orario reale di ogni materia.");
 };
 
 window.goBackToMassStep1 = () => {
