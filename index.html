@@ -14404,6 +14404,8 @@ return `
     `;
 
     // 2. Prepariamo l'header dello Step 2 con il tasto INDIETRO
+    const isScritto = type === 'Scritto'; // Verifica se è un compito scritto
+
     const step2Header = `
         <div class="flex justify-between items-center mb-4">
             <button onclick="window.goBackToMassStep1()" class="flex items-center gap-1 text-[9px] font-black uppercase text-zinc-400 hover:text-red-600 transition-colors">
@@ -14411,13 +14413,17 @@ return `
             </button>
             <p class="text-[9px] text-stone-500 font-black uppercase">05 · Revisione individuale</p>
             <div class="flex items-center gap-2">
-                ${type === 'Scritto' || type === 'Pratico' ? '' : '<button onclick="window.syncMassOralDates()" class="text-[8px] text-blue-700 font-bold uppercase hover:text-blue-800 whitespace-nowrap">Sincronizza date</button>'}
+                <!-- IL PULSANTE COMPARE SOLO SE NON È SCRITTO -->
+                ${!isScritto ? `
+                    <button onclick="window.syncMassOralDates()" class="text-[8px] text-blue-700 font-bold uppercase hover:text-blue-800 whitespace-nowrap">
+                        Sincronizza date (${type}) 📅
+                    </button>` : '' 
+                }
                 <button onclick="window.prepareMassGradesList()" class="text-[8px] text-red-600 font-bold uppercase hover:text-red-700 whitespace-nowrap">Rigenera 🎲</button>
             </div>
         </div>
     `;
 
-    // 3. Inseriamo tutto nello Step 2 (sovrascrivendo il contenuto precedente)
     step2.innerHTML = step2Header + `<div class="mass-students-list">${finalHtml}</div>`;
     
     // 4. Gestione visibilità e Titolo
@@ -14453,7 +14459,8 @@ window.regenMassSlotDatesByMonth = (voteIndex, newMonth) => {
 
 window.syncMassOralDates = () => {
     const type = document.getElementById('quick-mass-type')?.value;
-    if (type === 'Scritto' || type === 'Pratico') return; // Non serve per gli scritti
+    // Adesso il blocco è solo per lo scritto. Gli orali e i pratici vengono sincronizzati (divisi).
+    if (type === 'Scritto') return; 
 
     const checkedBoxes = document.querySelectorAll('input[name="mass-days"]:checked');
     const validWeekdays = Array.from(checkedBoxes).map(cb => parseInt(cb.value, 10));
@@ -14491,16 +14498,15 @@ window.syncMassOralDates = () => {
 
         if (candidates.length === 0) continue;
 
-        // --- LOGICA DI RAGGRUPPAMENTO (CLUMPING) ---
-        const studentsPerDay = 3.5; // Media desiderata
+        // --- LOGICA DI RAGGRUPPAMENTO (Valida per Orali e Pratici) ---
+        // Media di 3.5 studenti a lezione (quindi gruppi da 3 o 4)
+        const studentsPerDay = 3.5; 
         const daysNeeded = Math.ceil(slots.length / studentsPerDay);
         
-        // Scegliamo una finestra di date vicine (es. se servono 4 giorni, ne prendiamo 6 disponibili e scegliamo tra quelli)
-        const windowSize = Math.min(candidates.length, Math.max(daysNeeded, Math.ceil(daysNeeded * 1.4)));
+        const windowSize = Math.min(candidates.length, Math.max(daysNeeded, Math.ceil(daysNeeded * 1.3)));
         const startIdx = Math.floor(Math.random() * (candidates.length - windowSize + 1));
         const selectedWindow = candidates.slice(startIdx, startIdx + windowSize);
 
-        // Distribuiamo gli studenti solo in questa finestra temporale
         slots.forEach((slot, index) => {
             const dateInput = slot.querySelector('.mass-date');
             if (dateInput) {
@@ -15891,7 +15897,8 @@ window.syncMultiOralDates = () => {
     if (!window.multiGradeDateConfig) return;
 
     window.multiGradeDateConfig.forEach(config => {
-        if (config.type === 'Scritto' || config.type === 'Pratico') return; // Salta se non è orale
+        // SALTA GLI SCRITTI: le prove scritte rimangono accorpate
+        if (config.type === 'Scritto') return; 
 
         const validWeekdays = config.schedule.giorni;
         if (!validWeekdays || validWeekdays.length === 0) return;
@@ -15915,7 +15922,7 @@ window.syncMultiOralDates = () => {
 
             if (candidates.length === 0) continue;
 
-            // --- LOGICA DI RAGGRUPPAMENTO ---
+            // DISTRIBUZIONE A GRUPPI (Clumping)
             const daysNeeded = Math.ceil(targetSlots.length / 3.5);
             const windowSize = Math.min(candidates.length, Math.max(daysNeeded, Math.ceil(daysNeeded * 1.5)));
             const startIdx = Math.floor(Math.random() * (candidates.length - windowSize + 1));
@@ -15933,7 +15940,7 @@ window.syncMultiOralDates = () => {
         }
     });
 
-    alert("📅 Sincronizzazione completata: le interrogazioni sono state raggruppate in date vicine.");
+    alert("📅 Sincronizzazione completata: le prove Orali e Pratiche sono state divise su più date vicine.");
 };
 
 window.goBackToMassStep1 = () => {
