@@ -14573,8 +14573,6 @@ window.setRandomValidDate = () => {
 };
 
 window.individualRoll = (btn, rangeKey) => {
-    // Cerca prima se il tasto è dentro una singola riga materia (.multi-row-data)
-    // Altrimenti cerca in tutta la card dello studente (.mass-row)
     const container = btn.closest('.multi-row-data') || btn.closest('.mass-row');
     const inputs = container.querySelectorAll('.mass-grade, .m-voto');
     
@@ -14594,13 +14592,21 @@ window.individualRoll = (btn, rangeKey) => {
 
     inputs.forEach(input => {
         const subName = input.closest('[data-sub]')?.dataset.sub || document.getElementById('quick-mass-sub')?.value;
-        if (String(subName).toLowerCase().trim() === 'religione') {
+        if (isReligionSubject(subName)) {
             input.value = window.generateReligionJudgment();
         } else {
             input.value = labels[Math.floor(Math.random() * labels.length)];
         }
         input.style.backgroundColor = '#fef08a';
         setTimeout(() => input.style.backgroundColor = '#fff', 300);
+    });
+
+    // SBLOCCA TUTTI I PULSANTI AZIONE (Frecce e Ordinamento)
+    const actionBtns = container.querySelectorAll('.individual-grade-shift, .individual-grade-sort');
+    actionBtns.forEach(b => {
+        b.disabled = false;
+        b.classList.remove('opacity-40', 'cursor-not-allowed');
+        b.classList.add('hover:scale-110', 'active:scale-95');
     });
 };
 
@@ -14636,22 +14642,30 @@ window.shiftIndividualGrades = (btn, direction) => {
 };
 
 // HTML dei bottoni da riutilizzare
+// PULSANTI GRANDI (Per le card studente)
 window.getDiceButtonsHTML = () => `
     <div class="flex flex-wrap gap-1.5 mt-2 mb-2">
-        <button onclick="window.individualRoll(this, 'orribile')" title="Voto 0-3-" class="px-2 py-1 bg-black text-white text-[8px] font-black rounded-lg hover:bg-stone-800 transition-all uppercase shadow-sm">Orribile 🤮</button>
-        <button onclick="window.individualRoll(this, 'schifo')" title="Voto 3-4-" class="px-2 py-1 bg-red-900 text-white text-[8px] font-black rounded-lg hover:bg-red-800 transition-all uppercase shadow-sm">Schifo 🤢</button>
-        <button onclick="window.individualRoll(this, 'studia')" title="Voto 4-5" class="px-2 py-1 bg-red-600 text-white text-[8px] font-black rounded-lg hover:bg-red-500 transition-all uppercase shadow-sm">Studia!!! >:(</button>
-        <button onclick="window.individualRoll(this, 'meh')" title="Voto 5+-6-" class="px-2 py-1 bg-stone-400 text-white text-[8px] font-black rounded-lg hover:bg-stone-500 transition-all uppercase shadow-sm">Meh 😐</button>
-        <button onclick="window.individualRoll(this, 'buono')" title="Voto 6-7+" class="px-2 py-1 bg-blue-500 text-white text-[8px] font-black rounded-lg hover:bg-blue-600 transition-all uppercase shadow-sm">Buono 🙂</button>
-        <button onclick="window.individualRoll(this, 'bravo')" title="Voto 7½-8+" class="px-2 py-1 bg-indigo-500 text-white text-[8px] font-black rounded-lg hover:bg-indigo-600 transition-all uppercase shadow-sm">Bravo! 😎</button>
-        <button onclick="window.individualRoll(this, 'ottimo')" title="Voto 8½-10-" class="px-2 py-1 bg-emerald-500 text-white text-[8px] font-black rounded-lg hover:bg-emerald-600 transition-all uppercase shadow-sm">Ottimo ✨</button>
-        <button onclick="window.individualRoll(this, 'eccellente')" title="Voto 10" class="px-2 py-1 bg-amber-500 text-black text-[8px] font-black rounded-lg hover:bg-yellow-400 transition-all uppercase shadow-sm">Eccellente 🏆</button>
-        <button onclick="window.shiftIndividualGrades(this, 1)" title="Aumenta i voti di un punto" aria-label="Aumenta i voti di un punto" disabled class="individual-grade-shift opacity-40 cursor-not-allowed px-2 py-1 bg-emerald-700 text-white text-[10px] font-black rounded-lg transition-all shadow-sm">⬆️</button>
-        <button onclick="window.shiftIndividualGrades(this, -1)" title="Diminuisci i voti di un punto" aria-label="Diminuisci i voti di un punto" disabled class="individual-grade-shift opacity-40 cursor-not-allowed px-2 py-1 bg-red-700 text-white text-[10px] font-black rounded-lg transition-all shadow-sm">⬇️</button>
+        <button onclick="window.individualRoll(this, 'orribile')" class="px-2 py-1 bg-black text-white text-[8px] font-black rounded-lg hover:bg-stone-800 transition-all uppercase shadow-sm">Orribile 🤮</button>
+        <button onclick="window.individualRoll(this, 'schifo')" class="px-2 py-1 bg-red-900 text-white text-[8px] font-black rounded-lg hover:bg-red-800 transition-all uppercase shadow-sm">Schifo 🤢</button>
+        <button onclick="window.individualRoll(this, 'studia')" class="px-2 py-1 bg-red-600 text-white text-[8px] font-black rounded-lg hover:bg-red-500 transition-all uppercase shadow-sm">Studia!!! >:(</button>
+        <button onclick="window.individualRoll(this, 'meh')" class="px-2 py-1 bg-stone-400 text-white text-[8px] font-black rounded-lg hover:bg-stone-500 transition-all uppercase shadow-sm">Meh 😐</button>
+        <button onclick="window.individualRoll(this, 'buono')" class="px-2 py-1 bg-blue-500 text-white text-[8px] font-black rounded-lg hover:bg-blue-600 transition-all uppercase shadow-sm">Buono 🙂</button>
+        <button onclick="window.individualRoll(this, 'bravo')" class="px-2 py-1 bg-indigo-500 text-white text-[8px] font-black rounded-lg hover:bg-indigo-600 transition-all uppercase shadow-sm">Bravo! 😎</button>
+        <button onclick="window.individualRoll(this, 'ottimo')" class="px-2 py-1 bg-emerald-500 text-white text-[8px] font-black rounded-lg hover:bg-emerald-600 transition-all uppercase shadow-sm">Ottimo ✨</button>
+        <button onclick="window.individualRoll(this, 'eccellente')" class="px-2 py-1 bg-amber-500 text-black text-[8px] font-black rounded-lg hover:bg-yellow-400 transition-all uppercase shadow-sm">Eccellente 🏆</button>
+        
+        <div class="h-6 w-[1px] bg-zinc-200 mx-1"></div>
+
+        <!-- AZIONI SUI VOTI -->
+        <button onclick="window.shiftIndividualGrades(this, 1)" title="Aumenta" disabled class="individual-grade-shift opacity-40 cursor-not-allowed px-2 py-1 bg-emerald-700 text-white text-[10px] font-black rounded-lg transition-all">⬆️</button>
+        <button onclick="window.shiftIndividualGrades(this, -1)" title="Diminuisci" disabled class="individual-grade-shift opacity-40 cursor-not-allowed px-2 py-1 bg-red-700 text-white text-[10px] font-black rounded-lg transition-all">⬇️</button>
+        <button onclick="window.sortIndividualGrades(this, 1)" title="Dal peggiore al migliore" disabled class="individual-grade-sort opacity-40 cursor-not-allowed px-2 py-1 bg-green-500 text-white text-[10px] font-black rounded-lg transition-all">📈</button>
+        <button onclick="window.sortIndividualGrades(this, -1)" title="Dal migliore al peggiore" disabled class="individual-grade-sort opacity-40 cursor-not-allowed px-2 py-1 bg-red-500 text-white text-[10px] font-black rounded-lg transition-all">📉</button>
     </div>
-    <p class="text-[7px] text-zinc-400 font-bold uppercase tracking-widest mb-2 italic">🎲 Estrazione rapida per riga</p>
+    <p class="text-[7px] text-zinc-400 font-bold uppercase tracking-widest mb-2 italic">🎲 Estrazione e ordinamento</p>
 `;
 
+// PULSANTI MINI (Per le righe multi-materia)
 window.getMiniDiceButtonsHTML = () => `
     <div class="flex flex-wrap gap-1 mt-1">
         <button onclick="window.individualRoll(this, 'orribile')" title="Orribile" class="hover:scale-125 transition-transform">🤮</button>
@@ -14662,8 +14676,9 @@ window.getMiniDiceButtonsHTML = () => `
         <button onclick="window.individualRoll(this, 'bravo')" title="Bravo" class="hover:scale-125 transition-transform">😎</button>
         <button onclick="window.individualRoll(this, 'ottimo')" title="Ottimo" class="hover:scale-125 transition-transform">✨</button>
         <button onclick="window.individualRoll(this, 'eccellente')" title="Eccellente" class="hover:scale-125 transition-transform">🏆</button>
-        <button onclick="window.shiftIndividualGrades(this, 1)" class="ml-1 text-emerald-600 font-bold">↑</button>
-        <button onclick="window.shiftIndividualGrades(this, -1)" class="text-red-600 font-bold">↓</button>
+        
+        <button onclick="window.sortIndividualGrades(this, 1)" title="Crescente" disabled class="individual-grade-sort opacity-40 cursor-not-allowed ml-1 text-green-600 font-black text-[10px]">📈</button>
+        <button onclick="window.sortIndividualGrades(this, -1)" title="Decrescente" disabled class="individual-grade-sort opacity-40 cursor-not-allowed text-red-600 font-black text-[10px]">📉</button>
     </div>
 `;
 
@@ -15941,6 +15956,36 @@ window.syncMultiOralDates = () => {
     });
 
     alert("📅 Sincronizzazione completata: le prove Orali e Pratiche sono state divise su più date vicine.");
+};
+
+window.sortIndividualGrades = (btn, direction) => {
+    const container = btn.closest('.multi-row-data') || btn.closest('.mass-row');
+    const inputs = Array.from(container.querySelectorAll('.mass-grade, .m-voto'));
+    if (inputs.length < 2) return; // Inutile ordinare un solo voto
+
+    // Recupera i valori attuali
+    const values = inputs.map(input => input.value);
+
+    // Ordina basandosi sul valore scolastico reale
+    values.sort((a, b) => {
+        const valA = window.parseVotoScolastico(a);
+        const valB = window.parseVotoScolastico(b);
+        
+        // Se sono voti di religione (0), ordiniamo per la scala specifica O > D > B...
+        if (valA === 0 && valB === 0) {
+            const relScale = ['NS', 'S', 'd', 'B', 'D', 'O'];
+            return (relScale.indexOf(a) - relScale.indexOf(b)) * direction;
+        }
+        
+        return (valA - valB) * direction;
+    });
+
+    // Riapplica i valori ordinati agli input
+    inputs.forEach((input, idx) => {
+        input.value = values[idx];
+        input.style.backgroundColor = '#f0f9ff';
+        setTimeout(() => input.style.backgroundColor = '#fff', 400);
+    });
 };
 
 window.goBackToMassStep1 = () => {
